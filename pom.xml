@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>au.org.emii</groupId>
+    <artifactId>aodn-portal</artifactId>
+    <packaging>war</packaging>
+    <version>2.4.2</version>
+
+    <name>AODN Geoserver</name>
+    <description>AODN/IMOS Geoserver v2.4.2 with XSLT and no GZip</description>
+    <url>http://www.emii.org.au</url>
+
+    <build>
+        <pluginManagement/>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>maven-download-plugin</artifactId>
+                <version>1.1.0</version>
+                <executions>
+                    <execution>
+                        <id>wget geoserver</id>
+                        <!-- the wget goal actually binds itself to this phase by default -->
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>http://downloads.sourceforge.net/geoserver/geoserver-2.4.2-war.zip</url>
+                            <!-- <outputFileName>foo.bar</outputFileName> -->
+                            <!-- default target location, just to demonstrate the parameter -->
+                            <targetDirectory>${project.build.directory}</targetDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>wget XSLT extension</id>
+                        <!-- the wget goal actually binds itself to this phase by default -->
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>http://sourceforge.net/projects/geoserver/files/GeoServer%20Extensions/2.4.2/geoserver-2.4.2-xslt-plugin.zip</url>
+                            <!-- <outputFileName>foo.bar</outputFileName> -->
+                            <!-- default target location, just to demonstrate the parameter -->
+                            <targetDirectory>${project.build.directory}</targetDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
