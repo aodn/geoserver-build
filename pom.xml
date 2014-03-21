@@ -65,4 +65,11 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>${production.deployment.repository.id}</id>
+            <url>${production.deployment.repository.url}</url>
+        </repository>
+    </distributionManagement>
+
 </project>
