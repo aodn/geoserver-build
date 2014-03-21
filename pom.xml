@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>au.org.emii</groupId>
-    <artifactId>aodn-portal</artifactId>
+    <artifactId>geoserver</artifactId>
     <packaging>war</packaging>
     <version>2.4.2</version>
 
@@ -45,6 +45,30 @@
                             <!-- <outputFileName>foo.bar</outputFileName> -->
                             <!-- default target location, just to demonstrate the parameter -->
                             <targetDirectory>${project.build.directory}</targetDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.build.directory}</groupId>
+                                    <artifactId>geoserver</artifactId>
+                                    <version>2.4.2-war</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
