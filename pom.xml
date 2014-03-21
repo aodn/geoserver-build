@@ -14,7 +14,7 @@
     <properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
         <geoserver.artifact.id>geoserver</geoserver.artifact.id>
-        <geoserver.version>2.4.2</geoserver.version>
+        <geoserver.version>2.4.2.fetchsize</geoserver.version>
     </properties>
 
     <dependencies>
