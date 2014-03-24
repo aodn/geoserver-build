@@ -59,7 +59,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <warName>${geoserver.artifact.id}-${version}-fetchsize-nogzip</warName>
+                    <warName>${geoserver.artifact.id}-${project.version}-fetchsize-nogzip</warName>
                 </configuration>
             </plugin>
         </plugins>
