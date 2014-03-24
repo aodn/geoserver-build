@@ -67,8 +67,8 @@
 
     <distributionManagement>
         <repository>
-            <id>${internal.deployment.repository.id}</id>
-            <url>${internal.deployment.repository.url}</url>
+            <id>${internal.repository.id}</id>
+            <url>${internal.repository.url}</url>
         </repository>
     </distributionManagement>
 
