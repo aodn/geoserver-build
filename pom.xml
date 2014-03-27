@@ -8,27 +8,27 @@
     <version>2.4.2</version>
 
     <name>AODN Geoserver</name>
-    <description>AODN/IMOS Geoserver v2.4.2 with XSLT and no GZip</description>
+    <description>AODN/IMOS Geoserver v${project.version} with XSLT and no GZip</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
         <geoserver.artifact.id>geoserver</geoserver.artifact.id>
-        <geoserver.version>2.4.2.fetchsize</geoserver.version>
+        <geoserver.version>${project.version}.fetchsize</geoserver.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.geoserver</groupId>
-            <artifactId>geoserver</artifactId>
-            <version>2.4.2.fetchsize</version>
+            <groupId>${geoserver.group.id}</groupId>
+            <artifactId>${geoserver.artifact.id}</artifactId>
+            <version>${geoserver.version}</version>
             <type>war</type>
         </dependency>
 
         <dependency>
-            <groupId>org.geoserver</groupId>
+            <groupId>${geoserver.group.id}</groupId>
             <artifactId>xslt</artifactId>
-            <version>2.4.2</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
