@@ -20,6 +20,13 @@
     <dependencies>
         <dependency>
             <groupId>org.geoserver</groupId>
+            <artifactId>geoserver</artifactId>
+            <version>2.4.2.fetchsize</version>
+            <type>war</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.geoserver</groupId>
             <artifactId>xslt</artifactId>
             <version>2.4.2</version>
             <scope>runtime</scope>
@@ -27,38 +34,18 @@
     </dependencies>
 
     <build>
-        <pluginManagement/>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>unpack-geoserver</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${geoserver.group.id}</groupId>
-                                    <artifactId>${geoserver.artifact.id}</artifactId>
-                                    <version>${geoserver.version}</version>
-                                    <type>war</type>
-                                    <outputDirectory>${project.build.directory}/${geoserver.artifact.id}-${geoserver.version}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>${geoserver.group.id}</groupId>
+                            <artifactId>${geoserver.artifact.id}</artifactId>
+                        </overlay>
+                    </overlays>
                     <warName>${geoserver.artifact.id}-${project.version}-fetchsize-nogzip</warName>
                 </configuration>
             </plugin>
