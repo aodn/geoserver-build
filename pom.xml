@@ -36,6 +36,12 @@
             <groupId>${geoserver.group.id}</groupId>
             <artifactId>main</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+              <exclusion>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-jdbc</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -43,6 +49,13 @@
             <artifactId>wfs</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-jdbc</artifactId>
+            <version>10.2-imos</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -69,6 +82,9 @@
                         </overlay>
                     </overlays>
                     <warName>${geoserver.artifact.id}-${project.version}-imos</warName>
+                    <packagingExcludes>
+                        **/WEB-INF/lib/gt-jdbc-10.2.jar
+                    </packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
