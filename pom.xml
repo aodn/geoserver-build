@@ -8,7 +8,7 @@
     <version>2.4.2</version>
 
     <name>AODN Geoserver</name>
-    <description>AODN/IMOS Geoserver v${project.version} with XSLT and no GZip</description>
+    <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
@@ -31,9 +31,31 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
+
+        <dependency>
+            <groupId>${geoserver.group.id}</groupId>
+            <artifactId>main</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${geoserver.group.id}</groupId>
+            <artifactId>wfs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <includes>
+                    <include>applicationContext.xml</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
