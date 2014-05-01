@@ -14,14 +14,14 @@
     <properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
         <geoserver.artifact.id>geoserver</geoserver.artifact.id>
-        <geoserver.version>${project.version}.fetchsize</geoserver.version>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>${geoserver.group.id}</groupId>
-            <artifactId>${geoserver.artifact.id}</artifactId>
-            <version>${geoserver.version}</version>
+            <artifactId>geoserver</artifactId>
+            <version>${project.version}</version>
             <type>war</type>
         </dependency>
 
@@ -68,7 +68,7 @@
                             <artifactId>${geoserver.artifact.id}</artifactId>
                         </overlay>
                     </overlays>
-                    <warName>${geoserver.artifact.id}-${project.version}-fetchsize-nogzip</warName>
+                    <warName>${geoserver.artifact.id}-${project.version}-imos</warName>
                 </configuration>
             </plugin>
         </plugins>
