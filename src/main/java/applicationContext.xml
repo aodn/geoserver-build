@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright 2013 IMOS
+
+The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+
+-->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+  <bean id="CSVWithMetadataHeaderOutputFormat" class="au.org.emii.geoserver.wfs.response.CSVWithMetadataHeaderOutputFormat">
+    <constructor-arg index="0" ref="geoServer"/>
+    <constructor-arg index="1" ref="catalog"/>
+    <!-- TODO: can this be done using autowiring? -->
+    <constructor-arg index="2" ref="CSVOutputFormat"/>
+  </bean>
+</beans>
