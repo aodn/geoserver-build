@@ -10,9 +10,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -78,22 +78,11 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                                String metadataFeatureName,
                                BufferedWriter w) throws IOException {
 
-        /**
-         * Assumes a function 'build_metadata_summary' exists, e.g.:
-         *
-         *   CREATE OR REPLACE FUNCTION build_metadata_summary(feature_name TEXT) RETURNS TEXT AS $$
-         *     BEGIN
-         *       RETURN 'The wonderful metadata summary for ' || feature_name;
-         *     END;
-         *   $$ LANGUAGE plpgsql;
-         */
         String metadataSummaryBuildFunction = "build_metadata_summary";
         Connection cx = getConnectionForFeatureCollection(featureCollection);
 
         try {
-            CallableStatement stmt = cx.prepareCall("{call " + metadataSummaryBuildFunction + "(?)}");
-
-            stmt.setString(1, metadataFeatureName);
+            PreparedStatement stmt = cx.prepareStatement("select * from " + metadataFeatureName);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -127,11 +116,16 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     }
 
     private String getMetadataFeatureName(
-            FeatureCollectionResponse featureCollection) {
+            FeatureCollectionResponse featureCollection) throws IOException {
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
 
-        // There is an assumption that WFS features are conventionally suffixed with "_data".
-        return fc.getSchema().getName().getLocalPart().replace("_data", "");
+        // There is an assumption that metadata will be in a table/view under the "parameters" schema, with
+        // the naming scheme:
+        //
+        //     <featureCollection schema>_metadata_summary
+        //
+        String schema = getDataStoreForFeatureCollection(featureCollection).getDatabaseSchema();
+        return "parameters." + schema + "_metadata_summary";
     }
 
     @Override
