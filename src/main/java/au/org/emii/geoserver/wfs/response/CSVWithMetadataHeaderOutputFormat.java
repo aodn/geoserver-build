@@ -10,10 +10,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -66,6 +67,11 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     }
 
     @Override
+    public String getCapabilitiesElementName() {
+        return this.csvOutputFormat.getCapabilitiesElementName();
+    }
+
+    @Override
     protected void write(FeatureCollectionResponse featureCollection,
                          OutputStream output,
                          Operation getFeature) throws IOException, ServiceException {
@@ -78,23 +84,17 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                                String metadataFeatureName,
                                BufferedWriter w) throws IOException {
 
-        /**
-         * Assumes a function 'build_metadata_summary' exists, e.g.:
-         *
-         *   CREATE OR REPLACE FUNCTION build_metadata_summary(feature_name TEXT) RETURNS TEXT AS $$
-         *     BEGIN
-         *       RETURN 'The wonderful metadata summary for ' || feature_name;
-         *     END;
-         *   $$ LANGUAGE plpgsql;
-         */
         String metadataSummaryBuildFunction = "build_metadata_summary";
 
-        try {
-            Connection cx = getConnectionForFeatureCollection(featureCollection);
-            CallableStatement stmt = cx.prepareCall("{call " + metadataSummaryBuildFunction + "(?)}");
+        JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollection);
+        Connection cx = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
-            stmt.setString(1, metadataFeatureName);
-            ResultSet rs = stmt.executeQuery();
+        try {
+            cx = dataStore.getConnection(Transaction.AUTO_COMMIT);
+            stmt = cx.prepareStatement("select * from " + metadataFeatureName);
+            rs = stmt.executeQuery();
 
             while (rs.next()) {
                 w.write(rs.getString(1));
@@ -107,28 +107,37 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         catch (SQLException e) {
             LOGGER.warning(e.getMessage());
         }
+        finally {
+            closeSafe(dataStore, cx, stmt, rs);
+        }
     }
 
-    private Connection getConnectionForFeatureCollection(FeatureCollectionResponse featureCollection) throws IOException {
+    private JDBCDataStore getDataStoreForFeatureCollection(
+        FeatureCollectionResponse featureCollection) throws IOException {
+
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
         String typeName = fc.getSchema().getName().toString();
         FeatureTypeInfo fi = catalog.getFeatureTypeByName(typeName);
         DataStoreInfo dsi = fi.getStore();
-        JDBCDataStore jds = (JDBCDataStore)dsi.getDataStore(null);
-
-        return jds.getConnection(Transaction.AUTO_COMMIT);
+        return (JDBCDataStore)dsi.getDataStore(null);
     }
 
     private String getMetadataFeatureName(
-            FeatureCollectionResponse featureCollection) {
+            FeatureCollectionResponse featureCollection) throws IOException {
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
 
-        // There is an assumption that WFS features are conventionally suffixed with "_data".
-        return fc.getSchema().getName().getLocalPart().replace("_data", "");
+        // There is an assumption that metadata will be in a table/view under the "parameters" schema, with
+        // the naming scheme:
+        //
+        //     <featureCollection schema>_metadata_summary
+        //
+        String schema = getDataStoreForFeatureCollection(featureCollection).getDatabaseSchema();
+        return "parameters." + schema + "_metadata_summary";
     }
 
-    @Override
-    public String getCapabilitiesElementName() {
-        return this.csvOutputFormat.getCapabilitiesElementName();
+    private void closeSafe(JDBCDataStore dataStore, Connection con, Statement stmt, ResultSet rs) {
+        dataStore.closeSafe(rs);
+        dataStore.closeSafe(stmt);
+        dataStore.closeSafe(con);
     }
 }
