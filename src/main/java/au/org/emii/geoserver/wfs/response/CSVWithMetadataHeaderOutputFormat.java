@@ -88,9 +88,9 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
          *   $$ LANGUAGE plpgsql;
          */
         String metadataSummaryBuildFunction = "build_metadata_summary";
+        Connection cx = getConnectionForFeatureCollection(featureCollection);
 
         try {
-            Connection cx = getConnectionForFeatureCollection(featureCollection);
             CallableStatement stmt = cx.prepareCall("{call " + metadataSummaryBuildFunction + "(?)}");
 
             stmt.setString(1, metadataFeatureName);
@@ -107,16 +107,23 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         catch (SQLException e) {
             LOGGER.warning(e.getMessage());
         }
+        finally {
+            getDataStoreForFeatureCollection(featureCollection).closeSafe(cx);
+        }
     }
 
     private Connection getConnectionForFeatureCollection(FeatureCollectionResponse featureCollection) throws IOException {
+        return getDataStoreForFeatureCollection(featureCollection).getConnection(Transaction.AUTO_COMMIT);
+    }
+
+    private JDBCDataStore getDataStoreForFeatureCollection(
+        FeatureCollectionResponse featureCollection) throws IOException {
+
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
         String typeName = fc.getSchema().getName().toString();
         FeatureTypeInfo fi = catalog.getFeatureTypeByName(typeName);
         DataStoreInfo dsi = fi.getStore();
-        JDBCDataStore jds = (JDBCDataStore)dsi.getDataStore(null);
-
-        return jds.getConnection(Transaction.AUTO_COMMIT);
+        return (JDBCDataStore)dsi.getDataStore(null);
     }
 
     private String getMetadataFeatureName(
