@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -66,6 +67,11 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     }
 
     @Override
+    public String getCapabilitiesElementName() {
+        return this.csvOutputFormat.getCapabilitiesElementName();
+    }
+
+    @Override
     protected void write(FeatureCollectionResponse featureCollection,
                          OutputStream output,
                          Operation getFeature) throws IOException, ServiceException {
@@ -79,11 +85,16 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                                BufferedWriter w) throws IOException {
 
         String metadataSummaryBuildFunction = "build_metadata_summary";
-        Connection cx = getConnectionForFeatureCollection(featureCollection);
+
+        JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollection);
+        Connection cx = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try {
-            PreparedStatement stmt = cx.prepareStatement("select * from " + metadataFeatureName);
-            ResultSet rs = stmt.executeQuery();
+            cx = dataStore.getConnection(Transaction.AUTO_COMMIT);
+            stmt = cx.prepareStatement("select * from " + metadataFeatureName);
+            rs = stmt.executeQuery();
 
             while (rs.next()) {
                 w.write(rs.getString(1));
@@ -97,12 +108,8 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
             LOGGER.warning(e.getMessage());
         }
         finally {
-            getDataStoreForFeatureCollection(featureCollection).closeSafe(cx);
+            closeSafe(dataStore, cx, stmt, rs);
         }
-    }
-
-    private Connection getConnectionForFeatureCollection(FeatureCollectionResponse featureCollection) throws IOException {
-        return getDataStoreForFeatureCollection(featureCollection).getConnection(Transaction.AUTO_COMMIT);
     }
 
     private JDBCDataStore getDataStoreForFeatureCollection(
@@ -128,8 +135,9 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         return "parameters." + schema + "_metadata_summary";
     }
 
-    @Override
-    public String getCapabilitiesElementName() {
-        return this.csvOutputFormat.getCapabilitiesElementName();
+    private void closeSafe(JDBCDataStore dataStore, Connection con, Statement stmt, ResultSet rs) {
+        dataStore.closeSafe(rs);
+        dataStore.closeSafe(stmt);
+        dataStore.closeSafe(con);
     }
 }
