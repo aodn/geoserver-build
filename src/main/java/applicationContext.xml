@@ -15,4 +15,7 @@ The AODN/IMOS Portal is distributed under the terms of the GNU General Public Li
     <!-- TODO: can this be done using autowiring? -->
     <constructor-arg index="2" ref="CSVOutputFormat"/>
   </bean>
+
+    <!--  dispatcher -->
+    <bean id="dispatcher" class="org.geoserver.ows.DispatcherWithHttpStatus"/>
 </beans>
