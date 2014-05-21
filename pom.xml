@@ -14,6 +14,8 @@
     <properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
         <geoserver.artifact.id>geoserver</geoserver.artifact.id>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -64,7 +66,7 @@
             <resource>
                 <directory>${basedir}/src/main/java</directory>
                 <includes>
-                    <include>applicationContext.xml</include>
+                    <include>applicationContextOverrides.xml</include>
                 </includes>
             </resource>
         </resources>

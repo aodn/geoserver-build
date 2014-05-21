@@ -16,6 +16,6 @@ The AODN/IMOS Portal is distributed under the terms of the GNU General Public Li
     <constructor-arg index="2" ref="CSVOutputFormat"/>
   </bean>
 
-    <!--  dispatcher -->
-    <bean id="dispatcher" class="org.geoserver.ows.DispatcherWithHttpStatus"/>
+  <!--  dispatcher -->
+  <bean id="dispatcher" class="org.geoserver.ows.DispatcherWithHttpStatus"/>
 </beans>
