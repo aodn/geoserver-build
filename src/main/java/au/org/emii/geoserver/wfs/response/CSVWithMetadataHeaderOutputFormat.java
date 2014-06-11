@@ -126,13 +126,13 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
             FeatureCollectionResponse featureCollection) throws IOException {
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
 
-        // There is an assumption that metadata will be in a table/view under the "parameters" schema, with
+        // There is an assumption that metadata will be in a table/view under the "parameters_mapping" schema, with
         // the naming scheme:
         //
         //     <featureCollection schema>_metadata_summary
         //
         String schema = getDataStoreForFeatureCollection(featureCollection).getDatabaseSchema();
-        return "parameters." + schema + "_metadata_summary";
+        return "parameters_mapping." + schema + "_metadata_summary";
     }
 
     private void closeSafe(JDBCDataStore dataStore, Connection con, Statement stmt, ResultSet rs) {
