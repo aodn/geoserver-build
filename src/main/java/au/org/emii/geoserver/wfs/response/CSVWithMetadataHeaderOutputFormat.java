@@ -84,8 +84,6 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                                String metadataFeatureName,
                                BufferedWriter w) throws IOException {
 
-        String metadataSummaryBuildFunction = "build_metadata_summary";
-
         JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollection);
         Connection cx = null;
         PreparedStatement stmt = null;
