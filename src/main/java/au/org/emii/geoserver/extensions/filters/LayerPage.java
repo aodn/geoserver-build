@@ -74,21 +74,6 @@ public class LayerPage extends GeoServerSecuredPage {
 
         // the confirm dialog
         add(dialog = new GeoServerDialog("dialog"));
-        setHeaderPanel(headerPanel());
-    }
-
-    protected Component headerPanel() {
-        Fragment header = new Fragment(HEADER_PANEL, "header", this);
-
-        // the add button
-        header.add(new BookmarkablePageLink("addNew", NewLayerPage.class));
-
-        // the removal button
-        header.add(removal = new SelectionRemovalLink("removeSelected", table, dialog));
-        removal.setOutputMarkupId(true);
-        removal.setEnabled(false);
-
-        return header;
     }
 
     private Component layerLink(String id, final IModel model) {
