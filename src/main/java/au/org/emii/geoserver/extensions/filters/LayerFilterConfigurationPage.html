@@ -1,0 +1,42 @@
+<html xmlns:wicket="http://wicket.apache.org/">
+<head>
+    <title><wicket:message key="layerFilterConfiguration">Layer Filter Configuration</wicket:message></title>
+</head>
+<body>
+<wicket:extend>
+    <form wicket:id="layerFilterForm">
+    <table>
+        <thead>
+        <tr>
+            <th>Enable</th>
+            <th>Property</th>
+            <th>Type</th>
+            <th>Filter Label</th>
+            <th>WMS Filter</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><input type="checkbox" name="glider_type_enable" value=""></td>
+            <td>glider_type</td>
+            <td>String</td>
+            <td><input type="text" name="glider_type_label" value="Glider Type"></td>
+            <td><input type="checkbox" name="glider_type_wms_filter" value=""></td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" name="max_depth_enable" value=""></td>
+            <td>max_depth</td>
+            <td>Number</td>
+            <td><input type="text" name="max_depth_label" value="Maximum Depth"></td>
+            <td><input type="checkbox" name="max_depth_wms_filter" value=""></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="button-group selfclear">
+        <a href="#" wicket:id="save"><wicket:message key="save">Save</wicket:message></a>
+        <a href="#" wicket:id="cancel"><wicket:message key="cancel">Cancel</wicket:message></a>
+    </div>
+    </form>
+</wicket:extend>
+</body>
+</html>

@@ -8,24 +8,15 @@
 package au.org.emii.geoserver.extensions.filters;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ResourceReference;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.WMSStoreInfo;
-import org.geoserver.web.CatalogIconFactory;
 import org.geoserver.web.ComponentAuthorizer;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.geoserver.web.data.SelectionRemovalLink;
-import org.geoserver.web.data.layer.LayerProvider;
-import org.geoserver.web.data.layer.NewLayerPage;
-import org.geoserver.web.data.resource.ResourceConfigurationPage;
 import org.geoserver.web.data.store.CoverageStoreEditPage;
 import org.geoserver.web.data.store.DataAccessEditPage;
 import org.geoserver.web.data.store.WMSStoreEditPage;
@@ -83,12 +74,12 @@ public class LayerPage extends GeoServerSecuredPage {
 
         return new SimpleBookmarkableLink(
             id,
-            ResourceConfigurationPage.class,
+            LayerFilterConfigurationPage.class,
             layerNameModel,
-            ResourceConfigurationPage.NAME,
-            layerName,
-            ResourceConfigurationPage.WORKSPACE,
-            wsName
+            LayerFilterConfigurationPage.WORKSPACE,
+            wsName,
+            LayerFilterConfigurationPage.NAME,
+            layerName
         );
     }
 
