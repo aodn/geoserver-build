@@ -16,19 +16,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td><input type="checkbox" name="glider_type_enable" value=""></td>
-            <td>glider_type</td>
-            <td>String</td>
-            <td><input type="text" name="glider_type_label" value="Glider Type"></td>
-            <td><input type="checkbox" name="glider_type_wms_filter" value=""></td>
-        </tr>
-        <tr>
-            <td><input type="checkbox" name="max_depth_enable" value=""></td>
-            <td>max_depth</td>
-            <td>Number</td>
-            <td><input type="text" name="max_depth_label" value="Maximum Depth"></td>
-            <td><input type="checkbox" name="max_depth_wms_filter" value=""></td>
+        <tr wicket:id="layerDataProperties">
+            <td><input type="checkbox" wicket:id="propertyEnabled"></td>
+            <td wicket:id="propertyName"></td>
+            <td wicket:id="propertyType"></td>
+            <td><input type="text" wicket:id="propertyLabel"></td>
+            <td><input type="checkbox" wicket:id="propertyWmsFilter"></td>
         </tr>
         </tbody>
     </table>
@@ -40,3 +33,12 @@
 </wicket:extend>
 </body>
 </html>
+<!--
+<tbody>
+<tr wicket:id="listView">
+    <td wicket:id="productComponent">Product</td>
+    <td wicket:id="passedComponent">PassedColumn</td>
+    <td wicket:id="failedComponent">FailedColumn</td>
+</tr>
+</tbody>
+-->
