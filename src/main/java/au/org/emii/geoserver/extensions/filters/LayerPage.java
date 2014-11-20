@@ -10,20 +10,14 @@ package au.org.emii.geoserver.extensions.filters;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
-import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.StoreInfo;
-import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.web.ComponentAuthorizer;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.geoserver.web.data.SelectionRemovalLink;
-import org.geoserver.web.data.store.CoverageStoreEditPage;
-import org.geoserver.web.data.store.DataAccessEditPage;
-import org.geoserver.web.data.store.WMSStoreEditPage;
-import org.geoserver.web.data.workspace.WorkspaceEditPage;
-import org.geoserver.web.wicket.*;
-
-import static au.org.emii.geoserver.extensions.filters.LayerInfoProperties.*;
+import org.geoserver.web.wicket.GeoServerDataProvider;
+import org.geoserver.web.wicket.GeoServerDialog;
+import org.geoserver.web.wicket.GeoServerTablePanel;
+import org.geoserver.web.wicket.ParamResourceModel;
 
 public class LayerPage extends GeoServerSecuredPage {
 
@@ -41,16 +35,7 @@ public class LayerPage extends GeoServerSecuredPage {
                 IModel itemModel,
                 GeoServerDataProvider.Property<LayerInfo> property)
             {
-                if(property.getName().equals(WORKSPACE.getName())) {
-                    return workspaceLink(id, itemModel);
-                }
-                else if(property.getName().equals(STORE.getName())) {
-                    return storeLink(id, itemModel);
-                }
-                else if(property.getName().equals(NAME.getName())) {
-                    return layerLink(id, itemModel);
-                }
-                throw new IllegalArgumentException("Don't know a property named " + property.getName());
+                return LayerPageLink.create(property.getName(), id, new LayerInfoModels(itemModel)).getLink();
             }
 
             @Override
@@ -65,74 +50,6 @@ public class LayerPage extends GeoServerSecuredPage {
 
         // the confirm dialog
         add(dialog = new GeoServerDialog("dialog"));
-    }
-
-    private Component layerLink(String id, final IModel model) {
-        IModel layerNameModel = NAME.getModel(model);
-        String wsName = (String) WORKSPACE.getModel(model).getObject();
-        String layerName = (String) layerNameModel.getObject();
-
-        return new SimpleBookmarkableLink(
-            id,
-            LayerFilterConfigurationPage.class,
-            layerNameModel,
-            LayerFilterConfigurationPage.WORKSPACE,
-            wsName,
-            LayerFilterConfigurationPage.NAME,
-            layerName
-        );
-    }
-
-    private Component storeLink(String id, final IModel model) {
-        IModel storeModel = STORE.getModel(model);
-        String wsName = (String) WORKSPACE.getModel(model).getObject();
-        String storeName = (String) storeModel.getObject();
-        LayerInfo layer = (LayerInfo) model.getObject();
-        StoreInfo store = layer.getResource().getStore();
-        if(store instanceof DataStoreInfo) {
-            return new SimpleBookmarkableLink(
-                id,
-                DataAccessEditPage.class,
-                storeModel,
-                DataAccessEditPage.STORE_NAME,
-                storeName,
-                DataAccessEditPage.WS_NAME,
-                wsName
-            );
-        }
-        else if (store instanceof WMSStoreInfo) {
-            return new SimpleBookmarkableLink(
-                id,
-                WMSStoreEditPage.class,
-                storeModel,
-                DataAccessEditPage.STORE_NAME,
-                storeName,
-                DataAccessEditPage.WS_NAME,
-                wsName
-            );
-        }
-        else {
-            return new SimpleBookmarkableLink(
-                id,
-                CoverageStoreEditPage.class,
-                storeModel,
-                DataAccessEditPage.STORE_NAME,
-                storeName,
-                DataAccessEditPage.WS_NAME,
-                wsName
-            );
-        }
-    }
-
-    private Component workspaceLink(String id, final IModel model) {
-        IModel nameModel = WORKSPACE.getModel(model);
-        return new SimpleBookmarkableLink(
-            id,
-            WorkspaceEditPage.class,
-            nameModel,
-            "name",
-            (String)nameModel.getObject()
-        );
     }
 
     @Override
