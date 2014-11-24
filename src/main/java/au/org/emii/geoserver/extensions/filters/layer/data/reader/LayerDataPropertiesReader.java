@@ -27,14 +27,10 @@ public class LayerDataPropertiesReader {
 
     private DataSource dataSource;
     private LayerIdentifier layerIdentifier;
-    //private String layerName;
-    //private String schemaName;
 
     public LayerDataPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
         this.dataSource = dataSource;
         this.layerIdentifier = layerIdentifier;
-        //this.layerName = layerName;
-        //this.schemaName = schemaName;
     }
 
     public ArrayList<LayerDataProperty> read() {
@@ -46,9 +42,6 @@ public class LayerDataPropertiesReader {
             setSearchPath(connection);
             layerDataProperties = getLayerTableProperties(connection);
         }
-//        catch (NamingException exception) {
-//            LOGGER.log(Level.SEVERE, exception.toString(), exception);
-//        }
         catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }
@@ -64,7 +57,6 @@ public class LayerDataPropertiesReader {
 
         try {
             statement = connection.prepareStatement("set search_path to ?");
-            //statement.setString(1, (String)dataStoreInfo.getConnectionParameters().get("schema"));
             statement.setString(1, layerIdentifier.getSchemaName());
         }
         finally {

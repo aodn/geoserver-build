@@ -50,7 +50,7 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
             add(CSSPackageResource.getHeaderContribution(LayerFilterConfigurationPage.class, "layer_filters.css"));
         }
         catch (NamingException e) {
-            LOGGER.log(Level.SEVERE, "it failed tommy", e);
+            LOGGER.log(Level.SEVERE, "Error getting DataSource from JNDI reference", e);
         }
     }
 
