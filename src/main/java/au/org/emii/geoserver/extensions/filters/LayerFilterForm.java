@@ -11,7 +11,7 @@ import au.org.emii.geoserver.extensions.filters.layer.data.LayerDataAccessor;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterPropertyCheckBox;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterPropertyTextField;
-import au.org.emii.geoserver.extensions.filters.layer.data.reader.FilterPropertiesReader;
+import au.org.emii.geoserver.extensions.filters.layer.data.reader.LayerPropertiesReader;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
@@ -29,7 +29,7 @@ public class LayerFilterForm extends Form<ValueMap> {
 
         LayerDataAccessor accessor = model.getObject();
 
-        FilterPropertiesReader reader = new FilterPropertiesReader(accessor.getDataSource(), accessor.getLayerIdentifier());
+        LayerPropertiesReader reader = new LayerPropertiesReader(accessor.getDataSource(), accessor.getLayerIdentifier());
         add(new ListView<Filter>("layerDataProperties", reader.read())
         {
             public void populateItem(final ListItem<Filter> item)

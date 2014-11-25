@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FilterPropertiesReader {
+public class LayerPropertiesReader {
 
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.reader");
 
     private DataSource dataSource;
     private LayerIdentifier layerIdentifier;
 
-    public FilterPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
+    public LayerPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
         this.dataSource = dataSource;
         this.layerIdentifier = layerIdentifier;
     }
@@ -72,7 +72,7 @@ public class FilterPropertiesReader {
             statement = connection.prepareStatement("select column_name, data_type, character_maximum_length from INFORMATION_SCHEMA.COLUMNS where table_name = ?");
             statement.setString(1, layerIdentifier.getLayerName());
 
-            return buildLayerDataProperties(statement.executeQuery());
+            return buildFilters(statement.executeQuery());
         }
         finally {
             DbUtils.closeQuietly(results);
@@ -80,12 +80,12 @@ public class FilterPropertiesReader {
         }
     }
 
-    private ArrayList<Filter> buildLayerDataProperties(ResultSet results) throws SQLException {
-        ArrayList<Filter> layerDataProperties = new ArrayList<Filter>();
+    private ArrayList<Filter> buildFilters(ResultSet results) throws SQLException {
+        ArrayList<Filter> filters = new ArrayList<Filter>();
         while (results.next()) {
-            layerDataProperties.add(new Filter(results.getString("column_name"), results.getString("data_type")));
+            filters.add(new Filter(results.getString("column_name"), results.getString("data_type")));
         }
 
-        return layerDataProperties;
+        return filters;
     }
 }
