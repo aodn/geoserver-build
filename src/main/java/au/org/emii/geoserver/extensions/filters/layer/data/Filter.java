@@ -11,12 +11,12 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 
-public class LayerDataProperty implements Serializable {
+public class Filter implements Serializable {
 
     private String name;
     private String type;
 
-    public LayerDataProperty(String name, String type) {
+    public Filter(String name, String type) {
         this.name = name;
         this.type = type;
     }

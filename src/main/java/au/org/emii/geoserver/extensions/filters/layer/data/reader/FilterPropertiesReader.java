@@ -7,7 +7,7 @@
 
 package au.org.emii.geoserver.extensions.filters.layer.data.reader;
 
-import au.org.emii.geoserver.extensions.filters.layer.data.LayerDataProperty;
+import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
 import org.apache.commons.dbutils.DbUtils;
 import org.geotools.util.logging.Logging;
@@ -21,20 +21,20 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LayerDataPropertiesReader {
+public class FilterPropertiesReader {
 
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.reader");
 
     private DataSource dataSource;
     private LayerIdentifier layerIdentifier;
 
-    public LayerDataPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
+    public FilterPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
         this.dataSource = dataSource;
         this.layerIdentifier = layerIdentifier;
     }
 
-    public ArrayList<LayerDataProperty> read() {
-        ArrayList<LayerDataProperty> layerDataProperties = new ArrayList<LayerDataProperty>();
+    public ArrayList<Filter> read() {
+        ArrayList<Filter> layerDataProperties = new ArrayList<Filter>();
 
         Connection connection = null;
         try {
@@ -64,7 +64,7 @@ public class LayerDataPropertiesReader {
         }
     }
 
-    private ArrayList<LayerDataProperty> getLayerTableProperties(Connection connection) throws SQLException {
+    private ArrayList<Filter> getLayerTableProperties(Connection connection) throws SQLException {
         PreparedStatement statement = null;
         ResultSet results = null;
 
@@ -80,10 +80,10 @@ public class LayerDataPropertiesReader {
         }
     }
 
-    private ArrayList<LayerDataProperty> buildLayerDataProperties(ResultSet results) throws SQLException {
-        ArrayList<LayerDataProperty> layerDataProperties = new ArrayList<LayerDataProperty>();
+    private ArrayList<Filter> buildLayerDataProperties(ResultSet results) throws SQLException {
+        ArrayList<Filter> layerDataProperties = new ArrayList<Filter>();
         while (results.next()) {
-            layerDataProperties.add(new LayerDataProperty(results.getString("column_name"), results.getString("data_type")));
+            layerDataProperties.add(new Filter(results.getString("column_name"), results.getString("data_type")));
         }
 
         return layerDataProperties;

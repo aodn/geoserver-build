@@ -9,16 +9,16 @@ package au.org.emii.geoserver.extensions.filters.layer.data;
 
 import org.apache.wicket.markup.html.form.TextField;
 
-public class LayerDataPropertyTextField extends TextField {
+public class FilterPropertyTextField extends TextField {
 
-    private LayerDataProperty layerProperty;
+    private Filter layerProperty;
 
-    public LayerDataPropertyTextField(String id, LayerDataProperty layerProperty) {
+    public FilterPropertyTextField(String id, Filter layerProperty) {
         this(id);
         this.layerProperty = layerProperty;
     }
 
-    public LayerDataPropertyTextField(String id) {
+    public FilterPropertyTextField(String id) {
         super(id);
     }
 

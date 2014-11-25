@@ -9,16 +9,16 @@ package au.org.emii.geoserver.extensions.filters.layer.data;
 
 import org.apache.wicket.markup.html.form.CheckBox;
 
-public class LayerDataPropertyCheckBox extends CheckBox {
+public class FilterPropertyCheckBox extends CheckBox {
 
     private String name;
 
-    public LayerDataPropertyCheckBox(String id, String name) {
+    public FilterPropertyCheckBox(String id, String name) {
         this(id);
         this.name = name;
     }
 
-    public LayerDataPropertyCheckBox(String id) {
+    public FilterPropertyCheckBox(String id) {
         super(id);
     }
 
