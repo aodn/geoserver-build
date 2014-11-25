@@ -5,7 +5,7 @@
  *
  */
 
-package au.org.emii.geoserver.extensions.filters.layer.data.reader;
+package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 public class LayerPropertiesReader {
 
-    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.reader");
+    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.io");
 
     private DataSource dataSource;
     private LayerIdentifier layerIdentifier;

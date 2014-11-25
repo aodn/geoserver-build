@@ -11,7 +11,7 @@ import au.org.emii.geoserver.extensions.filters.layer.data.LayerDataAccessor;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterPropertyCheckBox;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterPropertyTextField;
-import au.org.emii.geoserver.extensions.filters.layer.data.reader.LayerPropertiesReader;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
@@ -52,6 +52,7 @@ public class LayerFilterForm extends Form<ValueMap> {
             @Override
             public void onSubmit() {
                 //doSave();
+
             }
         };
     }
