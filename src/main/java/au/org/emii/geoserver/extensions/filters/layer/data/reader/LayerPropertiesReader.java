@@ -34,13 +34,13 @@ public class LayerPropertiesReader {
     }
 
     public ArrayList<Filter> read() {
-        ArrayList<Filter> layerDataProperties = new ArrayList<Filter>();
+        ArrayList<Filter> layerTableProperties = new ArrayList<Filter>();
 
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
             setSearchPath(connection);
-            layerDataProperties = getLayerTableProperties(connection);
+            layerTableProperties = getLayerTableProperties(connection);
         }
         catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
@@ -49,7 +49,7 @@ public class LayerPropertiesReader {
             DbUtils.closeQuietly(connection);
         }
 
-        return layerDataProperties;
+        return layerTableProperties;
     }
 
     private void setSearchPath(Connection connection) throws SQLException {
