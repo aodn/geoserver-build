@@ -8,7 +8,6 @@
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
 import org.apache.commons.dbutils.DbUtils;
 
 import javax.sql.DataSource;
@@ -21,8 +20,8 @@ import java.util.logging.Level;
 
 public class PostgresSqlLayerPropertiesReader extends LayerPropertiesReader {
 
-    public PostgresSqlLayerPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
-        super(dataSource, layerIdentifier);
+    public PostgresSqlLayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
+        super(dataSource, layerName, schemaName);
     }
 
     public ArrayList<Filter> read() {
@@ -49,7 +48,7 @@ public class PostgresSqlLayerPropertiesReader extends LayerPropertiesReader {
 
         try {
             statement = connection.prepareStatement("set search_path to ?");
-            statement.setString(1, getLayerIdentifier().getSchemaName());
+            statement.setString(1, getSchemaName());
         }
         finally {
             DbUtils.closeQuietly(statement);
@@ -62,7 +61,7 @@ public class PostgresSqlLayerPropertiesReader extends LayerPropertiesReader {
 
         try {
             statement = connection.prepareStatement("select column_name, data_type, character_maximum_length from INFORMATION_SCHEMA.COLUMNS where table_name = ?");
-            statement.setString(1, getLayerIdentifier().getLayerName());
+            statement.setString(1, getLayerName());
 
             return buildFilters(statement.executeQuery());
         }

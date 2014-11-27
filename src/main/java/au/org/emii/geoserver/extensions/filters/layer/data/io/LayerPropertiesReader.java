@@ -8,7 +8,6 @@
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
 import org.geotools.util.logging.Logging;
 
 import javax.sql.DataSource;
@@ -20,11 +19,13 @@ public abstract class LayerPropertiesReader {
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.io");
 
     private DataSource dataSource;
-    private LayerIdentifier layerIdentifier;
+    private String layerName;
+    private String schemaName;
 
-    public LayerPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
+    public LayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
         this.dataSource = dataSource;
-        this.layerIdentifier = layerIdentifier;
+        this.layerName = layerName;
+        this.schemaName = schemaName;
     }
 
     public abstract ArrayList<Filter> read();
@@ -33,7 +34,11 @@ public abstract class LayerPropertiesReader {
         return dataSource;
     }
 
-    protected LayerIdentifier getLayerIdentifier() {
-        return layerIdentifier;
+    protected String getLayerName() {
+        return layerName;
+    }
+
+    protected String getSchemaName() {
+        return schemaName;
     }
 }

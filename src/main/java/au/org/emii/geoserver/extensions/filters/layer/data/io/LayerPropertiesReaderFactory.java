@@ -7,7 +7,6 @@
 
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
-import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
 import org.apache.commons.dbutils.DbUtils;
 import org.geotools.util.logging.Logging;
 
@@ -21,7 +20,7 @@ public class LayerPropertiesReaderFactory {
 
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.io");
 
-    public static LayerPropertiesReader getReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
+    public static LayerPropertiesReader getReader(DataSource dataSource, String layerName, String schemaName) {
         String driverName = "";
         Connection connection = null;
         try {
@@ -36,21 +35,22 @@ public class LayerPropertiesReaderFactory {
             DbUtils.closeQuietly(connection);
         }
 
-        return getLayerPropertiesReaderForDriver(driverName, dataSource, layerIdentifier);
+        return getLayerPropertiesReaderForDriver(driverName, dataSource, layerName, schemaName);
     }
 
     private static LayerPropertiesReader getLayerPropertiesReaderForDriver(
         String driverName,
         DataSource dataSource,
-        LayerIdentifier layerIdentifier
+        String layerName,
+        String schemaName
     )
     {
         String ciDriverName = driverName.toLowerCase();
         if (ciDriverName.contains("postgres")) {
-            return new PostgresSqlLayerPropertiesReader(dataSource, layerIdentifier);
+            return new PostgresSqlLayerPropertiesReader(dataSource, layerName, schemaName);
         }
         // Your driver implementation returned here
 
-        return new NullLayerPropertiesReader(dataSource, layerIdentifier);
+        return new NullLayerPropertiesReader(dataSource, layerName, schemaName);
     }
 }

@@ -8,15 +8,14 @@
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import au.org.emii.geoserver.extensions.filters.layer.data.LayerIdentifier;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
 
 public class NullLayerPropertiesReader extends LayerPropertiesReader {
 
-    public NullLayerPropertiesReader(DataSource dataSource, LayerIdentifier layerIdentifier) {
-        super(dataSource, layerIdentifier);
+    public NullLayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
+        super(dataSource, layerName, schemaName);
     }
 
     public ArrayList<Filter> read() {
