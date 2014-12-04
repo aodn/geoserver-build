@@ -22,12 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FilterConfigurationWriter {
+public class FilterConfigurationWriter extends FilterConfigurationIO {
 
     private static final String TEMPLATE_NAME = "filter_configuration.ftl";
-    private static final String OUTPUT_FILE_NAME = "filters.xml";
 
-    private String dataDirectoryPath;
     private List<Filter> filters;
 
     public FilterConfigurationWriter(String dataDirectoryPath, List<Filter> filters) {
@@ -42,7 +40,7 @@ public class FilterConfigurationWriter {
         FileWriter writer = null;
         try {
             Template template = config.getTemplate(TEMPLATE_NAME);
-            writer = new FileWriter(String.format("%s/%s", dataDirectoryPath, OUTPUT_FILE_NAME));
+            writer = new FileWriter(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME));
 
             Map<String, Object> root = new HashMap<String, Object>();
             root.put("filters", getEnabledFilters());

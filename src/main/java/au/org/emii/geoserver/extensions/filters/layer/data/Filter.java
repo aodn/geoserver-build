@@ -19,6 +19,10 @@ public class Filter implements Serializable {
     private Boolean enabled;
     private Boolean visualised;
 
+    public Filter() {
+
+    }
+
     public Filter(String name, String type) {
         this.name = name;
         this.type = type;
@@ -28,6 +32,10 @@ public class Filter implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getType() {
@@ -71,5 +79,22 @@ public class Filter implements Serializable {
 
     public void setVisualised(Boolean visualised) {
         this.visualised = visualised;
+    }
+
+    public Filter merge(Filter other) {
+        Filter right = coalesce(other, this);
+
+        Filter filter = new Filter();
+        filter.setName(coalesce(right.getName(), getName()));
+        filter.setType(coalesce(right.getType(), getType()));
+        filter.setLabel(coalesce(right.getLabel(), getLabel()));
+        filter.setVisualised(coalesce(right.getVisualised(), getVisualised()));
+        filter.setEnabled(coalesce(right.getEnabled(), getEnabled()));
+
+        return filter;
+    }
+
+    private <T> T coalesce(T a, T b) {
+        return a == null ? b : a;
     }
 }

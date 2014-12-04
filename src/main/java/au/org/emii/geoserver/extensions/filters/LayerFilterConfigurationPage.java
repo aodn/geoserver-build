@@ -7,7 +7,10 @@
 
 package au.org.emii.geoserver.extensions.filters;
 
+import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
+import au.org.emii.geoserver.extensions.filters.layer.data.FilterMerge;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationReader;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReaderFactory;
 import org.apache.wicket.PageParameters;
@@ -15,7 +18,6 @@ import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.geoserver.catalog.DataStoreInfo;
-import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.platform.resource.Paths;
 import org.geoserver.web.GeoServerSecuredPage;
@@ -23,12 +25,14 @@ import org.geoserver.web.data.store.DataAccessEditPage;
 import org.geotools.util.logging.Logging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jndi.JndiTemplate;
+import org.xml.sax.SAXException;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
-import java.io.File;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +45,7 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
     private String layerName;
     private String storeName;
     private String workspaceName;
+    private String dataDirectory;
 
     @Autowired
     private ServletContext context;
@@ -65,28 +70,32 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
         catch (NamingException e) {
             LOGGER.log(Level.SEVERE, "Error getting DataSource from JNDI reference", e);
         }
+        catch (ParserConfigurationException pce) {
+            LOGGER.log(Level.SEVERE, "Could not parse saved filter configuration", pce);
+        }
+        catch (SAXException se) {
+            LOGGER.log(Level.SEVERE, "Could not parse saved filter configuration", se);
+        }
         catch (IOException ioe) {
-            LOGGER.log(Level.SEVERE, "Error getting DataSource from JNDI reference", ioe);
+            LOGGER.log(Level.SEVERE, "Error reading filters", ioe);
         }
     }
 
     @Override
     protected String getTitle() {
-        return String.format("%s - %s - %s", workspaceName, storeName, layerName);
+        return String.format("%s/%s/%s", workspaceName, storeName, layerName);
     }
 
     @Override
     protected String getDescription() {
-        return String.format("Configuring filters for %s - %s - %s", workspaceName, storeName, layerName);
+        return String.format("Configuring filters for %s/%s/%s", workspaceName, storeName, layerName);
     }
 
     public void setContext(ServletContext context) {
-        // TODO dig into this and see what is happening
-        LOGGER.log(Level.WARNING, "Setting the context");
         this.context = context;
     }
 
-    private LayerFilterForm getLayerFilterForm() throws NamingException, IOException {
+    private LayerFilterForm getLayerFilterForm() throws NamingException, ParserConfigurationException, SAXException, IOException {
         return new LayerFilterForm("layerFilterForm", getFilterConfigurationModel());
     }
 
@@ -103,19 +112,19 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
         return (String)getDataStoreInfo().getConnectionParameters().get(parameter);
     }
 
-    private IModel<FilterConfiguration> getFilterConfigurationModel() throws NamingException, IOException {
-        LayerPropertiesReader reader = LayerPropertiesReaderFactory.getReader(getDataSource(), layerName, getDataStoreParameter("schema"));
+    private List<Filter> getLayerProperties() throws NamingException, IOException {
+        LayerPropertiesReader layerPropertiesReader = LayerPropertiesReaderFactory.getReader(getDataSource(), layerName, getDataStoreParameter("schema"));
+        return layerPropertiesReader.read();
+    }
 
-        String dataDir = GeoServerResourceLoader.lookupGeoServerDataDirectory(context);
+    private List<Filter> getConfiguredFilters() throws ParserConfigurationException, SAXException, IOException {
+        FilterConfigurationReader filterConfigurationReader = new FilterConfigurationReader(getDataDirectory());
+        return filterConfigurationReader.read().getFilters();
+    }
 
-        //GeoServerDataDirectory dataDirectory = new GeoServerDataDirectory(getCatalog().getResourceLoader());
-        //File dir = dataDirectory.findDataDir(workspaceName, storeName, layerName);
+    private IModel<FilterConfiguration> getFilterConfigurationModel() throws NamingException, ParserConfigurationException, SAXException, IOException {
 
-        String dir = Paths.path(dataDir, "workspaces", workspaceName, storeName, layerName);
-
-        LOGGER.log(Level.WARNING, String.format("data dir? %s", dir));
-
-        final FilterConfiguration config = new FilterConfiguration(dir, reader.read());
+        final FilterConfiguration config = new FilterConfiguration(getDataDirectory(), FilterMerge.merge(getLayerProperties(), getConfiguredFilters()));
 
         return new Model<FilterConfiguration>() {
             @Override
@@ -123,5 +132,17 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
                 return config;
             }
         };
+    }
+
+    private String getDataDirectory() {
+        if (dataDirectory == null) {
+            dataDirectory = Paths.path(getGeoServerDataDirectory(), "workspaces", workspaceName, storeName, layerName);
+        }
+
+        return dataDirectory;
+    }
+
+    private String getGeoServerDataDirectory() {
+        return GeoServerResourceLoader.lookupGeoServerDataDirectory(context);
     }
 }
