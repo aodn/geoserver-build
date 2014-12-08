@@ -50,7 +50,8 @@ public class Filter implements Serializable {
         if (label != null) {
             return label;
         }
-        return StringUtils.capitalize(getName().replaceAll("_", " "));
+
+        return getName() != null ? StringUtils.capitalize(getName().replaceAll("_", " ")) : null;
     }
 
     public void setLabel(String label) {

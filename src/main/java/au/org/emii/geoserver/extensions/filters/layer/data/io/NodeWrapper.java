@@ -45,14 +45,18 @@ public class NodeWrapper implements Iterable<Node> {
 
     private NodeList getNodeList() {
         if (nodeList == null) {
-            if (node.hasChildNodes()) {
-                nodeList = node.getChildNodes();
-            }
-            else {
-                nodeList = new NullNodeList();
-            }
+            setNodeList();
         }
         return nodeList;
+    }
+
+    private void setNodeList() {
+        if (node.hasChildNodes()) {
+            nodeList = node.getChildNodes();
+        }
+        else {
+            nodeList = new NullNodeList();
+        }
     }
 
     private class NullNodeList implements NodeList {

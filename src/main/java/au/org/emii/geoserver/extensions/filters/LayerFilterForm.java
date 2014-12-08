@@ -86,7 +86,7 @@ public class LayerFilterForm extends Form<FilterConfiguration> {
 
             @Override
             public void onClick() {
-                //onCancel();
+
             }
         };
     }
