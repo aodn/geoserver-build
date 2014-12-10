@@ -10,9 +10,11 @@ package au.org.emii.geoserver.extensions.filters;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterMerge;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationIO;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationReader;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReaderFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.model.IModel;
@@ -31,7 +33,10 @@ import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,8 +123,25 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
     }
 
     private List<Filter> getConfiguredFilters() throws ParserConfigurationException, SAXException, IOException {
+        List<Filter> filters = new ArrayList<Filter>();
+        File file = new File(String.format("%s/%s", getDataDirectory(), FilterConfigurationIO.FILTER_CONFIGURATION_FILE_NAME));
+        if (file.exists()) {
+            filters = readFilterConfigurationFromFile(file);
+        }
+
+        return filters;
+    }
+
+    private List<Filter> readFilterConfigurationFromFile(File file) throws ParserConfigurationException, SAXException, IOException {
         FilterConfigurationReader filterConfigurationReader = new FilterConfigurationReader(getDataDirectory());
-        return filterConfigurationReader.read().getFilters();
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+            return filterConfigurationReader.read(fileInputStream).getFilters();
+        }
+        finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
     }
 
     private IModel<FilterConfiguration> getFilterConfigurationModel() throws NamingException, ParserConfigurationException, SAXException, IOException {
