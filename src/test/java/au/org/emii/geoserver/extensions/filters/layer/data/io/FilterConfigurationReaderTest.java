@@ -24,7 +24,7 @@ public class FilterConfigurationReaderTest {
 
     private static String XML = "<?xml version=\"1.0\"?>\n" +
         "<filters>\n" +
-        "        <filter>\n" +
+        "    <filter>\n" +
         "        <name>file_id</name>\n" +
         "        <type>integer</type>\n" +
         "        <label>You</label>\n" +
