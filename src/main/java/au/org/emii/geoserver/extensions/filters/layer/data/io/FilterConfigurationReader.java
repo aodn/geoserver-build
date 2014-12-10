@@ -7,6 +7,7 @@
 
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
+import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -16,6 +17,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class FilterConfigurationReader extends FilterConfigurationIO {
 
@@ -24,10 +26,15 @@ public class FilterConfigurationReader extends FilterConfigurationIO {
     }
 
     public FilterConfiguration read() throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(new File(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME)));
+        File file = new File(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME));
 
-        return new FilterConfiguration(dataDirectoryPath, new FiltersDocumentParser(doc).getFilters());
+        if (file.exists()) {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(file);
+            return new FilterConfiguration(dataDirectoryPath, new FiltersDocumentParser(doc).getFilters());
+        }
+
+        return new FilterConfiguration(dataDirectoryPath, new ArrayList<Filter>());
     }
 }

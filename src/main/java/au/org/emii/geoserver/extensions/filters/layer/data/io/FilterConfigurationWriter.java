@@ -13,10 +13,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.io.IOUtils;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,35 +27,18 @@ public class FilterConfigurationWriter extends FilterConfigurationIO {
 
     private List<Filter> filters;
 
-    public FilterConfigurationWriter(String dataDirectoryPath, List<Filter> filters) {
-        this.dataDirectoryPath = dataDirectoryPath;
+    public FilterConfigurationWriter(List<Filter> filters) {
         this.filters = filters;
     }
 
-    public void write() {
+    public void write(Writer writer) throws TemplateException, IOException {
         Configuration config = new Configuration();
         config.setClassForTemplateLoading(FilterConfigurationWriter.class, "");
 
-        FileWriter writer = null;
-        try {
-            Template template = config.getTemplate(TEMPLATE_NAME);
-            writer = new FileWriter(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME));
-
-            Map<String, Object> root = new HashMap<String, Object>();
-            root.put("filters", getEnabledFilters());
-            template.process(root, writer);
-
-            // Probably throw the exceptions so errors are reported
-        }
-        catch (TemplateException te) {
-            te.printStackTrace();
-        }
-        catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-        finally {
-            IOUtils.closeQuietly(writer);
-        }
+        Template template = config.getTemplate(TEMPLATE_NAME);
+        Map<String, Object> root = new HashMap<String, Object>();
+        root.put("filters", getEnabledFilters());
+        template.process(root, writer);
     }
 
     private List<Filter> getEnabledFilters() {

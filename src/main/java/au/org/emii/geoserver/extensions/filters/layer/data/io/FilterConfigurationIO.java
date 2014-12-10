@@ -9,7 +9,7 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 public class FilterConfigurationIO {
 
-    protected static final String FILTER_CONFIGURATION_FILE_NAME = "filters.xml";
+    public static final String FILTER_CONFIGURATION_FILE_NAME = "filters.xml";
 
     protected String dataDirectoryPath;
 }
