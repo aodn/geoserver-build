@@ -7,13 +7,11 @@
 
 package au.org.emii.geoserver.extensions.filters;
 
+import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterMerge;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationIO;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationReader;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReaderFactory;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.CSSPackageResource;
@@ -96,25 +94,20 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
         return String.format("Configuring filters for %s/%s/%s", workspaceName, storeName, layerName);
     }
 
-    public void setContext(ServletContext context) {
-        this.context = context;
-    }
-
     private LayerFilterForm getLayerFilterForm() throws NamingException, ParserConfigurationException, SAXException, IOException {
         return new LayerFilterForm("layerFilterForm", getFilterConfigurationModel());
     }
 
     private DataSource getDataSource() throws NamingException {
-        JndiTemplate template = new JndiTemplate();
-        return (DataSource)template.lookup(getDataStoreParameter("jndiReferenceName"));
-    }
-
-    private DataStoreInfo getDataStoreInfo() {
-        return getCatalog().getDataStoreByName(workspaceName, storeName);
+        return getLayerDataStore().getDataSource();
     }
 
     private String getDataStoreParameter(String parameter) {
-        return (String)getDataStoreInfo().getConnectionParameters().get(parameter);
+        return getLayerDataStore().getDataStoreParameter(parameter);
+    }
+
+    private LayerDataStore getLayerDataStore() {
+        return new LayerDataStore(getCatalog(), workspaceName, storeName);
     }
 
     private List<Filter> getLayerProperties() throws NamingException, IOException {
@@ -123,25 +116,7 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
     }
 
     private List<Filter> getConfiguredFilters() throws ParserConfigurationException, SAXException, IOException {
-        List<Filter> filters = new ArrayList<Filter>();
-        File file = new File(String.format("%s/%s", getDataDirectory(), FilterConfigurationIO.FILTER_CONFIGURATION_FILE_NAME));
-        if (file.exists()) {
-            filters = readFilterConfigurationFromFile(file);
-        }
-
-        return filters;
-    }
-
-    private List<Filter> readFilterConfigurationFromFile(File file) throws ParserConfigurationException, SAXException, IOException {
-        FilterConfigurationReader filterConfigurationReader = new FilterConfigurationReader(getDataDirectory());
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
-            return filterConfigurationReader.read(fileInputStream).getFilters();
-        }
-        finally {
-            IOUtils.closeQuietly(fileInputStream);
-        }
+        return new FilterConfigurationFile(getDataDirectory()).getFilters();
     }
 
     private IModel<FilterConfiguration> getFilterConfigurationModel() throws NamingException, ParserConfigurationException, SAXException, IOException {
@@ -158,13 +133,9 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
     private String getDataDirectory() {
         if (dataDirectory == null) {
-            dataDirectory = Paths.path(getGeoServerDataDirectory(), "workspaces", workspaceName, storeName, layerName);
+            dataDirectory = new DataDirectory(context).getLayerDataDirectoryPath(workspaceName, storeName, layerName);
         }
 
         return dataDirectory;
-    }
-
-    private String getGeoServerDataDirectory() {
-        return GeoServerResourceLoader.lookupGeoServerDataDirectory(context);
     }
 }

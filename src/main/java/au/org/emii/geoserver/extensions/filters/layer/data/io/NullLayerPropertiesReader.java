@@ -10,15 +10,11 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
+import java.util.List;
 
-public class NullLayerPropertiesReader extends LayerPropertiesReader {
+public class NullLayerPropertiesReader implements LayerPropertiesReader {
 
-    public NullLayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
-        super(dataSource, layerName, schemaName);
-    }
-
-    public ArrayList<Filter> read() {
+    public List<Filter> read() {
         throw new RuntimeException("No LayerPropertiesReader found for your JDBC driver");
     }
 }

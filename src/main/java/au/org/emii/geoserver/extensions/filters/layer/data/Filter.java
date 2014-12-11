@@ -10,6 +10,7 @@ package au.org.emii.geoserver.extensions.filters.layer.data;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Filter implements Serializable {
 
@@ -18,10 +19,9 @@ public class Filter implements Serializable {
     private String label;
     private Boolean enabled;
     private Boolean visualised;
+    private List<String> possibleValues;
 
-    public Filter() {
-
-    }
+    public Filter() {}
 
     public Filter(String name, String type) {
         this.name = name;
@@ -80,6 +80,14 @@ public class Filter implements Serializable {
 
     public void setVisualised(Boolean visualised) {
         this.visualised = visualised;
+    }
+
+    public List<String> getPossibleValues() {
+        return possibleValues;
+    }
+
+    public void setPossibleValues(List<String> possibleValues) {
+        this.possibleValues = possibleValues;
     }
 
     public Filter merge(Filter other) {

@@ -1,10 +1,3 @@
-/*
- * Copyright 2014 IMOS
- *
- * The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
- *
- */
-
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
@@ -19,20 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements LayerPropertiesReader {
+public class PostgresSqlPossibleValuesReader extends LayerDataReader implements PossibleValuesReader {
 
-    public PostgresSqlLayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
+    public PostgresSqlPossibleValuesReader(DataSource dataSource, String layerName, String schemaName) {
         super(dataSource, layerName, schemaName);
     }
 
-    public List<Filter> read() {
-        List<Filter> layerTableProperties = new ArrayList<Filter>();
-
+    public void read(List<Filter> filters) {
         Connection connection = null;
         try {
             connection = getDataSource().getConnection();
             setSearchPath(connection);
-            layerTableProperties = getLayerTableProperties(connection);
+            for (Filter filter : filters) {
+                filter.setPossibleValues(getPossibleValues(connection, getLayerName(), filter.getName()));
+            }
         }
         catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
@@ -40,8 +33,6 @@ public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements
         finally {
             DbUtils.closeQuietly(connection);
         }
-
-        return layerTableProperties;
     }
 
     private void setSearchPath(Connection connection) throws SQLException {
@@ -56,28 +47,23 @@ public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements
         }
     }
 
-    private List<Filter> getLayerTableProperties(Connection connection) throws SQLException {
+    private List<String> getPossibleValues(Connection connection, String table, String column) throws SQLException {
+        List<String> possibleValues = new ArrayList<String>();
         PreparedStatement statement = null;
         ResultSet results = null;
 
         try {
-            statement = connection.prepareStatement("select column_name, data_type, character_maximum_length from INFORMATION_SCHEMA.COLUMNS where table_name = ?");
-            statement.setString(1, getLayerName());
-
-            return buildFilters(statement.executeQuery());
+            statement = connection.prepareStatement(String.format("select distinct %s from %s", column, table));
+            results = statement.executeQuery();
+            while (results.next()) {
+                possibleValues.add(results.getString(column));
+            }
         }
         finally {
             DbUtils.closeQuietly(results);
             DbUtils.closeQuietly(statement);
         }
-    }
 
-    private List<Filter> buildFilters(ResultSet results) throws SQLException {
-        ArrayList<Filter> filters = new ArrayList<Filter>();
-        while (results.next()) {
-            filters.add(new Filter(results.getString("column_name"), results.getString("data_type")));
-        }
-
-        return filters;
+        return possibleValues;
     }
 }
