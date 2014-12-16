@@ -1,6 +1,8 @@
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.dbutils.DbUtils;
 
 import javax.sql.DataSource;
@@ -23,7 +25,7 @@ public class PostgresSqlPossibleValuesReader extends LayerDataReader implements 
         try {
             connection = getDataSource().getConnection();
             setSearchPath(connection);
-            for (Filter filter : filters) {
+            for (Filter filter : getPossibleValueFilters(filters)) {
                 filter.setPossibleValues(getPossibleValues(connection, getLayerName(), filter.getName()));
             }
         }
@@ -53,7 +55,7 @@ public class PostgresSqlPossibleValuesReader extends LayerDataReader implements 
         ResultSet results = null;
 
         try {
-            statement = connection.prepareStatement(String.format("select distinct %s from %s", column, table));
+            statement = connection.prepareStatement(String.format("select distinct %s from %s.%s", column, getSchemaName(), table));
             results = statement.executeQuery();
             while (results.next()) {
                 possibleValues.add(results.getString(column));
@@ -65,5 +67,19 @@ public class PostgresSqlPossibleValuesReader extends LayerDataReader implements 
         }
 
         return possibleValues;
+    }
+
+    private List<Filter> getPossibleValueFilters(List<Filter> filters) {
+        List<Filter> possibleValueFilters = new ArrayList<Filter>(filters);
+        CollectionUtils.filter(possibleValueFilters, getPredicate());
+        return possibleValueFilters;
+    }
+
+    private Predicate getPredicate() {
+        return new Predicate() {
+            public boolean evaluate(Object o) {
+                return "string".equals(((Filter)o).getType().toLowerCase());
+            }
+        };
     }
 }

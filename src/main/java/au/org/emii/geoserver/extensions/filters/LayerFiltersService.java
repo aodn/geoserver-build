@@ -9,8 +9,9 @@ package au.org.emii.geoserver.extensions.filters;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.*;
-import org.apache.commons.io.IOUtils;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerDataStore;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.PossibleValuesReaderFactory;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.NamespaceInfo;
@@ -31,13 +32,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -138,11 +136,11 @@ public class LayerFiltersService {
             document = getNewDocument();
 
             List<Filter> filters = file.getFilters();
-//            PossibleValuesReaderFactory.getReader(
-//                getDataSource(workspace, getStoreName(layerInfo)),
-//                layer,
-//                getSchemaName(workspace, getStoreName(layerInfo))
-//            ).read(filters);
+            PossibleValuesReaderFactory.getReader(
+                getDataSource(workspace, getStoreName(layerInfo)),
+                layer,
+                getSchemaName(workspace, getStoreName(layerInfo))
+            ).read(filters);
 
             Element filtersElement = document.createElement("filters");
             document.appendChild(filtersElement);
@@ -166,6 +164,17 @@ public class LayerFiltersService {
                 Element visualisedElement = document.createElement("visualised");
                 visualisedElement.appendChild(document.createTextNode(filter.getVisualised().toString()));
                 filterElement.appendChild(visualisedElement);
+
+                Element valuesElement = document.createElement("values");
+                filterElement.appendChild(valuesElement);
+
+                if (filter.getPossibleValues() != null) {
+                    for (String value : filter.getPossibleValues()) {
+                        Element valueElement = document.createElement("value");
+                        valueElement.appendChild(document.createTextNode(value));
+                        valuesElement.appendChild(valueElement);
+                    }
+                }
             }
         }
         catch (FileNotFoundException fnfe) {

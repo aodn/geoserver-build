@@ -61,7 +61,7 @@ public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements
         ResultSet results = null;
 
         try {
-            statement = connection.prepareStatement("select column_name, data_type, character_maximum_length from INFORMATION_SCHEMA.COLUMNS where table_name = ?");
+            statement = connection.prepareStatement("select column_name, data_type, character_maximum_length from information_schema.columns where table_name = ?");
             statement.setString(1, getLayerName());
 
             return buildFilters(statement.executeQuery());
@@ -75,9 +75,23 @@ public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements
     private List<Filter> buildFilters(ResultSet results) throws SQLException {
         ArrayList<Filter> filters = new ArrayList<Filter>();
         while (results.next()) {
-            filters.add(new Filter(results.getString("column_name"), results.getString("data_type")));
+            filters.add(new Filter(results.getString("column_name"), translateDataType(results.getString("data_type"))));
         }
 
         return filters;
+    }
+
+    private String translateDataType(String type) {
+        String translation = type.toLowerCase();
+        if (translation.startsWith("character")) {
+            translation = "string";
+        }
+        else if (translation.startsWith("double")) {
+            translation = "double";
+        }
+        else if (translation.startsWith("timestamp")) {
+            translation = "dateTime";
+        }
+        return translation;
     }
 }
