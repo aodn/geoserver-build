@@ -9,6 +9,7 @@ package au.org.emii.geoserver.extensions.filters;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
+import au.org.emii.geoserver.extensions.filters.layer.data.FiltersDocument;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerDataStore;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.PossibleValuesReaderFactory;
@@ -49,41 +50,6 @@ public class LayerFiltersService {
 
     public LayerFiltersService() {}
 
-    /**
-     * <FeatureType xmlns:aodn="aodn">
-     <Name>aodn:aodn_dsto_trajectory_map</Name>
-     <Title>aodn_dsto_trajectory_map</Title>
-     <Abstract/>
-     <ows:Keywords>
-     <ows:Keyword>features</ows:Keyword>
-     <ows:Keyword>aodn_dsto_trajectory_map</ows:Keyword>
-     </ows:Keywords>
-     <DefaultSRS>urn:x-ogc:def:crs:EPSG:4326</DefaultSRS>
-     <ows:WGS84BoundingBox>
-     <ows:LowerCorner>114.133689880371 -32.2922477722168</ows:LowerCorner>
-     <ows:UpperCorner>151.253662109375 -22.4469432830811</ows:UpperCorner>
-     </ows:WGS84BoundingBox>
-     <MetadataURL type="TC211" format="text/xml">
-     https://catalogue-123.aodn.org.au/geonetwork/srv/eng/xml_iso19139.mcp?uuid=9cb44921-91a0-4a17-bdd0-3225bc47346c&styleSheet=xml_iso19139.mcp.xsl
-     </MetadataURL>
-     </FeatureType>
-     <FeatureType xmlns:imos="imos.mod">
-     <Name>imos:aodn_nt_sattag_hawksbill_profile_data</Name>
-     <Title>aodn_nt_sattag_hawksbill_profile_data</Title>
-     <Abstract/>
-     <ows:Keywords>
-     <ows:Keyword>aodn_nt_sattag_hawksbill_profile_data</ows:Keyword>
-     <ows:Keyword>features</ows:Keyword>
-     </ows:Keywords>
-     <DefaultSRS>urn:x-ogc:def:crs:EPSG:4326</DefaultSRS>
-     <ows:WGS84BoundingBox>
-     <ows:LowerCorner>135.870315569477 -16.7374538216423</ows:LowerCorner>
-     <ows:UpperCorner>138.535948597995 -13.224866015904</ows:UpperCorner>
-     </ows:WGS84BoundingBox>
-     </FeatureType>
-     *
-     */
-
     public void setCatalog(Catalog catalog) {
         this.catalog = catalog;
     }
@@ -93,16 +59,8 @@ public class LayerFiltersService {
     }
 
     public void enabledFilters(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-        /**
-         * - Read workspace parameter
-         * - Read name parameter
-         * - Find layer based on those and attempt to read store
-         * - Locate data folder and read xml
-         * Request possible values
-         * Merge with possibleValues
-         */
-
+        throws ServletException, IOException
+    {
         String workspace = request.getParameter("workspace");
         String layer = request.getParameter("layer");
 
@@ -142,40 +100,7 @@ public class LayerFiltersService {
                 getSchemaName(workspace, getStoreName(layerInfo))
             ).read(filters);
 
-            Element filtersElement = document.createElement("filters");
-            document.appendChild(filtersElement);
-
-            for (Filter filter : filters) {
-                Element filterElement = document.createElement("filter");
-                filtersElement.appendChild(filterElement);
-
-                Element nameElement = document.createElement("name");
-                nameElement.appendChild(document.createTextNode(filter.getName()));
-                filterElement.appendChild(nameElement);
-
-                Element typeElement = document.createElement("type");
-                typeElement.appendChild(document.createTextNode(filter.getType()));
-                filterElement.appendChild(typeElement);
-
-                Element labelElement = document.createElement("label");
-                labelElement.appendChild(document.createTextNode(filter.getLabel()));
-                filterElement.appendChild(labelElement);
-
-                Element visualisedElement = document.createElement("visualised");
-                visualisedElement.appendChild(document.createTextNode(filter.getVisualised().toString()));
-                filterElement.appendChild(visualisedElement);
-
-                Element valuesElement = document.createElement("values");
-                filterElement.appendChild(valuesElement);
-
-                if (filter.getPossibleValues() != null) {
-                    for (String value : filter.getPossibleValues()) {
-                        Element valueElement = document.createElement("value");
-                        valueElement.appendChild(document.createTextNode(value));
-                        valuesElement.appendChild(valueElement);
-                    }
-                }
-            }
+            new FiltersDocument().build(document, filters);
         }
         catch (FileNotFoundException fnfe) {
             document = getEmptyDocument();
