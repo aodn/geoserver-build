@@ -1,0 +1,25 @@
+<assembly>
+    <id>layer-filter-extension</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>target</directory>
+            <includes>
+                <include>${artifactId}-${version}.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <dependencySets>
+        <dependencySet>
+            <includes>
+                <include>*commons-dbutils*</include>
+                <include>*geoserver-layer-filter-extension*</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>

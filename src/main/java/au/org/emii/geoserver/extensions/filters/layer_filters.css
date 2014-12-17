@@ -1,0 +1,16 @@
+/* See https://smacss.com/book */
+
+.l-grid {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.l-grid > li {
+    display: inline-block;
+    margin: 0 0 10px 10px;
+
+    /* IE7 hack to mimic inline-block on block elements */
+    *display: inline;
+    *zoom: 1;
+}
