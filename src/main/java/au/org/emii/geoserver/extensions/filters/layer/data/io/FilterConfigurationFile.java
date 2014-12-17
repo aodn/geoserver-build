@@ -59,17 +59,6 @@ public class FilterConfigurationFile extends FilterConfigurationIO {
         }
     }
 
-    private Document readDocument(File file) throws ParserConfigurationException, SAXException, IOException {
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
-            return getReader().getDocument(fileInputStream);
-        }
-        finally {
-            IOUtils.closeQuietly(fileInputStream);
-        }
-    }
-
     private File getFile() {
         if (file == null) {
             file = new File(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME));

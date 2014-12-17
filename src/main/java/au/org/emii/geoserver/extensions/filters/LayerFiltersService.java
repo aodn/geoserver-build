@@ -83,44 +83,20 @@ public class LayerFiltersService {
     private Document getDocument(String workspace, String layer)
         throws ParserConfigurationException, SAXException, IOException, NamingException
     {
-        Document document = null;
         LayerInfo layerInfo = getLayerInfo(workspace, layer);
 
         FilterConfigurationFile file = new FilterConfigurationFile(
             getLayerDataDirectoryPath(workspace, layer, layerInfo)
         );
 
-        try {
-            document = getNewDocument();
+        List<Filter> filters = file.getFilters();
+        PossibleValuesReaderFactory.getReader(
+            getDataSource(workspace, getStoreName(layerInfo)),
+            layer,
+            getSchemaName(workspace, getStoreName(layerInfo))
+        ).read(filters);
 
-            List<Filter> filters = file.getFilters();
-            PossibleValuesReaderFactory.getReader(
-                getDataSource(workspace, getStoreName(layerInfo)),
-                layer,
-                getSchemaName(workspace, getStoreName(layerInfo))
-            ).read(filters);
-
-            new FiltersDocument().build(document, filters);
-        }
-        catch (FileNotFoundException fnfe) {
-            document = getEmptyDocument();
-        }
-
-        return document;
-    }
-
-    private Document getNewDocument() throws ParserConfigurationException {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-        return docBuilder.newDocument();
-    }
-
-    private Document getEmptyDocument() throws ParserConfigurationException {
-        Document document = getNewDocument();
-        document.appendChild(document.createElement("filters"));
-
-        return document;
+        return new FiltersDocument().build(filters);
     }
 
     private StoreInfo getStoreInfo(LayerInfo layerInfo) {
