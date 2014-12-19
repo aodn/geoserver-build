@@ -84,14 +84,37 @@ public class PostgresSqlLayerPropertiesReader extends LayerDataReader implements
     private String translateDataType(String type) {
         String translation = type.toLowerCase();
         if (translation.startsWith("character")) {
-            translation = "string";
+            translation = "String";
         }
         else if (translation.startsWith("double")) {
-            translation = "double";
+            translation = "Number";
         }
         else if (translation.startsWith("timestamp")) {
-            translation = "dateTime";
+            translation = "Date";
         }
         return translation;
     }
+
+    /**
+     * switch (s.toLowerCase()) {
+     case "string":
+     return String
+
+     case "boolean":
+     return Boolean
+
+     case ["date", "datetime"]:
+     return Date
+
+     case ["double", "float", "integer", "int", "long", "short", "decimal"]:
+     return Number
+
+     case ["pointpropertytype", "geometrypropertytype", "multilinepropertytype", "surfacepropertytype", "curvepropertytype"]:
+     return BoundingBox
+
+     default:
+     log.info "Unable to find FilterType for '$s'"
+     return null
+     }
+     */
 }
