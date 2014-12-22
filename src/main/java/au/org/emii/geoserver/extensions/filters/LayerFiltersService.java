@@ -108,17 +108,7 @@ public class LayerFiltersService {
     }
 
     private LayerInfo getLayerInfo(String workspace, String layer) {
-        // Pulled straight from the Geoserver source for ResourceConfigurationPage
-        if (workspace != null) {
-            NamespaceInfo ns = getCatalog().getNamespaceByPrefix(workspace);
-            if (ns == null) {
-                throw new RuntimeException("Could not find workspace " + workspace);
-            }
-            String nsURI = ns.getURI();
-            return getCatalog().getLayerByName(new NameImpl(nsURI, layer));
-        }
-
-        return getCatalog().getLayerByName(layer);
+        return LayerInfoProperties.getLayer(getCatalog(), workspace, layer);
     }
 
     private String getLayerDataDirectoryPath(String workspace, String layer, LayerInfo layerInfo) {

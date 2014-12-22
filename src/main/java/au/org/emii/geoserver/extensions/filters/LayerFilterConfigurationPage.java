@@ -11,30 +11,22 @@ import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterMerge;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.*;
-import org.apache.commons.io.IOUtils;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.geoserver.catalog.DataStoreInfo;
-import org.geoserver.platform.GeoServerResourceLoader;
-import org.geoserver.platform.resource.Paths;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.geoserver.web.data.store.DataAccessEditPage;
 import org.geotools.util.logging.Logging;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jndi.JndiTemplate;
 import org.xml.sax.SAXException;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
-import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,21 +90,8 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
         return new LayerFilterForm("layerFilterForm", getFilterConfigurationModel());
     }
 
-    private DataSource getDataSource() throws NamingException {
-        return getLayerDataStore().getDataSource();
-    }
-
-    private String getDataStoreParameter(String parameter) {
-        return getLayerDataStore().getDataStoreParameter(parameter);
-    }
-
-    private LayerDataStore getLayerDataStore() {
-        return new LayerDataStore(getCatalog(), workspaceName, storeName);
-    }
-
     private List<Filter> getLayerProperties() throws NamingException, IOException {
-        LayerPropertiesReader layerPropertiesReader = LayerPropertiesReaderFactory.getReader(getDataSource(), layerName, getDataStoreParameter("schema"));
-        return layerPropertiesReader.read();
+        return new LayerPropertiesReader(getCatalog(), LayerInfoProperties.getLayer(getCatalog(), workspaceName, layerName)).read();
     }
 
     private List<Filter> getConfiguredFilters() throws ParserConfigurationException, SAXException, IOException {
