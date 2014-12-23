@@ -103,7 +103,7 @@ public class LayerFilterForm extends Form<FilterConfiguration> {
 
             @Override
             public void onClick() {
-
+                throw new org.apache.wicket.RestartResponseException(LayerPage.class);
             }
         };
     }
