@@ -112,7 +112,9 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
     private String getDataDirectory() {
         if (dataDirectory == null) {
-            dataDirectory = new DataDirectory(context).getLayerDataDirectoryPath(workspaceName, storeName, layerName);
+            dataDirectory = new DataDirectory(context).getLayerDataDirectoryPath(
+                LayerInfoProperties.getLayer(getCatalog(), workspaceName, layerName)
+            );
         }
 
         return dataDirectory;

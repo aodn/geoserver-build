@@ -85,9 +85,7 @@ public class LayerFiltersService {
     {
         LayerInfo layerInfo = getLayerInfo(workspace, layer);
 
-        FilterConfigurationFile file = new FilterConfigurationFile(
-            getLayerDataDirectoryPath(workspace, layer, layerInfo)
-        );
+        FilterConfigurationFile file = new FilterConfigurationFile(getLayerDataDirectoryPath(layerInfo));
 
         List<Filter> filters = file.getFilters();
         PossibleValuesReaderFactory.getReader(
@@ -111,12 +109,8 @@ public class LayerFiltersService {
         return LayerInfoProperties.getLayer(getCatalog(), workspace, layer);
     }
 
-    private String getLayerDataDirectoryPath(String workspace, String layer, LayerInfo layerInfo) {
-        return new DataDirectory(context).getLayerDataDirectoryPath(
-            workspace,
-            getStoreInfo(layerInfo).getName(),
-            layer
-        );
+    private String getLayerDataDirectoryPath(LayerInfo layerInfo) {
+        return new DataDirectory(context).getLayerDataDirectoryPath(layerInfo);
     }
 
     private DataSource getDataSource(String workspaceName, String storeName) throws NamingException {
