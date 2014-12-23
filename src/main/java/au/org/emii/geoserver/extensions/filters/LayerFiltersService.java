@@ -12,15 +12,18 @@ import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FiltersDocument;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerDataStore;
-import au.org.emii.geoserver.extensions.filters.layer.data.io.PossibleValuesReaderFactory;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.PossibleValuesReader;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.NamespaceInfo;
 import org.geoserver.catalog.StoreInfo;
-import org.geotools.feature.NameImpl;
+import org.geotools.data.FeatureSource;
+import org.geotools.feature.FeatureIterator;
+import org.opengis.feature.Feature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.naming.NamingException;
@@ -29,17 +32,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 public class LayerFiltersService {
 
@@ -84,18 +84,14 @@ public class LayerFiltersService {
         throws ParserConfigurationException, SAXException, IOException, NamingException
     {
         LayerInfo layerInfo = getLayerInfo(workspace, layer);
-
         FilterConfigurationFile file = new FilterConfigurationFile(getLayerDataDirectoryPath(layerInfo));
-
         List<Filter> filters = file.getFilters();
-        PossibleValuesReaderFactory.getReader(
-            getDataSource(workspace, getStoreName(layerInfo)),
-            layer,
-            getSchemaName(workspace, getStoreName(layerInfo))
-        ).read(filters);
+        new PossibleValuesReader().read(layerInfo, filters);
 
         return new FiltersDocument().build(filters);
     }
+
+
 
     private StoreInfo getStoreInfo(LayerInfo layerInfo) {
         return layerInfo.getResource().getStore();
