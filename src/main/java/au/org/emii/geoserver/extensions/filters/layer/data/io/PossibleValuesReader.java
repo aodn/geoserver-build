@@ -47,12 +47,26 @@ public class PossibleValuesReader {
 
     private void collectFilterValues(Feature feature, List<Filter> filters, Map<String, Set> filterValues) {
         for (Filter filter : filters) {
-            filterValues.get(filter.getName()).add(getFeaturePropertyValue(feature, filter.getName()));
+            if (isNotEmpty(getFeaturePropertyValue(feature, filter.getName()))) {
+                filterValues.get(filter.getName()).add(getFeaturePropertyValue(feature, filter.getName()));
+            }
         }
     }
 
-    private Object getFeaturePropertyValue(Feature feature, String propertyName) {
-        return feature.getProperty(propertyName).getValue();
+    private boolean isEmpty(String s) {
+        return s == null || s.trim().length() == 0;
+    }
+
+    private boolean isNotEmpty(String s) {
+        return !isEmpty(s);
+    }
+
+    private String getFeaturePropertyValue(Feature feature, String propertyName) {
+        Object value = feature.getProperty(propertyName).getValue();
+        if (value != null) {
+            return value.toString();
+        }
+        return null;
     }
 
     private FeatureSource getFeatureSource(LayerInfo layerInfo) throws IOException {
