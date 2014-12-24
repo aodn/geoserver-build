@@ -24,10 +24,12 @@ public class FilterConfigurationReader extends FilterConfigurationIO {
     }
 
     public FilterConfiguration read(InputStream inputStream) throws ParserConfigurationException, SAXException, IOException {
+        return new FilterConfiguration(dataDirectoryPath, new FiltersDocumentParser(getDocument(inputStream)).getFilters());
+    }
+
+    public Document getDocument(InputStream inputStream) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(inputStream);
-
-        return new FilterConfiguration(dataDirectoryPath, new FiltersDocumentParser(doc).getFilters());
+        return db.parse(inputStream);
     }
 }

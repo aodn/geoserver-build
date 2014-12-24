@@ -9,6 +9,7 @@ package au.org.emii.geoserver.extensions.filters;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
+import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationIO;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationWriter;
 import freemarker.template.TemplateException;
@@ -77,22 +78,16 @@ public class LayerFilterForm extends Form<FilterConfiguration> {
         return new SubmitLink("save") {
             @Override
             public void onSubmit() {
-                FilterConfiguration data = getModel().getObject();
-                FilterConfigurationWriter configurationWriter = new FilterConfigurationWriter(data.getFilters());
-
-                Writer writer = null;
                 try {
-                    writer = new FileWriter(String.format("%s/%s", data.getDataDirectory(), FilterConfigurationIO.FILTER_CONFIGURATION_FILE_NAME));
-                    configurationWriter.write(writer);
+                    FilterConfiguration data = getModel().getObject();
+                    FilterConfigurationFile configurationFile = new FilterConfigurationFile(data.getDataDirectory());
+                    configurationFile.write(data.getFilters());
                 }
                 catch (TemplateException te) {
                     throw new RuntimeException(te);
                 }
                 catch (IOException ioe) {
                     throw new RuntimeException(ioe);
-                }
-                finally {
-                    IOUtils.closeQuietly(writer);
                 }
             }
         };

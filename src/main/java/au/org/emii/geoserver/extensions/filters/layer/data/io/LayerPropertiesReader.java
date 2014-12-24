@@ -8,37 +8,46 @@
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import org.geotools.util.logging.Logging;
+import org.geoserver.catalog.*;
+import org.opengis.feature.type.FeatureType;
+import org.opengis.feature.type.PropertyDescriptor;
 
-import javax.sql.DataSource;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.List;
 
-public abstract class LayerPropertiesReader {
+public class LayerPropertiesReader {
 
-    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters.layer.data.io");
+    private Catalog catalog;
+    private LayerInfo layerInfo;
 
-    private DataSource dataSource;
-    private String layerName;
-    private String schemaName;
-
-    public LayerPropertiesReader(DataSource dataSource, String layerName, String schemaName) {
-        this.dataSource = dataSource;
-        this.layerName = layerName;
-        this.schemaName = schemaName;
+    public LayerPropertiesReader(Catalog catalog, LayerInfo layerInfo) {
+        this.catalog = catalog;
+        this.layerInfo = layerInfo;
     }
 
-    public abstract ArrayList<Filter> read();
+    public List<Filter> read() throws IOException {
+        FeatureTypeInfo typeInfo = (FeatureTypeInfo)layerInfo.getResource();
+        final ResourcePool resourcePool = catalog.getResourcePool();
+        final FeatureType featureType = resourcePool.getFeatureType(typeInfo);
 
-    protected DataSource getDataSource() {
-        return dataSource;
+        return buildFilters(featureType, resourcePool.getAttributes(typeInfo));
     }
 
-    protected String getLayerName() {
-        return layerName;
+    private List<Filter> buildFilters(FeatureType featureType, List<AttributeTypeInfo> attributes) {
+        List<Filter> filters = new ArrayList<Filter>();
+        for (AttributeTypeInfo attribute : attributes) {
+            filters.add(new Filter(attribute.getName(), getTypeName(featureType, attribute)));
+        }
+
+        return filters;
     }
 
-    protected String getSchemaName() {
-        return schemaName;
+    private PropertyDescriptor getDescriptor(FeatureType featureType, AttributeTypeInfo attribute) {
+        return featureType.getDescriptor(attribute.getName());
+    }
+
+    private String getTypeName(FeatureType featureType, AttributeTypeInfo attribute) {
+        return getDescriptor(featureType, attribute).getType().getBinding().getSimpleName();
     }
 }
