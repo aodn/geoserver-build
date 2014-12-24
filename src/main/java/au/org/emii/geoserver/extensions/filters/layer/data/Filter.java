@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 public class Filter implements Serializable {
 
@@ -19,7 +20,7 @@ public class Filter implements Serializable {
     private String label;
     private Boolean enabled;
     private Boolean visualised;
-    private List<String> possibleValues;
+    private Set<String> values;
 
     public Filter() {}
 
@@ -82,12 +83,12 @@ public class Filter implements Serializable {
         this.visualised = visualised;
     }
 
-    public List<String> getPossibleValues() {
-        return possibleValues;
+    public Set<String> getValues() {
+        return values;
     }
 
-    public void setPossibleValues(List<String> possibleValues) {
-        this.possibleValues = possibleValues;
+    public void setValues(Set<String> values) {
+        this.values = values;
     }
 
     public Filter merge(Filter other) {

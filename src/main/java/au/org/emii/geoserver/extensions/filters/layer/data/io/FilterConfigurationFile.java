@@ -61,7 +61,7 @@ public class FilterConfigurationFile extends FilterConfigurationIO {
 
     private File getFile() {
         if (file == null) {
-            file = new File(String.format("%s/%s", dataDirectoryPath, FILTER_CONFIGURATION_FILE_NAME));
+            file = new File(getFilePath());
         }
         return file;
     }

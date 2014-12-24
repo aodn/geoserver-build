@@ -55,8 +55,8 @@ public class FiltersDocument {
     }
 
     private void appendPossibleValues(Filter filter, Document document, Node parent) {
-        if (filter.getPossibleValues() != null) {
-            for (String value : filter.getPossibleValues()) {
+        if (filter.getValues() != null) {
+            for (String value : filter.getValues()) {
                 appendChild(document, parent, "value").appendChild(document.createTextNode(value));
             }
         }
