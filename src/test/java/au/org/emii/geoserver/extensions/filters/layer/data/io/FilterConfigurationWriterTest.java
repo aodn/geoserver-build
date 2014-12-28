@@ -31,12 +31,14 @@ public class FilterConfigurationWriterTest {
         "        <type>integer</type>\n" +
         "        <label>You</label>\n" +
         "        <visualised>false</visualised>\n" +
+        "        <excludedFromDownload>false</excludedFromDownload>\n" +
         "    </filter>\n" +
         "    <filter>\n" +
         "        <name>url</name>\n" +
         "        <type>character varying</type>\n" +
         "        <label>Bet</label>\n" +
         "        <visualised>true</visualised>\n" +
+        "        <excludedFromDownload>true</excludedFromDownload>\n" +
         "    </filter>\n" +
         "</filters>";
 
@@ -60,17 +62,18 @@ public class FilterConfigurationWriterTest {
 
     private List<Filter> getFilters() {
         List<Filter> filters = new ArrayList<Filter>(3);
-        filters.add(buildFilter("file_id", "integer", "You", Boolean.FALSE, Boolean.TRUE));
-        filters.add(buildFilter("no", "not this", "one", Boolean.TRUE, Boolean.FALSE));
-        filters.add(buildFilter("url", "character varying", "Bet", Boolean.TRUE, Boolean.TRUE));
+        filters.add(buildFilter("file_id", "integer", "You", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE));
+        filters.add(buildFilter("no", "not this", "one", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
+        filters.add(buildFilter("url", "character varying", "Bet", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
         return filters;
     }
 
-    private Filter buildFilter(String name, String type, String label, Boolean visualised, Boolean enabled) {
+    private Filter buildFilter(String name, String type, String label, Boolean visualised, Boolean enabled, Boolean excludedFromDownload) {
         Filter filter = new Filter(name, type);
         filter.setLabel(label);
         filter.setVisualised(visualised);
         filter.setEnabled(enabled);
+        filter.setExcludedFromDownload(excludedFromDownload);
 
         return filter;
     }

@@ -6,6 +6,7 @@
         <type>${filter.type}</type>
         <label>${filter.label}</label>
         <visualised>${filter.visualised?string}</visualised>
+        <excludedFromDownload>${filter.excludedFromDownload?string}</excludedFromDownload>
     </filter>
 </#list>
 </filters>

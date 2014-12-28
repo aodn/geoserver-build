@@ -61,6 +61,9 @@ public class FilterParser {
         else if ("visualised".equals(property)) {
             setter = new FilterVisualisedSetter();
         }
+        else if ("excludedFromDownload".equals(property)) {
+            setter = new FilterExcludedFromDownloadSetter();
+        }
 
         return setter;
     }
@@ -95,6 +98,13 @@ public class FilterParser {
 
         public void setFilterProperty(Filter filter, String value) {
             filter.setVisualised(Boolean.valueOf(value));
+        }
+    }
+
+    class FilterExcludedFromDownloadSetter extends FilterPropertySetter {
+
+        public void setFilterProperty(Filter filter, String value) {
+            filter.setExcludedFromDownload(Boolean.valueOf(value));
         }
     }
 
