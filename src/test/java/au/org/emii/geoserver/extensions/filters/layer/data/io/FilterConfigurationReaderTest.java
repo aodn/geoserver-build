@@ -47,6 +47,7 @@ public class FilterConfigurationReaderTest {
         "        <type>character varying</type>\n" +
         "        <label>Happens</label>\n" +
         "        <visualised>true</visualised>\n" +
+        "        <excludedFromDownload>true</excludedFromDownload>\n" +
         "    </filter>\n" +
         "</filters>\n";
 
@@ -66,6 +67,7 @@ public class FilterConfigurationReaderTest {
             assertEquals(Boolean.TRUE, filterConfiguration.getFilters().get(1).getVisualised());
             assertEquals("This", filterConfiguration.getFilters().get(2).getLabel());
             assertEquals("deployment_name", filterConfiguration.getFilters().get(3).getName());
+            assertEquals(Boolean.TRUE, filterConfiguration.getFilters().get(3).getExcludedFromDownload());
         }
         finally {
             IOUtils.closeQuietly(stream);

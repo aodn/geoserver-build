@@ -42,4 +42,10 @@
         </constructor-arg>
 
     </bean>
+
+    <bean id="restrictedColumnCsvOutputFormat" class="au.org.emii.geoserver.wfs.response.RestrictedColumnCsvOutputFormat">
+        <constructor-arg index="0" ref="geoServer"/>
+        <constructor-arg index="1" ref="catalog"/>
+        <constructor-arg index="2" ref="CSVOutputFormat"/>
+    </bean>
 </beans>

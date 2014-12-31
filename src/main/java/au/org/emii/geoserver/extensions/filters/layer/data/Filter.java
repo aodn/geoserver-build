@@ -20,6 +20,7 @@ public class Filter implements Serializable {
     private String label;
     private Boolean enabled;
     private Boolean visualised;
+    private Boolean excludedFromDownload;
     private Set<String> values;
 
     public Filter() {}
@@ -29,6 +30,7 @@ public class Filter implements Serializable {
         this.type = type;
         this.enabled = Boolean.FALSE;
         this.visualised = Boolean.TRUE;
+        this.excludedFromDownload = Boolean.FALSE;
     }
 
     public String getName() {
@@ -83,6 +85,18 @@ public class Filter implements Serializable {
         this.visualised = visualised;
     }
 
+    public Boolean getExcludedFromDownload() {
+        return excludedFromDownload;
+    }
+
+    public Boolean isExcludedFromDownload() {
+        return getExcludedFromDownload();
+    }
+
+    public void setExcludedFromDownload(Boolean excludedFromDownload) {
+        this.excludedFromDownload = excludedFromDownload;
+    }
+
     public Set<String> getValues() {
         return values;
     }
@@ -100,6 +114,7 @@ public class Filter implements Serializable {
         filter.setLabel(coalesce(right.getLabel(), getLabel()));
         filter.setVisualised(coalesce(right.getVisualised(), getVisualised()));
         filter.setEnabled(coalesce(right.getEnabled(), getEnabled()));
+        filter.setExcludedFromDownload(coalesce(right.getExcludedFromDownload(), getExcludedFromDownload()));
 
         return filter;
     }

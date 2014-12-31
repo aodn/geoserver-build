@@ -70,6 +70,7 @@ public class LayerFilterForm extends Form<FilterConfiguration> {
                         filter.setVisualised(new Boolean(!value.booleanValue()));
                     }
                 }));
+                item.add(new CheckBox("propertyWfsExcluded", new PropertyModel<Boolean>(filter, "excludedFromDownload")));
             }
         });
 
