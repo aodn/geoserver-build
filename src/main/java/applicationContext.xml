@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2001 - 2013 OpenPlans - www.openplans.org. All rights reserved.
+ This code is licensed under the GPL 2.0 license, available at the root
+ application directory.
+ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <bean class="org.geoserver.web.MenuPageInfo" id="layerFiltersLink">
+        <!-- An internal identifier for the link component -->
+        <property name="id" value="layerFiltersPage"/>
+        <!-- The i18n key for the link title -->
+        <property name="titleKey" value="au.org.emii.geoserver.extensions.filters.LayerPage.page.title"/>
+        <!-- The i18n key for a longer description of the page -->
+        <property name="descriptionKey" value="au.org.emii.geoserver.extensions.filters.LayerPage.page.description"/>
+        <!-- The fully qualified name of the page class -->
+        <property name="componentClass" value="au.org.emii.geoserver.extensions.filters.LayerPage"/>
+    </bean>
+
+    <bean id="layerFiltersService" class="au.org.emii.geoserver.extensions.filters.LayerFiltersService">
+        <property name="catalog" ref="catalog"/>
+    </bean>
+
+    <!-- This creates a Service descriptor, which allows the org.geoserver.ows.Dispatcher
+           to locate it. -->
+    <bean id="layerFiltersService-1.0.0" class="org.geoserver.platform.Service">
+        <!-- used to reference the service in the URL -->
+        <constructor-arg index="0" value="layerFilters"/>
+
+        <!-- our actual service POJO defined previously -->
+        <constructor-arg index="1" ref="layerFiltersService"/>
+
+        <!-- a version number for this service -->
+        <constructor-arg index="2" value="1.0.0"/>
+
+        <!-- a list of functions for this service -->
+        <constructor-arg index="3">
+            <list>
+                <value>enabledFilters</value>
+            </list>
+        </constructor-arg>
+
+    </bean>
+
+    <bean id="restrictedColumnCsvOutputFormat" class="au.org.emii.geoserver.wfs.response.RestrictedColumnCsvOutputFormat">
+        <constructor-arg index="0" ref="geoServer"/>
+        <constructor-arg index="1" ref="catalog"/>
+        <constructor-arg index="2" ref="CSVOutputFormat"/>
+    </bean>
+</beans>
