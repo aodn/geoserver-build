@@ -61,7 +61,7 @@ Properties that can be filtered on but are not included in the set of downloaded
 
 ### The OWS Service XML
 
-The service can be accessed at http://<host>/geoserver/ows?request=enabledFilters&service=layerFilters&version=1.0.0&workspace=imos&layer=argo_profile_download_data
+The service can be accessed at `http://<host>/geoserver/ows?request=enabledFilters&service=layerFilters&version=1.0.0&workspace=imos&layer=argo_profile_download_data`
 The service expects a workspace and layer name. If either is missing behaviour is undefined.
 
 #### Example XML Response
@@ -128,7 +128,7 @@ The service expects a workspace and layer name. If either is missing behaviour i
 
 ### The WFS Service
 
-The service is requested using the `csv-restricted-column` format, for example http://<host>/geoserver/ows?typeName=argo_profile_download_data&SERVICE=WFS&outputFormat=csv-restricted-column&REQUEST=GetFeature&VERSION=1.0.0&CQL_FILTER=platform_number%20LIKE%20%271900042%27
+The service is requested using the `csv-restricted-column` format, for example `http://<host>/geoserver/ows?typeName=argo_profile_download_data&SERVICE=WFS&outputFormat=csv-restricted-column&REQUEST=GetFeature&VERSION=1.0.0&CQL_FILTER=platform_number%20LIKE%20%271900042%27`
 
 The response is identical to the CSV output format WFS response but excludes columns configured as not available for download.
 
@@ -141,4 +141,5 @@ a filter.
 ## Useful Documentation
 
 [GeoApi Java Docs](http://www.geoapi.org/2.2/javadoc/index.html)
+
 [Geo Tools Java Docs](http://docs.geotools.org/stable/javadocs/)
