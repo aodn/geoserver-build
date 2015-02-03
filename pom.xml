@@ -5,7 +5,7 @@
     <groupId>au.org.emii</groupId>
     <artifactId>geoserver</artifactId>
     <packaging>war</packaging>
-    <version>2.4.2</version>
+    <version>2.6.2</version>
 
     <name>AODN Geoserver</name>
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
@@ -13,7 +13,7 @@
 
     <properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
-        <geoserver.artifact.id>geoserver</geoserver.artifact.id>
+        <geoserver.artifact.id>gs-web-app</geoserver.artifact.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
@@ -21,41 +21,23 @@
     <dependencies>
 
         <dependency>
-            <groupId>${geoserver.group.id}</groupId>
-            <artifactId>geoserver</artifactId>
+            <groupId>${geoserver.group.id}.web</groupId>
+            <artifactId>${geoserver.artifact.id}</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
 
         <dependency>
             <groupId>${geoserver.group.id}</groupId>
-            <artifactId>xslt</artifactId>
+            <artifactId>gs-xslt</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
-            <groupId>${geoserver.group.id}</groupId>
-            <artifactId>main</artifactId>
+            <groupId>${geoserver.group.id}.web</groupId>
+            <artifactId>gs-web-wfs</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-              <exclusion>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-jdbc</artifactId>
-              </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>${geoserver.group.id}</groupId>
-            <artifactId>wfs</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-jdbc</artifactId>
-            <version>10.2-imos</version>
         </dependency>
 
     </dependencies>
@@ -79,14 +61,11 @@
                 <configuration>
                     <overlays>
                         <overlay>
-                            <groupId>${geoserver.group.id}</groupId>
+                            <groupId>${geoserver.group.id}.web</groupId>
                             <artifactId>${geoserver.artifact.id}</artifactId>
                         </overlay>
                     </overlays>
-                    <warName>${geoserver.artifact.id}-${project.version}-imos</warName>
-                    <packagingExcludes>
-                        **/WEB-INF/lib/gt-jdbc-10.2.jar
-                    </packagingExcludes>
+                    <warName>geoserver-${project.version}-imos</warName>
                 </configuration>
             </plugin>
             <plugin>
