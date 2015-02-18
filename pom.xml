@@ -6,14 +6,14 @@
     <groupId>au.org.emii</groupId>
     <artifactId>my-parent</artifactId>
     <packaging>pom</packaging>
-    <!-- version>1.0.0</version -->
-    <version>2.6.2</version>
+    <version>1.0.0</version>
+
 
     <name>Whoot Geoserver</name>
 
     <modules>
-    <module>project1</module>
-  </modules>
+       <module>project1</module>
+    </modules>
 
 
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
@@ -24,35 +24,37 @@
         <geoserver.artifact.id>gs-web-app</geoserver.artifact.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
+
+        <geoserver.version>2.6.2</geoserver.version>
     </properties>
 
- <dependencyManagement>
+   <dependencyManagement>
     <dependencies>
 
         <dependency>
             <groupId>${geoserver.group.id}.web</groupId>
             <artifactId>${geoserver.artifact.id}</artifactId>
-            <version>${project.version}</version>
+            <version>${geoserver.version}</version>
             <type>war</type>
         </dependency>
 
         <dependency>
             <groupId>${geoserver.group.id}</groupId>
             <artifactId>gs-xslt</artifactId>
-            <version>${project.version}</version>
+            <version>${geoserver.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>${geoserver.group.id}.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
-            <version>${project.version}</version>
+            <version>${geoserver.version}</version>
         </dependency>
 
     </dependencies>
- </dependencyManagement>
+   </dependencyManagement>
 
-    <!--build>
+    <build>
 
         <resources>
             <resource>
@@ -90,7 +92,7 @@
         </plugins>
     </build>
 
-    <distributionManagement>
+    <!--distributionManagement>
         <repository>
             <id>${internal.repository.id}</id>
             <url>${internal.repository.url}</url>
