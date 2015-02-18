@@ -11,12 +11,12 @@
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
-    <properties>
+    <!--properties>
         <geoserver.group.id>org.geoserver</geoserver.group.id>
         <geoserver.artifact.id>gs-web-app</geoserver.artifact.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
-    </properties>
+    </properties-->
 
   <parent>
     <groupId>au.org.emii</groupId>
