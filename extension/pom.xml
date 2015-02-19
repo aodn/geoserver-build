@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.geoserver</groupId>
@@ -11,24 +10,14 @@
 
     <name>GeoServer Extensions</name>
 
-
     <parent>
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
         <version>1.0.0</version>
     </parent>
 
-
     <modules>
        <module>geoserver-layer-filter-extension</module>
     </modules>
-
-
-    <!--distributionManagement>
-        <repository>
-            <id>${internal.repository.id}</id>
-            <url>${internal.repository.url}</url>
-        </repository>
-    </distributionManagement-->
 
 </project>

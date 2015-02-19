@@ -11,12 +11,11 @@
     <name>Emii Geoserver</name>
 
     <modules>
-       <module>main</module>
-       <module>extension</module>
+         <module>main</module>
+         <module>extension</module>
     </modules>
 
-
-    <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
+    <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
@@ -25,45 +24,30 @@
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
-   <dependencyManagement>
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
 
+            <dependency>
+                <groupId>org.geoserver.web</groupId>
+                <artifactId>gs-web-app</artifactId>
+                <version>${geoserver.version}</version>
+                <type>war</type>
+            </dependency>
 
-        <dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-app</artifactId>
-            <version>${geoserver.version}</version>
-            <type>war</type>
-        </dependency>
+            <dependency>
+                <groupId>org.geoserver</groupId>
+                <artifactId>gs-xslt</artifactId>
+                <version>${geoserver.version}</version>
+                <scope>runtime</scope>
+            </dependency>
 
-        <dependency>
-            <groupId>org.geoserver</groupId>
-            <artifactId>gs-xslt</artifactId>
-            <version>${geoserver.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+            <dependency>
+                <groupId>org.geoserver.web</groupId>
+                <artifactId>gs-web-wfs</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-wfs</artifactId>
-            <version>${geoserver.version}</version>
-        </dependency>
-
-    </dependencies>
-   </dependencyManagement>
-
-    <!--build>
-
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>applicationContextOverrides.xml</include>
-                </includes>
-            </resource>
-        </resources>
-
-
-    </build-->
+        </dependencies>
+     </dependencyManagement>
 
 </project>
