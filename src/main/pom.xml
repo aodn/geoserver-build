@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
-    <name>AODN Geoserver</name>
+    <name>AODN Geoserver (main)</name>
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
