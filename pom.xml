@@ -60,12 +60,12 @@
     </distributionManagement -->
 
  <!-- gs-xslt plugin -->	
- <repositories>
+ <!--repositories>
     <repository>
       <id>opengeo</id>
       <url>http://repo.boundlessgeo.com/main</url>
     </repository>
-  </repositories>
+  </repositories-->
 
 
 
