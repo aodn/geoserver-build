@@ -17,7 +17,7 @@
         <version>1.0.0</version>
     </parent>
 
-  <!-- we shouldn't have to specify the the dependencies explicitly here -->
+  <!-- we shouldn't have to specify the the dependency version explicitly here -->
 
     <dependencies>
         <dependency>
@@ -44,7 +44,7 @@
         </dependency>
     </dependencies>
 
-
+    <!-- this build stuff also ought to be pulled up -->
     <build>
 
         <resources>
