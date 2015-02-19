@@ -59,5 +59,12 @@
         </repository>
     </distributionManagement>
 
+	
+ <repositories>
+    <repository>
+      <id>opengeo</id>
+      <url>http://repo.boundlessgeo.com/main</url>
+    </repository>
+  </repositories>
 
 </project>

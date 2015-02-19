@@ -24,11 +24,11 @@
             <type>war</type>
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-xslt</artifactId>
             <scope>runtime</scope>
-        </dependency-->
+        </dependency>
 
         <dependency>
             <groupId>org.geoserver.web</groupId>
