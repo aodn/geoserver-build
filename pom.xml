@@ -11,15 +11,15 @@
     <name>Emii Geoserver</name>
 
     <modules>
+         <!--module>src/main</module-->
          <module>src/extension</module>
-         <module>src/main</module>
     </modules>
 
     <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
-        <geoserver.version>2.6.2</geoserver.version>
+        <geoserver.version>2.6.1</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
