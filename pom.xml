@@ -52,7 +52,7 @@
     </dependencies>
    </dependencyManagement>
 
-    <build>
+    <!--build>
 
         <resources>
             <resource>
@@ -64,6 +64,6 @@
         </resources>
 
 
-    </build>
+    </build-->
 
 </project>
