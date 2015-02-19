@@ -27,7 +27,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>${geoserver.group.id}.web</groupId>
+            <groupId>org.geoserver.web</groupId>
             <artifactId>${geoserver.artifact.id}</artifactId>
             <!-- version>${project.version}</version -->
 			 <!--relativePath>../pom.xml</relativePath-->
@@ -35,14 +35,14 @@
         </dependency>
 
         <dependency>
-            <groupId>${geoserver.group.id}</groupId>
+            <groupId>org.geoserver</groupId>
             <artifactId>gs-xslt</artifactId>
             <!--version>${project.version}</version-->
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
-            <groupId>${geoserver.group.id}.web</groupId>
+            <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
             <!--version>${project.version}</version -->
         </dependency>
@@ -68,7 +68,7 @@
                 <configuration>
                     <overlays>
                         <overlay>
-                            <groupId>${geoserver.group.id}.web</groupId>
+                            <groupId>org.geoserver.web</groupId>
                             <artifactId>${geoserver.artifact.id}</artifactId>
                         </overlay>
                     </overlays>
