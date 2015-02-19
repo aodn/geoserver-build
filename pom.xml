@@ -12,6 +12,7 @@
     <name>Whoot Geoserver</name>
 
     <modules>
+       <module>main</module>
        <module>extension</module>
     </modules>
 
