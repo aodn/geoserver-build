@@ -19,7 +19,7 @@
     <url>http://www.emii.org.au</url>
 
     <properties>
-        <geoserver.version>2.6.1</geoserver.version>
+        <geoserver.version>2.6.2</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
@@ -59,7 +59,7 @@
         </repository>
     </distributionManagement>
 
-	
+ <!-- gs-xslt plugin -->	
  <repositories>
     <repository>
       <id>opengeo</id>
