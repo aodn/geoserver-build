@@ -11,22 +11,34 @@
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
+
     <parent>
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
         <version>1.0.0</version>
     </parent>
 
+
+
   <!-- we shouldn't have to specify the the dependency version explicitly here -->
 
     <dependencies>
+
         <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-app</artifactId>
+
+            <version>${geoserver.version}</version>
+            <type>war</type>
+        </dependency>
+
+
+        <!--dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
             <version>${geoserver.version}</version>
             <type>war</type>
-
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>org.geoserver</groupId>
