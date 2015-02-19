@@ -8,11 +8,11 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
 
-    <name>Emii Geoserver</name>
+    <name>Emii Geoserver (pom)</name>
 
     <modules>
-         <module>src/main</module>
          <module>src/extension</module>
+         <module>src/main</module>
     </modules>
 
     <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
@@ -52,12 +52,12 @@
 
 
 
-    <distributionManagement>
+    <!--distributionManagement>
         <repository>
             <id>${internal.repository.id}</id>
             <url>${internal.repository.url}</url>
         </repository>
-    </distributionManagement>
+    </distributionManagement -->
 
  <!-- gs-xslt plugin -->	
  <repositories>
@@ -66,5 +66,7 @@
       <url>http://repo.boundlessgeo.com/main</url>
     </repository>
   </repositories>
+
+
 
 </project>

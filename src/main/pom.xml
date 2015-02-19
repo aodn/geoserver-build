@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>au.org.emii</groupId>
     <artifactId>main</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>1.0.0</version>
 
-    <name>AODN Geoserver (main)</name>
+    <name>AODN Geoserver (war)</name>
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
@@ -17,25 +17,6 @@
         <version>1.0.0</version>
     </parent>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-app</artifactId>
-            <type>war</type>
-        </dependency>
-
-        <dependency>
-            <groupId>org.geoserver</groupId>
-            <artifactId>gs-xslt</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-wfs</artifactId>
-        </dependency>
-
-    </dependencies>
 
     <build>
 

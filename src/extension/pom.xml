@@ -8,7 +8,7 @@
     <artifactId>extension</artifactId>
     <packaging>pom</packaging>
 
-    <name>GeoServer Extensions (extension)</name>
+    <name>GeoServer Extensions (pom)</name>
 
     <parent>
         <groupId>au.org.emii</groupId>
