@@ -20,11 +20,9 @@
     <url>http://www.emii.org.au</url>
 
     <properties>
-        <geoserver.artifact.id>gs-web-app</geoserver.artifact.id>
+        <geoserver.version>2.6.2</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
-
-        <geoserver.version>2.6.2</geoserver.version>
     </properties>
 
    <dependencyManagement>
@@ -33,7 +31,7 @@
 
         <dependency>
             <groupId>org.geoserver.web</groupId>
-            <artifactId>${geoserver.artifact.id}</artifactId>
+            <artifactId>gs-web-app</artifactId>
             <version>${geoserver.version}</version>
             <type>war</type>
         </dependency>
@@ -65,38 +63,7 @@
             </resource>
         </resources>
 
-        <!--plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <overlays>
-                        <overlay>
-                            <groupId>${geoserver.group.id}.web</groupId>
-                            <artifactId>${geoserver.artifact.id}</artifactId>
-                        </overlay>
-                    </overlays>
-                    <warName>geoserver-${project.version}-imos</warName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                     <source>1.5</source>
-                     <target>1.5</target>
-                </configuration>
-            </plugin>
-        </plugins-->
-    </build>
 
-    <!--distributionManagement>
-        <repository>
-            <id>${internal.repository.id}</id>
-            <url>${internal.repository.url}</url>
-        </repository>
-    </distributionManagement-->
+    </build>
 
 </project>

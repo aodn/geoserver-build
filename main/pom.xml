@@ -28,7 +28,7 @@
 
         <dependency>
             <groupId>org.geoserver.web</groupId>
-            <artifactId>${geoserver.artifact.id}</artifactId>
+            <artifactId>gs-web-app</artifactId>
             <!-- version>${project.version}</version -->
 			 <!--relativePath>../pom.xml</relativePath-->
             <type>war</type>
@@ -69,7 +69,7 @@
                     <overlays>
                         <overlay>
                             <groupId>org.geoserver.web</groupId>
-                            <artifactId>${geoserver.artifact.id}</artifactId>
+                            <artifactId>gs-web-app</artifactId>
                         </overlay>
                     </overlays>
                     <warName>geoserver-${project.version}-imos</warName>
