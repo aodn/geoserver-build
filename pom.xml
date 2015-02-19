@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>au.org.emii</groupId>
-    <artifactId>my-parent</artifactId>
+    <artifactId>geoserver</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
 
@@ -12,7 +12,7 @@
     <name>Whoot Geoserver</name>
 
     <modules>
-       <module>project1</module>
+       <module>extension</module>
     </modules>
 
 
@@ -65,7 +65,7 @@
             </resource>
         </resources>
 
-        <plugins>
+        <!--plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -89,7 +89,7 @@
                      <target>1.5</target>
                 </configuration>
             </plugin>
-        </plugins>
+        </plugins-->
     </build>
 
     <!--distributionManagement>

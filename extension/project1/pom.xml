@@ -60,7 +60,7 @@
             </resource>
         </resources>
 
-        <!--plugins>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -84,7 +84,8 @@
                      <target>1.5</target>
                 </configuration>
             </plugin>
-        </plugins-->
+        </plugins>
+
     </build>
 
     <distributionManagement>
