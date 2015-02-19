@@ -8,8 +8,7 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
 
-
-    <name>Whoot Geoserver</name>
+    <name>Emii Geoserver</name>
 
     <modules>
        <module>main</module>
@@ -31,6 +30,7 @@
 
    <dependencyManagement>
     <dependencies>
+
 
         <dependency>
             <groupId>${geoserver.group.id}.web</groupId>

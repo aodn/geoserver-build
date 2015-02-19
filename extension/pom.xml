@@ -5,20 +5,19 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-	<!-- eg same as in geoserver/src/extension -->
-	  <groupId>org.geoserver</groupId>
-	  <artifactId>extension</artifactId>
-	  <packaging>pom</packaging>
-	  <name>GeoServer Extensions</name>
+    <groupId>org.geoserver</groupId>
+    <artifactId>extension</artifactId>
+    <packaging>pom</packaging>
+
+    <name>GeoServer Extensions</name>
 
 
     <parent>
-		<groupId>au.org.emii</groupId>
-		<artifactId>geoserver</artifactId>
-		<version>1.0.0</version>
+        <groupId>au.org.emii</groupId>
+        <artifactId>geoserver</artifactId>
+        <version>1.0.0</version>
     </parent>
 
-    <!--name>Whoot Geoserver extensions</name-->
 
     <modules>
        <module>geoserver-layer-filter-extension</module>
