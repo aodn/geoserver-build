@@ -11,7 +11,7 @@
     <name>Emii Geoserver</name>
 
     <modules>
-         <!--module>src/main</module-->
+         <module>src/main</module>
          <module>src/extension</module>
     </modules>
 
@@ -51,45 +51,6 @@
      </dependencyManagement>
 
 
-
-    <build>
-
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>applicationContextOverrides.xml</include>
-                </includes>
-            </resource>
-        </resources>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <overlays>
-                        <overlay>
-                            <groupId>org.geoserver.web</groupId>
-                            <artifactId>gs-web-app</artifactId>
-                        </overlay>
-                    </overlays>
-                    <warName>geoserver-${project.version}-imos</warName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                     <source>1.5</source>
-                     <target>1.5</target>
-                </configuration>
-            </plugin>
-        </plugins>
-
-    </build>
 
     <distributionManagement>
         <repository>
