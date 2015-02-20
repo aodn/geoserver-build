@@ -11,7 +11,6 @@
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
-
     <parent>
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
@@ -19,34 +18,27 @@
     </parent>
 
     <dependencies>
-
-
-         <dependency>
+        <dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
             <scope>runtime</scope>
             <type>war</type>
         </dependency>
-
         <dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-xslt</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
             <scope>compile</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -87,6 +79,5 @@
         </plugins>
 
     </build>
-
 
 </project>

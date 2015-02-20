@@ -26,46 +26,31 @@
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-app</artifactId>
                 <version>${geoserver.version}</version>
                 <type>war</type>
             </dependency>
-
             <dependency>
                 <groupId>org.geoserver</groupId>
                 <artifactId>gs-xslt</artifactId>
                 <version>${geoserver.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-wfs</artifactId>
                 <version>${geoserver.version}</version>
             </dependency>
-
         </dependencies>
-     </dependencyManagement>
+    </dependencyManagement>
 
-
-
-    <!--distributionManagement>
+     <!-- gs-xslt plugin -->
+    <repositories>
         <repository>
-            <id>${internal.repository.id}</id>
-            <url>${internal.repository.url}</url>
+            <id>opengeo</id>
+            <url>http://repo.boundlessgeo.com/main</url>
         </repository>
-    </distributionManagement -->
-
- <!-- gs-xslt plugin -->	
- <repositories>
-    <repository>
-      <id>opengeo</id>
-      <url>http://repo.boundlessgeo.com/main</url>
-    </repository>
-  </repositories>
-
-
+    </repositories>
 
 </project>
