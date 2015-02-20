@@ -20,6 +20,14 @@
 
     <dependencies>
 
+
+         <dependency>
+            <groupId>au.org.emii</groupId>
+            <artifactId>geoserver-layer-filter-extension</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
