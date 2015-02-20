@@ -1,89 +1,75 @@
+/*
+ * Copyright 2014 IMOS
+ *
+ * The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+ *
+ */
+
 package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
-import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.geoserver.catalog.FeatureTypeInfo;
+import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
-import org.geotools.data.FeatureSource;
-import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureIterator;
-import org.opengis.feature.Feature;
+import org.geotools.data.Query;
+import org.geotools.feature.visitor.UniqueVisitor;
+import org.geotools.jdbc.JDBCDataStore;
+import org.geotools.jdbc.VirtualTable;
+
+import org.opengis.feature.type.FeatureType;
+
+import org.geoserver.catalog.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.IllegalAccessException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Set;
+import java.util.TreeSet;
+
 
 public class PossibleValuesReader {
 
-    public List<Filter> read(LayerInfo layerInfo, List<Filter> filters) throws IOException {
-        setFilterValues(getValueFilters(filters), getFeatureSource(layerInfo).getFeatures());
+    public Set read(DataStoreInfo dataStoreInfo, LayerInfo layerInfo, String propertyName)
+        throws IOException, NoSuchMethodException, SQLException, IllegalAccessException, InvocationTargetException
+    {
+        JDBCDataStore store = (JDBCDataStore)dataStoreInfo.getDataStore(null);
+        FeatureTypeInfo info = (FeatureTypeInfo)layerInfo.getResource();
 
-        return filters;
-    }
+        FeatureType schema = null ;
 
-    private void setFilterValues(List<Filter> filters, FeatureCollection featureCollection) throws IOException {
-        FeatureIterator features = featureCollection.features();
-        try {
-            Map<String, Set> filterValues = initFilterValues(filters);
-
-            while (features.hasNext()) {
-                collectFilterValues(features.next(), filters, filterValues);
+        if( info.getMetadata() != null && info.getMetadata().containsKey(FeatureTypeInfo.JDBC_VIRTUAL_TABLE)) {
+            VirtualTable vt = (VirtualTable) info.getMetadata().get(FeatureTypeInfo.JDBC_VIRTUAL_TABLE);
+            if(!store.getVirtualTables().containsValue(vt)) {
+                 store.addVirtualTable(vt);
             }
+            schema = store.getSchema(vt.getName());
+        }
+        else {
+            schema = store.getSchema(layerInfo.getName());
+        }
+
+        Query query = new Query(null, null, new String[] { });
+        UniqueVisitor visitor = new UniqueVisitor(propertyName);
+
+        Method storeGetAggregateValueMethod = store.getClass().getDeclaredMethod(
+            "getAggregateValue",
+            org.opengis.feature.FeatureVisitor.class,
+            org.opengis.feature.simple.SimpleFeatureType.class,
+            org.geotools.data.Query.class,
+            java.sql.Connection.class
+        );
+        storeGetAggregateValueMethod.setAccessible(true);
+
+        Connection conn = store.getDataSource().getConnection();
+        try {
+            storeGetAggregateValueMethod.invoke(store, visitor, schema, query, conn);
         }
         finally {
-            features.close();
-        }
-    }
-
-    private Map<String, Set> initFilterValues(List<Filter> filters) {
-        Map<String, Set> filterValues = new LinkedHashMap<String, Set>(filters.size());
-        for (Filter filter : filters) {
-            filter.setValues(new TreeSet<String>());
-            filterValues.put(filter.getName(), filter.getValues());
+            conn.close();
         }
 
-        return filterValues;
-    }
-
-    private void collectFilterValues(Feature feature, List<Filter> filters, Map<String, Set> filterValues) {
-        for (Filter filter : filters) {
-            if (isNotEmpty(getFeaturePropertyValue(feature, filter.getName()))) {
-                filterValues.get(filter.getName()).add(getFeaturePropertyValue(feature, filter.getName()));
-            }
-        }
-    }
-
-    private boolean isEmpty(String s) {
-        return s == null || s.trim().length() == 0;
-    }
-
-    private boolean isNotEmpty(String s) {
-        return !isEmpty(s);
-    }
-
-    private String getFeaturePropertyValue(Feature feature, String propertyName) {
-        Object value = feature.getProperty(propertyName).getValue();
-        if (value != null) {
-            return value.toString();
-        }
-        return null;
-    }
-
-    private FeatureSource getFeatureSource(LayerInfo layerInfo) throws IOException {
-        return ((FeatureTypeInfo)layerInfo.getResource()).getFeatureSource(null, null);
-    }
-
-    private List<Filter> getValueFilters(List<Filter> filters) {
-        List<Filter> possibleValueFilters = new ArrayList<Filter>(filters);
-        CollectionUtils.filter(possibleValueFilters, getPredicate());
-        return possibleValueFilters;
-    }
-
-    private Predicate getPredicate() {
-        return new Predicate() {
-            public boolean evaluate(Object o) {
-                return "string".equals(((Filter)o).getType().toLowerCase());
-            }
-        };
+        // ordered by comparator for type
+        return new TreeSet(visitor.getUnique());
     }
 }

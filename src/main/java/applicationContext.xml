@@ -38,6 +38,7 @@
         <constructor-arg index="3">
             <list>
                 <value>enabledFilters</value>
+                <value>uniqueValues</value>
             </list>
         </constructor-arg>
 
