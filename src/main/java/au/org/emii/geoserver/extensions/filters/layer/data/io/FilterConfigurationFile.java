@@ -10,7 +10,6 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;

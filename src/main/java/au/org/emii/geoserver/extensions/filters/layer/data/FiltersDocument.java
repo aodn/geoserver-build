@@ -43,8 +43,6 @@ public class FiltersDocument {
         appendChild(document, filterElement, "type").appendChild(document.createTextNode(filter.getType()));
         appendChild(document, filterElement, "label").appendChild(document.createTextNode(filter.getLabel()));
         appendChild(document, filterElement, "visualised").appendChild(document.createTextNode(filter.getVisualised().toString()));
-
-        appendPossibleValues(filter, document, appendChild(document, filterElement, "values"));
     }
 
     private Element appendChild(Document document, Node parent, String name) {
@@ -52,13 +50,5 @@ public class FiltersDocument {
         parent.appendChild(element);
 
         return element;
-    }
-
-    private void appendPossibleValues(Filter filter, Document document, Node parent) {
-        if (filter.getValues() != null) {
-            for (String value : filter.getValues()) {
-                appendChild(document, parent, "value").appendChild(document.createTextNode(value));
-            }
-        }
     }
 }
