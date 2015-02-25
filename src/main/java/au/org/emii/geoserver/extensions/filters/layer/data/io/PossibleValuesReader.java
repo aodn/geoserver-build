@@ -69,7 +69,9 @@ public class PossibleValuesReader {
             conn.close();
         }
 
+        Set values = visitor.getUnique();
+        values.remove(null);
         // ordered by comparator for type
-        return new TreeSet(visitor.getUnique());
+        return new TreeSet(values);
     }
 }
