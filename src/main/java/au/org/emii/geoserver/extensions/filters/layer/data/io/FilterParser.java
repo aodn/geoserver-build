@@ -43,7 +43,7 @@ public class FilterParser {
 
     private void setFilterProperty(Filter filter, Node node) {
         if (isElement(node)) {
-            getFilterPropertySetter(node.getNodeName()).setFilterProperty(filter, getNodeValue(node));
+            getFilterPropertySetter(node.getNodeName()).setFilterProperty(filter, getNodeValue(node), node.getNodeName());
         }
     }
 
@@ -64,52 +64,62 @@ public class FilterParser {
         else if ("excludedFromDownload".equals(property)) {
             setter = new FilterExcludedFromDownloadSetter();
         }
+        else {
+            setter = new FilterExtrasSetter();
+        }
 
         return setter;
     }
 
     abstract class FilterPropertySetter {
 
-        public abstract void setFilterProperty(Filter filter, String value);
+        public abstract void setFilterProperty(Filter filter, String value, String nodeName);
     }
 
     class FilterNameSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) {
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
             filter.setName(value);
         }
     }
 
     class FilterTypeSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) {
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
             filter.setType(value);
         }
     }
 
     class FilterLabelSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) {
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
             filter.setLabel(value);
         }
     }
 
     class FilterVisualisedSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) {
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
             filter.setVisualised(Boolean.valueOf(value));
         }
     }
 
     class FilterExcludedFromDownloadSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) {
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
             filter.setExcludedFromDownload(Boolean.valueOf(value));
+        }
+    }
+
+    class FilterExtrasSetter extends FilterPropertySetter {
+
+        public void setFilterProperty(Filter filter, String value, String nodeName) {
+            filter.setExtrasField(value, nodeName);
         }
     }
 
     class NullFilterSetter extends FilterPropertySetter {
 
-        public void setFilterProperty(Filter filter, String value) { }
+        public void setFilterProperty(Filter filter, String value, String nodeName) { }
     }
 }

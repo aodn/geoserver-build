@@ -100,6 +100,7 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
     private IModel<FilterConfiguration> getFilterConfigurationModel() throws NamingException, ParserConfigurationException, SAXException, IOException {
 
+        // we want configured filters on the left
         final FilterConfiguration config = new FilterConfiguration(getDataDirectory(), FilterMerge.merge(getLayerProperties(), getConfiguredFilters()));
 
         return new Model<FilterConfiguration>() {

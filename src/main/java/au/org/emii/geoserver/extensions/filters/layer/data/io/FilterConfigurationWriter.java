@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import freemarker.ext.beans.CollectionModel;
+import freemarker.ext.beans.BeansWrapper;
+
 public class FilterConfigurationWriter extends FilterConfigurationIO {
 
     private static final String TEMPLATE_NAME = "filter_configuration.ftl";
@@ -37,7 +40,7 @@ public class FilterConfigurationWriter extends FilterConfigurationIO {
 
         Template template = config.getTemplate(TEMPLATE_NAME);
         Map<String, Object> root = new HashMap<String, Object>();
-        root.put("filters", getEnabledFilters());
+        root.put("filters", new CollectionModel(getEnabledFilters(), BeansWrapper.getDefaultInstance()));
         template.process(root, writer);
     }
 

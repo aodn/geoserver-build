@@ -29,6 +29,11 @@ public class FilterMergeTest {
             filter.setLabel(String.format("left filter %s", i));
             leftFilters.add(filter);
         }
+
+        Filter filter = new Filter("TimeRange", "String");
+        filter.setLabel("timerange test");
+        filter.setExtrasField("ATESTFIELD", "thetestvalue");
+        leftFilters.add(filter);
     }
 
     public void setupRightFilters() {
@@ -69,6 +74,6 @@ public class FilterMergeTest {
 
     @Test
     public void keepsLeftSideWhenNoMatchingRightSideTest() {
-        assertEquals(merged.get(9).getLabel(), leftFilters.get(9).getLabel());
+        assertEquals(merged.get(10).getLabel(), "timerange test");
     }
 }
