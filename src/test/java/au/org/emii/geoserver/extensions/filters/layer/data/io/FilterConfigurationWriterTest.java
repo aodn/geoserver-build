@@ -22,7 +22,7 @@ public class FilterConfigurationWriterTest {
 
     private static String NO_FILTERS_XML = "<?xml version=\"1.0\"?>\n" +
         "<filters>\n" +
-        "</filters>";
+        "</filters>\n";
 
     private static String FILTERS_XML = "<?xml version=\"1.0\"?>\n" +
         "<filters>\n" +
@@ -39,8 +39,9 @@ public class FilterConfigurationWriterTest {
         "        <label>Bet</label>\n" +
         "        <visualised>true</visualised>\n" +
         "        <excludedFromDownload>true</excludedFromDownload>\n" +
+        "        <arbitraryfield>TEST</arbitraryfield>\n" +
         "    </filter>\n" +
-        "</filters>";
+        "</filters>\n";
 
     @Test
     public void writeNoFiltersTest() throws TemplateException, IOException {
@@ -62,18 +63,21 @@ public class FilterConfigurationWriterTest {
 
     private List<Filter> getFilters() {
         List<Filter> filters = new ArrayList<Filter>(3);
-        filters.add(buildFilter("file_id", "integer", "You", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE));
-        filters.add(buildFilter("no", "not this", "one", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
-        filters.add(buildFilter("url", "character varying", "Bet", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
+        filters.add(buildFilter("file_id", "integer", "You", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
+        filters.add(buildFilter("no", "not this", "one", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE));
+        filters.add(buildFilter("url", "character varying", "Bet", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
         return filters;
     }
 
-    private Filter buildFilter(String name, String type, String label, Boolean visualised, Boolean enabled, Boolean excludedFromDownload) {
+    private Filter buildFilter(String name, String type, String label, Boolean visualised, Boolean enabled, Boolean excludedFromDownload, Boolean addsomeextras) {
         Filter filter = new Filter(name, type);
         filter.setLabel(label);
         filter.setVisualised(visualised);
         filter.setEnabled(enabled);
         filter.setExcludedFromDownload(excludedFromDownload);
+        if (addsomeextras) {
+            filter.setExtrasField("TEST", "arbitraryfield");
+        }
 
         return filter;
     }

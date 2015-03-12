@@ -8,7 +8,7 @@
 package au.org.emii.geoserver.extensions.filters.layer.data;
 
 import org.apache.commons.lang.StringUtils;
-
+import java.util.*;
 import java.io.Serializable;
 
 public class Filter implements Serializable {
@@ -19,6 +19,7 @@ public class Filter implements Serializable {
     private Boolean enabled;
     private Boolean visualised;
     private Boolean excludedFromDownload;
+    public HashMap extras = new HashMap();
 
     public Filter() {}
 
@@ -28,6 +29,7 @@ public class Filter implements Serializable {
         this.enabled = Boolean.FALSE;
         this.visualised = Boolean.TRUE;
         this.excludedFromDownload = Boolean.FALSE;
+        this.extras = new HashMap();
     }
 
     public String getName() {
@@ -94,6 +96,14 @@ public class Filter implements Serializable {
         this.excludedFromDownload = excludedFromDownload;
     }
 
+    public void setExtrasField(String value, String xmlTag) {
+        this.extras.put(xmlTag, value);
+    }
+
+    public Map getExtras() {
+        return this.extras;
+    }
+
     public Filter merge(Filter other) {
         Filter right = coalesce(other, this);
 
@@ -104,6 +114,7 @@ public class Filter implements Serializable {
         filter.setVisualised(coalesce(right.getVisualised(), getVisualised()));
         filter.setEnabled(coalesce(right.getEnabled(), getEnabled()));
         filter.setExcludedFromDownload(coalesce(right.getExcludedFromDownload(), getExcludedFromDownload()));
+        filter.extras = right.extras; // only ever take the saved xml value
 
         return filter;
     }
