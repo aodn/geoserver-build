@@ -17,6 +17,7 @@ import au.org.emii.geoserver.extensions.filters.layer.data.ValuesDocument;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
+import org.geoserver.platform.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -83,9 +84,14 @@ public class LayerFiltersService {
     }
 
     private Document getEnabledFiltersDocument(String workspace, String layer)
-        throws ParserConfigurationException, SAXException, IOException, NamingException
+        throws ParserConfigurationException, SAXException, IOException, NamingException, ServiceException
     {
         LayerInfo layerInfo = getLayerInfo(workspace, layer);
+
+        if (layerInfo == null) {
+            throw new ServiceException("Could not find layer " + workspace + ":" + layer);
+        }
+
         FilterConfigurationFile file = new FilterConfigurationFile(getLayerDataDirectoryPath(layerInfo));
         List<Filter> filters = file.getFilters();
 
