@@ -19,9 +19,11 @@ public class Filter implements Serializable {
     private Boolean enabled;
     private Boolean visualised;
     private Boolean excludedFromDownload;
-    public HashMap extras = new HashMap();
+    public Map<String, String> extras;
 
-    public Filter() {}
+    public Filter() {
+        this.extras = new HashMap<String, String>();
+    }
 
     public Filter(String name, String type) {
         this.name = name;
@@ -29,7 +31,7 @@ public class Filter implements Serializable {
         this.enabled = Boolean.FALSE;
         this.visualised = Boolean.TRUE;
         this.excludedFromDownload = Boolean.FALSE;
-        this.extras = new HashMap();
+        this.extras = new HashMap<String, String>();
     }
 
     public String getName() {
@@ -100,7 +102,7 @@ public class Filter implements Serializable {
         this.extras.put(xmlTag, value);
     }
 
-    public Map getExtras() {
+    public Map<String, String> getExtras() {
         return this.extras;
     }
 
