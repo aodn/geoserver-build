@@ -15,6 +15,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FiltersDocument {
 
@@ -43,6 +45,10 @@ public class FiltersDocument {
         appendChild(document, filterElement, "type").appendChild(document.createTextNode(filter.getType()));
         appendChild(document, filterElement, "label").appendChild(document.createTextNode(filter.getLabel()));
         appendChild(document, filterElement, "visualised").appendChild(document.createTextNode(filter.getVisualised().toString()));
+
+        for (Map.Entry<String, String> entry : filter.getExtras().entrySet()) {
+            appendChild(document, filterElement, entry.getKey()).appendChild(document.createTextNode(entry.getValue()));
+        }
     }
 
     private Element appendChild(Document document, Node parent, String name) {
