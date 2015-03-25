@@ -36,17 +36,17 @@ public class PossibleValuesReader {
         JDBCDataStore store = (JDBCDataStore)dataStoreInfo.getDataStore(null);
         FeatureTypeInfo info = (FeatureTypeInfo)layerInfo.getResource();
 
-        FeatureType schema = null ;
+        FeatureType schema = null;
 
-        if( info.getMetadata() != null && info.getMetadata().containsKey(FeatureTypeInfo.JDBC_VIRTUAL_TABLE)) {
+        if(info.getMetadata() != null && info.getMetadata().containsKey(FeatureTypeInfo.JDBC_VIRTUAL_TABLE)) {
             VirtualTable vt = (VirtualTable) info.getMetadata().get(FeatureTypeInfo.JDBC_VIRTUAL_TABLE);
             if(!store.getVirtualTables().containsValue(vt)) {
-                 store.addVirtualTable(vt);
+                store.addVirtualTable(vt);
             }
             schema = store.getSchema(vt.getName());
         }
         else {
-            schema = store.getSchema(layerInfo.getName());
+            schema = store.getSchema(info.getNativeName());
         }
 
         Query query = new Query(null, null, new String[] { });
