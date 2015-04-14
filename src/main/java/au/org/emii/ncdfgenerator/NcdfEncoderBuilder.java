@@ -5,7 +5,10 @@ package au.org.emii.ncdfgenerator;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream ;
+import java.io.OutputStream ;
 import java.io.IOException;
+
+import java.nio.charset.Charset;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,8 +21,6 @@ import java.util.regex.Matcher;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import java.sql.*;
-
-import java.lang.RuntimeException;
 
 import java.text.SimpleDateFormat;
 
@@ -35,26 +36,35 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
-
-
 import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-interface IVisitor
+
+class NcdfGeneratorException extends Exception
 {
-	public void visit( ExprInteger expr );
-	public void visit( ExprProc expr );
-	public void visit( ExprLiteral expr );
-	public void visit( ExprSymbol expr );
-	public void visit( ExprTimestamp expr );
+    public NcdfGeneratorException(String message)
+	{
+        super(message);
+    }
+}
+
+
+
+interface IExprVisitor
+{
+	public void visit( ExprInteger expr )throws Exception;
+	public void visit( ExprProc expr ) throws Exception;
+	public void visit( ExprLiteral expr ) throws Exception;
+	public void visit( ExprSymbol expr ) throws Exception;
+	public void visit( ExprTimestamp expr )throws Exception;
 }
 
 
 interface IExpression
 {
 	public int getPosition() ;
-	public void accept( IVisitor v ) ;
+	public void accept( IExprVisitor v ) throws Exception ;
 }
 
 
@@ -67,7 +77,8 @@ class ExprSymbol implements IExpression
 	}
 
 	public int getPosition() { return pos; }
-	public void accept( IVisitor v )  { v.visit( this); }
+	public void accept( IExprVisitor v )  throws Exception
+	{ v.visit( this); }
 
 	final int pos;
 	final String value;
@@ -83,7 +94,8 @@ class ExprInteger implements IExpression
 	}
 
 	public int getPosition() { return pos; }
-	public void accept( IVisitor v )  { v.visit( this); }
+	public void accept( IExprVisitor v ) throws Exception
+	{ v.visit( this); }
 
 	final int pos;
 	final int value;
@@ -99,7 +111,8 @@ class ExprTimestamp implements IExpression
 	}
 
 	public int getPosition() { return pos; }
-	public void accept( IVisitor v )  { v.visit( this); }
+	public void accept( IExprVisitor v ) throws Exception
+	{ v.visit( this); }
 
 	final int pos;
 	final Timestamp value;
@@ -115,7 +128,8 @@ class ExprLiteral implements IExpression
 	}
 
 	public int getPosition() { return pos; }
-	public void accept( IVisitor v )  { v.visit( this); }
+	public void accept( IExprVisitor v ) throws Exception
+	{ v.visit( this); }
 	final int pos;
 	final String value;
 }
@@ -131,7 +145,8 @@ class ExprProc implements IExpression
 	}
 
 	public int getPosition() { return pos; }
-	public void accept( IVisitor v )  { v.visit( this); }
+	public void accept( IExprVisitor v )
+	throws Exception { v.visit( this); }
 
 	final int		pos;
 	final String symbol;
@@ -179,7 +194,6 @@ class ExprParser implements IExprParser
 		// timestamp
 		IExpression expr = parseTimestamp(s, pos);
 		if(expr != null) {
-			System.out.println( "parsed Timestamp" );
 			return expr;
 		}
 
@@ -200,7 +214,6 @@ class ExprParser implements IExprParser
 			return expr;
 		return null;
 	}
-
 
 	private ExprProc parseProc(String s, int pos)
 	{
@@ -320,43 +333,55 @@ class ExprParser implements IExprParser
 }
 
 
-class PrettyPrinterVisitor implements IVisitor
+class PrettyPrinterVisitor implements IExprVisitor
 {
-	// TODO should take the stream on the constructor
 
-	public void visit( ExprSymbol expr )
+	PrettyPrinterVisitor( OutputStream os)
 	{
-		System.out.print( "Symbol:" + expr.value );
+		this.os = os;
 	}
 
-	public void visit(  ExprInteger expr )
+	OutputStream	os;
+
+	private void write( String s )
+		throws IOException
 	{
-		System.out.print( "Integer:" + expr.value );
+		os.write( s.getBytes(Charset.forName("UTF-8")));
 	}
 
-	public void visit( ExprTimestamp expr )
+	public void visit( ExprSymbol expr ) throws Exception
 	{
-		System.out.print( "Timestamp:" + expr.value );
+		write( "Symbol:" + expr.value );
 	}
 
-	public void visit(  ExprLiteral expr )
+	public void visit(  ExprInteger expr ) throws Exception
 	{
-		System.out.print( "Literal:" + expr.value );
+		write( "Integer:" + expr.value );
 	}
 
-	public void visit( ExprProc expr )
+	public void visit( ExprTimestamp expr ) throws Exception
 	{
-		System.out.print( "(" + expr.symbol + " " );
+		write( "Timestamp:" + expr.value );
+	}
+
+	public void visit(  ExprLiteral expr ) throws Exception
+	{
+		write( "Literal:" + expr.value );
+	}
+
+	public void visit( ExprProc expr ) throws Exception
+	{
+		write( "(" + expr.symbol + " " );
 		for( IExpression child : expr.children ) {
 			child.accept(this);
-			System.out.print( " ");
+			write(  " ");
 		}
-		System.out.println( ")" );
+		write( ")" );
 	}
 }
 
 
-class PGDialectSelectionGenerator implements IVisitor
+class PGDialectSelectionGenerator implements IExprVisitor
 {
 	StringBuilder b;
 	SimpleDateFormat df;
@@ -392,7 +417,7 @@ class PGDialectSelectionGenerator implements IVisitor
 		b.append('\"' + expr.value + '\"' );
 	}
 
-	public void visit( ExprProc expr )
+	public void visit( ExprProc expr ) throws Exception
 	{
 		String symbol = expr.symbol;
 
@@ -414,11 +439,11 @@ class PGDialectSelectionGenerator implements IVisitor
 			emitInfixSqlExpr( symbol, expr );
 		}
 		else {
-			throw new RuntimeException( "Unrecognized proc expression symbol '" + symbol + "'" );
+			throw new NcdfGeneratorException( "Unrecognized proc expression symbol '" + symbol + "'" );
 		}
 	}
 
-	public void emitInfixSqlExpr( String op, ExprProc expr )
+	public void emitInfixSqlExpr( String op, ExprProc expr ) throws Exception
 	{
 		// if expansion is done in order we may be ok,....
 		b.append('(');
@@ -432,10 +457,9 @@ class PGDialectSelectionGenerator implements IVisitor
 }
 
 
-
 interface IDialectTranslate
 {
-	public String process( IExpression expr ) ;
+	public String process( IExpression expr ) throws Exception ;
 }
 
 
@@ -444,15 +468,16 @@ class PGDialectTranslate implements IDialectTranslate
 	// we have to have something to instantiate the specific visitor
 	public PGDialectTranslate( )
 	{
-		// should pass the PGDialect selction on constructor
+		// Ideally we should pass the PGDialectSelectionGenerator on the constructor
+		// however the issue is that it needs the stringBuilder to assemble
+		// , which would require creating a property setter.
 		; // this.visitor = visitor;
 	}
 
-	public String process( IExpression expr )
+	public String process( IExpression expr ) throws Exception
 	{
 		StringBuilder b = new StringBuilder();
-		PGDialectSelectionGenerator visitor = new PGDialectSelectionGenerator( b);
-		expr.accept( visitor );
+		expr.accept( new PGDialectSelectionGenerator( b));
 
 		return b.toString();
 	}
@@ -463,8 +488,8 @@ interface IValueEncoder
 {
 	// Netcdf value encoder from java/sql types
 
-	public void encode( Array A, int ima, Object value );
-	public void prepare( Map<String, String> attributes );
+	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException;
+	public void prepare( Map<String, String> attributes ) throws NcdfGeneratorException;
 	public DataType targetType();
 }
 
@@ -489,12 +514,12 @@ class TimestampValueEncoder implements IValueEncoder
 		return DataType.FLOAT;
 	}
 
-	public void prepare( Map<String, String> attributes )
+	public void prepare( Map<String, String> attributes ) throws NcdfGeneratorException
 	{
 		Matcher m = Pattern.compile("([a-zA-Z]*)[ ]*since[ ]*(.*)").matcher( attributes.get("units") );
 		if(!m.find())
 		{
-			throw new RuntimeException( "couldn't parse attribute date");
+			throw new NcdfGeneratorException( "couldn't parse attribute date");
 		}
 		unit = m.group(1);
 		String epochString = m.group(2);
@@ -504,17 +529,17 @@ class TimestampValueEncoder implements IValueEncoder
 			epoch = (Long) ts.getTime() / 1000 ;
 		} catch( Exception e )
 		{
-			throw new RuntimeException( "couldn't extract timestamp '" + epochString + "' " + e.getMessage()  );
+			throw new NcdfGeneratorException( "couldn't extract timestamp '" + epochString + "' " + e.getMessage()  );
 		}
 
 		fill = Float.valueOf( attributes.get( "_FillValue" )).floatValue();
 	}
 
-	public void encode( Array A, int ima,  Object value )
+	public void encode( Array array, int ima,  Object value ) throws NcdfGeneratorException
 	{
 
 		if( value == null) {
-			A.setFloat( ima, fill );
+			array.setFloat( ima, fill );
 		}
 		else if( value instanceof java.sql.Timestamp ) {
 			long seconds =  ((java.sql.Timestamp)value).getTime() / 1000  ;
@@ -526,12 +551,12 @@ class TimestampValueEncoder implements IValueEncoder
 			else if ( unit.equals("seconds"))
 				;
 			else
-				throw new RuntimeException( "unrecognized time unit " + unit );
+				throw new NcdfGeneratorException( "unrecognized time unit " + unit );
 
-			A.setFloat( ima, (float) ret );
+			array.setFloat( ima, (float) ret );
 		}
 		else {
-			throw new RuntimeException( "Not a timestamp" );
+			throw new NcdfGeneratorException( "Not a timestamp" );
 		}
 	}
 }
@@ -557,19 +582,19 @@ class FloatValueEncoder implements IValueEncoder
 
 	}
 
-	public void encode( Array A, int ima, Object value )
+	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException
 	{
 		if( value == null) {
-			A.setFloat( ima, fill );
+			array.setFloat( ima, fill );
 		}
 		else if( value instanceof Float ) {
-			A.setFloat( ima, (Float) value);
+			array.setFloat( ima, (Float) value);
 		}
 		else if( value instanceof Double ) {
-			A.setFloat( ima, (float)(double)(Double) value);
+			array.setFloat( ima, (float)(double)(Double) value);
 		}
 		else {
-			throw new RuntimeException( "Failed to coerce type '" + value.getClass() + "' to float" );
+			throw new NcdfGeneratorException( "Failed to coerce type '" + value.getClass() + "' to float" );
 		}
 	}
 }
@@ -596,19 +621,19 @@ class IntValueEncoder implements IValueEncoder
 		fill = Integer.valueOf( attributes.get( "_FillValue" )).intValue();
 	}
 
-	public void encode( Array A, int ima, Object value )
+	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException
 	{
 		if( value == null) {
-			A.setInt( ima, fill );
+			array.setInt( ima, fill );
 		}
 		else if( value instanceof Integer ) {
-			A.setInt( ima, (Integer) value);
+			array.setInt( ima, (Integer) value);
 		}
 		else if( value instanceof Long ) {
-			A.setInt( ima, (int)(long)(Long) value);
+			array.setInt( ima, (int)(long)(Long) value);
 		}
 		else {
-			throw new RuntimeException( "Failed to coerce type '" + value.getClass() + "' to float" );
+			throw new NcdfGeneratorException( "Failed to coerce type '" + value.getClass() + "' to float" );
 		}
 	}
 }
@@ -634,23 +659,23 @@ class ByteValueEncoder implements IValueEncoder
 		fill = (byte) Integer.decode( attributes.get( "_FillValue" ) ).intValue();
 	}
 
-	public void encode( Array A, int ima, Object value )
+	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException
 	{
 		if( value == null) {
-			A.setByte( ima, fill );
+			array.setByte( ima, fill );
 		}
 		else if(value instanceof Byte)
 		{
-			A.setByte( ima, (Byte) value);
+			array.setByte( ima, (Byte) value);
 		}
 		else if(value instanceof String && ((String)value).length() == 1) {
 			// coerce string of length 1 to byte
 			String s = (String) value;
 			Byte ch = s.getBytes()[0];
-			A.setByte(ima, ch);
+			array.setByte(ima, ch);
 		}
 		else {
-			throw new RuntimeException( "Failed to convert type to byte");
+			throw new NcdfGeneratorException( "Failed to convert type to byte");
 		}
 	}
 }
@@ -661,6 +686,7 @@ interface IAddValue
 	// change name to put(), or append? and class to IBufferAddValue
 	public void addValueToBuffer( Object value );
 }
+
 
 interface IVariableEncoder extends IAddValue
 {
@@ -691,7 +717,6 @@ interface IDimension extends IAddValue
 }
 
 
-
 class DimensionImpl implements IDimension
 {
 
@@ -719,10 +744,7 @@ class DimensionImpl implements IDimension
 
 	public void define( NetcdfFileWriteable writer)
 	{
-		// System.out.println( "** before writing dimension " + name + " " + size );
-
 		dimension = writer.addDimension( name, size );
-		//return null;
 	}
 
 	public void addValueToBuffer( Object value )
@@ -730,13 +752,13 @@ class DimensionImpl implements IDimension
 		++size;
 	}
 
-	public String getName() { return name ; }
-
+	public String getName()
 	{
-		System.out.println( "** Dimension size " + size );
-	}
-}
+		return name ;
 
+	}
+
+}
 
 
 class VariableEncoder implements IVariableEncoder
@@ -791,6 +813,7 @@ class VariableEncoder implements IVariableEncoder
 
 
 	public void writeValues( ArrayList<IDimension> dims, int dimIndex, int acc, Array A  )
+		throws NcdfGeneratorException
 	{
 		if( dimIndex < dims.size() )
 		{
@@ -803,11 +826,8 @@ class VariableEncoder implements IVariableEncoder
 		else
 		{
 			// System.out.println( "dimIndex " + "  acc " + acc  + "  buffer " + buffer.get( acc ) );
-			// public void encode( Array A, int ima, Map<String, Object> attributes, Object value );
 
 			encodeValue.encode( A, acc, buffer.get( acc ) );
-
-			// A.setFloat( acc, (float) 99999. );
 		}
 
 	}
@@ -823,8 +843,7 @@ class VariableEncoder implements IVariableEncoder
 
 	public void finish( NetcdfFileWriteable writer) throws Exception
 	{
-
-		System.out.println( "finish " + variableName );
+		// System.out.println( "finish " + variableName );
 
 		ArrayList< Integer> shape = new ArrayList< Integer>() ;
 		for( IDimension dimension : dimensions ) {
@@ -858,15 +877,19 @@ interface ICreateWritable
 
 class CreateWritable implements  ICreateWritable
 {
+	// an abstraction to support creating the ncf file
 	// NetcdfFileWriteable is not an abstraction over a stream!. instead it insists on being a file...
+
+	CreateWritable( String path )
+	{
+		this.path = path;
+	}
+
+	final String path;
 
 	public NetcdfFileWriteable create() throws IOException
 	{
-		System.out.println( "creating writer" );
-		// netcdf stuff
-		String filename = "testWrite.nc";
-
-		return NetcdfFileWriteable.createNew(filename, false);
+		return NetcdfFileWriteable.createNew( path, false);
 	}
 
 	// TODO method to request as a byte stream and return?
@@ -874,9 +897,9 @@ class CreateWritable implements  ICreateWritable
 }
 
 
-class NodeWrapper implements Iterable<Node> 
+class NodeWrapper implements Iterable<Node>
 {
-	// just a helper class
+	// xml helper class
 
     private Node node;
     private List<Node> nodes;
@@ -1023,16 +1046,14 @@ class NcdfDefinitionXMLParser
 
 
 	private IValueEncoder parseEncoder( Node node)
+		throws NcdfGeneratorException
 	{
 		if( isNodeName( node, "encoder"))
 		{
 			String val = nodeVal( node );
 			if( val.equals( "integer")) {
 
-				System.out.println( "WHOOT WHOOT WHOOT" );
-
 				return new IntValueEncoder();
-
 				// throw new RuntimeException( "INT" );
 			}
 			else if( val.equals( "float")) {
@@ -1046,7 +1067,7 @@ class NcdfDefinitionXMLParser
 			}
 			else
 			{
-				throw new RuntimeException( "Unrecognized value type encoder" );
+				throw new NcdfGeneratorException( "Unrecognized value type encoder" );
 			}
 		}
 		return null;
@@ -1112,6 +1133,7 @@ class NcdfDefinitionXMLParser
 	// think we may want a more general context ...
 
 	private IVariableEncoder parseVariableEncoder( Node node, Map< String, IDimension> dimensionsContext  )
+		throws NcdfGeneratorException
 	{
 		String name = null;
 		Map< String, IDimension> dimensions = null;
@@ -1147,7 +1169,7 @@ class NcdfDefinitionXMLParser
 				return new VariableEncoder ( name , new ArrayList<IDimension>(dimensions.values()), encodeValue , attributes ) ;
 			}
 			else {
-				throw new RuntimeException("missing something  " );
+				throw new NcdfGeneratorException( "missing something" );
 				// return null;
 			}
 		}
@@ -1156,6 +1178,7 @@ class NcdfDefinitionXMLParser
 
 
 	private Map< String, IVariableEncoder> parseVariableEncoders( Node node, Map< String, IDimension> dimensionsContext  )
+		throws NcdfGeneratorException
 	{
 		if( isNodeName( node, "variables"))
 		{
@@ -1189,6 +1212,7 @@ class NcdfDefinitionXMLParser
 	}
 
 	NcdfDefinition parseDefinition( Node node )
+		throws NcdfGeneratorException
 	{
 		// think we need a context?
 		if( isNodeName( node, "definition"))
@@ -1223,8 +1247,8 @@ class NcdfDefinitionXMLParser
 
 class NcdfEncoder
 {
-	final IExprParser exprParser;				
-	final IDialectTranslate translate ;		
+	final IExprParser exprParser;
+	final IDialectTranslate translate ;
 	final Connection conn;
 	final ICreateWritable createWritable; // generate a writable
 	final NcdfDefinition definition ;
@@ -1259,7 +1283,7 @@ class NcdfEncoder
 		selection_expr = exprParser.parseExpression( filterExpr, 0);
 		// bad, should return expr or throw
 		if(selection_expr == null) {
-			throw new RuntimeException( "failed to parse expression" );
+			throw new NcdfGeneratorException( "failed to parse expression" );
 		}
 
 		System.out.println( "setting search_path to " + definition.schema );
@@ -1331,10 +1355,10 @@ class NcdfEncoder
 
 	public NetcdfFileWriteable get() throws Exception
 	{
-		// TODO should just return a readable IStream, client shouldn't care that it's netcdf type. 
+		// TODO should just return a readable IStream, client shouldn't care that it's netcdf type.
 
-		try { 
-			if( featureInstancesRS.next()) 
+		try {
+			if( featureInstancesRS.next())
 			{
 				// munge
 				long instance_id = -1234;
@@ -1346,14 +1370,14 @@ class NcdfEncoder
 				else if( clazz.equals( Long.class )) {
 					instance_id = (long)(Long)o;
 				} else {
-					throw new RuntimeException( "Can't convert intance_id type to integer" );
+					throw new NcdfGeneratorException( "Can't convert intance_id type to integer" );
 				}
 
 				System.out.println( "whoot get(), instance_id is " + instance_id );
 
 				String selection = translate.process( selection_expr); // we ought to be caching the specific query ???
 
-				populateValues( definition.dimensions, definition.encoders, 
+				populateValues( definition.dimensions, definition.encoders,
 					"SELECT * FROM (" + definition.virtualInstanceTable + ") as instance where instance.id = " + Long.toString( instance_id) );
 
 
@@ -1369,7 +1393,7 @@ class NcdfEncoder
 					dimensionVar += "\"" + dimension.getName() + "\"" ;
 				}
 
-				populateValues( definition.dimensions, definition.encoders, 
+				populateValues( definition.dimensions, definition.encoders,
 					"SELECT * FROM (" + definition.virtualDataTable + ") as data where " + selection +  " and data.instance_id = " + Long.toString( instance_id) + " order by " + dimensionVar  );
 
 				NetcdfFileWriteable writer = createWritable.create();
@@ -1402,19 +1426,28 @@ class NcdfEncoder
 				return null;
 			}
 		} catch ( Exception e ) {
-			System.out.println( "Opps " + e.getMessage() ); 
+			System.out.println( "Opps " + e.getMessage() );
 			conn.close();
 			return null;
-		} 
+		}
 	}
 }
 
 
 public class NcdfEncoderBuilder
 {
+	// responsible for assembling the NcdfEncoder
 
 	public NcdfEncoderBuilder()
-	{ }
+	{
+		this.parser = new ExprParser();
+		this.translate = new  PGDialectTranslate();
+		this.createWritable = new CreateWritable( "testWrite.nc");
+	}
+
+	final IExprParser parser;
+	final IDialectTranslate translate;
+	final ICreateWritable createWritable;
 
 
 	public NcdfEncoder create ( InputStream config, String filterExpr, Connection conn ) throws Exception
@@ -1432,12 +1465,9 @@ public class NcdfEncoderBuilder
 			config.close();
 		}
 
-		IExprParser parser = new ExprParser();
-		IDialectTranslate translate = new  PGDialectTranslate();
-		ICreateWritable createWritable = new CreateWritable();
 
 		NcdfEncoder generator = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
-		// think client should probably call prepare()
+		// should client call prepare() ?
 		generator.prepare();
 		return generator;
 	}
