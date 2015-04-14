@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>au.org.emii</groupId>
+    <artifactId>myartifcat</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>My artifact (jar)</name>
+
+	<dependencies>
+		<dependency>
+		  <groupId>edu.ucar</groupId>
+			<artifactId>netcdf</artifactId>
+		  <version>4.3.22</version>
+		</dependency>
+
+
+	<dependency>
+		<groupId>org.postgresql</groupId>
+		<artifactId>postgresql</artifactId>
+		<version>9.4-1201-jdbc41</version>
+	</dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+	</dependencies>
+
+
+	<repositories>
+		<!--other repositories if any-->
+
+		
+		<repository>
+			<id>unidata-releases</id>
+			<name>UNIDATA Releases</name>
+			<url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
+		</repository>
+
+        <!--repository>
+            <id>edu.ucar</id>
+            <name>Unidata</name>
+            <url>http://artifacts.unidata.ucar.edu/main</url>
+        </repository-->
+
+		<!--repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository -->
+
+	</repositories>
+
+<!-- http://zeroturnaround.com/rebellabs/the-correct-way-to-use-integration-tests-in-your-build-process/ -->
+<build>
+    <plugins>
+
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <version>2.3</version>
+  <configuration>
+    <source>1.7</source>
+    <target>1.7</target>
+  </configuration>
+</plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.13</version>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
+

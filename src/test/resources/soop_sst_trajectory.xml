@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<definition>
+  <!-- soop_sst_trajectory -->
+  <source>
+    <schema>soop_sst</schema>
+    <virtualDataTable>select trajectory_id as instance_id, * from measurements</virtualDataTable>
+    <virtualInstanceTable>select * from indexed_file</virtualInstanceTable>
+  </source>
+  <dimensions>
+    <dimension name="TIME"/>
+  </dimensions>
+  <variables>
+
+    <variable>
+      <name>id</name>
+      <encoder>integer</encoder>
+      <attributes>
+        <attribute name="_FillValue" value="99999"/>
+      </attributes>
+    </variable>
+
+    <variable>
+      <name>TIME</name>
+      <encoder>time</encoder>
+      <dimensions>
+        <dimension name="TIME"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999."/>
+        <attribute name="units" value="days since 1950-01-01 00:00:00 UTC"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>LATITUDE</name>
+      <encoder>float</encoder>
+      <dimensions>
+        <dimension name="TIME"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999."/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>LONGITUDE</name>
+      <encoder>float</encoder>
+      <dimensions>
+        <dimension name="TIME"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999."/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>TEMP</name>
+      <encoder>float</encoder>
+      <dimensions>
+        <dimension name="TIME"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999."/>
+        <attribute name="whoot" value="whootvalue"/>
+      </attributes>
+    </variable>
+  </variables>
+</definition>
