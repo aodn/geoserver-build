@@ -48,6 +48,7 @@ public class LayerPropertiesReader {
     }
 
     private String getTypeName(FeatureType featureType, AttributeTypeInfo attribute) {
-        return getDescriptor(featureType, attribute).getType().getBinding().getSimpleName();
+        Class attributeClass = getDescriptor(featureType, attribute).getType().getBinding();
+        return new FilterTypeMapper().getTypeForClass(attributeClass);
     }
 }
