@@ -58,7 +58,7 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="99999."/>
-        <attribute name="whoot" value="whootvalue"/>
+        <attribute name="example" value="examplevalue"/>
       </attributes>
     </variable>
   </variables>

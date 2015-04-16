@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>au.org.emii</groupId>
-  <artifactId>myartifcat</artifactId>
+  <artifactId>ncdfgenerator</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
-  <name>My artifact (jar)</name>
+  <name>NcdfGenerator artifact (jar)</name>
   <dependencies>
     <dependency>
       <groupId>edu.ucar</groupId>
@@ -25,22 +25,11 @@
     </dependency>
   </dependencies>
   <repositories>
-    <!--other repositories if any-->
     <repository>
       <id>unidata-releases</id>
       <name>UNIDATA Releases</name>
       <url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
     </repository>
-    <!--repository>
-            <id>edu.ucar</id>
-            <name>Unidata</name>
-            <url>http://artifacts.unidata.ucar.edu/main</url>
-        </repository-->
-    <!--repository>
-			<id>project.local</id>
-			<name>project</name>
-			<url>file:${project.basedir}/repo</url>
-		</repository -->
   </repositories>
   <!-- http://zeroturnaround.com/rebellabs/the-correct-way-to-use-integration-tests-in-your-build-process/ -->
   <build>
@@ -72,7 +61,18 @@
             </goals>
           </execution>
         </executions>
+		<configuration>
+          <skipTests>true</skipTests>
+        </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.18.1</version>
+      </plugin>
+
     </plugins>
   </build>
+
+
 </project>

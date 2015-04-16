@@ -1,4 +1,13 @@
 
+- interface and single method to communicate with server. 
+- cql filter expression parsing
+- wkt
+- global attributes and sql lookup.
+
+- need float and string literal types.
+
+-----
+
 Important - We don't need to get rid of the example parsers. just ensure it's puggable 
 
 ----

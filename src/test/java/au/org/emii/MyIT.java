@@ -19,13 +19,13 @@ import java.sql.*;
 
 public class MyIT {
 
-    @Before
-    public void mergeIT() {
+		@Before
+		public void mergeIT() {
 
 		// setup db conn once? 
     }   
 
-    public static Connection getConn() throws Exception
+	public static Connection getConn() throws Exception
 	{
 		String url = "jdbc:postgresql://115.146.94.132/harvest";   // nectar instance, needs to move to test resources configuration
 		Properties props = new Properties();
@@ -51,8 +51,8 @@ public class MyIT {
 	}
 
 
-    @Test
-    public void anmn_nrs_ctd_profiles_IT() throws Exception {
+	@Test
+	public void anmn_nrs_ctd_profiles_IT() throws Exception {
 
 		System.out.println( "**** anmn_nrs_ctd_profiles **** " );
 		// exception handling needs to be improved a lot...
@@ -68,10 +68,10 @@ public class MyIT {
 
 		streamData( generator ); 
 		System.out.println( "finished test" );
-    }   
+	}   
 
 	@Test
-    public void anmn_timeseries_IT() throws Exception {
+	public void anmn_timeseries_IT() throws Exception {
 
 		System.out.println( "**** anmn timeseries ****" );
 		// assertTrue(123 == 123 );
@@ -89,7 +89,7 @@ public class MyIT {
     }   
 
 	@Test
-    public void soop_sst_trajectory_IT() throws Exception {
+	public void soop_sst_trajectory_IT() throws Exception {
 
 		System.out.println( "**** sst trajectory ****" );
 		InputStream config = getClass().getResourceAsStream("/soop_sst_trajectory.xml");
@@ -103,9 +103,6 @@ public class MyIT {
 		// can expect a count ...
 		streamData( generator ); 
 		System.out.println( "finished test" );
-    }   
-
+	}   
 }
-
-
 

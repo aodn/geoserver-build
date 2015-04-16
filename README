@@ -10,8 +10,19 @@ mvn -Dtest=MyIT#anmn_timeseries_IT   test
 mvn -Dtest=MyIT#anmn_nrs_ctd_profiles_IT  test   
 mvn -Dtest=MyIT#soop_sst_trajectory_IT   test   
 
+# Unit test
+mvn -Dtest=MyTest#newListTest test
+
+
 
 references
+
+cql
+
+http://svemir.co/2012/08/16/introduction-to-cql-and-geoserver-implementation/
+
+http://en.cppreference.com/w/c/language/operator_precedence
+
 
 timeseries example,
 jfca@10-nsp-mel:~$ ncdump  /mnt/opendap/1/IMOS/opendap/eMII/checker_test/ANMN/timeSeries/IMOS_ANMN-QLD_TZ_20140907T063947Z_ITFTIS_FV01_ITFTIS-1409-SBE39-94_END-20150207T065000Z_C-20150219T005030Z.nc | less
