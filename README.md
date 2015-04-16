@@ -57,7 +57,8 @@ data
 
 ##### Exclude From Download
 
-Properties that can be filtered on but are not included in the set of downloaded data. This is useful for boolean properties.
+Properties that can be filtered on but are not included in the set of downloaded data. This is useful for boolean properties.  
+*n.b. For a property to be excluded from download it must also be enabled*
 
 ### The OWS Service XML
 
@@ -131,12 +132,6 @@ The service expects a workspace and layer name. If either is missing behaviour i
 The service is requested using the `csv-restricted-column` format, for example `http://<host>/geoserver/ows?typeName=argo_profile_download_data&SERVICE=WFS&outputFormat=csv-restricted-column&REQUEST=GetFeature&VERSION=1.0.0&CQL_FILTER=platform_number%20LIKE%20%271900042%27`
 
 The response is identical to the CSV output format WFS response but excludes columns configured as not available for download.
-
-## What Is Missing?
-
-At the moment the unique list of possible values for String filters is always returned. Thus the ability to request only filter information or
-only request values for a specified filter are missing. These features could be useful in the case of layers that have many possible values for
-a filter.
 
 ## Useful Documentation
 
