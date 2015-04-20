@@ -10,10 +10,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
+// import java.io.Exception;
 import java.io.InputStream ;
 import java.io.OutputStream ;
 import java.io.FileOutputStream ;
 
+import java.lang.System;
+import java.util.Map;
 
 // import ucar.nc2.NetcdfFileWriteable;
 
@@ -30,17 +33,22 @@ public class MyIT {
 
 	public static Connection getConn() throws Exception
 	{
-		String url = "jdbc:postgresql://115.146.94.132/harvest";   // nectar instance, needs to move to test resources configuration
+		Map<String, String> env = System.getenv();
+
+		String opts [] = { "POSTGRES_USER", "POSTGRES_PASS", "POSTGRES_JDBC_URL" } ;
+		for ( String opt : opts ) {
+			if( env.get( opt) == null)
+				throw new Exception( "Environment var '" + opt + "' not set" );
+		}
+
 		Properties props = new Properties();
-		props.setProperty("user","meteo");
-		props.setProperty("password","meteo");
-
-
+		props.setProperty("user", env.get( "POSTGRES_USER" ) );
+		props.setProperty("password", env.get( "POSTGRES_PASS" ) );
 		props.setProperty("ssl","true");
 		props.setProperty("sslfactory","org.postgresql.ssl.NonValidatingFactory");
 		props.setProperty("driver","org.postgresql.Driver" );
 
-		return DriverManager.getConnection(url, props);
+		return DriverManager.getConnection( env.get( "POSTGRES_JDBC_URL" ), props);
 	}
 
 	private void streamData( INcdfEncoder encoder ) throws Exception {
