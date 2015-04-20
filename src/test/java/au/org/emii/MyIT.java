@@ -114,7 +114,6 @@ public class MyIT {
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
 
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-		// String cql = " TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
 		INcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 		ZipCreator zipCreator = new ZipCreator( encoder); 
