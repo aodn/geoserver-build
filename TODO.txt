@@ -1,4 +1,7 @@
 
+- attribute values are typed - check GG xml. check ncdf api.
+- sql support in attributes
+
 - interface and single method to communicate with server. 
 - cql filter expression parsing
 - wkt

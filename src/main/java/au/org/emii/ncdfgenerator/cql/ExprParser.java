@@ -66,18 +66,18 @@ public class ExprParser implements IExprParser
 	}
 
 
-	public IExpression parseExpression(String s)
+	public IExpression parseExpression(String s) throws CQLException
 	{
 		int pos = 0;
 		IExpression expr = parseExpression1( s, pos ); 
-		if( expr == null)
-			return null; 
-		// ensure the parse reached the end of the string, with no syntax issues 
-		pos = expr.getPosition();
-		pos = skipWhite( s, pos); 
-		if( pos == s.length() ) 
-			return expr;	
-		return null;
+		if( expr != null) {
+			// ensure we got to the end, with nothing trailing
+			pos = expr.getPosition();
+			pos = skipWhite( s, pos); 
+			if( pos == s.length() ) 
+				return expr;	
+		}
+		throw new CQLException( "failed to parse expression '" + s + "'" );
 	}	
 
 
@@ -175,8 +175,8 @@ public class ExprParser implements IExprParser
 		}
 	}
 
-
-	public IExpression parseFactor(String s, int pos)
+	// public for unit
+	private IExpression parseFactor(String s, int pos)
 	{
 		pos = skipWhite( s, pos); 
 
@@ -327,20 +327,20 @@ public class ExprParser implements IExprParser
 				children.add( child);
 				pos = child.getPosition();
 			}
+
 			pos = skipWhite( s, pos ); 
 
 			if( peekChar( s, pos) == ',') {
 				++pos;
-				pos = skipWhite( s, pos ); 
 				continue; 
 			}
-			if( peekChar( s, pos) == ')') {
+			else if( peekChar( s, pos) == ')') {
 				++pos;
-				// public ExprProc( int pos, String symbol, ArrayList< IExpression> children  )
 				return new ExprProc( pos, name, children );
 			}
+			else
+				return null;
 		} 
-
 
 		return null;
 	}
