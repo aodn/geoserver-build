@@ -29,13 +29,14 @@ public class ZipCreator
 			// encoder.prepare() ...
 			zipStream = new ZipOutputStream( os ); 
 			int count = 0; 
-			InputStream writer = encoder.get();
-			while( writer != null ) 
+			InputStream is = encoder.get();
+			while( is != null ) 
 			{
 				String filenameToUse = "file" + count + ".nc";
 				zipStream.putNextEntry( new ZipEntry(filenameToUse) ); 
-				int bytesCopied = IOUtils.copy( writer, zipStream); 
-				writer = encoder.get();
+				int bytesCopied = IOUtils.copy( is, zipStream); 
+				is.close();
+				is = encoder.get();
 				++count;
 			}
 
