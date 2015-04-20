@@ -1,14 +1,13 @@
 
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.cql.ExprParser; 
-import au.org.emii.ncdfgenerator.cql.IExprParser; 
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate; 
-
-import au.org.emii.ncdfgenerator.cql.PGDialectTranslate; 
+import au.org.emii.ncdfgenerator.cql.ExprParser;
+import au.org.emii.ncdfgenerator.cql.IExprParser;
+import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
+import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
 
 import java.sql.Connection;
-import java.io.InputStream ;
+import java.io.InputStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -17,7 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class NcdfEncoderBuilder
 {
-	// class responsible for assembling the NcdfEncoder
+	// responsible for assembling the NcdfEncoder
 
 	final IExprParser parser;
 	final IDialectTranslate translate;
@@ -46,10 +45,10 @@ public class NcdfEncoderBuilder
 		}
 
 
-		NcdfEncoder generator = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
+		NcdfEncoder encoder = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
 		// should client call prepare() ?
-		generator.prepare();
-		return generator;
+		encoder.prepare();
+		return encoder;
 	}
 }
 
