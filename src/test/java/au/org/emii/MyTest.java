@@ -15,7 +15,7 @@ import au.org.emii.ncdfgenerator.cql.*;
 public class MyTest {
 
 	@Before
-	public void merge()
+	public void before()
 	{
 	}
 

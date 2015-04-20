@@ -8,34 +8,37 @@ import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
 
 import java.sql.Connection;
 import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-public class NcdfEncoderBuilder
+public class NcdfGenerator
 {
-	// responsible for assembling the NcdfEncoder
-
 	final IExprParser parser;
 	final IDialectTranslate translate;
 	final ICreateWritable createWritable;
+	final String layerConfigDir;
 
-	public NcdfEncoderBuilder()
+	public NcdfGenerator( String layerConfigDir, String tmpCreationDir  )
 	{
 		this.parser = new ExprParser();
 		this.translate = new PGDialectTranslate();
-		this.createWritable = new CreateWritable( "./tmp");
+		this.createWritable = new CreateWritable( tmpCreationDir );
+		this.layerConfigDir = layerConfigDir;
 	}
 
-	public NcdfEncoder create( InputStream config, String filterExpr, Connection conn ) throws Exception
+	public void write( String typename, String filterExpr, Connection conn, OutputStream os ) throws Exception
 	{
-		// not sure if the expression parsing shouldn't go in here?
-		// not sure if definition decoding should be done here...
-
 		NcdfDefinition definition = null;
+		InputStream	config = null;
+
 		try {
+			config = new FileInputStream( layerConfigDir + "/" + typename + ".xml" );
+
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
 			Node node = document.getFirstChild();
 			definition = new NcdfDefinitionXMLParser().parseDefinition( node );
@@ -44,12 +47,14 @@ public class NcdfEncoderBuilder
 			config.close();
 		}
 
-
-		NcdfEncoder encoder = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
-		// should client call prepare() ?
-		encoder.prepare();
-		return encoder;
+		try {
+			NcdfEncoder encoder = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
+			ZipCreator zipCreator = new ZipCreator( encoder);
+			encoder.prepare();
+			zipCreator.doStreaming( os );
+		} finally {
+			os.close();
+		}
 	}
 }
-
 
