@@ -2,29 +2,44 @@
 package au.org.emii.ncdfgenerator;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.lang.Thread;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import ucar.nc2.NetcdfFileWriteable;
 
 
 class CreateWritable implements ICreateWritable
 {
-	// an abstraction to support creating the ncf file
 	// NetcdfFileWriteable is not an abstraction over a stream!. instead it insists on being a file...
+	// Makes resource handling tedious to support multithreading and http concurrency.
 
-	CreateWritable( String path )
+	final String tmpDir;
+
+	CreateWritable( String tmpDir )
 	{
-		this.path = path;
+		this.tmpDir = tmpDir;
 	}
 
-	final String path;
+	private String getFilename()
+	{
+		long threadId = Thread.currentThread().getId();
+		return tmpDir + "/tmpfile" + threadId + ".nc";
+	}
 
 	public NetcdfFileWriteable create() throws IOException
 	{
-		return NetcdfFileWriteable.createNew( path, false);
+		String filename = getFilename();
+		Files.deleteIfExists( Paths.get( filename ));
+		return NetcdfFileWriteable.createNew( filename, false);
 	}
 
-	// TODO method to request as a byte stream and return?
-	// public getByteStream () { }
+	public InputStream getStream() throws IOException
+	{
+		return new FileInputStream( getFilename() );
+	}
 }
 
 

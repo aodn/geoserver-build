@@ -6,19 +6,22 @@ import au.org.emii.ncdfgenerator.cql.IExprParser;
 import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
 
 
-import java.util.Map;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
+import java.util.Map;
 import java.util.ArrayList;
+
 
 import org.w3c.dom.Document;
 
 import ucar.nc2.NetcdfFileWriteable;
 
+import au.org.emii.ncdfgenerator.INcdfEncoder ;
 
-class NcdfEncoder
+class NcdfEncoder implements INcdfEncoder
 {
 	final IExprParser exprParser;
 	final IDialectTranslate translate ;
@@ -84,10 +87,8 @@ class NcdfEncoder
 	}
 
 
-	public NetcdfFileWriteable get() throws Exception
+	public InputStream get() throws Exception
 	{
-		// TODO should just return a readable IStream, client shouldn't care that it's netcdf type.
-
 		try {
 			if( featureInstancesRS.next())
 			{
@@ -147,12 +148,11 @@ class NcdfEncoder
 					// maybe change name writeValues
 					encoder.finish( writer );
 				}
-				// write the file
+				// finish the file
 				writer.close();
 
-				// TODO we should be returning a filestream here...
-				// the caller doesn't care that it's a netcdf
-				return writer;
+				// return the stream
+				return createWritable.getStream(); 
 			}
 			else {
 				// no more netcdfs
@@ -160,7 +160,7 @@ class NcdfEncoder
 				return null;
 			}
 		} catch ( Exception e ) {
-			System.out.println( "Opps " + e.getMessage() );
+			System.out.println( "Opps " + e.getMessage() + "\n" + e.getStackTrace().toString() );
 			conn.close();
 			return null;
 		}

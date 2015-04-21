@@ -1,66 +1,61 @@
 
+Prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
+
+-----
+TODO
 - attribute values are typed - check GG xml. check ncdf api.
-- sql support in attributes
-
-- interface and single method to communicate with server. 
-- cql filter expression parsing
-- wkt
+- sql lookup for global attributes
 - global attributes and sql lookup.
-
 - need float and string literal types.
 
 -----
+TODO - OLD
 
-Important - We don't need to get rid of the example parsers. just ensure it's puggable 
-
-----
-prototype demonstrate end-to-end filter to subset netcdf generation, with streaming 
-on prod data.
-
-----
-PRIORITY
-- move connection pool in the unit tests.
+- postgres - parametize query parameters, rather than use text, injection attack
+- compose with spring
+-  (cant but have abstracted out) do the netcdf generation in memory
+- pass table as paraemter to encoder strategy (not sure)
+- make a tomcat/http service/
 
 ----
 
 WHAT'S DONE
 
 - done get dates correctly encoded  (to enable verificiation of filter date range)
-- done sequencing the definition, and data writing phases of netcdf generation 
-- done basic subset expression parser/ 
+- done sequencing the definition, and data writing phases of netcdf generation
+- done basic subset expression parser/
 - done postgres dialect rewriter instance
 - done netcdf encoder
 - done localized convention/ config strategy
-- done experimented with a couple of query approaches favor time to start streaming, total time etc. 
+- done experimented with a couple of query approaches favor time to start streaming, total time etc.
 - done - write required attributes with strategy
-- done - write multiple files (and get the writable instantiation working ) (pass at the time). 
-- done-  should specify dimension of a var by name, then we can infer size/count. 
+- done - write multiple files (and get the writable instantiation working ) (pass at the time).
+- done-  should specify dimension of a var by name, then we can infer size/count.
 - done - think we have to invert it, instead of trying to infer, use an explicit configuration.
 	- It's part of the task.
 	- meaning use spring.
 - done - mvn project
 - done layer configuration into xml file
 - done need to be able to select different feature types - and command line arguments
-- done take dims from config file.. 
-- done - have a timeseries, need a trajectory. failsafe to run a specific integration test... 
+- done take dims from config file..
+- done - have a timeseries, need a trajectory. failsafe to run a specific integration test...
 - done xml config.
-- done factor encoder strategy chooser - so it's not instantiated, or else use property setters instead of constructor for the writer. 
+- done factor encoder strategy chooser - so it's not instantiated, or else use property setters instead of constructor for the writer.
 - done tidy xml examples - to be more complete .
-- push the sql projections into the xml. 
-- done done check integration test IT naming conventions. change test names to ITtimeseries with IT first 
+- push the sql projections into the xml.
+- done done check integration test IT naming conventions. change test names to ITtimeseries with IT first
 - done get date correctly encoded
 ---
 
-TODO
+- done - organize project sources
+- done - add support to parser/expr for geometry for spatial constraint choice
+- done - zip the file stream
+- done - move db connection management into unit tests.
+- done - the createWritable generates local files, - needs to be able to handle creating/using concurrently
+- done - interface and single method to communicate with server.
+- done - cql filter subset expression parsing
+- done - wkt
+- done - config to specify the tables. eg. xml
 
-- organize project sources
-- postgres - parametize query parameters, rather than use text, injection attack
-- add support to parser/expr for geometry for spatial constraint choice
-- config to specify the tables.
-- compose with spring
--  (cant but have abstracted out) do the netcdf generation in memory
 
-- pass table as paraemter to encoder strategy (not sure)
-- make a tomcat/http service/ 
-- zip the file stream
 
