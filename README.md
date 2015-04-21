@@ -1,6 +1,8 @@
 GeoServer Layer Filter Extension
 ================================
 
+[![Build Status](https://travis-ci.org/aodn/geoserver-layer-filter-extension.png?branch=master)](https://travis-ci.org/aodn/geoserver-layer-filter-extension)
+
 This extension provides the ability to configure layers to present properties by which they
 can be subset.
 
@@ -57,7 +59,7 @@ data
 
 ##### Exclude From Download
 
-Properties that can be filtered on but are not included in the set of downloaded data. This is useful for boolean properties.  
+Properties that can be filtered on but are not included in the set of downloaded data. This is useful for boolean properties.
 *n.b. For a property to be excluded from download it must also be enabled*
 
 ### The OWS Service XML
