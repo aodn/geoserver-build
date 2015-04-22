@@ -102,8 +102,8 @@
         <attribute name="units" value="'metres'"/>
         <attribute name="axis" value="'Z'"/>
         <attribute name="reference_datum" value="'sea surface'"/>
-        <attribute name="valid_min" value="-5.f"/> <!-- this guy needs to be casted in the relevant type -->
-        <attribute name="valid_max" value="12000.f"/> <!-- this guy needs to be casted in the relevant type -->
+        <attribute name="valid_min" value="-5.f"/>
+        <attribute name="valid_max" value="12000.f"/>
       </attributes>
     </variable>
 
