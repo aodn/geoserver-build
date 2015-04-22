@@ -8,11 +8,13 @@ java 1.7
 ## To compile and run unit tests
 mvn install
 
-## To run a specific integration test
+# To run a specific integration test
 
-mvn -Dtest=GenerationIT#anmn_timeseries_IT   test   
-mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT  test   
-mvn -Dtest=GenerationIT#soop_sst_trajectory_IT   test   
+mvn -Dtest=GenerationIT#anmn_timeseries_gg_IT test
+
+mvn -Dtest=GenerationIT#anmn_timeseries_IT test   
+mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT test   
+mvn -Dtest=GenerationIT#soop_sst_trajectory_IT test   
 
 
 references
@@ -45,3 +47,4 @@ http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/tutorial/Netcdf
 http://www.unidata.ucar.edu/software/netcdf/docs/BestPractices.html
 
 https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/CDL-Data-Types.html
+

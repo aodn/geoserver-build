@@ -79,7 +79,7 @@ public class AttributeTest
 	public void testArray() throws Exception
 	{
 		IAttributeValueParser p = this.p; 
-		AttributeValue x = p.parse( "0b 5b 7b 9b" );
+		AttributeValue x = p.parse( "0b, 5b, 7b, 9b" );
 		Array value = (Array) x.value ; 
 		assertTrue( value != null );
 		// TODO check length ... etc

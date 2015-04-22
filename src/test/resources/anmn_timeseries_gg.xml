@@ -4,7 +4,9 @@
   <source>
     <schema>anmn_ts</schema>
     <virtualDataTable>select ts_id as instance_id, * from measurement</virtualDataTable>
-    <virtualInstanceTable>select * from timeseries</virtualInstanceTable>
+
+      
+    <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from timeseries</virtualInstanceTable>
   </source>
   <dimensions>
     <dimension name="TIME"/>
@@ -91,37 +93,35 @@
         <attribute name="valid_max" value="180."/> 
       </attributes>
     </variable>
-
-    <!-- variable>
+    <variable>
       <name>NOMINAL_DEPTH</name>
       <encoder>float</encoder>
-		<field> instrument_nominal_depth </field> 
       <attributes>
         <attribute name="standard_name" value="'depth'"/>
         <attribute name="long_name" value="'nominal depth'"/>
         <attribute name="units" value="'metres'"/>
         <attribute name="axis" value="'Z'"/>
         <attribute name="reference_datum" value="'sea surface'"/>
-        <attribute name="valid_min" value="-5.f"/> 
-        <attribute name="valid_max" value="12000.f"/> 
+        <attribute name="valid_min" value="-5.f"/>
+        <attribute name="valid_max" value="12000.f"/>
       </attributes>
-    </variable -->
+    </variable>
 
-    <!--variable>
+    <variable>
       <name>TEMP</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_temperature"/>
-        <attribute name="long_name" value="sea_water_temperature"/>
-        <attribute name="units" value="Celsius"/>
+        <attribute name="standard_name" value="'sea_water_temperature'"/>
+        <attribute name="long_name" value="'sea_water_temperature'"/>
+        <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/> 
         <attribute name="valid_max" value="40.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="coordinates" value="TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH"/>
-        <attribute name="ancillary_variables" value="TEMP_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH'"/>
+        <attribute name="ancillary_variables" value="'TEMP_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -131,15 +131,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_temperature status_flag"/>
-        <attribute name="long_name" value="quality flag for sea_water_temperature"/>
+        <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_temperature'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1."/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
     </variable>
     <variable>
@@ -149,14 +149,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_electrical_conductivity"/>
-        <attribute name="long_name" value="sea_water_electrical_conductivity"/>
-        <attribute name="units" value="S m-1"/>
+        <attribute name="standard_name" value="'sea_water_electrical_conductivity'"/>
+        <attribute name="long_name" value="'sea_water_electrical_conductivity'"/>
+        <attribute name="units" value="'S m-1'"/>
         <attribute name="valid_min" value="0.f"/> 
         <attribute name="valid_max" value="50000.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="coordinates" value="TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH"/>
-        <attribute name="ancillary_variables" value="CNDC_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH'"/>
+        <attribute name="ancillary_variables" value="'CNDC_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -166,15 +166,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_electrical_conductivity status_flag"/>
-        <attribute name="long_name" value="quality flag for sea_water_electrical_conductivity"/>
+        <attribute name="standard_name" value="'sea_water_electrical_conductivity status_flag'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_electrical_conductivity'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1"/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
     </variable>
     <variable>
@@ -184,14 +184,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_salinity"/>
-        <attribute name="long_name" value="sea_water_salinity"/>
-        <attribute name="units" value="1e-3"/>
+        <attribute name="standard_name" value="'sea_water_salinity'"/>
+        <attribute name="long_name" value="'sea_water_salinity'"/>
+        <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/> 
         <attribute name="valid_max" value="41.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="coordinates" value="TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH"/>
-        <attribute name="ancillary_variables" value="PSAL_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH'"/>
+        <attribute name="ancillary_variables" value="'PSAL_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -201,15 +201,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_salinity status_flag"/>
-        <attribute name="long_name" value="quality flag for sea_water_salinity"/>
+        <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_salinity'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1"/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
     </variable>
     <variable>
@@ -219,14 +219,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_pressure"/>
-        <attribute name="long_name" value="sea_water_pressure"/>
-        <attribute name="units" value="dbar"/>
+        <attribute name="standard_name" value="'sea_water_pressure'"/>
+        <attribute name="long_name" value="'sea_water_pressure'"/>
+        <attribute name="units" value="'dbar'"/>
         <attribute name="valid_min" value="-5.f"/> 
         <attribute name="valid_max" value="12000.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="coordinates" value="TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH"/>
-        <attribute name="ancillary_variables" value="PRES_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH'"/>
+        <attribute name="ancillary_variables" value="'PRES_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -236,15 +236,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_pressure status_flag"/>
-        <attribute name="long_name" value="quality flag for sea_water_pressure"/>
+        <attribute name="standard_name" value="'sea_water_pressure status_flag'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_pressure'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1"/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
     </variable>
     <variable>
@@ -254,14 +254,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_pressure_due_to_sea_water"/>
-        <attribute name="long_name" value="sea_water_pressure_due_to_sea_water"/>
-        <attribute name="units" value="dbar"/>
+        <attribute name="standard_name" value="'sea_water_pressure_due_to_sea_water'"/>
+        <attribute name="long_name" value="'sea_water_pressure_due_to_sea_water'"/>
+        <attribute name="units" value="'dbar'"/>
         <attribute name="valid_min" value="-15.f"/> 
         <attribute name="valid_max" value="12000.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="coordinates" value="TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH"/>
-        <attribute name="ancillary_variables" value="PRES_REL_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH'"/>
+        <attribute name="ancillary_variables" value="'PRES_REL_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -271,15 +271,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="sea_water_pressure_due_to_sea_water status_flag"/>
-        <attribute name="long_name" value="quality flag for sea_water_pressure_due_to_sea_water"/>
+        <attribute name="standard_name" value="'sea_water_pressure_due_to_sea_water status_flag'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_pressure_due_to_sea_water'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1"/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
     </variable>
     <variable>
@@ -289,15 +289,15 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="depth"/>
-        <attribute name="long_name" value="depth"/>
-        <attribute name="units" value="metres"/>
-        <attribute name="positive" value="down"/>
-        <attribute name="reference_datum" value="sea surface"/>
+        <attribute name="standard_name" value="'depth'"/>
+        <attribute name="long_name" value="'depth'"/>
+        <attribute name="units" value="'metres'"/>
+        <attribute name="positive" value="'down'"/>
+        <attribute name="reference_datum" value="'sea surface'"/>
         <attribute name="valid_min" value="-5.f"/> 
         <attribute name="valid_max" value="12000.f"/> 
         <attribute name="_FillValue" value="999999.f"/> 
-        <attribute name="ancillary_variables" value="DEPTH_quality_control"/>
+        <attribute name="ancillary_variables" value="'DEPTH_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -307,16 +307,16 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="standard_name" value="depth status_flag"/>
-        <attribute name="long_name" value="quality flag for depth"/>
+        <attribute name="standard_name" value="'depth status_flag'"/>
+        <attribute name="long_name" value="'quality flag for depth'"/>
         <attribute name="valid_min" value="0b"/> 
         <attribute name="valid_max" value="9b"/> 
         <attribute name="_FillValue" value="99b"/> 
         <attribute name="quality_control_set" value="1"/> 
-        <attribute name="quality_control_conventions" value="IMOS standard set using the IODE flags"/>
+        <attribute name="quality_control_conventions" value="'IMOS standard set using the IODE flags'"/>
         <attribute name="flag_values" value="0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b"/> 
-        <attribute name="flag_meaning" value="No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"/>
+        <attribute name="flag_meaning" value="'No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value'"/>
       </attributes>
-    </variable -->
+    </variable>
   </variables>
 </definition>
