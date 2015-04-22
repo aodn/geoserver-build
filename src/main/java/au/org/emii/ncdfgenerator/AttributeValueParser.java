@@ -53,7 +53,7 @@ class AttributeValueParser implements IAttributeValueParser
 		List<AttributeValue> items = new ArrayList<AttributeValue> (); 
 		AttributeValue a = null;
 		do { 
-			a = parseAttributeValue1( s, pos ); 
+			a = parseAttributeValue( s, pos );
 			if( a != null) { 
 				items.add( a) ; 
 				pos = a.pos;
@@ -111,7 +111,7 @@ class AttributeValueParser implements IAttributeValueParser
 	}
 	
 
-	protected AttributeValue parseAttributeValue1( String s, int pos )
+	protected AttributeValue parseAttributeValue( String s, int pos )
 	{
 		AttributeValue a = parseFloat( s, pos );
 		if( a != null )
