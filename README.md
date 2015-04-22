@@ -1,14 +1,17 @@
+# NetCDF Generator
 
-# Requires 
+[![Build Status](https://travis-ci.org/aodn/ncdfgenerator.png?branch=master)](https://travis-ci.org/aodn/ncdfgenerator.png)
+
+## Requires
 java 1.7
 
-# To compile and run unit tests
-mvn install 
+## To compile and run unit tests
+mvn install
 
-# To run a specific integration test
-mvn -Dtest=MyIT#anmn_timeseries_IT   test   
-mvn -Dtest=MyIT#anmn_nrs_ctd_profiles_IT  test   
-mvn -Dtest=MyIT#soop_sst_trajectory_IT   test   
+## To run a specific integration test
+mvn -Dtest=MyIT#anmn_timeseries_IT   test
+mvn -Dtest=MyIT#anmn_nrs_ctd_profiles_IT  test
+mvn -Dtest=MyIT#soop_sst_trajectory_IT   test
 
 
 
@@ -41,5 +44,4 @@ http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/tutorial/Netcdf
 
 http://www.unidata.ucar.edu/software/netcdf/docs/BestPractices.html
 
-HTTps://www.unidata.ucar.edu/software/netcdf/docs/netcdf/CDL-Data-Types.html
-
+https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/CDL-Data-Types.html
