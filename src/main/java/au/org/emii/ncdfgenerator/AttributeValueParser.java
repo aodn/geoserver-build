@@ -105,9 +105,9 @@ class AttributeValueParser implements IAttributeValueParser
 			}
 			return new AttributeValue(pos, ar );
 		}
-		else
+		else {
 			return null;
-
+		}
 	}
 	
 
