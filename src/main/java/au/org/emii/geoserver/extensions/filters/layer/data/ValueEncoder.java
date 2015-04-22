@@ -26,15 +26,15 @@ public class ValueEncoder {
         return result;
     }
 
-    String encode(Object unencoded) {
+    String encode(Object value) {
 
-        if (unencoded instanceof java.util.Date) {
+        if (value instanceof java.util.Date) {
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
             df.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-            return df.format(unencoded);
+            return df.format(value);
         }
 
-        return String.valueOf(unencoded);
+        return String.valueOf(value);
     }
 }
