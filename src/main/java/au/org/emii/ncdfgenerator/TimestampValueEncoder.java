@@ -74,18 +74,18 @@ public class TimestampValueEncoder implements IValueEncoder
 				throw new NcdfGeneratorException( "Missing value and no fill attribute defined" );
 		}
 		else if( value instanceof java.sql.Timestamp ) {
-			long seconds =  ((java.sql.Timestamp)value).getTime() / 1000  ;
-			long val = seconds - epoch;
+			double seconds =  ((java.sql.Timestamp)value).getTime() / 1000.0d ;
+			double val = seconds - epoch;
 			if( unit.equals("days"))
-				val /= 86400;
+				val /= 86400.0d;
 			else if( unit.equals("minutes"))
-				val /= 1440;
+				val /= 60.0d;
 			else if ( unit.equals("seconds"))
 				;
 			else
 				throw new NcdfGeneratorException( "Unrecognized time unit " + unit );
 
-			array.setDouble( ima, (double) val );
+			array.setDouble( ima, val );
 		}
 		else {
 			throw new NcdfGeneratorException( "Not a timestamp" );
