@@ -1,7 +1,5 @@
 
-// package au.org.emii;
 package au.org.emii.ncdfgenerator;
-
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import au.org.emii.ncdfgenerator.cql.*;
 
-public class MyTest {
+public class QueryTest {
 
 	@Before
 	public void before()
@@ -95,7 +93,7 @@ public class MyTest {
 	}
 
 	@Test
-	public void test05() throws Exception
+	public void testSubsetServiceExampleQuery() throws Exception
 	{
 		// example cql filter query expression from
 		// https://github.com/aodn/netcdf-subset-service
@@ -106,16 +104,16 @@ public class MyTest {
 	@Test
 	public void testParseThatShouldThrow() throws Exception
 	{
-		boolean didThrow = false;
+		boolean threw = false;
 		try {
 			String s = " and ( 2013-6 ) ";
 			IExprParser p =	new ExprParser() ;
 			IExpression expr = p.parseExpression( s);
 		} catch( Exception e )
 		{
-			didThrow = true;
+			threw = true;
 		}
-		assertTrue( didThrow );
+		assertTrue( threw );
 	}
 
 	@Test

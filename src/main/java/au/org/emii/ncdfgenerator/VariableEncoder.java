@@ -4,10 +4,14 @@ package au.org.emii.ncdfgenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
 
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.ma2.Array;
 import ucar.nc2.Dimension;
+
+import au.org.emii.ncdfgenerator.AttributeValue;
 
 
 class VariableEncoder implements IVariableEncoder
@@ -18,6 +22,8 @@ class VariableEncoder implements IVariableEncoder
 	final ArrayList<IDimension>	dimensions; // change name childDimensions
 	final ArrayList<Object>		buffer;
 
+	final IAttributeValueParser	attributeValueParser; 
+	final Map< String, Object > convertedAttributes;
 
 	public VariableEncoder(
 		String variableName,
@@ -30,6 +36,9 @@ class VariableEncoder implements IVariableEncoder
 		this.attributes = attributes;
 		this.dimensions = dimensions;
 		this.buffer = new ArrayList<Object>( );
+
+		this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate 
+		this.convertedAttributes = new HashMap< String, Object > ();
 	}
 
 
@@ -43,7 +52,7 @@ class VariableEncoder implements IVariableEncoder
 		buffer.add( value );
 	}
 
-	public void define( NetcdfFileWriteable writer )
+	public void define( NetcdfFileWriteable writer ) throws NcdfGeneratorException
 	{
 		// write dims and attributes
 
@@ -56,8 +65,30 @@ class VariableEncoder implements IVariableEncoder
 
 		writer.addVariable(variableName, encodeValue.targetType(), d );
 
+		// decode the attribute values 
 		for( Map.Entry< String, String> entry : attributes.entrySet()) {
-			writer.addVariableAttribute( variableName, entry.getKey(), entry.getValue()/*.toString()*/ );
+			AttributeValue a = attributeValueParser.parse( entry.getValue() ); 
+			convertedAttributes.put( entry.getKey(), a.value );
+		}
+
+		// encode the variable attributes 
+		for( Map.Entry< String, Object> entry : convertedAttributes.entrySet()) {
+
+			// https://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/v4.2/javadoc/ucar/nc2/NetcdfFileWriteable.html
+			Object value = entry.getValue(); 
+			if( value instanceof Number ) {
+				writer.addVariableAttribute( variableName, entry.getKey(), (Number) value );
+			}  
+			else if( value instanceof String ) {
+				writer.addVariableAttribute( variableName, entry.getKey(), (String) value );
+			}  
+			else if( value instanceof Array ) {
+				writer.addVariableAttribute( variableName, entry.getKey(), (Array) value );
+			}  
+			else {
+				// TODO array
+				throw new NcdfGeneratorException( "Unrecognized attribute type '" +  value.getClass().getName() + "'" ); 
+			}
 		}
 	}
 
@@ -98,7 +129,8 @@ class VariableEncoder implements IVariableEncoder
 
 		Array A = Array.factory( encodeValue.targetType(), toIntArray(shape ) );
 
-		encodeValue.prepare( attributes );
+
+		encodeValue.prepare( convertedAttributes );
 
 		writeValues( dimensions,  0, 0 , A );
 

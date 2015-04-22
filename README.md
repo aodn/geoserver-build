@@ -9,10 +9,10 @@ java 1.7
 mvn install
 
 ## To run a specific integration test
-mvn -Dtest=MyIT#anmn_timeseries_IT   test
-mvn -Dtest=MyIT#anmn_nrs_ctd_profiles_IT  test
-mvn -Dtest=MyIT#soop_sst_trajectory_IT   test
 
+mvn -Dtest=GenerationIT#anmn_timeseries_IT   test   
+mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT  test   
+mvn -Dtest=GenerationIT#soop_sst_trajectory_IT   test   
 
 
 references

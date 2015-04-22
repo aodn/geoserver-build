@@ -16,16 +16,18 @@ class ByteValueEncoder implements IValueEncoder
 		this.fill = 0x0;
 	}
 
-	// assumption that the Object A is a float array
 	public DataType targetType()
 	{
 		return DataType.BYTE;
 	}
 
-	public void prepare( Map<String, String> attributes )
+	public void prepare( Map<String, Object> attributes ) throws NcdfGeneratorException
 	{
-		// eg. no unsigned byte in java, so use integer and downcast
-		fill = (byte) Integer.decode( attributes.get( "_FillValue" ) ).intValue();
+		try { 	
+			fill = (Byte) attributes.get( "_FillValue" );
+		} catch( Exception e ) {
+			throw new NcdfGeneratorException( "Expected _FillValue attribute to be Byte type");
+		}
 	}
 
 	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException

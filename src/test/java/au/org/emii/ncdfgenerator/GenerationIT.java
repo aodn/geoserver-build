@@ -23,7 +23,7 @@ import java.util.Map;
 import java.sql.*;
 
 
-public class MyIT {
+public class GenerationIT {
 
 	@Before
 	public void mergeIT() {
@@ -68,8 +68,6 @@ public class MyIT {
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
 
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-		// String cql = " TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-
 
 		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 		streamData( encoder );
@@ -104,11 +102,9 @@ public class MyIT {
 	}
 
 
-
-
-	// test zip streaming of data...
+	// test zip streaming of data using builder...
 	@Test
-	public void anmn_timeseries2_IT() throws Exception 
+	public void anmn_timeseries2_IT() throws Exception
 	{
 		System.out.println( "**** anmn timeseries ****" );
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
@@ -116,28 +112,45 @@ public class MyIT {
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
 		INcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
-		ZipCreator zipCreator = new ZipCreator( encoder); 
+		ZipCreator zipCreator = new ZipCreator( encoder);
 
 		OutputStream os = new FileOutputStream( "./myoutput2.zip" );
-		zipCreator.doStreaming( os );  
+		zipCreator.doStreaming( os );
 		os.close();
 
 		System.out.println( "finished test" );
 	}
 
 
+	// test zip streaming using NcdfGenerator
 	@Test
-	public void ncdfGenerator_IT() throws Exception 
+	public void ncdfGenerator_IT() throws Exception
 	{
 		String layerConfigDir = "./src/test/resources/"; // TODO URL url = getClass().getResource("/")  ; url.toString()...
 		String tmpCreationDir = "./tmp";
 		NcdfGenerator generator = new NcdfGenerator( layerConfigDir, tmpCreationDir );
-	
+
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-	
+
 		OutputStream os = new FileOutputStream( "./tmp/output.zip" );
 
 		generator.write( "anmn_timeseries", cql, getConn(), os );
+	}
+
+
+
+	@Test
+	public void anmn_timeseries_gg_IT() throws Exception {
+
+		System.out.println( "**** anmn timeseries ****" );
+		InputStream config = getClass().getResourceAsStream("/anmn_timeseries_gg.xml");
+
+		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
+
+
+		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
+		streamData( encoder );
+		System.out.println( "finished test" );
 	}
 
 }

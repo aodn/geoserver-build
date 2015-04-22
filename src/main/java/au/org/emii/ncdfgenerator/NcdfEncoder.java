@@ -7,6 +7,9 @@ import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
 
 
 import java.io.InputStream;
+import java.io.StringWriter; 
+import java.io.PrintWriter;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 
+//       ucar.nc2.NetcdfFile
 import ucar.nc2.NetcdfFileWriteable;
 
 import au.org.emii.ncdfgenerator.INcdfEncoder ;
@@ -159,8 +163,12 @@ class NcdfEncoder implements INcdfEncoder
 				conn.close();
 				return null;
 			}
-		} catch ( Exception e ) {
-			System.out.println( "Opps " + e.getMessage() + "\n" + e.getStackTrace().toString() );
+		} 
+		// should we log here, or allow exceptions to propagate up?
+		catch ( Exception e ) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			System.out.println( "Opps " + sw.toString() );
 			conn.close();
 			return null;
 		}

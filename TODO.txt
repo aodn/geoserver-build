@@ -1,12 +1,11 @@
 
 Prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
 
------
+
 TODO
-- attribute values are typed - check GG xml. check ncdf api.
 - sql lookup for global attributes
-- global attributes and sql lookup.
-- need float and string literal types.
+- need float and string cql literal types.
+- logger
 
 -----
 TODO - OLD
@@ -14,8 +13,7 @@ TODO - OLD
 - postgres - parametize query parameters, rather than use text, injection attack
 - compose with spring
 -  (cant but have abstracted out) do the netcdf generation in memory
-- pass table as paraemter to encoder strategy (not sure)
-- make a tomcat/http service/
+- pass table as parameter to encoder strategy (not sure)
 
 ----
 
@@ -56,6 +54,6 @@ WHAT'S DONE
 - done - cql filter subset expression parsing
 - done - wkt
 - done - config to specify the tables. eg. xml
-
-
+- done - attribute arrays.
+- done - attribute values are typed - check GG xml. check ncdf api.
 

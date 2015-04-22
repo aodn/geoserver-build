@@ -13,10 +13,12 @@ import ucar.ma2.DataType;
 
 public class TimestampValueEncoder implements IValueEncoder
 {
-	// need a date unit...
+	// Always double type, for the moment
+
 	long epoch;  // in seconds
 	String unit; // seconds, days
-	float fill;
+	double fill;
+	boolean haveFill;
 
 	TimestampValueEncoder()
 	{
@@ -24,19 +26,26 @@ public class TimestampValueEncoder implements IValueEncoder
 		this.epoch = 0;
 		this.unit = null;
 		this.fill = 1234;
+		this.haveFill = false;
 	}
 
 	public DataType targetType()
 	{
-		return DataType.FLOAT;
+		return DataType.DOUBLE;
 	}
 
-	public void prepare( Map<String, String> attributes ) throws NcdfGeneratorException
+	public void prepare( Map<String, Object> attributes ) throws NcdfGeneratorException
 	{
-		Matcher m = Pattern.compile("([a-zA-Z]*)[ ]*since[ ]*(.*)").matcher( attributes.get("units") );
+		if( attributes.get("units") == null ) { 
+			throw new NcdfGeneratorException( "Missing 'units' attribute required for time coding");
+		}
+
+		String units = (String) attributes.get("units"); 
+
+		Matcher m = Pattern.compile("([a-zA-Z]*)[ ]*since[ ]*(.*)").matcher( units );
 		if(!m.find())
 		{
-			throw new NcdfGeneratorException( "couldn't parse attribute date");
+			throw new NcdfGeneratorException( "Couldn't parse attribute date");
 		}
 		unit = m.group(1);
 		String epochString = m.group(2);
@@ -46,31 +55,37 @@ public class TimestampValueEncoder implements IValueEncoder
 			epoch = (Long) ts.getTime() / 1000 ;
 		} catch( Exception e )
 		{
-			throw new NcdfGeneratorException( "couldn't extract timestamp '" + epochString + "' " + e.getMessage()  );
+			throw new NcdfGeneratorException( "Couldn't extract timestamp '" + epochString + "' " + e.getMessage()  );
 		}
 
-		fill = Float.valueOf( attributes.get( "_FillValue" )).floatValue();
+		if( attributes.get( "_FillValue" ) != null) {
+			fill = (Double) attributes.get( "_FillValue" );
+			haveFill = true;
+		}
 	}
 
 	public void encode( Array array, int ima,  Object value ) throws NcdfGeneratorException
 	{
 
 		if( value == null) {
-			array.setFloat( ima, fill );
+			if( haveFill) 
+				array.setDouble( ima, fill );
+			else 
+				throw new NcdfGeneratorException( "Missing value and no fill attribute defined" );
 		}
 		else if( value instanceof java.sql.Timestamp ) {
 			long seconds =  ((java.sql.Timestamp)value).getTime() / 1000  ;
-			long ret = seconds - epoch;
+			long val = seconds - epoch;
 			if( unit.equals("days"))
-				ret /= 86400;
+				val /= 86400;
 			else if( unit.equals("minutes"))
-				ret /= 1440;
+				val /= 1440;
 			else if ( unit.equals("seconds"))
 				;
 			else
-				throw new NcdfGeneratorException( "unrecognized time unit " + unit );
+				throw new NcdfGeneratorException( "Unrecognized time unit " + unit );
 
-			array.setFloat( ima, (float) ret );
+			array.setDouble( ima, (double) val );
 		}
 		else {
 			throw new NcdfGeneratorException( "Not a timestamp" );
