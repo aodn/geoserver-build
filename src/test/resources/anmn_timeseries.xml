@@ -34,7 +34,7 @@
         <attribute name="_FillValue" value="99999.f"/>
         <attribute name="example1" value="&quot;examplevalue&quot;" />
         <attribute name="example2" value="'examplevalue'" />
-        <attribute name="example3" value="0b 5b 7b 9b 1b" />
+        <attribute name="example3" value="0b, 5b, 7b, 9b, 1b" />
       </attributes>
     </variable>
     <variable>

@@ -86,7 +86,6 @@ class VariableEncoder implements IVariableEncoder
 				writer.addVariableAttribute( variableName, entry.getKey(), (Array) value );
 			}  
 			else {
-				// TODO array
 				throw new NcdfGeneratorException( "Unrecognized attribute type '" +  value.getClass().getName() + "'" ); 
 			}
 		}
@@ -131,6 +130,10 @@ class VariableEncoder implements IVariableEncoder
 
 
 		encodeValue.prepare( convertedAttributes );
+
+		if( buffer.isEmpty() ) {
+			throw new NcdfGeneratorException( "No values found for variable '" + variableName + "'" );
+		}
 
 		writeValues( dimensions,  0, 0 , A );
 

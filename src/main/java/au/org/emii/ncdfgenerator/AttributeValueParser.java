@@ -33,7 +33,7 @@ class AttributeValueParser implements IAttributeValueParser
 	{
 		int pos = 0;
 
-		AttributeValue a = parseAttributes( s, pos ); 
+		AttributeValue a = parseAttributes( s, pos );
 		if( a != null) {
 			// ensure we got to the end, with nothing trailing
 			pos = a.pos;
@@ -45,56 +45,66 @@ class AttributeValueParser implements IAttributeValueParser
 		throw new NcdfGeneratorException( "Couldn't parse attribute value '" + s + "'" );
 	}
 
-	
+
 	protected AttributeValue parseAttributes( String s, int pos ) throws NcdfGeneratorException
 	{
-		// try to parse as an attribute array, fallback to creating a scalar 
+		// try to parse as an attribute array, fallback to creating a scalar
 
-		List<AttributeValue> items = new ArrayList<AttributeValue> (); 
-		AttributeValue a = null;
-		do { 
-			a = parseAttributeValue( s, pos );
-			if( a != null) { 
-				items.add( a) ; 
-				pos = a.pos;
-				pos = skipWhite( s, pos ); 
-			}
+		List<AttributeValue> items = new ArrayList<AttributeValue> ();
+
+		AttributeValue a = parseAttributeValue1( s, pos );
+		if( a == null )
+			return null;
+
+		items.add(a) ;
+		pos = a.pos;
+		pos = skipWhite( s, pos );
+
+		while( peekChar( s, pos) == ',') {
+			++pos;
+			pos = skipWhite( s, pos );
+			a = parseAttributeValue1( s, pos );
+			if( a == null )
+				return null;
+			items.add(a) ;
+			pos = a.pos;
+			pos = skipWhite( s, pos );
 		}
-		while( a != null ); 
 
-		if( items.size() == 1 ) { 
-			return items.get(0);
+
+		if( items.size() == 1 ) {
+			return items.get( 0);
 		}
 		else if ( items.size() > 1 ) {
 			// handle single dimension only at this point...
 			int shape [] = { items.size() };
 
 			// assume type according to the first value
-			Object first = items.get(0).value;
+			Object first = items.get( 0).value;
 			Array ar = null;
 
-			if( first instanceof Byte ) { 
+			if( first instanceof Byte ) {
 				ar = Array.factory( DataType.BYTE, shape );
-				int i = 0; 
+				int i = 0;
 				for( AttributeValue e : items )
 					ar.setByte( i++, (Byte)e.value );
 			}
-			else if( first instanceof Integer ) { 
+			else if( first instanceof Integer ) {
 				ar = Array.factory( DataType.INT, shape );
-				int i = 0; 
+				int i = 0;
 				for( AttributeValue e : items )
 					ar.setInt( i++, (Integer)e.value );
 			}
 			// TODO long
-			else if( first instanceof Float ) { 
+			else if( first instanceof Float ) {
 				ar = Array.factory( DataType.FLOAT, shape );
-				int i = 0; 
+				int i = 0;
 				for( AttributeValue e : items )
 					ar.setFloat( i++, (Float)e.value );
 			}
-			else if( first instanceof Double ) { 
+			else if( first instanceof Double ) {
 				ar = Array.factory( DataType.DOUBLE, shape );
-				int i = 0; 
+				int i = 0;
 				for( AttributeValue e : items )
 					ar.setDouble( i++, (Double)e.value );
 			}
@@ -105,13 +115,13 @@ class AttributeValueParser implements IAttributeValueParser
 			}
 			return new AttributeValue(pos, ar );
 		}
-		else {
+		else
 			return null;
-		}
-	}
-	
 
-	protected AttributeValue parseAttributeValue( String s, int pos )
+	}
+
+
+	protected AttributeValue parseAttributeValue1( String s, int pos )
 	{
 		AttributeValue a = parseFloat( s, pos );
 		if( a != null )

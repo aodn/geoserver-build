@@ -56,4 +56,4 @@ WHAT'S DONE
 - done - config to specify the tables. eg. xml
 - done - attribute arrays.
 - done - attribute values are typed - check GG xml. check ncdf api.
-
+- done - gg all dimensions and attribute variables
