@@ -16,17 +16,17 @@ import java.util.TimeZone;
 
 public class ValueEncoder {
 
-    List<String> encodeValues(Set values) {
+    List<String> encode(Set values) {
         List<String> result = new ArrayList<String>();
 
         for (Object value : values) {
-            result.add(encodeValue(value));
+            result.add(encode(value));
         }
 
         return result;
     }
 
-    String encodeValue(Object unencoded) {
+    String encode(Object unencoded) {
 
         if (unencoded instanceof java.util.Date) {
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");

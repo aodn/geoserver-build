@@ -30,7 +30,7 @@ public class ValueEncoderTest {
             Object unencoded = encoding.getKey();
             String encoded = encoding.getValue();
 
-            assertEquals(encoded, new ValueEncoder().encodeValue(unencoded));
+            assertEquals(encoded, new ValueEncoder().encode(unencoded));
         }
     }
 }

@@ -23,9 +23,9 @@ public class ValuesDocument {
         Element valuesElement = document.createElement("uniqueValues");
         document.appendChild(valuesElement);
 
-        for (String value : new ValueEncoder().encodeValues(values)) {
+        for (String encodedValue : new ValueEncoder().encode(values)) {
               Element element = document.createElement("value");
-              element.appendChild(document.createTextNode(value));
+              element.appendChild(document.createTextNode(encodedValue));
               valuesElement.appendChild(element);
         }
         return document;
