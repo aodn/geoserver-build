@@ -63,14 +63,14 @@ class AttributeValueParser implements IAttributeValueParser
 		while( a != null ); 
 
 		if( items.size() == 1 ) { 
-			return items.get( 0); 
+			return items.get(0);
 		}
 		else if ( items.size() > 1 ) {
 			// handle single dimension only at this point...
 			int shape [] = { items.size() };
 
 			// assume type according to the first value
-			Object first = items.get( 0).value;
+			Object first = items.get(0).value;
 			Array ar = null;
 
 			if( first instanceof Byte ) { 
