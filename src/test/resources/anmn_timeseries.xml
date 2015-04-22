@@ -14,12 +14,12 @@
       <name>LATITUDE</name>
       <encoder>float</encoder>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
+        <attribute name="_FillValue" value="99999.f"/>
       </attributes>
     </variable>
     <variable>
       <name>LONGITUDE</name>
-      <encoder>float</encoder>
+      <encoder>double</encoder>
       <attributes>
         <attribute name="_FillValue" value="99999."/>
       </attributes>
@@ -31,8 +31,10 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
-        <attribute name="example" value="examplevalue"/>
+        <attribute name="_FillValue" value="99999.f"/>
+        <attribute name="example1" value="&quot;examplevalue&quot;" />
+        <attribute name="example2" value="'examplevalue'" />
+        <attribute name="example3" value="0b 5b 7b 9b 1b" />
       </attributes>
     </variable>
     <variable>
@@ -42,7 +44,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
+        <attribute name="_FillValue" value="99999.f"/>
       </attributes>
     </variable>
     <variable>
@@ -52,7 +54,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="0xffb"/>
+        <attribute name="_FillValue" value="99b"/>
       </attributes>
     </variable>
   </variables>

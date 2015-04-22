@@ -22,9 +22,13 @@ public class IntValueEncoder implements IValueEncoder
 		return DataType.INT;
 	}
 
-	public void prepare( Map<String, String> attributes )
+	public void prepare( Map<String, Object> attributes )throws NcdfGeneratorException
 	{
-		fill = Integer.valueOf( attributes.get( "_FillValue" )).intValue();
+		try { 
+			fill = (Integer)attributes.get( "_FillValue" );
+		} catch( Exception e ) {
+			throw new NcdfGeneratorException( "Expected _FillValue attribute to be Int type");
+		}
 	}
 
 	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException
@@ -39,7 +43,7 @@ public class IntValueEncoder implements IValueEncoder
 			array.setInt( ima, (int)(long)(Long) value);
 		}
 		else {
-			throw new NcdfGeneratorException( "Failed to coerce type '" + value.getClass() + "' to float" );
+			throw new NcdfGeneratorException( "Failed to coerce type '" + value.getClass() + "' to int" );
 		}
 	}
 }

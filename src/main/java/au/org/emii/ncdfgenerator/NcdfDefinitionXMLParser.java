@@ -84,12 +84,13 @@ class NcdfDefinitionXMLParser
 		{
 			String val = nodeVal( node );
 			if( val.equals( "integer")) {
-
 				return new IntValueEncoder();
-				// throw new RuntimeException( "INT" );
 			}
 			else if( val.equals( "float")) {
 				return new FloatValueEncoder();
+			}
+			else if( val.equals( "double")) {
+				return new DoubleValueEncoder();
 			}
 			else if( val.equals( "byte")) {
 				return new ByteValueEncoder();
@@ -99,7 +100,8 @@ class NcdfDefinitionXMLParser
 			}
 			else
 			{
-				throw new NcdfGeneratorException( "Unrecognized value type encoder" );
+				// int lineNo = node.getLineNumber();
+				throw new NcdfGeneratorException( "Unrecognized value type encoder '" + val + "'" );
 			}
 		}
 		return null;

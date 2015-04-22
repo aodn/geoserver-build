@@ -453,18 +453,15 @@ public class ExprParser implements IExprParser
 
 	private ExprStringLiteral parseStringLiteral( String s, int pos )
 	{
-		// change name parseStringLiteral
-
-		// TODO pos2
+		// TODO use peekChar() not charAt()
+		// TODO ignore escaping for the moment
 		int pos2 = pos;
-		// ignore escaping for the moment
 		if(s.charAt(pos2) != '\'')
 			return null;
 		++pos2;
 
 		while(s.charAt(pos2) != '\'')
 			++pos2;
-
 		++pos2;
 		return new ExprStringLiteral(pos, s.substring( pos + 1, pos2 - 1));
 	}

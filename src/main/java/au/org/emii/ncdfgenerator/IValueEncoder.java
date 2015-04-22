@@ -10,8 +10,8 @@ public interface IValueEncoder
 {
 	// Netcdf value encoder from java/sql types
 
+	public void prepare( Map<String, Object> attributes ) throws NcdfGeneratorException;
 	public void encode( Array array, int ima, Object value ) throws NcdfGeneratorException;
-	public void prepare( Map<String, String> attributes ) throws NcdfGeneratorException;
 	public DataType targetType();
 }
 
