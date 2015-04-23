@@ -145,17 +145,17 @@ class NcdfEncoder implements INcdfEncoder
 					String name = attribute.name;
 					Object value = null;
 
-					// we have to do the conversion ...
 					if( attribute.value != null )
 					{
+						// convert to netcdf type
 						AttributeValue convertedValue = attributeValueParser.parse( attribute.value );
 						value = convertedValue.value;
 					}
 					else if( attribute.sql != null )
 					{
-						// we need an alias for the inner select, and to support wrapping the where selection
+						// we need aliases for the inner select, and to support wrapping the where selection
 						String sql = attribute.sql.replaceAll( "\\$instance",
-							"( select * " + 
+							"( select * " +
 							" from (" + definition.dataSource.virtualInstanceTable + ") instance " +
 							" where instance.id = " + Long.toString( instanceId) + ") as instance "
 						);
@@ -172,13 +172,13 @@ class NcdfEncoder implements INcdfEncoder
 						);
 
 						PreparedStatement stmt = null;
-						try { 
+						try {
 							stmt = conn.prepareStatement( sql );
 							stmt.setFetchSize(fetchSize);
 							ResultSet rs = stmt.executeQuery();
 
 							// TODO more checks around this
-							// maybe support converion to ncdf array attribute types 
+							// maybe support converion to ncdf array attribute types
 							rs.next();
 							value = rs.getObject( 1 );
 						} finally {
@@ -206,8 +206,8 @@ class NcdfEncoder implements INcdfEncoder
 				for ( IDimension dimension: definition.dimensions) {
 					dimension.define(writer);
 				}
-	
-				// define vars 
+
+				// define vars
 				for ( IVariableEncoder variable : definition.variables ) {
 					variable.define( writer );
 				}

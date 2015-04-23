@@ -6,7 +6,7 @@ import java.util.List;
 class NcdfDefinition
 {
 	final DataSource dataSource;
-	final List< Attribute> globalAttributes; 
+	final List< Attribute> globalAttributes;
 	final List< IDimension> dimensions;
 	final List< IVariableEncoder> variables;
 
