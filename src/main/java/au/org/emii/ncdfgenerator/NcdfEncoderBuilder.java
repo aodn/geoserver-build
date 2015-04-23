@@ -38,7 +38,7 @@ public class NcdfEncoderBuilder
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
 			Node node = document.getFirstChild();
-			definition = new NcdfDefinitionXMLParser().parseDefinition( node );
+			definition = new NcdfDefinitionXMLParser().parse( node );
 
 		} finally {
 			config.close();

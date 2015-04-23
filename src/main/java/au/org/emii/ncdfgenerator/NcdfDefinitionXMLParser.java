@@ -1,276 +1,376 @@
 
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.IVariableEncoder;
-import au.org.emii.ncdfgenerator.VariableEncoder;
 
+import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.AbstractMap.SimpleImmutableEntry;
 
+import java.sql.Connection;
+import java.io.InputStream;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
 
-class NcdfDefinitionXMLParser
+import java.lang.Exception ;
+
+import au.org.emii.ncdfgenerator.IDimension;
+import au.org.emii.ncdfgenerator.NcdfGeneratorException;
+
+
+class Helper
 {
-	private boolean isNodeName( Node node, String name )
-	{
-		return node.getNodeType() == Node.ELEMENT_NODE
-			&& node.getNodeName().equals( name );
-	}
-
-	private String nodeVal( Node node  )
+	static String nodeVal( Node node )
 	{
 		Node child = node.getFirstChild();
 		if( child != null && child.getNodeType() == Node.TEXT_NODE )
 			return child.getNodeValue();
-
 		return "";
 	}
 
-
-	private Map< String, String> parseKeyVals( Node node )
+	static boolean isElementNode( Node node )
 	{
-		// have another version that does this for attributes
-		Map< String, String> m = new HashMap< String, String>();
-		for( Node child : new NodeWrapper(node) )
-			if( child.getNodeType() == Node.ELEMENT_NODE )
-				m.put( child.getNodeName(), nodeVal( child ) );
-
-		// add any xml attributes
-		NamedNodeMap attrs = node.getAttributes();
-		for( int i = 0; i < attrs.getLength(); ++i )
-		{
-			Node child = attrs.item( i) ;
-			m.put( child.getNodeName(), nodeVal( child ) );
-		}
-
-		return m;
+	    return node.getNodeType() == Node.ELEMENT_NODE;
 	}
 
-	private IDimension parseDimension( Node node)
+/*
+	static boolean isTextNode( Node node )
 	{
-		if( isNodeName( node, "dimension")) {
-			Map< String, String> m = parseKeyVals( node );
-			return new DimensionImpl( m.get( "name" ) );
-		}
-		return null;
+	    return node.getNodeType() == Node.TEXT_NODE;
 	}
+*/
+}
 
-	// having a simple parse key-vals function, means we can do it with attributes as alternative syntax.
 
-	private Map< String, IDimension> parseDimensions( Node node )
+class NcdfDefinitionXMLParser
+{
+	class Context
 	{
-		if( isNodeName( node, "dimensions"))
+		// required to resolve references to dimensions from the variable definitions
+		List< IDimension> dimensions;
+
+		IDimension getDimensionByName( String name )
 		{
-			Map< String, IDimension> dimensions = new HashMap< String, IDimension> () ;
-			for( Node child : new NodeWrapper(node) ) {
-				IDimension dimension = parseDimension( child );
-				if( dimension != null)
-					dimensions.put( dimension.getName(), dimension );
+			for( IDimension dimension : dimensions ) {
+				if( dimension.getName().equals( name))
+					return dimension;
 			}
-			return dimensions;
+			return null;
 		}
-		return null;
 	}
 
 
-	private IValueEncoder parseEncoder( Node node)
-		throws NcdfGeneratorException
+	class ParseDataSource
 	{
-		if( isNodeName( node, "encoder"))
+		String schema;
+		String virtualDataTable;
+		String virtualInstanceTable;
+
+		private void extractValue( Node child ) throws NcdfGeneratorException
 		{
-			String val = nodeVal( node );
-			if( val.equals( "integer")) {
-				return new IntValueEncoder();
-			}
-			else if( val.equals( "float")) {
-				return new FloatValueEncoder();
-			}
-			else if( val.equals( "double")) {
-				return new DoubleValueEncoder();
-			}
-			else if( val.equals( "byte")) {
-				return new ByteValueEncoder();
-			}
-			else if( val.equals( "time")) {
-				return new TimestampValueEncoder();
-			}
+			String tag = child.getNodeName();
+			if( tag.equals( "schema" ))
+				schema = Helper.nodeVal( child );
+			else if ( tag.equals( "virtualDataTable" ))
+				virtualDataTable = Helper.nodeVal( child );
+			else if ( tag.equals( "virtualInstanceTable" ))
+				virtualInstanceTable = Helper.nodeVal( child );
 			else
+				throw new NcdfGeneratorException( "Unrecognized tag" );
+		}
+
+		DataSource parse( Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "source" ))
+				throw new NcdfGeneratorException( "Not source node" );
+
+			for( Node child : new NodeWrapper(node) )
+				if( Helper.isElementNode( child))
+					extractValue( child );
+
+			return new DataSource( schema, virtualDataTable, virtualInstanceTable );
+		}
+	}
+
+
+	class ParseDimension
+	{
+		IDimension parse( Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "dimension" ))
+				throw new NcdfGeneratorException( "Not a dimension node" );
+
+			String name = "";
+			NamedNodeMap attrs = node.getAttributes();
+			for( int i = 0; i < attrs.getLength(); ++i )
 			{
-				// int lineNo = node.getLineNumber();
-				throw new NcdfGeneratorException( "Unrecognized value type encoder '" + val + "'" );
+				Node child = attrs.item( i) ;
+				if( child.getNodeName().equals( "name" ))
+					name = Helper.nodeVal( child);
+		        else
+					throw new NcdfGeneratorException( "Unrecognized tag" );
 			}
+
+			return new DimensionImpl( name );
 		}
-		return null;
 	}
 
 
-	private SimpleImmutableEntry<String, String> parseAttribute( Node node )
+	class ParseDimensions
 	{
-
-		if( isNodeName( node, "attribute"))
+		List< IDimension> parse( Node node ) throws NcdfGeneratorException
 		{
-			Map< String, String> m = parseKeyVals( node );
-			String key = m.get("name");
-			String val = m.get("value");
-			return new SimpleImmutableEntry< String, String>( key, val );
-		}
-		return null;
-	}
+			if( !node.getNodeName().equals( "dimensions" ))
+				throw new NcdfGeneratorException( "Not a dimensions node" );
 
-
-	private Map<String, String> parseAttributes( Node node )
-	{
-		if( isNodeName( node, "attributes"))
-		{
-			Map<String, String> m = new HashMap<String, String> ();
-			for( Node child : new NodeWrapper(node) ) {
-				SimpleImmutableEntry< String, String> pair = parseAttribute( child);
-				if( pair != null)
-					m.put( pair.getKey(), pair.getValue());
-			}
-			return m;
-		}
-		return null;
-	}
-
-
-	private IDimension parseDimensionRef ( Node node, Map< String, IDimension> dimensionsContext )
-	{
-		if( isNodeName( node, "dimension")) {
-			Map< String, String> m = parseKeyVals( node );
-			return dimensionsContext.get( m.get( "name" ));
-		}
-		return null;
-	}
-
-
-	private Map< String, IDimension> parseDimensionsRef( Node node, Map< String, IDimension> dimensionsContext )
-	{
-		if( isNodeName( node, "dimensions"))
-		{
-			Map< String, IDimension> dimensions = new HashMap< String, IDimension> () ;
-			for( Node child : new NodeWrapper(node) ) {
-				IDimension dimension = parseDimensionRef( child, dimensionsContext);
-				if( dimension != null)
-					dimensions.put( dimension.getName(), dimension );
-			}
-			return dimensions;
-		}
-		return null;
-	}
-
-	// think we may want a more general context ...
-
-	private IVariableEncoder parseVariableEncoder( Node node, Map< String, IDimension> dimensionsContext  )
-		throws NcdfGeneratorException
-	{
-		String name = null;
-		Map< String, IDimension> dimensions = null;
-		IValueEncoder encodeValue = null;
-		Map< String, String> attributes = null;
-
-		if( isNodeName( node, "variable"))
-		{
+			List< IDimension> dimensions = new ArrayList< IDimension>();
 			for( Node child : new NodeWrapper(node) )
 			{
-				// this is very neat. may want to do this explicitly rather than using the map...
-				if( isNodeName( child, "name" ))
-					name = nodeVal( child);
-				if( dimensions == null)
-					dimensions = parseDimensionsRef( child, dimensionsContext );
-				if( encodeValue == null)
-					encodeValue = parseEncoder( child ) ;
-				if( attributes == null)
-					attributes = parseAttributes( child );
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "dimension" ))
+						dimensions.add( new ParseDimension().parse( child ) );
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag" );
+				}
 			}
+			return dimensions;
+		}
+	}
 
-			if( dimensions == null )
+
+	class ParseVariableDimension
+	{
+		IDimension parse( Context context, Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "dimension" ))
+				throw new NcdfGeneratorException( "Not a dimension" );
+
+			NamedNodeMap attrs = node.getAttributes();
+			for( int i = 0; i < attrs.getLength(); ++i )
 			{
-				dimensions = new HashMap< String, IDimension> ();
+				Node child = attrs.item( i) ;
+				if( child.getNodeName().equals( "name" ))
+					return context.getDimensionByName( Helper.nodeVal( child) );
+				else
+					throw new NcdfGeneratorException( "Unrecognized tag" );
 			}
+			return null;
+		}
+	}
 
-			if( name != null
-				&& encodeValue != null
-				&& attributes != null )
+
+	class ParseVariableDimensions
+	{
+		List< IDimension> parse( Context context, Node node  ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "dimensions" ))
+				throw new NcdfGeneratorException( "Not a dimensions node" );
+
+			List< IDimension> dimensions = new ArrayList< IDimension>();
+			for( Node child : new NodeWrapper(node) )
 			{
-
-				return new VariableEncoder( name , new ArrayList<IDimension>(dimensions.values()), encodeValue , attributes ) ;
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "dimension" ))
+						dimensions.add( new ParseVariableDimension().parse( context, child ) );
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag" );
+				}
 			}
-			else {
-				throw new NcdfGeneratorException( "missing something" );
-			}
+			return dimensions;
 		}
-		return null;
 	}
 
 
-	private Map< String, IVariableEncoder> parseVariableEncoders( Node node, Map< String, IDimension> dimensionsContext  )
-		throws NcdfGeneratorException
+	class ParseAttribute
 	{
-		if( isNodeName( node, "variables"))
+		String name;
+		String value;
+		String sql;
+
+		private void extractValue( Node child) throws NcdfGeneratorException
 		{
-			Map< String, IVariableEncoder> m = new HashMap < String, IVariableEncoder>();
-			for( Node child : new NodeWrapper(node)) {
-				IVariableEncoder e = parseVariableEncoder( child, dimensionsContext  );
-				if( e != null )
-					m.put( e.getName(), e );
-			}
-			return m;
+			// attr or node
+			String tag = child.getNodeName();
+			if( tag.equals( "name" ))
+				name = Helper.nodeVal( child);
+			else if( tag.equals( "value" ))
+				value = Helper.nodeVal( child);
+			else if( tag.equals( "sql" ))
+				sql = Helper.nodeVal( child);
 		}
-		return null;
+
+		Attribute parse( Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "attribute" ))
+				throw new NcdfGeneratorException( "Not an attribute" );
+
+			// extract from nested tags
+			for( Node child : new NodeWrapper(node) )
+				extractValue( child );
+
+			// extract from attributes
+			NamedNodeMap attrs = node.getAttributes();
+			for( int i = 0; i < attrs.getLength(); ++i )
+				extractValue( attrs.item( i));
+
+			return new Attribute( name, value, sql );
+		}
 	}
 
-	private Map< String, String> parseSource( Node node )
+
+	class ParseAttributes
 	{
-		if( isNodeName( node, "source")) /// data or dataSource
+		List< Attribute> parse( Node node ) throws NcdfGeneratorException
 		{
-			Map< String, String> source = parseKeyVals( node);
+			if( !node.getNodeName().equals( "attributes" )
+				&& !node.getNodeName().equals( "globalattributes" )
+			)
+				throw new NcdfGeneratorException( "Not an attributes node" );
 
-			/*
-			for( Map.Entry< String, String> entry : source.entrySet()) {
-				System.out.println( "*** " + entry.getKey() + " " + entry.getValue() );
-
-			} */
-			return source;
+			List< Attribute> attributes = new ArrayList< Attribute>();
+			for( Node child : new NodeWrapper(node) )
+			{
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "attribute" ))
+						attributes.add( new ParseAttribute().parse( child ));
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag" );
+				}
+			}
+			return attributes;
 		}
-		return null;
-
 	}
 
-	NcdfDefinition parseDefinition( Node node )
-		throws NcdfGeneratorException
+
+	class ParseEncoder
 	{
-		// think we need a context?
-		if( isNodeName( node, "definition"))
+		IValueEncoder parse( Node node ) throws NcdfGeneratorException
 		{
-			Map< String, String> source = null;
-			Map< String, IDimension> dimensions = null;
-			Map< String, IVariableEncoder> encoders = null;
+			if( !node.getNodeName().equals( "encoder" ))
+				throw new NcdfGeneratorException( "Not an encoder" );
 
-			// pick out dimensions
-			for( Node child : new NodeWrapper(node)) {
+			// if we need more encoder detail, then can deal with separately
+			String tag = Helper.nodeVal( node );
+			if( tag.equals( "integer"))
+				return new IntValueEncoder();
+			else if( tag.equals( "float"))
+				return new FloatValueEncoder();
+			else if( tag.equals( "double"))
+				return new DoubleValueEncoder();
+			else if( tag.equals( "byte"))
+				return new ByteValueEncoder();
+			else if( tag.equals( "time"))
+				return new TimestampValueEncoder();
+			else
+				throw new NcdfGeneratorException( "Unrecognized tague type encoder '" + tag + "'" );
+		}
+	}
 
-				if( source == null )
-					source = parseSource( child );
 
-				if( dimensions == null )
-					dimensions = parseDimensions( child );
+	class ParseVariable
+	{
+		IVariableEncoder parse( Context context, Node node  ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "variable" ))
+				throw new NcdfGeneratorException( "Not a variable" );
 
-				if( encoders == null )
-					encoders = parseVariableEncoders( child, dimensions );
+			String name = null;
+			IValueEncoder encoder = null;
+			List<IDimension> dimensions = new ArrayList< IDimension>(); // support missing dimensions and attributes
+			List<Attribute> attributes = new ArrayList< Attribute>();
+
+			for( Node child : new NodeWrapper(node) )
+			{
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "name" ))
+						name = Helper.nodeVal( child );
+					else if( tag.equals( "encoder" ))
+						encoder = new ParseEncoder().parse( child );
+					else if( tag.equals( "dimensions" ))
+						dimensions = new ParseVariableDimensions().parse( context, child );
+					else if (tag.equals( "attributes"))
+						attributes = new ParseAttributes().parse( child );
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag" );
+				}
 			}
 
-			String schema = source.get( "schema" );
-			String virtualDataTable = source.get( "virtualDataTable" );
-			String virtualInstanceTable =source.get( "virtualInstanceTable" );
-
-			return new NcdfDefinition( schema, virtualDataTable, virtualInstanceTable, dimensions, encoders );
+			return new VariableEncoder( name, dimensions, encoder, attributes );
 		}
-		return null;
+	}
+
+
+	class ParseVariables
+	{
+		List<IVariableEncoder> parse( Context context, Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "variables" ))
+				throw new NcdfGeneratorException( "Not variables" );
+
+			List<IVariableEncoder> variables = new ArrayList< IVariableEncoder>();
+			for( Node child : new NodeWrapper(node) )
+			{
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "variable" ))
+						variables.add( new ParseVariable().parse( context, child ) );
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag" );
+				}
+			}
+			return variables;
+		}
+	}
+
+
+	class ParseDefinition
+	{
+		NcdfDefinition parse( Node node ) throws NcdfGeneratorException
+		{
+			if( !node.getNodeName().equals( "definition" ))
+				throw new NcdfGeneratorException( "Not definition" );
+
+			DataSource dataSource = null; ;
+			List<IVariableEncoder> variables = null;
+			List< Attribute> globalAttributes = null;
+	
+			Context context = new Context ();
+
+			for( Node child : new NodeWrapper(node) )
+			{
+				if( Helper.isElementNode( child)) {
+					String tag = child.getNodeName();
+					if( tag.equals( "source" ))
+						dataSource = new ParseDataSource().parse( child ) ;
+					else if( tag.equals( "dimensions" ))
+						context.dimensions = new ParseDimensions().parse( child);
+					else if( tag.equals( "variables" ))
+						variables = new ParseVariables().parse( context, child);
+					else if( tag.equals( "globalattributes" ))
+						globalAttributes = new ParseAttributes().parse( child);
+					else
+						throw new NcdfGeneratorException( "Unrecognized tag '" + tag + "'" );
+				}
+			}
+
+			return new NcdfDefinition( dataSource, globalAttributes, context.dimensions, variables );
+		}
+	}
+
+
+	NcdfDefinition parse( Node node ) throws NcdfGeneratorException
+	{
+		if( node.getNodeName().equals( "definition" ))
+			return new ParseDefinition().parse( node );
+		else
+			throw new NcdfGeneratorException( "Missing definition" );
 	}
 }
 

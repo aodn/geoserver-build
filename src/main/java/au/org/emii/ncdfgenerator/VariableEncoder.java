@@ -14,43 +14,42 @@ import ucar.nc2.Dimension;
 import au.org.emii.ncdfgenerator.AttributeValue;
 
 
+
 class VariableEncoder implements IVariableEncoder
 {
-	final String				variableName;
-	final IValueEncoder			encodeValue;
-	final Map<String, String>	attributes;
-	final ArrayList<IDimension>	dimensions; // change name childDimensions
-	final ArrayList<Object>		buffer;
+	final String variableName;
+	final IValueEncoder encodeValue;
+	final List<Attribute> attributes;
+	final List<IDimension> dimensions;
+	final List<Object> buffer;
 
-	final IAttributeValueParser	attributeValueParser; 
-	final Map< String, Object > convertedAttributes;
+	final IAttributeValueParser attributeValueParser;
+	final List< Object > convertedAttributes; // output ordered (change name Values  )
+	final Map< String, Object > convertedAttributesMap; // to support encoder lookup...
 
 	public VariableEncoder(
 		String variableName,
-		ArrayList< IDimension> dimensions,
+		List< IDimension> dimensions,
 		IValueEncoder encodeValue,
-		Map<String, String> attributes
+		List<Attribute> attributes
 	) {
 		this.variableName = variableName;
 		this.encodeValue = encodeValue;
 		this.attributes = attributes;
 		this.dimensions = dimensions;
 		this.buffer = new ArrayList<Object>( );
-
-		this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate 
-		this.convertedAttributes = new HashMap< String, Object > ();
+		this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate
+		this.convertedAttributes = new ArrayList< Object > ();
+		this.convertedAttributesMap = new HashMap< String, Object > ();
 	}
 
 
-	/*	we can also record the table, or index of table here if we want
-			to incorporate into the strategy.
-		eg. we can compre with xml to decide what to do.
-	*/
 	public void addValueToBuffer( Object value )
 	{
 		// perhaps delegate to strategy...
 		buffer.add( value );
 	}
+
 
 	public void define( NetcdfFileWriteable writer ) throws NcdfGeneratorException
 	{
@@ -65,34 +64,38 @@ class VariableEncoder implements IVariableEncoder
 
 		writer.addVariable(variableName, encodeValue.targetType(), d );
 
-		// decode the attribute values 
-		for( Map.Entry< String, String> entry : attributes.entrySet()) {
-			AttributeValue a = attributeValueParser.parse( entry.getValue() ); 
-			convertedAttributes.put( entry.getKey(), a.value );
+		// there's a bit of double handling here. We use the list to preserve output ordering
+		// but use a map for the encoder type to permit easy name lookup
+		for( Attribute a : attributes ) {
+			AttributeValue av = attributeValueParser.parse( a.value );
+			convertedAttributes.add( av.value );
+			convertedAttributesMap.put( a.name, av.value );
 		}
 
-		// encode the variable attributes 
-		for( Map.Entry< String, Object> entry : convertedAttributes.entrySet()) {
+		// encode the variable attributes
+		for( int i = 0; i < attributes.size(); ++i ) {
 
 			// https://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/v4.2/javadoc/ucar/nc2/NetcdfFileWriteable.html
-			Object value = entry.getValue(); 
+			String name = attributes.get( i ).name;
+			Object value = convertedAttributes.get( i );
+
 			if( value instanceof Number ) {
-				writer.addVariableAttribute( variableName, entry.getKey(), (Number) value );
-			}  
+				writer.addVariableAttribute( variableName, name, (Number) value );
+			}
 			else if( value instanceof String ) {
-				writer.addVariableAttribute( variableName, entry.getKey(), (String) value );
-			}  
+				writer.addVariableAttribute( variableName, name, (String) value );
+			}
 			else if( value instanceof Array ) {
-				writer.addVariableAttribute( variableName, entry.getKey(), (Array) value );
-			}  
+				writer.addVariableAttribute( variableName, name, (Array) value );
+			}
 			else {
-				throw new NcdfGeneratorException( "Unrecognized attribute type '" +  value.getClass().getName() + "'" ); 
+				throw new NcdfGeneratorException( "Unrecognized attribute type '" +  value.getClass().getName() + "'" );
 			}
 		}
 	}
 
 
-	public void writeValues( ArrayList<IDimension> dims, int dimIndex, int acc, Array A  )
+	public void writeValues( List<IDimension> dims, int dimIndex, int acc, Array A  )
 		throws NcdfGeneratorException
 	{
 		if( dimIndex < dims.size() )
@@ -107,8 +110,8 @@ class VariableEncoder implements IVariableEncoder
 		{
 			encodeValue.encode( A, acc, buffer.get( acc ) );
 		}
-
 	}
+
 
 	private static int[] toIntArray( List<Integer> list)
 	{
@@ -119,7 +122,8 @@ class VariableEncoder implements IVariableEncoder
 		return ret;
 	}
 
-	public void finish( NetcdfFileWriteable writer) throws Exception
+
+	public void finish( NetcdfFileWriteable writer) throws Exception // TODO use narrow exception
 	{
 		ArrayList< Integer> shape = new ArrayList< Integer>() ;
 		for( IDimension dimension : dimensions ) {
@@ -128,8 +132,7 @@ class VariableEncoder implements IVariableEncoder
 
 		Array A = Array.factory( encodeValue.targetType(), toIntArray(shape ) );
 
-
-		encodeValue.prepare( convertedAttributes );
+		encodeValue.prepare( convertedAttributesMap );
 
 		if( buffer.isEmpty() ) {
 			throw new NcdfGeneratorException( "No values found for variable '" + variableName + "'" );
