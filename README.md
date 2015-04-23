@@ -8,7 +8,7 @@ java 1.7
 ## To compile and run unit tests
 mvn install
 
-# To run a specific integration test
+## To run a specific integration test
 
 mvn -Dtest=GenerationIT#anmn_timeseries_gg_IT test
 
@@ -17,7 +17,7 @@ mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT test
 mvn -Dtest=GenerationIT#soop_sst_trajectory_IT test   
 
 
-references
+## references
 
 cql
 
@@ -34,13 +34,11 @@ jfca@10-nsp-mel:~$ ncdump /mnt/opendap/1/IMOS/opendap/eMII/checker_test/ANMN/pro
 
 ----
 
-For profile
-
 http://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/reference/faq.html
 
 https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Variables.html
-https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Dimensions.html
 
+https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Dimensions.html
 
 http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/tutorial/NetcdfFileWriteable.html
 

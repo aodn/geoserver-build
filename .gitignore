@@ -3,3 +3,5 @@
 *.class
 target
 testWrite.nc
+env.*sh
+
