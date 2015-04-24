@@ -1,28 +1,25 @@
 
 package au.org.emii.ncdfgenerator;
 
-import java.util.Map;
+import java.util.List;
 
 class NcdfDefinition
 {
-	final String schema;
-	final String virtualDataTable;
-	final String virtualInstanceTable;
-	final Map< String, IDimension> dimensions;
-	final Map< String, IVariableEncoder> encoders;
+	final DataSource dataSource;
+	final List< Attribute> globalAttributes;
+	final List< IDimension> dimensions;
+	final List< IVariable> variables;
 
 	NcdfDefinition(
-		String schema,
-		String virtualDataTable,
-		String virtualInstanceTable,
-		Map< String, IDimension> dimensions,
-		Map< String, IVariableEncoder> encoders
+		DataSource dataSource,
+		List< Attribute> globalAttributes,
+		List< IDimension> dimensions,
+		List< IVariable> variables
 	) {
-		this.schema = schema;
-		this.virtualDataTable = virtualDataTable;
-		this.virtualInstanceTable = virtualInstanceTable;
+		this.dataSource = dataSource;
+		this.globalAttributes = globalAttributes;
 		this.dimensions = dimensions;
-		this.encoders = encoders;
+		this.variables = variables;
 	}
 }
 
