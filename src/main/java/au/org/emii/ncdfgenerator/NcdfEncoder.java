@@ -136,19 +136,19 @@ class NcdfEncoder implements INcdfEncoder
 				// Write the global attributes
 				for( Attribute attribute: definition.globalAttributes )
 				{
-					String name = attribute.name;
+					String name = attribute.getName();
 					Object value = null;
 
-					if( attribute.value != null )
+					if( attribute.getValue() != null )
 					{
 						// convert to netcdf type
-						AttributeValue convertedValue = attributeValueParser.parse( attribute.value );
+						AttributeValue convertedValue = attributeValueParser.parse( attribute.getValue() );
 						value = convertedValue.value;
 					}
-					else if( attribute.sql != null )
+					else if( attribute.getSql() != null )
 					{
 						// we need aliases for the inner select, and to support wrapping the where selection
-						String sql = attribute.sql.replaceAll( "\\$instance",
+						String sql = attribute.getSql().replaceAll( "\\$instance",
 							"( select * " +
 							" from (" + dataSource.getVirtualInstanceTable() + ") instance " +
 							" where instance.id = " + Long.toString( instanceId) + ") as instance "

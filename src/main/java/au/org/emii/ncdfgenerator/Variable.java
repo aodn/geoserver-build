@@ -67,16 +67,16 @@ class Variable implements IVariable
 		// there's a bit of double handling here. We use the list to preserve output ordering
 		// but use a map for the encoder type to permit easy name lookup
 		for( Attribute a : attributes ) {
-			AttributeValue av = attributeValueParser.parse( a.value );
+			AttributeValue av = attributeValueParser.parse( a.getValue() );
 			convertedAttributes.add( av.value );
-			convertedAttributesMap.put( a.name, av.value );
+			convertedAttributesMap.put( a.getName(), av.value );
 		}
 
 		// encode the variable attributes
 		for( int i = 0; i < attributes.size(); ++i ) {
 
 			// https://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/v4.2/javadoc/ucar/nc2/NetcdfFileWriteable.html
-			String name = attributes.get( i ).name;
+			String name = attributes.get( i ).getName();
 			Object value = convertedAttributes.get( i );
 
 			if( value instanceof Number ) {
