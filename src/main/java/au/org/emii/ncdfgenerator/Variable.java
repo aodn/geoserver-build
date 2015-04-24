@@ -17,15 +17,14 @@ import au.org.emii.ncdfgenerator.AttributeValue;
 
 class Variable implements IVariable
 {
-	final String variableName;
-	final IValueEncoder encodeValue;
-	final List<Attribute> attributes;
-	final List<IDimension> dimensions;
-	final List<Object> buffer;
-
-	final IAttributeValueParser attributeValueParser;
-	final List< Object > convertedAttributes; // output ordered (change name Values  )
-	final Map< String, Object > convertedAttributesMap; // to support encoder lookup...
+	private final String variableName;
+	private final List<IDimension> dimensions;
+	private final IValueEncoder encodeValue;
+	private final List<Attribute> attributes;
+	private final IAttributeValueParser attributeValueParser;
+	private final List< Object > convertedAttributes; // output ordered (change name Values  )
+	private final Map< String, Object > convertedAttributesMap; // to support encoder lookup...
+	private List<Object> buffer;
 
 	public Variable(
 		String variableName,
@@ -37,12 +36,16 @@ class Variable implements IVariable
 		this.encodeValue = encodeValue;
 		this.attributes = attributes;
 		this.dimensions = dimensions;
-		this.buffer = new ArrayList<Object>( );
 		this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate
 		this.convertedAttributes = new ArrayList< Object > ();
 		this.convertedAttributesMap = new HashMap< String, Object > ();
+		this.buffer = null;
 	}
 
+	public void prepare()
+	{
+		buffer = new ArrayList<Object>();
+	}
 
 	public void addValueToBuffer( Object value )
 	{
