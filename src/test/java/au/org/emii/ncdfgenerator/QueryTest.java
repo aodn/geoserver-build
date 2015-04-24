@@ -4,8 +4,6 @@ package au.org.emii.ncdfgenerator;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import au.org.emii.ncdfgenerator.cql.*;
@@ -22,18 +20,46 @@ public class QueryTest {
 		IExprParser p =	new ExprParser() ;
 		IExpression expr = p.parseExpression( s);
 		assertTrue( expr != null );
-
-		// System.out.println( "****" );
-		//expr.accept( new PrettyPrinterVisitor( System.out ) );
-		// System.out.println( "" );
 		return expr;
 	}
 
 	@Test
 	public void testIntegerLiteral() throws Exception
 	{
-		IExpression expr = doExprTest( "1234" ) ;
+		IExpression expr = doExprTest("1234") ;
 		assertTrue( expr instanceof ExprIntegerLiteral );
+	}
+
+	@Test
+	public void testFloatLiteral() throws Exception
+	{
+		IExpression expr = doExprTest("123.5");
+		assertTrue(expr instanceof ExprFloatLiteral);
+	}
+
+	@Test(expected = CQLException.class)
+	public void testFloatLiteralNoDecimalComponent() throws Exception
+	{
+		doExprTest("1234.");
+	}
+
+	@Test(expected = CQLException.class)
+	public void testFloatLiteralNoDecimalComponentWithASpace() throws Exception
+	{
+		doExprTest("1234. ");
+	}
+
+	@Test(expected = CQLException.class)
+	public void testFloatLiteralNoIntegerComponent() throws Exception
+	{
+		doExprTest(".234");
+	}
+
+	@Test
+	public void testFloatLiteralWithSpaces() throws Exception
+	{
+		IExpression expr = doExprTest("1234.0 ");
+		assertTrue(expr instanceof ExprFloatLiteral);
 	}
 
 	@Test
@@ -98,22 +124,15 @@ public class QueryTest {
 		// example cql filter query expression from
 		// https://github.com/aodn/netcdf-subset-service
 		String s = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-		IExpression expr = doExprTest( s );
+        doExprTest(s);
 	}
 
-	@Test
+	@Test(expected = CQLException.class)
 	public void testParseThatShouldThrow() throws Exception
 	{
-		boolean threw = false;
-		try {
-			String s = " and ( 2013-6 ) ";
-			IExprParser p =	new ExprParser() ;
-			IExpression expr = p.parseExpression( s);
-		} catch( Exception e )
-		{
-			threw = true;
-		}
-		assertTrue( threw );
+		String s = " and ( 2013-6 ) ";
+		IExprParser p =	new ExprParser() ;
+		p.parseExpression(s);
 	}
 
 	@Test
@@ -124,8 +143,7 @@ public class QueryTest {
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 		IExpression expr = doExprTest( cql );
 		IDialectTranslate dt = new PGDialectTranslate();
-		String sql = dt.process( expr );
-		// System.out.println( sql );
+		dt.process( expr );
 		// TODO ...
 	}
 }

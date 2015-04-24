@@ -28,6 +28,8 @@ public class PGDialectSelectionGenerator implements IExprVisitor
 		b.append( expr.value );
 	}
 
+	public void visit( ExprFloatLiteral expr ) { b.append( expr.value ); }
+
 	public void visit( ExprTimestampLiteral expr )
 	{
 		b.append( "'" + df.format(expr.value ) + "'" );

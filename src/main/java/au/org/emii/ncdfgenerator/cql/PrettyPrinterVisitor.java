@@ -25,12 +25,17 @@ public class PrettyPrinterVisitor implements IExprVisitor
 
 	public void visit( ExprSymbol expr ) throws Exception
 	{
-		write( "Symbol:" + expr.value );
+		write("Symbol:" + expr.value);
 	}
 
 	public void visit(  ExprIntegerLiteral expr ) throws Exception
 	{
 		write( "Integer:" + expr.value );
+	}
+
+	public void visit(  ExprFloatLiteral expr ) throws Exception
+	{
+		write( "Float:" + expr.value );
 	}
 
 	public void visit( ExprTimestampLiteral expr ) throws Exception
