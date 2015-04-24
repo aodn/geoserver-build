@@ -178,7 +178,7 @@ public class ExprParser implements IExprParser
 	// public for unit
 	private IExpression parseFactor(String s, int pos)
 	{
-		pos = skipWhite( s, pos); 
+		pos = skipWhite(s, pos);
 
 		// nested parenthesis expr
 		if( peekChar( s, pos ) == '(' ) { 
@@ -196,30 +196,31 @@ public class ExprParser implements IExprParser
 		}	
 
 
-		IExpression expr; 
+		IExpression expr;
 
 		expr = parseQuotedTimestamp(s, pos);
 		if(expr != null) 
 			return expr;
+
+		expr = parseFloatLiteral(s, pos);
+		if (expr != null)
+			return expr;
 	
-		expr = parseIntegerLiteral( s, pos ); 
+		expr = parseIntegerLiteral(s, pos);
+		if( expr != null)
+			return expr;
+
+		expr = parseWKT(s, pos);
+		if( expr != null)
+			return expr;
+
+		expr = parseFunction(s, pos);
 		if( expr != null)
 			return expr; 
-
-		expr = parseWKT( s, pos ); 
-		if( expr != null)
-			return expr; 
-
-
-		expr = parseFunction( s, pos); 
-		if( expr != null)
-			return expr; 
-
 
 		expr = parseSymbol( s, pos); 
 		if( expr != null)
 			return expr;
-
 
 
 		return null;
@@ -441,13 +442,38 @@ public class ExprParser implements IExprParser
 	private ExprIntegerLiteral parseIntegerLiteral( String s, int pos )
 	{
 		int pos2 = pos;
-		while( Character.isDigit( peekChar( s, pos2)))
+		while( Character.isDigit( peekChar( s, pos2))) {
 			++pos2;
+		}
 
 		if( pos != pos2) {
 			int value = Integer.parseInt(s.substring(pos, pos2));
 			return new ExprIntegerLiteral(pos2, value);
 		}
+		return null;
+	}
+
+	private ExprFloatLiteral parseFloatLiteral(String s, int pos) {
+		int pos2 = pos;
+		int dotPos = -1;
+		boolean hasDot = false;
+		while (Character.isDigit( peekChar( s, pos2)) || peekChar(s, pos2) == '.') {
+			if (peekChar(s, pos2) == '.') {
+				hasDot = true;
+				dotPos = pos2;
+			}
+			++pos2;
+		}
+
+		boolean notEmpty = pos != pos2;
+		boolean doesntStartWithDot = dotPos != pos;
+		boolean doesntEndWithDot = dotPos != (pos2 - 1);
+
+		if (notEmpty && hasDot && doesntStartWithDot && doesntEndWithDot) {
+			float value = Float.parseFloat(s.substring(pos, pos2));
+			return new ExprFloatLiteral(pos2, value);
+		}
+
 		return null;
 	}
 
