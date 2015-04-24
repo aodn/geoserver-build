@@ -103,17 +103,7 @@ class NcdfEncoder implements INcdfEncoder
 		try {
 			if( featureInstancesRS.next())
 			{
-				long instanceId = -1234;
-				Object o = featureInstancesRS.getObject(1);
-
-				// munge
-				if( o instanceof Integer)
-					instanceId = (long)(Integer)o;
-				else if( o instanceof Long )
-					instanceId = (Long)o;
-				else
-					throw new NcdfGeneratorException( "Can't convert instanceId field to integer" );
-
+				long instanceId = featureInstancesRS.getLong(1); 
 
 				String orderClause = "";
 				for( IDimension dimension : definition.dimensions )
