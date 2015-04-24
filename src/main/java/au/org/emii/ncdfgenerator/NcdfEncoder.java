@@ -68,8 +68,10 @@ class NcdfEncoder implements INcdfEncoder
 
 	public void prepare() throws Exception
 	{
+		DataSource dataSource = definition.dataSource;
+
 		// do not quote search path!.
-		PreparedStatement s = conn.prepareStatement( "set search_path=" + definition.dataSource.schema + ", public");
+		PreparedStatement s = conn.prepareStatement( "set search_path=" + dataSource.getSchema() + ", public");
 		s.execute();
 		s.close();
 
@@ -81,8 +83,8 @@ class NcdfEncoder implements INcdfEncoder
 		// And there's no optimisation penalty since both the initial and instance queries have to hit the big data table
 		String query =
 			"select distinct data.instance_id" +
-			" from (" + definition.dataSource.virtualDataTable + ") as data" +
-			" left join (" + definition.dataSource.virtualInstanceTable + ") instance" +
+			" from (" + dataSource.getVirtualDataTable() + ") as data" +
+			" left join (" + dataSource.getVirtualInstanceTable() + ") instance" +
 			" on instance.id = data.instance_id" +
 			" where " + selectionSql + ";" ;
 
@@ -122,10 +124,12 @@ class NcdfEncoder implements INcdfEncoder
 					orderClause += "\"" + dimension.getName() + "\"" ;
 				}
 
+				DataSource dataSource = definition.dataSource;
+
 				String query =
 					"select *" +
-					" from (" + definition.dataSource.virtualDataTable + ") as data" +
-					" left join (" + definition.dataSource.virtualInstanceTable + ") instance" +
+					" from (" + dataSource.getVirtualDataTable() + ") as data" +
+					" left join (" + dataSource.getVirtualInstanceTable() + ") instance" +
 					" on instance.id = data.instance_id" +
 					" where " + selectionSql +
 					" and data.instance_id = " + Long.toString( instanceId) +
@@ -156,15 +160,15 @@ class NcdfEncoder implements INcdfEncoder
 						// we need aliases for the inner select, and to support wrapping the where selection
 						String sql = attribute.sql.replaceAll( "\\$instance",
 							"( select * " +
-							" from (" + definition.dataSource.virtualInstanceTable + ") instance " +
+							" from (" + dataSource.getVirtualInstanceTable() + ") instance " +
 							" where instance.id = " + Long.toString( instanceId) + ") as instance "
 						);
 
 						// as for vars/dims, but without the order clause, to support aggregate functions like min/max
 						sql = sql.replaceAll( "\\$data",
 							"( select *" +
-							" from (" + definition.dataSource.virtualDataTable + ") as data" +
-							" left join (" + definition.dataSource.virtualInstanceTable + ") instance" +
+							" from (" + dataSource.getVirtualDataTable() + ") as data" +
+							" left join (" + dataSource.getVirtualInstanceTable() + ") instance" +
 							" on instance.id = data.instance_id" +
 							" where " + selectionSql +
 							" and data.instance_id = " + Long.toString( instanceId) +
