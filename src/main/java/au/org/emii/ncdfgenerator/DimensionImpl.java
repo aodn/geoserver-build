@@ -34,6 +34,12 @@ class DimensionImpl implements IDimension
 		dimension = writer.addDimension( name, size );
 	}
 
+
+	public void prepare()
+	{
+		size = 0;
+	}
+
 	public void addValueToBuffer( Object value )
 	{
 		++size;
@@ -41,8 +47,7 @@ class DimensionImpl implements IDimension
 
 	public String getName()
 	{
-		return name ;
-
+		return name;
 	}
 }
 

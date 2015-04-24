@@ -236,6 +236,13 @@ class NcdfEncoder implements INcdfEncoder
 		List< IVariable> encoders
 		) throws Exception
 	{
+		// prepare buffers
+		for( IDimension dimension : definition.dimensions )
+			dimension.prepare();
+
+		for( IVariable variable : definition.variables )
+			variable.prepare();
+
 		// sql stuff
 		PreparedStatement stmt = conn.prepareStatement( query );
 		stmt.setFetchSize(fetchSize);
