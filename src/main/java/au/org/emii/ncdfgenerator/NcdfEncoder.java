@@ -1,15 +1,9 @@
 
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.cql.IExpression;
-import au.org.emii.ncdfgenerator.cql.IExprParser;
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
-
-
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.PrintWriter;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -19,30 +13,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-
-import org.w3c.dom.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO ucar.nc2.NetcdfFile
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.ma2.Array;
 
-import au.org.emii.ncdfgenerator.INcdfEncoder ;
+import au.org.emii.ncdfgenerator.INcdfEncoder;
+import au.org.emii.ncdfgenerator.cql.IExpression;
+import au.org.emii.ncdfgenerator.cql.IExprParser;
+import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
+
 
 class NcdfEncoder implements INcdfEncoder
 {
-	final IExprParser exprParser;
-	final IDialectTranslate translate ;
-	final Connection conn;
-	final ICreateWritable createWritable;
-	final NcdfDefinition definition ;
-	final String filterExpr;
-	final IAttributeValueParser attributeValueParser;
+	private final IExprParser exprParser;
+	private final IDialectTranslate translate ;
+	private final Connection conn;
+	private final ICreateWritable createWritable;
+	private final NcdfDefinition definition ;
+	private final String filterExpr;
+	private static final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
+	private final IAttributeValueParser attributeValueParser;
+	private final int fetchSize;
 
-	final int fetchSize;
-
-	IExpression selectionExpr;
-	String selectionSql;
-	ResultSet featureInstancesRS;
+	private IExpression selectionExpr;
+	private String selectionSql;
+	private ResultSet featureInstancesRS;
 
 	public NcdfEncoder(
 		IExprParser exprParser,
@@ -126,8 +124,7 @@ class NcdfEncoder implements INcdfEncoder
 					" order by " + orderClause +
 					";" ;
 
-				// TODO logger
-				System.out.println( "instanceId is " + instanceId + " " + query);
+				logger.debug( "instanceId " + instanceId + ", " + query );
 
 				populateValues( query, definition.dimensions, definition.variables );
 
@@ -184,8 +181,7 @@ class NcdfEncoder implements INcdfEncoder
 					}
 
 					if( value == null )
-						// TODO Logger
-						System.out.println( "null value!!!!" );
+						logger.error( "Null found for attribute value '" + name + "'" );
 					else if( value instanceof Number )
 						writer.addGlobalAttribute( name, (Number) value );
 					else if( value instanceof String )
@@ -226,14 +222,11 @@ class NcdfEncoder implements INcdfEncoder
 				return null;
 			}
 		}
-		// should we log here, or allow exceptions to propagate up?
 		catch ( Exception e ) {
-			// TODO log
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-			System.out.println( "Opps " + sw.toString() );
+			logger.error( "Problem generating netcdf ", e );
 			conn.close();
-			return null;
+			// propagate to caller
+			throw e;
 		}
 	}
 

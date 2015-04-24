@@ -64,20 +64,17 @@ public class GenerationIT {
 	@Test
 	public void anmn_timeseries_IT() throws Exception {
 
-		System.out.println( "**** anmn timeseries ****" );
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
 
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
 		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 		streamData( encoder );
-		System.out.println( "finished test" );
 	}
 
 	@Test
 	public void anmn_nrs_ctd_profiles_IT() throws Exception {
 
-		System.out.println( "**** anmn_nrs_ctd_profiles **** " );
 		// exception handling needs to be improved a lot...
 
 		InputStream config = getClass().getResourceAsStream("/anmn_nrs_ctd_profiles.xml");
@@ -85,20 +82,17 @@ public class GenerationIT {
 		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 
 		streamData( encoder );
-		System.out.println( "finished test" );
 	}
 
 	@Test
 	public void soop_sst_trajectory_IT() throws Exception {
 
-		System.out.println( "**** sst trajectory ****" );
 		InputStream config = getClass().getResourceAsStream("/soop_sst_trajectory.xml");
 
 		String cql = "TIME >= '2013-6-27T00:35:01Z' AND TIME <= '2013-6-29T00:40:01Z' ";
 		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 
 		streamData( encoder );
-		System.out.println( "finished test" );
 	}
 
 
@@ -106,7 +100,6 @@ public class GenerationIT {
 	@Test
 	public void anmn_timeseries2_IT() throws Exception
 	{
-		System.out.println( "**** anmn timeseries ****" );
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
 
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
@@ -117,8 +110,6 @@ public class GenerationIT {
 		OutputStream os = new FileOutputStream( "./myoutput2.zip" );
 		zipCreator.doStreaming( os );
 		os.close();
-
-		System.out.println( "finished test" );
 	}
 
 
@@ -142,7 +133,6 @@ public class GenerationIT {
 	@Test
 	public void anmn_timeseries_gg_IT() throws Exception {
 
-		System.out.println( "**** anmn timeseries ****" );
 		InputStream config = getClass().getResourceAsStream("/anmn_timeseries_gg.xml");
 
 		String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
@@ -150,7 +140,6 @@ public class GenerationIT {
 
 		NcdfEncoder encoder = new NcdfEncoderBuilder().create( config, cql, getConn());
 		streamData( encoder );
-		System.out.println( "finished test" );
 	}
 
 }
