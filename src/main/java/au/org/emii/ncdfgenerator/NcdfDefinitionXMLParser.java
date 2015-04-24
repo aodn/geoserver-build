@@ -73,7 +73,7 @@ class NcdfDefinitionXMLParser
 				throw new NcdfGeneratorException( "Not definition" );
 
 			DataSource dataSource = null; ;
-			List<IVariableEncoder> variables = null;
+			List<IVariable> variables = null;
 			List< Attribute> globalAttributes = null;
 	
 			Context context = new Context ();
@@ -181,12 +181,12 @@ class NcdfDefinitionXMLParser
 
 	class VariableParsers
 	{
-		List<IVariableEncoder> parse( Context context, Node node ) throws NcdfGeneratorException
+		List<IVariable> parse( Context context, Node node ) throws NcdfGeneratorException
 		{
 			if( !node.getNodeName().equals( "variables" ))
 				throw new NcdfGeneratorException( "Not variables" );
 
-			List<IVariableEncoder> variables = new ArrayList< IVariableEncoder>();
+			List<IVariable> variables = new ArrayList< IVariable>();
 			for( Node child : new NodeWrapper(node) )
 			{
 				if( Helper.isElementNode( child)) {
@@ -204,7 +204,7 @@ class NcdfDefinitionXMLParser
 
 	class VariableParser
 	{
-		IVariableEncoder parse( Context context, Node node  ) throws NcdfGeneratorException
+		IVariable parse( Context context, Node node  ) throws NcdfGeneratorException
 		{
 			if( !node.getNodeName().equals( "variable" ))
 				throw new NcdfGeneratorException( "Not a variable" );
@@ -231,7 +231,7 @@ class NcdfDefinitionXMLParser
 				}
 			}
 
-			return new VariableEncoder( name, dimensions, encoder, attributes );
+			return new Variable( name, dimensions, encoder, attributes );
 		}
 	}
 

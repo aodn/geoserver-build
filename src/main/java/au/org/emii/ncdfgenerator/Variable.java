@@ -15,7 +15,7 @@ import au.org.emii.ncdfgenerator.AttributeValue;
 
 
 
-class VariableEncoder implements IVariableEncoder
+class Variable implements IVariable
 {
 	final String variableName;
 	final IValueEncoder encodeValue;
@@ -27,7 +27,7 @@ class VariableEncoder implements IVariableEncoder
 	final List< Object > convertedAttributes; // output ordered (change name Values  )
 	final Map< String, Object > convertedAttributesMap; // to support encoder lookup...
 
-	public VariableEncoder(
+	public Variable(
 		String variableName,
 		List< IDimension> dimensions,
 		IValueEncoder encodeValue,

@@ -212,7 +212,7 @@ class NcdfEncoder implements INcdfEncoder
 				}
 
 				// define vars
-				for ( IVariableEncoder variable : definition.variables ) {
+				for ( IVariable variable : definition.variables ) {
 					variable.define( writer );
 				}
 
@@ -220,7 +220,7 @@ class NcdfEncoder implements INcdfEncoder
 				writer.create();
 
 				// write values
-				for ( IVariableEncoder variable: definition.variables) {
+				for ( IVariable variable: definition.variables) {
 					// maybe change name writeValues
 					variable.finish( writer );
 				}
@@ -250,7 +250,7 @@ class NcdfEncoder implements INcdfEncoder
 	public void populateValues(
 		String query,
 		List< IDimension> dimensions,
-		List< IVariableEncoder> encoders
+		List< IVariable> encoders
 		) throws Exception
 	{
 		// sql stuff
@@ -269,8 +269,8 @@ class NcdfEncoder implements INcdfEncoder
 			dimensionsMap.put( dimension.getName(), dimension );
 
 		// organize variables by name
-		Map< String, IVariableEncoder> encodersMap = new HashMap< String, IVariableEncoder> ();
-		for( IVariableEncoder encoder : encoders )
+		Map< String, IVariable> encodersMap = new HashMap< String, IVariable> ();
+		for( IVariable encoder : encoders )
 			encodersMap.put( encoder.getName(), encoder );
 
 		// pre-map the encoders by index according to the column name

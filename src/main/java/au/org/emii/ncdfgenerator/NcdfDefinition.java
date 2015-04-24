@@ -8,13 +8,13 @@ class NcdfDefinition
 	final DataSource dataSource;
 	final List< Attribute> globalAttributes;
 	final List< IDimension> dimensions;
-	final List< IVariableEncoder> variables;
+	final List< IVariable> variables;
 
 	NcdfDefinition(
 		DataSource dataSource,
 		List< Attribute> globalAttributes,
 		List< IDimension> dimensions,
-		List< IVariableEncoder> variables
+		List< IVariable> variables
 	) {
 		this.dataSource = dataSource;
 		this.globalAttributes = globalAttributes;
