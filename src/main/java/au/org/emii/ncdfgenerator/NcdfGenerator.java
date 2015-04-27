@@ -16,45 +16,42 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-public class NcdfGenerator
-{
-	final IExprParser parser;
-	final IDialectTranslate translate;
-	final ICreateWritable createWritable;
-	final String layerConfigDir;
+public class NcdfGenerator {
+    private final IExprParser parser;
+    private final IDialectTranslate translate;
+    private final ICreateWritable createWritable;
+    private final String layerConfigDir;
 
-	public NcdfGenerator( String layerConfigDir, String tmpCreationDir  )
-	{
-		this.parser = new ExprParser();
-		this.translate = new PGDialectTranslate();
-		this.createWritable = new CreateWritable( tmpCreationDir );
-		this.layerConfigDir = layerConfigDir;
-	}
+    public NcdfGenerator(String layerConfigDir, String tmpCreationDir) {
+        this.parser = new ExprParser();
+        this.translate = new PGDialectTranslate();
+        this.createWritable = new CreateWritable(tmpCreationDir);
+        this.layerConfigDir = layerConfigDir;
+    }
 
-	public void write( String typename, String filterExpr, Connection conn, OutputStream os ) throws Exception
-	{
-		NcdfDefinition definition = null;
-		InputStream	config = null;
+    public final void write(String typename, String filterExpr, Connection conn, OutputStream os) throws Exception {
+        NcdfDefinition definition = null;
+        InputStream config = null;
 
-		try {
-			config = new FileInputStream( layerConfigDir + "/" + typename + ".xml" );
+        try {
+            config = new FileInputStream(layerConfigDir + "/" + typename + ".xml");
 
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
-			Node node = document.getFirstChild();
-			definition = new NcdfDefinitionXMLParser().parse( node );
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
+            Node node = document.getFirstChild();
+            definition = new NcdfDefinitionXMLParser().parse(node);
 
-		} finally {
-			config.close();
-		}
+        } finally {
+            config.close();
+        }
 
-		try {
-			NcdfEncoder encoder = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
-			ZipCreator zipCreator = new ZipCreator( encoder);
-			encoder.prepare();
-			zipCreator.doStreaming( os );
-		} finally {
-			os.close();
-		}
-	}
+        try {
+            NcdfEncoder encoder = new NcdfEncoder(parser, translate, conn, createWritable, definition, filterExpr);
+            ZipCreator zipCreator = new ZipCreator(encoder);
+            encoder.prepare();
+            zipCreator.doStreaming(os);
+        } finally {
+            os.close();
+        }
+    }
 }
 

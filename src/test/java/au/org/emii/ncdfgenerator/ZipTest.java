@@ -20,11 +20,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 
-public class ZipTest
-{
+public class ZipTest {
     @Test
-    public void aTest() throws FileNotFoundException, IOException
-    {
+    public void aTest() throws FileNotFoundException, IOException {
         OutputStream os = new ByteArrayOutputStream();
         ZipOutputStream zipStream = new ZipOutputStream(os);
         zipStream.setLevel(ZipOutputStream.STORED);
