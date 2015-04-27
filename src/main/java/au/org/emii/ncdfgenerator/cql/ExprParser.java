@@ -73,8 +73,8 @@ public class ExprParser implements IExprParser
 		if( expr != null) {
 			// ensure we got to the end, with nothing trailing
 			pos = expr.getPosition();
-			pos = skipWhite( s, pos); 
-			if( pos == s.length() ) 
+			pos = skipWhite(s, pos);
+			if(pos == s.length())
 				return expr;	
 		}
 		throw new CQLException( "failed to parse expression '" + s + "'" );
@@ -202,6 +202,10 @@ public class ExprParser implements IExprParser
 		if(expr != null) 
 			return expr;
 
+		expr = parseStringLiteral(s, pos);
+		if(expr != null)
+			return expr;
+
 		expr = parseFloatLiteral(s, pos);
 		if (expr != null)
 			return expr;
@@ -218,10 +222,9 @@ public class ExprParser implements IExprParser
 		if( expr != null)
 			return expr; 
 
-		expr = parseSymbol( s, pos); 
+		expr = parseSymbol(s, pos);
 		if( expr != null)
 			return expr;
-
 
 		return null;
 	}
@@ -479,17 +482,24 @@ public class ExprParser implements IExprParser
 
 	private ExprStringLiteral parseStringLiteral( String s, int pos )
 	{
-		// TODO use peekChar() not charAt()
-		// TODO ignore escaping for the moment
 		int pos2 = pos;
-		if(s.charAt(pos2) != '\'')
+		if (peekChar(s, pos2) != '\'') {
 			return null;
-		++pos2;
-
-		while(s.charAt(pos2) != '\'')
+		}
+		else {
 			++pos2;
-		++pos2;
-		return new ExprStringLiteral(pos, s.substring( pos + 1, pos2 - 1));
+
+			while (peekChar(s, pos2) != '\'') {
+				if (peekChar(s, pos2) == -1) {
+					return null;
+				}
+				++pos2;
+			}
+
+			++pos2;
+
+			return new ExprStringLiteral(pos2, s.substring(pos + 1, pos2 - 1));
+		}
 	}
 }
 

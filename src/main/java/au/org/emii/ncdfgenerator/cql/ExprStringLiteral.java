@@ -6,7 +6,7 @@ public class ExprStringLiteral implements IExpression
 	final int pos;
 	final String value;
 
-	public ExprStringLiteral( int pos, String value)
+	public ExprStringLiteral(int pos, String value)
 	{
 		this.pos = pos;
 		this.value = value;
