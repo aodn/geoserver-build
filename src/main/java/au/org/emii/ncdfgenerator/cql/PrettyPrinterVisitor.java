@@ -7,60 +7,49 @@ import java.io.IOException;
 
 
 
-public class PrettyPrinterVisitor implements IExprVisitor
-{
+public class PrettyPrinterVisitor implements IExprVisitor {
 
-	final OutputStream os;
+    private final OutputStream os;
 
-	public PrettyPrinterVisitor( OutputStream os)
-	{
-		this.os = os;
-	}
+    public PrettyPrinterVisitor(OutputStream os) {
+        this.os = os;
+    }
 
-	private void write( String s )
-		throws IOException
-	{
-		os.write( s.getBytes(Charset.forName("UTF-8")));
-	}
+    private void write(String s) throws IOException {
+        os.write(s.getBytes(Charset.forName("UTF-8")));
+    }
 
-	public void visit( ExprSymbol expr ) throws Exception
-	{
-		write("Symbol:" + expr.value);
-	}
+    public final void visit(ExprSymbol expr) throws Exception {
+        write("Symbol:" + expr.getValue());
+    }
 
-	public void visit(  ExprIntegerLiteral expr ) throws Exception
-	{
-		write( "Integer:" + expr.value );
-	}
+    public final void visit(ExprIntegerLiteral expr) throws Exception {
+        write("Integer:" + expr.getValue());
+    }
 
-	public void visit(  ExprFloatLiteral expr ) throws Exception
-	{
-		write( "Float:" + expr.value );
-	}
+    public final void visit(ExprFloatLiteral expr) throws Exception {
+        write("Float:" + expr.getValue());
+    }
 
-	public void visit( ExprTimestampLiteral expr ) throws Exception
-	{
-		write( "Timestamp:" + expr.value );
-	}
+    public final void visit(ExprTimestampLiteral expr) throws Exception {
+        write("Timestamp:" + expr.getValue());
+    }
 
-	public void visit(  ExprStringLiteral expr ) throws Exception
-	{
-		write( "Literal:" + expr.value );
-	}
+    public final void visit(ExprStringLiteral expr) throws Exception {
+        write("Literal:" + expr.getValue());
+    }
 
-	public void visit(  ExprWKTLiteral expr ) throws Exception
-	{
-		write( "WKTLiteral:" + expr.value );
-	}
+    public final void visit(ExprWKTLiteral expr) throws Exception {
+        write("WKTLiteral:" + expr.getValue());
+    }
 
-	public void visit( ExprProc expr ) throws Exception
-	{
-		write( "(" + expr.symbol + " " );
-		for( IExpression child : expr.children ) {
-			child.accept(this);
-			write(  " ");
-		}
-		write( ")" );
-	}
+    public final void visit(ExprProc expr) throws Exception {
+        write("(" + expr.getSymbol() + " ");
+        for(IExpression child : expr.getChildren()) {
+            child.accept(this);
+            write(" ");
+        }
+        write(")");
+    }
 }
 

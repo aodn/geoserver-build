@@ -1,10 +1,10 @@
 
 package au.org.emii.ncdfgenerator;
 
-public interface IAddValue
-{
-	// change name to put(), or append? and class to IBufferAddValue
-	public void addValueToBuffer( Object value );
+public interface IAddValue {
+    void prepare();
+    // change name to put(), or append? and class to IBufferAddValue
+    void addValueToBuffer(Object value);
 }
 
 

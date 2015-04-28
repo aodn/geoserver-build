@@ -1,8 +1,7 @@
 
 package au.org.emii.ncdfgenerator;
 
-interface IAttributeValueParser
-{
-	public AttributeValue parse( String s ) throws NcdfGeneratorException; 
+interface IAttributeValueParser {
+    AttributeValue parse(String s) throws NcdfGeneratorException;
 }
 

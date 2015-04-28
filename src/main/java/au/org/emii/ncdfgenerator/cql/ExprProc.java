@@ -1,23 +1,34 @@
 
 package au.org.emii.ncdfgenerator.cql;
 
+import java.util.List;
 import java.util.ArrayList;
 
-public class ExprProc implements IExpression
-{
-	final int pos;
-	// public for unit tests
-	public final String symbol;
-	public final ArrayList<IExpression> children;
+public class ExprProc implements IExpression {
+    private final int pos;
+    // public for unit tests
+    private final String symbol;
+    private final ArrayList<IExpression> children;
 
-	public ExprProc( int pos, String symbol, ArrayList< IExpression> children  )
-	{
-		this.pos = pos;
-		this.symbol = symbol;
-		this.children = children;
-	}
+    public ExprProc(int pos, String symbol, ArrayList< IExpression> children) {
+        this.pos = pos;
+        this.symbol = symbol;
+        this.children = children;
+    }
 
-	public int getPosition() { return pos; }
-	public void accept( IExprVisitor v )
-	throws Exception { v.visit( this); }
+    public final int getPosition() {
+        return pos;
+    }
+
+    public final String getSymbol() {
+        return symbol;
+    }
+
+    public final List<IExpression> getChildren() {
+        return children;
+    }
+
+    public final void accept(IExprVisitor v) throws Exception {
+        v.visit(this);
+    }
 }

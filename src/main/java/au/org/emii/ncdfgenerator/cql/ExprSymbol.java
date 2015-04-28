@@ -1,18 +1,23 @@
 
 package au.org.emii.ncdfgenerator.cql;
 
-public class ExprSymbol implements IExpression
-{
-	final int pos;
-	final String value;
+public class ExprSymbol implements IExpression {
+    private final int pos;
+    private final String value;
 
-	public ExprSymbol( int pos, String value)
-	{
-		this.pos = pos;
-		this.value = value;
-	}
+    public ExprSymbol(int pos, String value) {
+        this.pos = pos;
+        this.value = value;
+    }
 
-	public int getPosition() { return pos; }
-	public void accept( IExprVisitor v ) throws Exception
-	{ v.visit( this); }
+    public final int getPosition() {
+        return pos;
+    }
+    public final String getValue() {
+        return value;
+    }
+
+    public final void accept(IExprVisitor v) throws Exception {
+        v.visit(this);
+    }
 }
