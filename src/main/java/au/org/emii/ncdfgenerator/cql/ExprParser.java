@@ -56,7 +56,7 @@ public class ExprParser implements IExprParser {
             ++pos;
         return pos;
     }
-	
+
 
     public final IExpression parseExpression(String s) throws CQLException {
         int pos = 0;
@@ -164,21 +164,21 @@ public class ExprParser implements IExprParser {
 
     private IExpression parseFactor(String s, int pos) {
         pos = skipWhite(s, pos);
-		
-		// nested parenthesis expr
-		if(peekChar(s, pos) == '(') {
-			++pos;
-			IExpression expr = parseExpression1(s, pos);
-			if(expr == null)
-				return null;
-			pos = expr.getPosition();
-			pos = skipWhite(s, pos);
-			if(peekChar(s, pos) != ')')
-				return null;
-			++pos;
-			// we have to create a dummy node, to record the new pos
-			return createUnaryExpr(pos, "nop", expr);
-		}
+
+        // nested parenthesis expr
+        if(peekChar(s, pos) == '(') {
+            ++pos;
+            IExpression expr = parseExpression1(s, pos);
+            if(expr == null)
+                return null;
+            pos = expr.getPosition();
+            pos = skipWhite(s, pos);
+            if(peekChar(s, pos) != ')')
+                return null;
+            ++pos;
+            // we have to create a dummy node, to record the new pos
+            return createUnaryExpr(pos, "nop", expr);
+        }
 
 
         IExpression expr;
@@ -187,9 +187,9 @@ public class ExprParser implements IExprParser {
         if(expr != null)
             return expr;
 
-		expr = parseStringLiteral(s, pos);
-		if(expr != null)
-			return expr;
+        expr = parseStringLiteral(s, pos);
+        if(expr != null)
+            return expr;
 
         expr = parseFloatLiteral(s, pos);
         if(expr != null)
@@ -366,10 +366,10 @@ public class ExprParser implements IExprParser {
     private ExprIntegerLiteral parseIntegerLiteral(String s, int pos) {
         int pos2 = pos;
         while(Character.isDigit(peekChar(s, pos2))) {
-			++pos2;
-		}
+            ++pos2;
+        }
 
-		if(pos != pos2) {
+        if(pos != pos2) {
             int value = Integer.parseInt(s.substring(pos, pos2));
             return new ExprIntegerLiteral(pos2, value);
         }
@@ -400,26 +400,26 @@ public class ExprParser implements IExprParser {
         return null;
     }
 
-	private ExprStringLiteral parseStringLiteral( String s, int pos )
-	{
-		int pos2 = pos;
-		if (peekChar(s, pos2) != '\'') {
-			return null;
-		}
-		else {
-			++pos2;
+    private ExprStringLiteral parseStringLiteral( String s, int pos )
+    {
+        int pos2 = pos;
+        if (peekChar(s, pos2) != '\'') {
+            return null;
+        }
+        else {
+            ++pos2;
 
-			while (peekChar(s, pos2) != '\'') {
-				if (peekChar(s, pos2) == -1) {
-					return null;
-				}
-				++pos2;
-			}
+            while (peekChar(s, pos2) != '\'') {
+                if (peekChar(s, pos2) == -1) {
+                    return null;
+                }
+                ++pos2;
+            }
 
-			++pos2;
+            ++pos2;
 
-			return new ExprStringLiteral(pos2, s.substring(pos + 1, pos2 - 1));
-		}
-	}
+            return new ExprStringLiteral(pos2, s.substring(pos + 1, pos2 - 1));
+        }
+    }
 }
 
