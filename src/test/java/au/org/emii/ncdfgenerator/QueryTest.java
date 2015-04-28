@@ -55,8 +55,22 @@ public class QueryTest {
     }
 
     @Test
-    public void testStringLiteral() throws Exception {
+    public void testStringLiteral() throws Exception
+    {
+        IExpression expr = doExprTest("'string'");
+        assertTrue(expr instanceof ExprStringLiteral);
+    }
 
+    @Test(expected = CQLException.class)
+    public void testStringLiteralWithNoStartingInvertedComma() throws Exception
+    {
+        doExprTest("string'");
+    }
+
+    @Test(expected = CQLException.class)
+    public void testStringLiteralWithNoEndingInvertedComma() throws Exception
+    {
+        doExprTest("'string");
     }
 
     @Test

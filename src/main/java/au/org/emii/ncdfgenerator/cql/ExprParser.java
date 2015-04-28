@@ -187,6 +187,10 @@ public class ExprParser implements IExprParser {
         if(expr != null)
             return expr;
 
+        expr = parseStringLiteral(s, pos);
+        if(expr != null)
+            return expr;
+
         expr = parseFloatLiteral(s, pos);
         if(expr != null)
             return expr;
@@ -396,18 +400,26 @@ public class ExprParser implements IExprParser {
         return null;
     }
 
-    private ExprStringLiteral parseStringLiteral(String s, int pos) {
-        // TODO use peekChar() not charAt()
-        // TODO ignore escaping for the moment
+    private ExprStringLiteral parseStringLiteral( String s, int pos )
+    {
         int pos2 = pos;
-        if(s.charAt(pos2) != '\'')
+        if (peekChar(s, pos2) != '\'') {
             return null;
-        ++pos2;
-
-        while(s.charAt(pos2) != '\'')
+        }
+        else {
             ++pos2;
-        ++pos2;
-        return new ExprStringLiteral(pos, s.substring(pos + 1, pos2 - 1));
+
+            while (peekChar(s, pos2) != '\'') {
+                if (peekChar(s, pos2) == -1) {
+                    return null;
+                }
+                ++pos2;
+            }
+
+            ++pos2;
+
+            return new ExprStringLiteral(pos2, s.substring(pos + 1, pos2 - 1));
+        }
     }
 }
 
