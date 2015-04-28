@@ -9,9 +9,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
-class NodeWrapper implements Iterable<Node>
-{
-	// xml helper class
+class NodeWrapper implements Iterable<Node> {
+    // xml helper class
 
     private Node node;
     private List<Node> nodes;
@@ -22,7 +21,7 @@ class NodeWrapper implements Iterable<Node>
     }
 
     public Iterator<Node> iterator() {
-        if (nodes == null) {
+        if(nodes == null) {
             buildNodes();
         }
 
@@ -31,7 +30,7 @@ class NodeWrapper implements Iterable<Node>
 
     private void buildNodes() {
         nodes = new ArrayList<Node>(getListLength());
-        for (int i = 0; i < getListLength(); i++) {
+        for(int i = 0; i < getListLength(); i++) {
             nodes.add(nodeList.item(i));
         }
     }
@@ -41,17 +40,16 @@ class NodeWrapper implements Iterable<Node>
     }
 
     private NodeList getNodeList() {
-        if (nodeList == null) {
+        if(nodeList == null) {
             setNodeList();
         }
         return nodeList;
     }
 
     private void setNodeList() {
-        if (node.hasChildNodes()) {
+        if(node.hasChildNodes()) {
             nodeList = node.getChildNodes();
-        }
-        else {
+        } else {
             nodeList = new NullNodeList();
         }
     }

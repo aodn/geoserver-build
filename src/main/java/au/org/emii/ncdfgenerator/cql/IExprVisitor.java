@@ -1,15 +1,14 @@
 
 package au.org.emii.ncdfgenerator.cql;
 
-public interface IExprVisitor
-{
-	public void visit( ExprIntegerLiteral expr ) throws Exception;
-	public void visit( ExprFloatLiteral expr ) throws Exception;
-	public void visit( ExprStringLiteral expr ) throws Exception;
-	public void visit( ExprTimestampLiteral expr ) throws Exception;
-	public void visit( ExprWKTLiteral expr ) throws Exception;
-	public void visit( ExprSymbol expr ) throws Exception;
-	public void visit( ExprProc expr ) throws Exception;
+public interface IExprVisitor {
+    void visit(ExprIntegerLiteral expr) throws Exception;
+    void visit(ExprFloatLiteral expr) throws Exception;
+    void visit(ExprStringLiteral expr) throws Exception;
+    void visit(ExprTimestampLiteral expr) throws Exception;
+    void visit(ExprWKTLiteral expr) throws Exception;
+    void visit(ExprSymbol expr) throws Exception;
+    void visit(ExprProc expr) throws Exception;
 }
 
 

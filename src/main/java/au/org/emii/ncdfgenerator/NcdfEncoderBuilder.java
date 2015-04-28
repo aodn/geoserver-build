@@ -14,42 +14,39 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-public class NcdfEncoderBuilder
-{
-	// responsible for assembling the NcdfEncoder
+public class NcdfEncoderBuilder {
+    // responsible for assembling the NcdfEncoder
 
-	final IExprParser parser;
-	final IDialectTranslate translate;
-	final ICreateWritable createWritable;
+    private final IExprParser parser;
+    private final IDialectTranslate translate;
+    private final ICreateWritable createWritable;
 
-	public NcdfEncoderBuilder()
-	{
-		this.parser = new ExprParser();
-		this.translate = new PGDialectTranslate();
-		this.createWritable = new CreateWritable( "./tmp");
-	}
+    public NcdfEncoderBuilder() {
+        this.parser = new ExprParser();
+        this.translate = new PGDialectTranslate();
+        this.createWritable = new CreateWritable("./tmp");
+    }
 
-	public NcdfEncoder create( InputStream config, String filterExpr, Connection conn ) throws Exception
-	{
-		// not sure if the expression parsing shouldn't go in here?
-		// not sure if definition decoding should be done here...
+    public final NcdfEncoder create(InputStream config, String filterExpr, Connection conn) throws Exception {
+        // not sure if the expression parsing shouldn't go in here?
+        // not sure if definition decoding should be done here...
 
-		NcdfDefinition definition = null;
-		try {
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
-			Node node = document.getFirstChild();
-			definition = new NcdfDefinitionXMLParser().parse( node );
+        NcdfDefinition definition = null;
+        try {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
+            Node node = document.getFirstChild();
+            definition = new NcdfDefinitionXMLParser().parse(node);
 
-		} finally {
-			config.close();
-		}
+        } finally {
+            config.close();
+        }
 
 
-		NcdfEncoder encoder = new NcdfEncoder( parser, translate, conn, createWritable, definition, filterExpr );
-		// should client call prepare() ?
-		encoder.prepare();
-		return encoder;
-	}
+        NcdfEncoder encoder = new NcdfEncoder(parser, translate, conn, createWritable, definition, filterExpr);
+        // should client call prepare() ?
+        encoder.prepare();
+        return encoder;
+    }
 }
 
 
