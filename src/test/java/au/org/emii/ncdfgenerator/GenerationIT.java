@@ -103,7 +103,7 @@ public class GenerationIT {
 
 
     private void doSimpleQuery(String cql) throws Exception {
-        InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
+        InputStream config = getClass().getResourceAsStream("/anmn_ts.xml");
         NcdfEncoder encoder = getEncoder(config, cql, getConn());
         encoder.write();
     }
