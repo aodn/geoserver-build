@@ -61,6 +61,7 @@ class NcdfDefinitionXMLParser {
                 throw new NcdfGeneratorException("Not definition");
 
             DataSource dataSource = null;
+            FilenameTemplate filenameTemplate = null;
             List<IVariable> variables = null;
             List< Attribute> globalAttributes = null;
 
@@ -71,6 +72,8 @@ class NcdfDefinitionXMLParser {
                     String tag = child.getNodeName();
                     if(tag.equals("source"))
                         dataSource = new DataSourceParser().parse(child);
+                    else if(tag.equals("filename"))
+                        filenameTemplate = new FilenameTemplateParser().parse(child);
                     else if(tag.equals("dimensions"))
                         context.setDimensions(new DimensionsParser().parse(child));
                     else if(tag.equals("variables"))
@@ -82,7 +85,7 @@ class NcdfDefinitionXMLParser {
                 }
             }
 
-            return new NcdfDefinition(dataSource, globalAttributes, context.dimensions, variables);
+            return new NcdfDefinition(dataSource, filenameTemplate, globalAttributes, context.dimensions, variables);
         }
     }
 
@@ -115,6 +118,33 @@ class NcdfDefinitionXMLParser {
             return new DataSource(schema, virtualDataTable, virtualInstanceTable);
         }
     }
+
+    class FilenameTemplateParser {
+        private String sql;
+
+        private void extractValue(Node child) throws NcdfGeneratorException {
+            String tag = child.getNodeName();
+            if(tag.equals("sql"))
+                sql = Helper.nodeVal(child);
+        }
+
+        FilenameTemplate parse(Node node) throws NcdfGeneratorException {
+            if(!node.getNodeName().equals("filename"))
+                throw new NcdfGeneratorException("Not a filename");
+
+            // extract from nested tags
+            for(Node child : new NodeWrapper(node))
+                extractValue(child);
+
+            // extract from attributes
+            NamedNodeMap attrs = node.getAttributes();
+            for(int i = 0; i < attrs.getLength(); ++i)
+                extractValue(attrs.item(i));
+
+            return new FilenameTemplate(sql);
+        }
+    }
+
 
 
     class DimensionsParser {

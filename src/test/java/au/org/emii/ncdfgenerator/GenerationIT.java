@@ -22,13 +22,57 @@ import java.util.Map;
 
 import java.sql.*;
 
+import au.org.emii.ncdfgenerator.IOutputFormatter;
+
+import au.org.emii.ncdfgenerator.cql.ExprParser;
+import au.org.emii.ncdfgenerator.cql.IExprParser;
+import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
+import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
+import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
+import au.org.emii.ncdfgenerator.IOutputFormatter;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+
+class MockFormatter implements IOutputFormatter
+{
+    public final void prepare(OutputStream os) { 
+    }
+
+    public final void write(String filename, InputStream is) { 
+    }
+
+    public final void finish() {
+    }
+}
 
 public class GenerationIT {
 
     @Before
-    public void mergeIT() {
+    public void before() {
+    }
 
-        // setup db conn once?
+    private NcdfEncoder getEncoder( InputStream config, String filterExpr, Connection conn ) throws Exception {
+
+        // we can't use the builder for this, becuase config is a stream...
+
+        IExprParser parser = new ExprParser();
+        IDialectTranslate translate = new PGDialectTranslate();
+        ICreateWritable createWritable = new CreateWritable( "./tmp" );
+        IAttributeValueParser attributeValueParser = new AttributeValueParser();
+
+        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
+        Node node = document.getFirstChild();
+        NcdfDefinition definition = new NcdfDefinitionXMLParser().parse(node);
+
+        // better responsibility separation
+        // change name from outputGenerator to outputFormatter....
+        IOutputFormatter outputGenerator = new MockFormatter();
+
+        return new NcdfEncoder(parser, translate, conn, createWritable, attributeValueParser, definition, filterExpr, outputGenerator, System.out);
+
     }
 
     public static Connection getConn() throws Exception {
@@ -50,36 +94,24 @@ public class GenerationIT {
         return DriverManager.getConnection(env.get("POSTGRES_JDBC_URL"), props);
     }
 
-    private void streamData(INcdfEncoder encoder) throws Exception {
-        InputStream writer = null;
-        do {
-            // should try and get lots...
-            writer = encoder.get();
-        } while(writer != null);
-    }
-
 
     @Test
     public void anmn_timeseries_IT() throws Exception {
 
         InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
-
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-
-        NcdfEncoder encoder = new NcdfEncoderBuilder().create(config, cql, getConn());
-        streamData(encoder);
+        NcdfEncoder encoder = getEncoder(config, cql, getConn());
+        encoder.write();
     }
 
     @Test
     public void anmn_nrs_ctd_profiles_IT() throws Exception {
 
         // exception handling needs to be improved a lot...
-
         InputStream config = getClass().getResourceAsStream("/anmn_nrs_ctd_profiles.xml");
         String cql = "TIME < '2013-6-29T00:40:01Z' ";
-        NcdfEncoder encoder = new NcdfEncoderBuilder().create(config, cql, getConn());
-
-        streamData(encoder);
+        NcdfEncoder encoder = getEncoder(config, cql, getConn());
+        encoder.write();
     }
 
     @Test
@@ -88,9 +120,8 @@ public class GenerationIT {
         InputStream config = getClass().getResourceAsStream("/soop_sst_trajectory.xml");
 
         String cql = "TIME >= '2013-6-27T00:35:01Z' AND TIME <= '2013-6-29T00:40:01Z' ";
-        NcdfEncoder encoder = new NcdfEncoderBuilder().create(config, cql, getConn());
-
-        streamData(encoder);
+        NcdfEncoder encoder = getEncoder(config, cql, getConn());
+        encoder.write();
     }
 
 
@@ -100,13 +131,8 @@ public class GenerationIT {
         InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
 
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
-
-        INcdfEncoder encoder = new NcdfEncoderBuilder().create(config, cql, getConn());
-        ZipCreator zipCreator = new ZipCreator(encoder);
-
-        OutputStream os = new FileOutputStream("./myoutput2.zip");
-        zipCreator.doStreaming(os);
-        os.close();
+        NcdfEncoder encoder = getEncoder( config, cql, getConn() );
+        encoder.write();
     }
 
 
@@ -120,23 +146,20 @@ public class GenerationIT {
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
         OutputStream os = new FileOutputStream("./tmp/output.zip");
-
         generator.write("anmn_timeseries", cql, getConn(), os);
     }
 
 
-
     @Test
     public void anmn_timeseries_gg_IT() throws Exception {
-
-        InputStream config = getClass().getResourceAsStream("/anmn_timeseries_gg.xml");
+        String layerConfigDir = "./src/test/resources/"; // TODO URL url = getClass().getResource("/")  ; url.toString()...
+        String tmpCreationDir = "./tmp";
+        NcdfGenerator generator = new NcdfGenerator(layerConfigDir, tmpCreationDir);
 
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
-
-        NcdfEncoder encoder = new NcdfEncoderBuilder().create(config, cql, getConn());
-        streamData(encoder);
+        OutputStream os = new FileOutputStream("./tmp/output.zip");
+        generator.write("anmn_timeseries_gg", cql, getConn(), os);
     }
-
 }
 

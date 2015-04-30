@@ -2,6 +2,7 @@
 package au.org.emii.ncdfgenerator;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -23,77 +24,81 @@ import au.org.emii.ncdfgenerator.cql.IExprParser;
 import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
 
 
-class NcdfEncoder implements INcdfEncoder {
+class NcdfEncoder {
     private final IExprParser exprParser;
     private final IDialectTranslate translate;
     private final Connection conn;
     private final ICreateWritable createWritable;
     private final NcdfDefinition definition;
     private final String filterExpr;
-    private final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
+    private final IOutputFormatter outputFormatter;
+    private final OutputStream os;
+    static private final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
     private final IAttributeValueParser attributeValueParser;
     private final int fetchSize;
 
-    private IExpression selectionExpr;
-    private String selectionSql;
-    private ResultSet featureInstancesRS;
 
     public NcdfEncoder(
         IExprParser exprParser,
         IDialectTranslate translate,
         Connection conn,
         ICreateWritable createWritable,
+        IAttributeValueParser attributeValueParser,
         NcdfDefinition definition,
-        String filterExpr
+        String filterExpr,
+        IOutputFormatter outputFormatter,
+        OutputStream os
     ) {
         this.exprParser = exprParser;
         this.translate = translate;
         this.conn = conn;
         this.createWritable = createWritable;
+        this.attributeValueParser = attributeValueParser;
         this.definition = definition;
         this.filterExpr = filterExpr;
-        this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate
+        this.outputFormatter = outputFormatter;
+        this.os = os;
 
         fetchSize = 1000;
-        featureInstancesRS = null;
-        selectionExpr = null;
-        selectionSql = null;
-    }
-
-    public void prepare() throws Exception {
-        DataSource dataSource = definition.getDataSource();
-
-        // do not quote search path!.
-        PreparedStatement s = conn.prepareStatement("set search_path=" + dataSource.getSchema() + ", public");
-        s.execute();
-        s.close();
-
-        selectionExpr = exprParser.parseExpression(filterExpr);
-        selectionSql = translate.process(selectionExpr);
-
-        // if we combine both tables, then it's actually simpler, since don't need to process twice
-        // or discriminate about which attributes come from which tables.
-        // And there's no optimisation penalty since both the initial and instance queries have to hit the big data table
-        String query =
-            "select distinct data.instance_id"
-            + " from (" + dataSource.getVirtualDataTable() + ") as data"
-            + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
-            + " on instance.id = data.instance_id"
-            + " where " + selectionSql
-            + ";";
-
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setFetchSize(fetchSize);
-
-        // change name featureInstancesRSToProcess ?
-        featureInstancesRS = stmt.executeQuery();
-
     }
 
 
-    public InputStream get() throws Exception {
+    public void write() throws Exception {
+
+        InputStream is = null;
+
         try {
-            if(featureInstancesRS.next()) {
+            DataSource dataSource = definition.getDataSource();
+
+            // do not quote search path!.
+            PreparedStatement pathStmt = conn.prepareStatement("set search_path=" + dataSource.getSchema() + ", public");
+            pathStmt.execute();
+            pathStmt.close();
+
+            IExpression selectionExpr = exprParser.parseExpression(filterExpr);
+            String selectionClause = translate.process(selectionExpr);
+
+            // if we combine both tables, then it's actually simpler, since don't need to process twice
+            // or discriminate about which attributes come from which tables.
+            // And there's no optimisation penalty since both the initial and instance queries have to hit the big data table
+            String instanceQuery =
+                "select distinct data.instance_id"
+                + " from (" + dataSource.getVirtualDataTable() + ") as data"
+                + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
+                + " on instance.id = data.instance_id"
+                + " where " + selectionClause
+                + ";";
+
+            PreparedStatement featuresStmt = conn.prepareStatement(instanceQuery);
+            featuresStmt.setFetchSize(fetchSize);
+
+            // change name featureInstancesRSToProcess ?
+            ResultSet featureInstancesRS = featuresStmt.executeQuery();
+
+            // setup output formatter
+            outputFormatter.prepare(os);
+
+            while(featureInstancesRS.next()) {
                 long instanceId = featureInstancesRS.getLong(1);
 
                 String orderClause = "";
@@ -104,14 +109,12 @@ class NcdfEncoder implements INcdfEncoder {
                     orderClause += "\"" + dimension.getName() + "\"";
                 }
 
-                DataSource dataSource = definition.getDataSource();
-
                 String query =
                     "select *"
                     + " from (" + dataSource.getVirtualDataTable() + ") as data"
                     + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
                     + " on instance.id = data.instance_id"
-                    + " where " + selectionSql
+                    + " where " + selectionClause
                     + " and data.instance_id = " + Long.toString(instanceId)
                     + " order by " + orderClause
                     + ";";
@@ -128,47 +131,15 @@ class NcdfEncoder implements INcdfEncoder {
                     Object value = null;
 
                     if(attribute.getValue() != null) {
-                        // convert to netcdf type
-                        AttributeValue convertedValue = attributeValueParser.parse(attribute.getValue());
-                        value = convertedValue.getValue();
+                        value = attributeValueParser.parse(attribute.getValue()).getValue();
                     } else if(attribute.getSql() != null) {
-                        // we need aliases for the inner select, and to support wrapping the where selection
-                        String sql = attribute.getSql().replaceAll("\\$instance",
-                            "( select *"
-                            + " from (" + dataSource.getVirtualInstanceTable() + ") instance "
-                            + " where instance.id = " + Long.toString(instanceId) + ") as instance "
-                                                                  );
-
-                        // as for vars/dims, but without the order clause, to support aggregate functions like min/max
-                        sql = sql.replaceAll("\\$data",
-                             "( select *"
-                             + " from (" + dataSource.getVirtualDataTable() + ") as data"
-                             + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
-                             + " on instance.id = data.instance_id"
-                             + " where " + selectionSql
-                             + " and data.instance_id = " + Long.toString(instanceId)
-                             + " ) as data"
-                            );
-
-                        PreparedStatement stmt = null;
-                        try {
-                            stmt = conn.prepareStatement(sql);
-                            stmt.setFetchSize(fetchSize);
-                            ResultSet rs = stmt.executeQuery();
-
-                            // TODO more checks around this
-                            // maybe support converion to ncdf array attribute types
-                            rs.next();
-                            value = rs.getObject(1);
-                        } finally {
-                            stmt.close();
-                        }
+                        value = evaluateSql(dataSource, instanceId, selectionClause, orderClause, attribute.getSql()) ;
                     } else {
                         throw new NcdfGeneratorException("No value defined for global attribute '" + name + "'");
                     }
 
                     if(value == null)
-                        logger.error("Null found for attribute value '" + name + "'");
+                        logger.error("Null attribute value '" + name + "'");
                     else if(value instanceof Number)
                         writer.addGlobalAttribute(name, (Number) value);
                     else if(value instanceof String)
@@ -200,20 +171,71 @@ class NcdfEncoder implements INcdfEncoder {
                 // finish the file
                 writer.close();
 
-                // return the stream
-                return createWritable.getStream();
-            } else {
-                // no more netcdfs
-                conn.close();
-                return null;
-            }
-        } catch(Exception e) {
+                // get filename
+                Object filename = evaluateSql(dataSource, instanceId, selectionClause, orderClause, definition.getFilenameTemplate().getSql());
+
+                // format the file into the output stream
+                is = createWritable.getStream();
+                outputFormatter.write((String)filename, is);
+                is.close();
+            } 
+        }
+
+        catch(Exception e) {
             logger.error("Problem generating netcdf ", e);
-            conn.close();
             // propagate to caller
             throw e;
         }
+        finally {
+            conn.close();
+            if(is != null)
+              is.close();
+    
+            outputFormatter.finish();
+        }
     }
+
+
+    private Object evaluateSql(DataSource dataSource, long instanceId, String selectionClause, String orderClause, String sql) throws Exception
+    {
+        // we need aliases for the inner select, and to support wrapping the where selection
+        sql = sql.replaceAll("\\$instance",
+            "( select *"
+            + " from (" + dataSource.getVirtualInstanceTable() + ") instance "
+            + " where instance.id = " + Long.toString(instanceId) + ") as instance "
+        );
+
+        // as for vars/dims, but without the order clause, to support aggregate functions like min/max
+        sql = sql.replaceAll("\\$data",
+             "( select *"
+             + " from (" + dataSource.getVirtualDataTable() + ") as data"
+             + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
+             + " on instance.id = data.instance_id"
+             + " where " + selectionClause
+             + " and data.instance_id = " + Long.toString(instanceId)
+             + " order by " + orderClause
+             + " ) as data"
+        );
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+            stmt.setFetchSize(fetchSize);
+            rs = stmt.executeQuery();
+
+            // TODO more checks around this
+            // maybe support converion to ncdf array attribute types
+            rs.next();
+            return rs.getObject(1);
+        } finally {
+            if(stmt != null)
+                stmt.close();
+            if( rs != null)
+                rs.close();
+        }
+    }
+
 
     public void populateValues(
         String query,
