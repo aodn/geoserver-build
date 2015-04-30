@@ -21,7 +21,7 @@ public class XMLDefinitionTest {
 
     @Test
     public void testStringLiteral() throws Exception {
-        InputStream config = getClass().getResourceAsStream("/anmn_timeseries.xml");
+        InputStream config = getClass().getResourceAsStream("/anmn_ts.xml");
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
         Node node = document.getFirstChild();
 
