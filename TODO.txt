@@ -1,18 +1,13 @@
 
-Prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
-
-
 TODO
-- sql lookup for global attributes
-- need float and string cql literal types.
-- logger
-
------
-TODO - OLD
 
 - postgres - parametize query parameters, rather than use text, injection attack
-- compose with spring
--  (cant but have abstracted out) do the netcdf generation in memory
+- Angus cql examples - in integration tests
+- integration test should use a subset of prod data and be included in github
+- re-check that works with profile, and trajectory
+- refactor variable class to avoid being both definition and mutable buffer - srp
+- spring
+- (cant but have abstracted out) netcdf generation in memory
 - pass table as parameter to encoder strategy (not sure)
 
 ----
@@ -60,5 +55,8 @@ WHAT'S DONE
 - done order of dimensions and attributes
 - done carry a context when decoding the xml, to perform lookup of dimensions, etc...
 - done index on prod data.
-
-
+- done sql lookup for global attributes
+- done - logger
+- done - java linter
+- done - prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
+- done - need float and string cql literal types.

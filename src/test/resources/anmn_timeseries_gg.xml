@@ -6,6 +6,13 @@
     <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from timeseries</virtualInstanceTable>
   </source>
 
+  <!-- TODO run xmllint on this -->
+  <filename>
+      <sql>select 'file-'||(select deployment_code from $instance)||'-'||(select id from $instance)||'.nc'
+    </sql>
+  </filename>
+ 
+
   <dimensions>
     <dimension name="TIME"/>
   </dimensions>
