@@ -5,8 +5,6 @@ import au.org.emii.ncdfgenerator.cql.ExprParser;
 import au.org.emii.ncdfgenerator.cql.IExprParser;
 import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
 import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
-import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
-import au.org.emii.ncdfgenerator.IOutputFormatter; 
 
 import java.sql.Connection;
 import java.io.InputStream;
@@ -21,7 +19,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class NcdfEncoderBuilder {
     // responsible for assembling the NcdfEncoder
 
-    private String layerConfigDir; 
+    private String layerConfigDir;
     private String tmpCreationDir;
     private IOutputFormatter outputFormatter;
 
@@ -34,7 +32,7 @@ public class NcdfEncoderBuilder {
         try {
             IExprParser parser = new ExprParser();
             IDialectTranslate translate = new PGDialectTranslate();
-            ICreateWritable createWritable = new CreateWritable( tmpCreationDir );
+            ICreateWritable createWritable = new CreateWritable(tmpCreationDir);
             IAttributeValueParser attributeValueParser = new AttributeValueParser();
 
             config = new FileInputStream(layerConfigDir + "/" + typename + ".xml");
@@ -50,16 +48,15 @@ public class NcdfEncoderBuilder {
         }
     }
 
-    public void setLayerConfigDir(String layerConfigDir) {
+    public final void setLayerConfigDir(String layerConfigDir) {
         this.layerConfigDir = layerConfigDir;
     }
-    
-    public void setTmpCreationDir(String tmpCreationDir) {
+
+    public final void setTmpCreationDir(String tmpCreationDir) {
         this.tmpCreationDir = tmpCreationDir;
     }
 
-    public void setOutputType(IOutputFormatter outputFormatter)
-    {
+    public final void setOutputType(IOutputFormatter outputFormatter) {
         this.outputFormatter = outputFormatter;
     }
 }

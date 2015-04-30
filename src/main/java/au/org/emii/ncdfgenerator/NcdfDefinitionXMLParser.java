@@ -146,7 +146,6 @@ class NcdfDefinitionXMLParser {
     }
 
 
-
     class DimensionsParser {
         List< IDimension> parse(Node node) throws NcdfGeneratorException {
             if(!node.getNodeName().equals("dimensions"))

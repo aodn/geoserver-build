@@ -33,7 +33,7 @@ class NcdfEncoder {
     private final String filterExpr;
     private final IOutputFormatter outputFormatter;
     private final OutputStream os;
-    static private final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
+    private static final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
     private final IAttributeValueParser attributeValueParser;
     private final int fetchSize;
 
@@ -133,7 +133,7 @@ class NcdfEncoder {
                     if(attribute.getValue() != null) {
                         value = attributeValueParser.parse(attribute.getValue()).getValue();
                     } else if(attribute.getSql() != null) {
-                        value = evaluateSql(dataSource, instanceId, selectionClause, orderClause, attribute.getSql()) ;
+                        value = evaluateSql(dataSource, instanceId, selectionClause, orderClause, attribute.getSql());
                     } else {
                         throw new NcdfGeneratorException("No value defined for global attribute '" + name + "'");
                     }
@@ -178,19 +178,16 @@ class NcdfEncoder {
                 is = createWritable.getStream();
                 outputFormatter.write((String)filename, is);
                 is.close();
-            } 
-        }
-
-        catch(Exception e) {
+            }
+        } catch(Exception e) {
             logger.error("Problem generating netcdf ", e);
             // propagate to caller
             throw e;
-        }
-        finally {
+        } finally {
             conn.close();
             if(is != null)
               is.close();
-    
+
             outputFormatter.finish();
         }
     }
@@ -231,13 +228,13 @@ class NcdfEncoder {
         } finally {
             if(stmt != null)
                 stmt.close();
-            if( rs != null)
+            if(rs != null)
                 rs.close();
         }
     }
 
 
-    public void populateValues(
+    private void populateValues(
         String query,
         List< IDimension> dimensions,
         List< IVariable> encoders
