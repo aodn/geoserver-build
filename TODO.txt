@@ -9,7 +9,6 @@ TODO
 - spring
 - (cant but have abstracted out) netcdf generation in memory
 - pass table as parameter to encoder strategy (not sure)
-- need float and string cql literal types.
 
 ----
 
@@ -60,5 +59,4 @@ WHAT'S DONE
 - done - logger
 - done - java linter
 - done - prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
-
-
+- done - need float and string cql literal types.
