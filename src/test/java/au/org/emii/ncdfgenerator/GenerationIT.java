@@ -136,7 +136,7 @@ public class GenerationIT {
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
 
         OutputStream os = new FileOutputStream(TMPDIR + "/output.zip");
-        generator.write("anmn_timeseries", cql, getConn(), os);
+        generator.write("anmn_ts", cql, getConn(), os);
     }
 
 
