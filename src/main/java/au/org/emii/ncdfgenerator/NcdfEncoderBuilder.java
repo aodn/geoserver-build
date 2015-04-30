@@ -43,7 +43,8 @@ public class NcdfEncoderBuilder {
 
             return new NcdfEncoder(parser, translate, conn, createWritable, attributeValueParser, definition, filterExpr, outputFormatter, os);
         } finally {
-            config.close();
+            if(config != null)
+                config.close();
             // conn.close();
         }
     }

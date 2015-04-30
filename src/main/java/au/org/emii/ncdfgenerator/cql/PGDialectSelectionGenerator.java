@@ -54,15 +54,16 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
             }
             expr.getChildren().get(0).accept(this);
         } else if(lower.equals("and")
-            || lower.equals("or")) {
+                || lower.equals("or")) {
             emitInfixSqlExpr(symbol, expr);
         } else if(lower.equals("intersects")) {
             emitFunctionSqlExpr("ST_INTERSECTS", expr);
         } else if(symbol.equals(">=")
-            || symbol.equals("<=")
-            || symbol.equals("<")
-            || symbol.equals(">")
-          ) {
+                || symbol.equals("<=")
+                || symbol.equals("<")
+                || symbol.equals(">")
+                || symbol.equals("=")
+                || symbol.equals("<>")) {
             emitInfixSqlExpr(symbol, expr);
         } else {
             throw new CQLException("Unrecognized proc expression symbol '" + symbol + "'");

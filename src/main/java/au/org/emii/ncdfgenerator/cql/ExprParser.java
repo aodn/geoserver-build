@@ -400,13 +400,11 @@ public class ExprParser implements IExprParser {
         return null;
     }
 
-    private ExprStringLiteral parseStringLiteral( String s, int pos )
-    {
+    private ExprStringLiteral parseStringLiteral(String s, int pos) {
         int pos2 = pos;
         if (peekChar(s, pos2) != '\'') {
             return null;
-        }
-        else {
+        } else {
             ++pos2;
 
             while (peekChar(s, pos2) != '\'') {
