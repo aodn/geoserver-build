@@ -32,10 +32,10 @@ class ByteValueEncoder implements IValueEncoder {
         } else if(value instanceof Byte) {
             array.setByte(ima, (Byte) value);
         } else if(value instanceof String && ((String)value).length() == 1) {
-            // coerce string of length 1 to byte
-            String s = (String) value;
-            Byte ch = s.getBytes()[0];
-            array.setByte(ima, ch);
+            // interpret one char string literals using ascii value
+            String s = (String)value;
+            int ch = s.getBytes()[0] - '0';
+            array.setByte(ima, (byte)ch);
         } else {
             throw new NcdfGeneratorException("Failed to convert type to byte");
         }
