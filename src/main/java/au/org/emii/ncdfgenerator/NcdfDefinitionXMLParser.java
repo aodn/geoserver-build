@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.NamedNodeMap;
 
 
 final class Helper {
@@ -137,9 +136,8 @@ class NcdfDefinitionXMLParser {
                 extractValue(child);
 
             // extract from attributes
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i)
-                extractValue(attrs.item(i));
+            for(Node child : new AttrWrapper(node))
+                extractValue(child);
 
             return new FilenameTemplate(sql);
         }
@@ -172,9 +170,7 @@ class NcdfDefinitionXMLParser {
                 throw new NcdfGeneratorException("Not a dimension node");
 
             String name = "";
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i) {
-                Node child = attrs.item(i);
+            for(Node child : new AttrWrapper(node)) {
                 String tag = child.getNodeName();
                 if(tag.equals("name"))
                     name = Helper.nodeVal(child);
@@ -266,9 +262,7 @@ class NcdfDefinitionXMLParser {
             if(!node.getNodeName().equals("dimension"))
                 throw new NcdfGeneratorException("Not a dimension");
 
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i) {
-                Node child = attrs.item(i);
+            for(Node child : new AttrWrapper(node)) {
                 String tag = child.getNodeName();
                 if(tag.equals("name"))
                     return context.getDimensionByName(Helper.nodeVal(child));
@@ -346,9 +340,8 @@ class NcdfDefinitionXMLParser {
                 extractValue(child);
 
             // extract from attributes
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i)
-                extractValue(attrs.item(i));
+            for(Node child : new AttrWrapper(node))
+                extractValue(child);
 
             return new Attribute(name, value, sql);
         }
