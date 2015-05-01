@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import au.org.emii.ncdfgenerator.cql.*;
 
@@ -156,7 +157,7 @@ public class QueryTest {
         IExpression expr = doExprTest("SYM <  +(-+ -123)");
         assertTrue(expr instanceof ExprProc);
         String sql = new PGDialectTranslate().process(expr);
-        assertTrue(sql.equals("(\"SYM\" < (+(-(+(-123)))))"));
+        assertEquals(sql, "(\"SYM\" < (+(-(+(-123)))))");
     }
 }
 
