@@ -65,13 +65,12 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
             && (symbol.equals("+")
             || symbol.equals("-"))) {
             emitUnarySqlExpr(symbol, expr);
-        }
-        else {
+        } else {
             throw new CQLException("Unrecognized proc expression symbol '" + symbol + "'");
         }
     }
 
-    private final void emitFunctionSqlExpr(String op, ExprProc expr) throws Exception {
+    private void emitFunctionSqlExpr(String op, ExprProc expr) throws Exception {
         b.append(op);
         b.append('(');
         for(IExpression child : expr.getChildren()) {
@@ -82,14 +81,14 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
         b.append(')');
     }
 
-    private final void emitUnarySqlExpr(String op, ExprProc expr) throws Exception {
+    private void emitUnarySqlExpr(String op, ExprProc expr) throws Exception {
         b.append('(');
         b.append(op);
         expr.getChildren().get(0).accept(this);
         b.append(')');
     }
 
-    private final void emitInfixSqlExpr(String op, ExprProc expr) throws Exception {
+    private void emitInfixSqlExpr(String op, ExprProc expr) throws Exception {
         b.append('(');
         expr.getChildren().get(0).accept(this);
         b.append(' ');
