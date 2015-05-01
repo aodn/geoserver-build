@@ -42,56 +42,53 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
         b.append("ST_GeomFromText( '" + expr.getValue() + "', 4326)");
     }
 
-
     public final void visit(ExprProc expr) throws Exception {
-        String symbol = expr.getSymbol();
-        String lower = symbol.toLowerCase();
+        String symbol = expr.getSymbol().toLowerCase();
+        int arity = expr.getChildren().size();
 
-        if(symbol.equals("nop")) {
-            if(expr.getChildren().size() != 1) {
-                // should almost be an unchecked runtime exception
-                throw new CQLException("nop with more than one child");
-            }
+        if(arity == 1 && symbol.equals("nop")) {
             expr.getChildren().get(0).accept(this);
-        } else if(lower.equals("and")
-                || lower.equals("or")) {
-            emitInfixSqlExpr(symbol, expr);
-        } else if(lower.equals("intersects")) {
+        } else if(symbol.equals("intersects")) {
             emitFunctionSqlExpr("ST_INTERSECTS", expr);
-        } else if(symbol.equals(">=")
-                || symbol.equals("<=")
-                || symbol.equals("<")
-                || symbol.equals(">")
-                || symbol.equals("=")
-                || symbol.equals("<>")) {
+        } else if(arity == 2
+            && (
+            symbol.equals("and")
+            || symbol.equals("or")
+            || symbol.equals(">=")
+            || symbol.equals("<=")
+            || symbol.equals("<")
+            || symbol.equals(">")
+            || symbol.equals("=")
+            || symbol.equals("<>"))) {
             emitInfixSqlExpr(symbol, expr);
+        } else if(arity == 1
+            && (symbol.equals("+")
+            || symbol.equals("-"))) {
+            emitUnarySqlExpr(symbol, expr);
         } else {
             throw new CQLException("Unrecognized proc expression symbol '" + symbol + "'");
         }
     }
 
-    public final void emitFunctionSqlExpr(String op, ExprProc expr) throws Exception {
-        // if expansion is done in order we may be ok,....
-
+    private void emitFunctionSqlExpr(String op, ExprProc expr) throws Exception {
         b.append(op);
         b.append('(');
-
-        boolean first = true;
         for(IExpression child : expr.getChildren()) {
-            if(first) {
-                child.accept(this);
-                first = false;
-            } else {
+            if(child != expr.getChildren().get(0))
                 b.append(',');
-                child.accept(this);
-            }
+            child.accept(this);
         }
         b.append(')');
     }
 
+    private void emitUnarySqlExpr(String op, ExprProc expr) throws Exception {
+        b.append('(');
+        b.append(op);
+        expr.getChildren().get(0).accept(this);
+        b.append(')');
+    }
 
-    public final void emitInfixSqlExpr(String op, ExprProc expr) throws Exception {
-        // if expansion is done in order we may be ok,....
+    private void emitInfixSqlExpr(String op, ExprProc expr) throws Exception {
         b.append('(');
         expr.getChildren().get(0).accept(this);
         b.append(' ');
