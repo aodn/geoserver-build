@@ -40,7 +40,7 @@ public class ExprParser implements IExprParser {
 
 
     private String peekOperator(String s, int pos) {
-        final String [] ops = {"AND", "OR", "<>", "<=", ">=", "<", ">", "="};
+        final String [] ops = {"AND", "OR", "<>", "<=", ">=", "<", ">", "=", "+", "-", "NOT" };
         for(String op : ops) {
             if(pos + op.length() < s.length()
                     && s.substring(pos, pos + op.length()).equals(op)) {
@@ -140,7 +140,7 @@ public class ExprParser implements IExprParser {
 
 
     private IExpression parseComparisonExpression(String s, int pos) {
-        IExpression lhs = parseFactor(s, pos);
+        IExpression lhs = parseUnaryExpression(s, pos);
         if(lhs == null)
             return null;
         pos = lhs.getPosition();
@@ -162,8 +162,20 @@ public class ExprParser implements IExprParser {
     }
 
 
-    private IExpression parseFactor(String s, int pos) {
+    private IExpression parseUnaryExpression(String s, int pos) {
         pos = skipWhite(s, pos);
+        String op = peekOperator(s, pos);
+        if((op.equals("+") || op.equals("-"))) { // TODO NOT operator
+            ++pos;
+            IExpression child = parseUnaryExpression(s, pos);
+            return createUnaryExpr(child.getPosition(), op, child);
+        } else {
+            return parseFactor(s, pos);
+        }
+    }
+
+
+    private IExpression parseFactor(String s, int pos) {
 
         // nested parenthesis expr
         if(peekChar(s, pos) == '(') {
