@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.NamedNodeMap;
 
 
 final class Helper {
@@ -104,7 +103,7 @@ class NcdfDefinitionXMLParser {
             else if(tag.equals("virtualInstanceTable"))
                 virtualInstanceTable = Helper.nodeVal(child);
             else
-                throw new NcdfGeneratorException("Unrecognized tag");
+                throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
         }
 
         DataSource parse(Node node) throws NcdfGeneratorException {
@@ -137,9 +136,8 @@ class NcdfDefinitionXMLParser {
                 extractValue(child);
 
             // extract from attributes
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i)
-                extractValue(attrs.item(i));
+            for(Node child : new AttrWrapper(node))
+                extractValue(child);
 
             return new FilenameTemplate(sql);
         }
@@ -158,7 +156,7 @@ class NcdfDefinitionXMLParser {
                     if(tag.equals("dimension"))
                         dimensions.add(new DimensionParser().parse(child));
                     else
-                        throw new NcdfGeneratorException("Unrecognized tag");
+                        throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
                 }
             }
             return dimensions;
@@ -172,13 +170,12 @@ class NcdfDefinitionXMLParser {
                 throw new NcdfGeneratorException("Not a dimension node");
 
             String name = "";
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i) {
-                Node child = attrs.item(i);
-                if(child.getNodeName().equals("name"))
+            for(Node child : new AttrWrapper(node)) {
+                String tag = child.getNodeName();
+                if(tag.equals("name"))
                     name = Helper.nodeVal(child);
                 else
-                    throw new NcdfGeneratorException("Unrecognized tag");
+                    throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
             }
 
             return new DimensionImpl(name);
@@ -198,7 +195,7 @@ class NcdfDefinitionXMLParser {
                     if(tag.equals("variable"))
                         variables.add(new VariableParser().parse(context, child));
                     else
-                        throw new NcdfGeneratorException("Unrecognized tag");
+                        throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
                 }
             }
             return variables;
@@ -228,7 +225,7 @@ class NcdfDefinitionXMLParser {
                     else if(tag.equals("attributes"))
                         attributes = new AttributesParser().parse(child);
                     else
-                        throw new NcdfGeneratorException("Unrecognized tag");
+                        throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
                 }
             }
 
@@ -255,7 +252,7 @@ class NcdfDefinitionXMLParser {
             else if(tag.equals("time"))
                 return new TimestampValueEncoder();
             else
-                throw new NcdfGeneratorException("Unrecognized tague type encoder '" + tag + "'");
+                throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
         }
     }
 
@@ -265,13 +262,12 @@ class NcdfDefinitionXMLParser {
             if(!node.getNodeName().equals("dimension"))
                 throw new NcdfGeneratorException("Not a dimension");
 
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i) {
-                Node child = attrs.item(i);
-                if(child.getNodeName().equals("name"))
+            for(Node child : new AttrWrapper(node)) {
+                String tag = child.getNodeName();
+                if(tag.equals("name"))
                     return context.getDimensionByName(Helper.nodeVal(child));
                 else
-                    throw new NcdfGeneratorException("Unrecognized tag");
+                    throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
             }
             return null;
         }
@@ -290,7 +286,7 @@ class NcdfDefinitionXMLParser {
                     if(tag.equals("dimension"))
                         dimensions.add(new VariableDimensionParser().parse(context, child));
                     else
-                        throw new NcdfGeneratorException("Unrecognized tag");
+                        throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
                 }
             }
             return dimensions;
@@ -311,7 +307,7 @@ class NcdfDefinitionXMLParser {
                     if(tag.equals("attribute"))
                         attributes.add(new AttributeParser().parse(child));
                     else
-                        throw new NcdfGeneratorException("Unrecognized tag");
+                        throw new NcdfGeneratorException("Unrecognized tag '" + tag + "'");
                 }
             }
             return attributes;
@@ -344,9 +340,8 @@ class NcdfDefinitionXMLParser {
                 extractValue(child);
 
             // extract from attributes
-            NamedNodeMap attrs = node.getAttributes();
-            for(int i = 0; i < attrs.getLength(); ++i)
-                extractValue(attrs.item(i));
+            for(Node child : new AttrWrapper(node))
+                extractValue(child);
 
             return new Attribute(name, value, sql);
         }
