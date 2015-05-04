@@ -111,11 +111,12 @@ public class GenerationIT {
 
     @Test
     public void anmn_nrs_ctd_profiles_IT() throws Exception {
-
-        // exception handling needs to be improved a lot...
-        InputStream config = getClass().getResourceAsStream("/anmn_nrs_ctd_profiles.xml");
         String cql = "TIME < '2013-6-29T00:40:01Z' ";
-        doTypenameQuery(config, cql);
+        String layerConfigDir = "./src/test/resources/"; // TODO URL url = getClass().getResource("/")  ; url.toString()...
+        String tmpCreationDir = TMPDIR;
+        NcdfGenerator generator = new NcdfGenerator(layerConfigDir, tmpCreationDir);
+        OutputStream os = new FileOutputStream(TMPDIR + "/output.zip");
+        generator.write("anmn_nrs_ctd_profiles", cql, getConn(), os);
     }
 
     @Test
