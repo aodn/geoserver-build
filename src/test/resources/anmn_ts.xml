@@ -6,7 +6,7 @@
     <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from timeseries</virtualInstanceTable>
   </source>
   <filename>
-    <sql>select 'IMOS_ANMN-TS_'||(select to_char(time_coverage_start AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"') from $instance)||'_'||(select platform_code from $instance)||'_FV01_'||(select deployment_code from $instance)||'-'||(select trim(both '-' from regexp_replace(regexp_replace(instrument, '[^A-Za-z0-9_\.-]', '-', 'g'), '(-)\1+', '-', 'g')) from $instance)||'-'||(select instrument_nominal_depth from $instance)||'_END-'||(select time_coverage_end from $instance)||'_id-'||(select id from $instance)||'.nc'
+    <sql>select 'IMOS_ANMN-TS_'||(select to_char(time_coverage_start AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"') from $instance)||'_'||(select platform_code from $instance)||'_FV01_'||(select deployment_code from $instance)||'-'||(select trim(both '-' from regexp_replace(regexp_replace(instrument, '[^A-Za-z0-9_\.-]', '-', 'g'), '(-)\1+', '-', 'g')) from $instance)||'-'||(select instrument_nominal_depth from $instance)||'_END-'||(select to_char(time_coverage_end AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"') from $instance)||'_id-'||(select id from $instance)||'.nc'
     </sql>
   </filename>
   <dimensions>
