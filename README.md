@@ -5,16 +5,13 @@
 ## Requires
 java 1.7
 
-## To compile and run unit tests
-mvn install
+## env vars for integration tests
+export POSTGRES_USER='user'
+export POSTGRES_PASS='pass'
+export POSTGRES_JDBC_URL='jdbc:postgresql://127.0.0.1/mytest'
 
-## To run a specific integration test
-
-mvn -Dtest=GenerationIT#anmn_timeseries_gg_IT test
-
-mvn -Dtest=GenerationIT#anmn_timeseries_IT test   
-mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT test   
-mvn -Dtest=GenerationIT#soop_sst_trajectory_IT test   
+## To compile and run unit + integration tests
+mvn clean install
 
 
 ## references

@@ -6,6 +6,14 @@
     <virtualDataTable>select trajectory_id as instance_id, * from measurements</virtualDataTable>
     <virtualInstanceTable>select * from indexed_file</virtualInstanceTable>
   </source>
+
+  <filename>
+    <sql>select 'file-'||(select id from $instance)||'.nc'
+    </sql>
+  </filename>
+
+  <globalattributes/>
+
   <dimensions>
     <dimension name="TIME"/>
   </dimensions>
@@ -27,7 +35,7 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="99999."/>
-        <attribute name="units" value="days since 1950-01-01 00:00:00 UTC"/>
+        <attribute name="units" value="'days since 1950-01-01 00:00:00 UTC'"/>
       </attributes>
     </variable>
     <variable>
@@ -37,7 +45,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
+        <attribute name="_FillValue" value="99999.f"/>
       </attributes>
     </variable>
     <variable>
@@ -47,7 +55,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
+        <attribute name="_FillValue" value="99999.f"/>
       </attributes>
     </variable>
     <variable>
@@ -57,8 +65,8 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="_FillValue" value="99999."/>
-        <attribute name="example" value="examplevalue"/>
+        <attribute name="_FillValue" value="99999.f"/>
+        <attribute name="example" value="'examplevalue'"/>
       </attributes>
     </variable>
   </variables>
