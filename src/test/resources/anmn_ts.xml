@@ -6,7 +6,7 @@
     <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from timeseries</virtualInstanceTable>
   </source>
   <filename>
-    <sql>select 'file-'||(select deployment_code from $instance)||'-'||(select id from $instance)||'.nc'
+    <sql>select 'IMOS_ANMN-TS_'||(select to_char(time_coverage_start AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"') from $instance)||'_'||(select platform_code from $instance)||'_FV01_'||(select deployment_code from $instance)||'-'||(select trim(both '-' from regexp_replace(regexp_replace(instrument, '[^A-Za-z0-9_\.-]', '-', 'g'), '(-)\1+', '-', 'g')) from $instance)||'-'||(select instrument_nominal_depth from $instance)||'_END-'||(select to_char(time_coverage_end AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"') from $instance)||'_id-'||(select id from $instance)||'.nc'
     </sql>
   </filename>
   <dimensions>
@@ -22,7 +22,7 @@
     <attribute name="Conventions" value="'CF-1.6,IMOS-1.3'"/>
     <attribute name="standard_name_vocabulary" value="'CF-1.6'"/>
     <attribute name="date_created">
-      <sql>select to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD""T""HH24:MI:SSZ')</sql>
+      <sql>select to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')</sql>
     </attribute>
     <attribute name="comment" sql="select comment from $instance"/>
     <attribute name="instrument" sql="select instrument from $instance"/>
@@ -56,16 +56,16 @@
     </attribute>
     <attribute name="geospatial_vertical_positive" value="'down'"/>
     <attribute name="time_deployment_start">
-      <sql>select to_char(time_deployment_start AT TIME ZONE 'UTC', 'YYYY-MM-DD""T""HH24:MI:SSZ') from $instance</sql>
+      <sql>select to_char(time_deployment_start AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from $instance</sql>
     </attribute>
     <attribute name="time_deployment_end">
-      <sql>select to_char(time_deployment_end AT TIME ZONE 'UTC', 'YYYY-MM-DD""T""HH24:MI:SSZ') from $instance</sql>
+      <sql>select to_char(time_deployment_end AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from $instance</sql>
     </attribute>
     <attribute name="time_coverage_start">
-      <sql>select to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYY-MM-DD""T""HH24:MI:SSZ') from $data</sql>
+      <sql>select to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from $data</sql>
     </attribute>
     <attribute name="time_coverage_end">
-      <sql>select to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYY-MM-DD""T""HH24:MI:SSZ') from $data</sql>
+      <sql>select to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from $data</sql>
     </attribute>
     <attribute name="data_centre" value="'eMarine Information Infrastructure (eMII)'"/>
     <attribute name="data_centre_email" value="'info@emii.org.au'"/>
