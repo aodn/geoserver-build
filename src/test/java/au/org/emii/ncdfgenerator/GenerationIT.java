@@ -103,18 +103,14 @@ public class GenerationIT {
 
         logger.info("Importing SQL");
 
-        while(true) {
+        int ch = -1;
+        while((ch = is.read()) >= 0) {
             StringBuilder sb = new StringBuilder();
 
             // glob firstToken
-            int ch = is.read();
             while(ch >= 0 && ch != ' ' && ch != '\n') {
                 sb.append((char)ch);
                 ch = is.read();
-            }
-            // end of stream
-            if(ch < 0) {
-                break;
             }
 
             String firstTok = sb.toString();
