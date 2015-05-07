@@ -5,16 +5,21 @@
 ## Requires
 java 1.7
 
-## To compile and run unit tests
-mvn install
+## setup env vars for integration tests
 
-## To run a specific integration test
+    $ sudo -u postgres psql -d postgres
+    # drop database mytest;
+    # create user mytest password 'mytest';
+    # create database mytest owner mytest;
+    # \c mytest
+    # create extension postgis schema public;
 
-mvn -Dtest=GenerationIT#anmn_timeseries_gg_IT test
+    export POSTGRES_USER='mytest'
+    export POSTGRES_PASS='mytest'
+    export POSTGRES_JDBC_URL='jdbc:postgresql://127.0.0.1/mytest'
 
-mvn -Dtest=GenerationIT#anmn_timeseries_IT test   
-mvn -Dtest=GenerationIT#anmn_nrs_ctd_profiles_IT test   
-mvn -Dtest=GenerationIT#soop_sst_trajectory_IT test   
+## To compile and run unit + integration tests
+mvn clean install
 
 
 ## references

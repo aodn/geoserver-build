@@ -1,14 +1,11 @@
 
 PRIORITY
 
-- fix integration tests + naming
 - factory for Variable to hide detail of attribute parser instantiation.
 
 TODO
 
 - postgres - parametize query parameters, rather than use text, injection attack
-- integration test should use a subset of prod data and be included in github
-- re-check that works with profile, and trajectory
 - refactor variable class to avoid being both definition and mutable buffer - srp
 - spring
 - investigate netcdf generation in memory
@@ -67,3 +64,6 @@ WHAT'S DONE
 - done - unary operators
 - done - fix qc vars which are being encoded incorrectly?
 - done - Angus cql examples - in integration tests
+- done - fix integration tests + naming
+- done - integration test should use a subset of prod data and be included in github
+- done - re-check that works with profile, and trajectory
