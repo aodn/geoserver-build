@@ -5,10 +5,18 @@
 ## Requires
 java 1.7
 
-## env vars for integration tests
-export POSTGRES_USER='user'
-export POSTGRES_PASS='pass'
-export POSTGRES_JDBC_URL='jdbc:postgresql://127.0.0.1/mytest'
+## setup env vars for integration tests
+
+    $ sudo -u postgres psql -d postgres
+    # drop database mytest;
+    # create user mytest password 'mytest';
+    # create database mytest owner mytest;
+    # \c mytest
+    # create extension postgis schema public;
+
+    export POSTGRES_USER='mytest'
+    export POSTGRES_PASS='mytest'
+    export POSTGRES_JDBC_URL='jdbc:postgresql://127.0.0.1/mytest'
 
 ## To compile and run unit + integration tests
 mvn clean install
