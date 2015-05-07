@@ -28,6 +28,8 @@ import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.io.FileUtils;
+
 import au.org.emii.ncdfgenerator.cql.CQLException;
 import au.org.emii.ncdfgenerator.cql.ExprParser;
 import au.org.emii.ncdfgenerator.cql.IExprParser;
@@ -142,11 +144,11 @@ public class GenerationIT {
                     regularStmt = true;
 
             if(regularStmt) {
-                // logger.info("query " + sql);
+                logger.debug("query " + sql);
                 st.execute(sql);
             }
             else if(firstTok.equals("COPY")) {
-                // logger.info("Copying data");
+                logger.debug("Copying data");
                 is.read(); // \n
 
                 // the copyManager reads to eof and doesn't respect the \n\\. terminating sequence. so we have
@@ -216,9 +218,11 @@ public class GenerationIT {
     }
 
     @Before
-    public void setup() {
-        // TODO factor this name into var
-        new File(TMPDIR).mkdirs();
+    public void setup() throws Exception {
+        logger.info("delete and create TMPDIR");
+        File file = new File(TMPDIR);
+        FileUtils.deleteDirectory(file);
+        file.mkdirs();
     }
 
     @Test
