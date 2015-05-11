@@ -9,6 +9,11 @@ TODO
 - refactor variable class to avoid being both definition and mutable buffer - srp
 - spring
 - investigate netcdf generation in memory
+    See here,
+    http://www.massapi.com/source/manual/thredds/cdm/src/main/java/ucar/nc2/NetcdfFile.java.html#576
+    and
+    http://www.unidata.ucar.edu/software/thredds/v4.6/netcdf-java/javadocAll/ucar/unidata/io/InMemoryRandomAccessFile.html
+    
 - pass table as parameter to encoder strategy (not sure)
 
 ----
