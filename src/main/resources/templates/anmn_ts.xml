@@ -9,7 +9,7 @@
     <sql>
         select
         'IMOS_ANMN-TS_'
-        ||to_char(time_coverage_start AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"')
+        ||to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
         ||'_'
         ||platform_code
         ||'_FV01_'
@@ -19,11 +19,12 @@
         ||'-'
         ||instrument_nominal_depth
         ||'_END-'
-        ||to_char(time_coverage_end AT TIME ZONE 'UTC', 'YYYYMMDD"T"HH24MISS"Z"')
+        ||to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
         ||'_id-'
         ||id
         ||'.nc'
-        from $instance
+        from $data
+        group by platform_code, deployment_code, trim(both '-' from regexp_replace(regexp_replace(instrument, '[^A-Za-z0-9_\.-]', '-', 'g'), '(-)\1+', '-', 'g')), instrument_nominal_depth, id
     </sql>
   </filename>
   <dimensions>
