@@ -21,6 +21,8 @@ java 1.7
 ## To compile and run unit + integration tests
 mvn clean install
 
+## Specific integration test - useful for developing
+mvn -Dit.test=GenerationIT#testAnmnTs verify
 
 ## references
 
