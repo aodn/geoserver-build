@@ -1,9 +1,7 @@
-
 package au.org.emii.ncdfgenerator;
 
-import java.sql.Connection;
 import java.io.OutputStream;
-
+import java.sql.Connection;
 
 public class NcdfGenerator {
 
@@ -20,7 +18,8 @@ public class NcdfGenerator {
         try {
             NcdfEncoder encoder = encoderBuilder.create(typename, filterExpr, conn, os);
             encoder.write();
-        } finally {
+        }
+        finally {
             os.close();
             conn.close();
         }

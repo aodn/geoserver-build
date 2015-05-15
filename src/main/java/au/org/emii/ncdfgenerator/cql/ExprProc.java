@@ -1,8 +1,7 @@
-
 package au.org.emii.ncdfgenerator.cql;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ExprProc implements IExpression {
     private final int pos;
@@ -10,7 +9,7 @@ public class ExprProc implements IExpression {
     private final String symbol;
     private final ArrayList<IExpression> children;
 
-    public ExprProc(int pos, String symbol, ArrayList< IExpression> children) {
+    public ExprProc(int pos, String symbol, ArrayList<IExpression> children) {
         this.pos = pos;
         this.symbol = symbol;
         this.children = children;

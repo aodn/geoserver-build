@@ -1,17 +1,11 @@
-
 package au.org.emii.ncdfgenerator;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-
-
 import ucar.ma2.Array;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AttributeTest {
 
@@ -21,7 +15,6 @@ public class AttributeTest {
     public void before() {
         p = new AttributeValueParser();
     }
-
 
     @Test
     public void testByte() throws Exception {
@@ -69,12 +62,11 @@ public class AttributeTest {
     public void testArray() throws Exception {
         IAttributeValueParser p = this.p;
         AttributeValue x = p.parse("0b, 5b, 7b, 9b");
-        Array value = (Array) x.getValue() ;
+        Array value = (Array)x.getValue();
         assertTrue(value != null);
         // TODO check length ... etc
         // pos etc.
     }
-
 
     @Test
     public void testAttributeValue() throws Exception {

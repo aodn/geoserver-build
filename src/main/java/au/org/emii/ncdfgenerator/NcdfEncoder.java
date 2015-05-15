@@ -1,28 +1,25 @@
-
 package au.org.emii.ncdfgenerator;
+
+import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
+import au.org.emii.ncdfgenerator.cql.IExprParser;
+import au.org.emii.ncdfgenerator.cql.IExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.ma2.Array;
+import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // TODO ucar.nc2.NetcdfFile
-import ucar.nc2.NetcdfFileWriteable;
-import ucar.ma2.Array;
-
-import au.org.emii.ncdfgenerator.cql.IExpression;
-import au.org.emii.ncdfgenerator.cql.IExprParser;
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
-
 
 class NcdfEncoder {
     private final IExprParser exprParser;
@@ -36,7 +33,6 @@ class NcdfEncoder {
     private static final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
     private final IAttributeValueParser attributeValueParser;
     private final int fetchSize;
-
 
     public NcdfEncoder(
         IExprParser exprParser,
@@ -61,7 +57,6 @@ class NcdfEncoder {
 
         fetchSize = 1000;
     }
-
 
     public void write() throws Exception {
 
@@ -98,12 +93,12 @@ class NcdfEncoder {
             // setup output formatter
             outputFormatter.prepare(os);
 
-            while(featureInstancesRS.next()) {
+            while (featureInstancesRS.next()) {
                 long instanceId = featureInstancesRS.getLong(1);
 
                 String orderClause = "";
-                for(IDimension dimension : definition.getDimensions()) {
-                    if(!orderClause.equals("")) {
+                for (IDimension dimension : definition.getDimensions()) {
+                    if (!orderClause.equals("")) {
                         orderClause += ",";
                     }
                     orderClause += "\"" + dimension.getName() + "\"";
@@ -126,37 +121,44 @@ class NcdfEncoder {
                 NetcdfFileWriteable writer = createWritable.create();
 
                 // Write the global attributes
-                for(Attribute attribute: definition.getGlobalAttributes()) {
+                for (Attribute attribute : definition.getGlobalAttributes()) {
                     String name = attribute.getName();
                     Object value = null;
 
-                    if(attribute.getValue() != null) {
+                    if (attribute.getValue() != null) {
                         value = attributeValueParser.parse(attribute.getValue()).getValue();
-                    } else if(attribute.getSql() != null) {
+                    }
+                    else if (attribute.getSql() != null) {
                         value = evaluateSql(dataSource, instanceId, selectionClause, orderClause, attribute.getSql());
-                    } else {
+                    }
+                    else {
                         throw new NcdfGeneratorException("No value defined for global attribute '" + name + "'");
                     }
 
-                    if(value == null)
+                    if (value == null) {
                         logger.error("Null attribute value '" + name + "'");
-                    else if(value instanceof Number)
-                        writer.addGlobalAttribute(name, (Number) value);
-                    else if(value instanceof String)
-                        writer.addGlobalAttribute(name, (String) value);
-                    else if(value instanceof Array)
-                        writer.addGlobalAttribute(name, (Array) value);
-                    else
-                        throw new NcdfGeneratorException("Unrecognized attribute type '" +  value.getClass().getName() + "'");
+                    }
+                    else if (value instanceof Number) {
+                        writer.addGlobalAttribute(name, (Number)value);
+                    }
+                    else if (value instanceof String) {
+                        writer.addGlobalAttribute(name, (String)value);
+                    }
+                    else if (value instanceof Array) {
+                        writer.addGlobalAttribute(name, (Array)value);
+                    }
+                    else {
+                        throw new NcdfGeneratorException("Unrecognized attribute type '" + value.getClass().getName() + "'");
+                    }
                 }
 
                 // define dimensions
-                for(IDimension dimension: definition.getDimensions()) {
+                for (IDimension dimension : definition.getDimensions()) {
                     dimension.define(writer);
                 }
 
                 // define vars
-                for(IVariable variable : definition.getVariables()) {
+                for (IVariable variable : definition.getVariables()) {
                     variable.define(writer);
                 }
 
@@ -164,7 +166,7 @@ class NcdfEncoder {
                 writer.create();
 
                 // write values
-                for(IVariable variable: definition.getVariables()) {
+                for (IVariable variable : definition.getVariables()) {
                     // maybe change name writeValues
                     variable.finish(writer);
                 }
@@ -179,22 +181,23 @@ class NcdfEncoder {
                 outputFormatter.write((String)filename, is);
                 is.close();
             }
-        } catch(Exception e) {
+        }
+        catch (Exception e) {
             logger.error("Problem generating netcdf ", e);
             // propagate to caller
             throw e;
-        } finally {
+        }
+        finally {
             conn.close();
-            if(is != null)
-              is.close();
+            if (is != null) {
+                is.close();
+            }
 
             outputFormatter.finish();
         }
     }
 
-
-    private Object evaluateSql(DataSource dataSource, long instanceId, String selectionClause, String orderClause, String sql) throws Exception
-    {
+    private Object evaluateSql(DataSource dataSource, long instanceId, String selectionClause, String orderClause, String sql) throws Exception {
         // we need aliases for the inner select, and to support wrapping the where selection
         sql = sql.replaceAll("\\$instance",
             "( select *"
@@ -204,14 +207,14 @@ class NcdfEncoder {
 
         // as for vars/dims, but without the order clause, to support aggregate functions like min/max
         sql = sql.replaceAll("\\$data",
-             "( select *"
-             + " from (" + dataSource.getVirtualDataTable() + ") as data"
-             + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
-             + " on instance.id = data.instance_id"
-             + " where " + selectionClause
-             + " and data.instance_id = " + Long.toString(instanceId)
-             + " order by " + orderClause
-             + " ) as data"
+            "( select *"
+            + " from (" + dataSource.getVirtualDataTable() + ") as data"
+            + " left join (" + dataSource.getVirtualInstanceTable() + ") instance"
+            + " on instance.id = data.instance_id"
+            + " where " + selectionClause
+            + " and data.instance_id = " + Long.toString(instanceId)
+            + " order by " + orderClause
+            + " ) as data"
         );
 
         PreparedStatement stmt = null;
@@ -225,26 +228,30 @@ class NcdfEncoder {
             // maybe support converion to ncdf array attribute types
             rs.next();
             return rs.getObject(1);
-        } finally {
-            if(stmt != null)
+        }
+        finally {
+            if (stmt != null) {
                 stmt.close();
-            if(rs != null)
+            }
+            if (rs != null) {
                 rs.close();
+            }
         }
     }
 
-
     private void populateValues(
         String query,
-        List< IDimension> dimensions,
-        List< IVariable> encoders
+        List<IDimension> dimensions,
+        List<IVariable> encoders
     ) throws Exception {
         // prepare buffers
-        for(IDimension dimension : definition.getDimensions())
+        for (IDimension dimension : definition.getDimensions()) {
             dimension.prepare();
+        }
 
-        for(IVariable variable : definition.getVariables())
+        for (IVariable variable : definition.getVariables()) {
             variable.prepare();
+        }
 
         // sql stuff
         PreparedStatement stmt = conn.prepareStatement(query);
@@ -255,42 +262,44 @@ class NcdfEncoder {
         ResultSetMetaData m = rs.getMetaData();
         int numColumns = m.getColumnCount();
 
-
         // organize dimensions by name
-        Map< String, IDimension> dimensionsMap = new HashMap< String, IDimension>();
-        for(IDimension dimension : definition.getDimensions())
+        Map<String, IDimension> dimensionsMap = new HashMap<String, IDimension>();
+        for (IDimension dimension : definition.getDimensions()) {
             dimensionsMap.put(dimension.getName(), dimension);
+        }
 
         // organize variables by name
-        Map< String, IVariable> variablesMap = new HashMap< String, IVariable>();
-        for(IVariable variable : definition.getVariables())
+        Map<String, IVariable> variablesMap = new HashMap<String, IVariable>();
+        for (IVariable variable : definition.getVariables()) {
             variablesMap.put(variable.getName(), variable);
+        }
 
         // pre-map the encoders by index according to the column name
-        ArrayList< IAddValue> [] processing = (ArrayList< IAddValue> []) new ArrayList [numColumns + 1];
+        ArrayList<IAddValue>[] processing = (ArrayList<IAddValue>[])new ArrayList[numColumns + 1];
 
-        for(int i = 1; i <= numColumns; ++i) {
+        for (int i = 1; i <= numColumns; ++i) {
 
-            processing[i] = new ArrayList< IAddValue>();
+            processing[i] = new ArrayList<IAddValue>();
 
             IDimension dimension = dimensionsMap.get(m.getColumnName(i));
-            if(dimension != null)
+            if (dimension != null) {
                 processing[i].add(dimension);
+            }
 
             IAddValue variable = variablesMap.get(m.getColumnName(i));
-            if(variable != null)
+            if (variable != null) {
                 processing[i].add(variable);
+            }
         }
 
         // process result set rows
-        while(rs.next()) {
-            for(int i = 1; i <= numColumns; ++i) {
-                for(IAddValue p : processing[ i]) {
+        while (rs.next()) {
+            for (int i = 1; i <= numColumns; ++i) {
+                for (IAddValue p : processing[i]) {
                     p.addValueToBuffer(rs.getObject(i));
                 }
             }
         }
     }
-
 }
 

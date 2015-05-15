@@ -1,4 +1,3 @@
-
 package au.org.emii.ncdfgenerator;
 
 import java.util.List;
@@ -6,17 +5,16 @@ import java.util.List;
 class NcdfDefinition {
     private final DataSource dataSource;
     private final FilenameTemplate filenameTemplate;
-    private final List< Attribute> globalAttributes;
-    private final List< IDimension> dimensions;
-    private final List< IVariable> variables;
-
+    private final List<Attribute> globalAttributes;
+    private final List<IDimension> dimensions;
+    private final List<IVariable> variables;
 
     NcdfDefinition(
         DataSource dataSource,
         FilenameTemplate filenameTemplate,
-        List< Attribute> globalAttributes,
-        List< IDimension> dimensions,
-        List< IVariable> variables
+        List<Attribute> globalAttributes,
+        List<IDimension> dimensions,
+        List<IVariable> variables
     ) {
         this.dataSource = dataSource;
         this.filenameTemplate = filenameTemplate;

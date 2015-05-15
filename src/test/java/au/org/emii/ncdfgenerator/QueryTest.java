@@ -1,13 +1,11 @@
-
 package au.org.emii.ncdfgenerator;
 
+import au.org.emii.ncdfgenerator.cql.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
-
-import au.org.emii.ncdfgenerator.cql.*;
+import static org.junit.Assert.assertTrue;
 
 public class QueryTest {
 
@@ -16,7 +14,7 @@ public class QueryTest {
     }
 
     private IExpression doExprTest(String s) throws Exception {
-        IExprParser p =	new ExprParser() ;
+        IExprParser p = new ExprParser();
         IExpression expr = p.parseExpression(s);
         assertTrue(expr != null);
         return expr;
@@ -24,7 +22,7 @@ public class QueryTest {
 
     @Test
     public void testIntegerLiteral() throws Exception {
-        IExpression expr = doExprTest("1234") ;
+        IExpression expr = doExprTest("1234");
         assertTrue(expr instanceof ExprIntegerLiteral);
     }
 
@@ -56,27 +54,24 @@ public class QueryTest {
     }
 
     @Test
-    public void testStringLiteral() throws Exception
-    {
+    public void testStringLiteral() throws Exception {
         IExpression expr = doExprTest("'string'");
         assertTrue(expr instanceof ExprStringLiteral);
     }
 
     @Test(expected = CQLException.class)
-    public void testStringLiteralWithNoStartingInvertedComma() throws Exception
-    {
+    public void testStringLiteralWithNoStartingInvertedComma() throws Exception {
         doExprTest("string'");
     }
 
     @Test(expected = CQLException.class)
-    public void testStringLiteralWithNoEndingInvertedComma() throws Exception
-    {
+    public void testStringLiteralWithNoEndingInvertedComma() throws Exception {
         doExprTest("'string");
     }
 
     @Test
     public void testTimestampLiteral() throws Exception {
-        IExpression expr = doExprTest(" '2015-01-13T23:00:00Z' ") ;
+        IExpression expr = doExprTest(" '2015-01-13T23:00:00Z' ");
         // will be an ExprProc nop, due to the way we parse this thing, parsing the quotes separately
         ExprProc expr0 = (ExprProc)expr;
         IExpression expr1 = expr0.getChildren().get(0);
@@ -91,15 +86,15 @@ public class QueryTest {
 
     @Test
     public void testSymbol() throws Exception {
-        IExpression expr = doExprTest("TIME") ;
+        IExpression expr = doExprTest("TIME");
         assertTrue(expr instanceof ExprSymbol);
     }
 
     @Test
     public void testPrecedenceBinding01() throws Exception {
-        IExpression expr = doExprTest(" TIME>='2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z' AND 777= 999") ;
+        IExpression expr = doExprTest(" TIME>='2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z' AND 777= 999");
         assertTrue(expr instanceof ExprProc);
-        ExprProc expr0 = (ExprProc) expr;
+        ExprProc expr0 = (ExprProc)expr;
         assertTrue(expr0.getSymbol().equals("AND"));
         // TODO check lhs for precendence
     }
@@ -110,7 +105,6 @@ public class QueryTest {
         assertTrue(expr instanceof ExprProc);
         // TODO check lhs for precendence
     }
-
 
     @Test
     public void testFunction() throws Exception {
@@ -129,7 +123,7 @@ public class QueryTest {
     @Test(expected = CQLException.class)
     public void testParseThatShouldThrow() throws Exception {
         String s = " and ( 2013-6 ) ";
-        IExprParser p =	new ExprParser() ;
+        IExprParser p = new ExprParser();
         p.parseExpression(s);
     }
 

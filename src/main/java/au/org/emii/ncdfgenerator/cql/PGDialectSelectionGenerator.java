@@ -1,9 +1,6 @@
-
-
 package au.org.emii.ncdfgenerator.cql;
 
 import java.text.SimpleDateFormat;
-
 
 public class PGDialectSelectionGenerator implements IExprVisitor {
     private final StringBuilder b;
@@ -30,7 +27,7 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
     }
 
     public final void visit(ExprStringLiteral expr) {
-        b.append("'"+ expr.getValue() + "'");
+        b.append("'" + expr.getValue() + "'");
     }
 
     public final void visit(ExprSymbol expr) {
@@ -46,26 +43,30 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
         String symbol = expr.getSymbol().toLowerCase();
         int arity = expr.getChildren().size();
 
-        if(arity == 1 && symbol.equals("nop")) {
+        if (arity == 1 && symbol.equals("nop")) {
             expr.getChildren().get(0).accept(this);
-        } else if(symbol.equals("intersects")) {
+        }
+        else if (symbol.equals("intersects")) {
             emitFunctionSqlExpr("ST_INTERSECTS", expr);
-        } else if(arity == 2
+        }
+        else if (arity == 2
             && (
             symbol.equals("and")
-            || symbol.equals("or")
-            || symbol.equals(">=")
-            || symbol.equals("<=")
-            || symbol.equals("<")
-            || symbol.equals(">")
-            || symbol.equals("=")
-            || symbol.equals("<>"))) {
+                || symbol.equals("or")
+                || symbol.equals(">=")
+                || symbol.equals("<=")
+                || symbol.equals("<")
+                || symbol.equals(">")
+                || symbol.equals("=")
+                || symbol.equals("<>"))) {
             emitInfixSqlExpr(symbol, expr);
-        } else if(arity == 1
+        }
+        else if (arity == 1
             && (symbol.equals("+")
             || symbol.equals("-"))) {
             emitUnarySqlExpr(symbol, expr);
-        } else {
+        }
+        else {
             throw new CQLException("Unrecognized proc expression symbol '" + symbol + "'");
         }
     }
@@ -73,9 +74,10 @@ public class PGDialectSelectionGenerator implements IExprVisitor {
     private void emitFunctionSqlExpr(String op, ExprProc expr) throws Exception {
         b.append(op);
         b.append('(');
-        for(IExpression child : expr.getChildren()) {
-            if(child != expr.getChildren().get(0))
+        for (IExpression child : expr.getChildren()) {
+            if (child != expr.getChildren().get(0)) {
                 b.append(',');
+            }
             child.accept(this);
         }
         b.append(')');

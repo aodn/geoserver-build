@@ -152,7 +152,7 @@
         <module name="EmptyBlock"/>
         <module name="LeftCurly"/>
         <!-- module name="NeedBraces"/ --> <!-- JA -->
-        <module name="RightCurly"/>
+        <!-- <module name="RightCurly"/> --> <!-- DN: Doesn't match our code style -->
 
 
         <!-- Checks for common coding problems               -->

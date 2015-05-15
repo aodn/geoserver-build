@@ -1,4 +1,3 @@
-
 package au.org.emii.ncdfgenerator.cql;
 
 public interface IExprParser {

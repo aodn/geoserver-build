@@ -1,23 +1,13 @@
 package au.org.emii.ncdfgenerator;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
-
-import java.io.ByteArrayInputStream;
-
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.IOUtils;
+import static org.junit.Assert.assertEquals;
 
 public class ZipTest {
     @Test
