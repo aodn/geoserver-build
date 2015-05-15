@@ -1,14 +1,12 @@
-
 package au.org.emii.ncdfgenerator;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import ucar.nc2.NetcdfFileWriteable;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 class CreateWritable implements ICreateWritable {
     // NetcdfFileWriteable is not an abstraction over a stream!. instead it insists on being a file...

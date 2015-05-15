@@ -1,11 +1,8 @@
-
 package au.org.emii.ncdfgenerator.cql;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.io.IOException;
-
-
 
 public class PrettyPrinterVisitor implements IExprVisitor {
 
@@ -45,7 +42,7 @@ public class PrettyPrinterVisitor implements IExprVisitor {
 
     public final void visit(ExprProc expr) throws Exception {
         write("(" + expr.getSymbol() + " ");
-        for(IExpression child : expr.getChildren()) {
+        for (IExpression child : expr.getChildren()) {
             child.accept(this);
             write(" ");
         }

@@ -1,11 +1,9 @@
-
 package au.org.emii.ncdfgenerator;
-
-import java.util.Map;
 
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
+import java.util.Map;
 
 class ByteValueEncoder implements IValueEncoder {
     private byte fill;
@@ -20,23 +18,27 @@ class ByteValueEncoder implements IValueEncoder {
 
     public void prepare(Map<String, Object> attributes) throws NcdfGeneratorException {
         try {
-            fill = (Byte) attributes.get("_FillValue");
-        } catch(Exception e) {
+            fill = (Byte)attributes.get("_FillValue");
+        }
+        catch (Exception e) {
             throw new NcdfGeneratorException("Expected _FillValue attribute to be Byte type");
         }
     }
 
     public void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
-        if(value == null) {
+        if (value == null) {
             array.setByte(ima, fill);
-        } else if(value instanceof Byte) {
-            array.setByte(ima, (Byte) value);
-        } else if(value instanceof String && ((String)value).length() == 1) {
+        }
+        else if (value instanceof Byte) {
+            array.setByte(ima, (Byte)value);
+        }
+        else if (value instanceof String && ((String)value).length() == 1) {
             // interpret one char string literals using ascii value
             String s = (String)value;
             int ch = s.getBytes()[0] - '0';
             array.setByte(ima, (byte)ch);
-        } else {
+        }
+        else {
             throw new NcdfGeneratorException("Failed to convert type to byte");
         }
     }

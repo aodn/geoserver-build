@@ -1,46 +1,35 @@
-
 package au.org.emii.ncdfgenerator;
 
+import au.org.emii.ncdfgenerator.cql.*;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import org.postgresql.PGConnection;
+import org.postgresql.copy.CopyIn;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
-import java.util.Map;
-import java.util.Properties;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.Map;
+import java.util.Properties;
 
-import java.sql.*;
+import static org.junit.Assert.assertEquals;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.postgresql.copy.CopyManager;
-import org.postgresql.copy.CopyIn;
-import org.postgresql.PGConnection;
-import org.postgresql.util.PSQLException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.apache.commons.io.FileUtils;
-
-import au.org.emii.ncdfgenerator.cql.CQLException;
-import au.org.emii.ncdfgenerator.cql.ExprParser;
-import au.org.emii.ncdfgenerator.cql.IExprParser;
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
-import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
-import au.org.emii.ncdfgenerator.IOutputFormatter;
-
-
-class MockOutputterCounter implements IOutputFormatter
-{
+class MockOutputterCounter implements IOutputFormatter {
     int count;
+
     public final void prepare(OutputStream os) {
         this.count = 0;
     }
@@ -57,7 +46,6 @@ class MockOutputterCounter implements IOutputFormatter
     }
 };
 
-
 public class GenerationIT {
 
     static final String TMPDIR = "./tmp";
@@ -65,9 +53,8 @@ public class GenerationIT {
 
     private static boolean dbIsPrepared = false;
 
-    public GenerationIT() throws Exception
-    {
-        if(!dbIsPrepared) {
+    public GenerationIT() throws Exception {
+        if (!dbIsPrepared) {
             logger.info("Prepare db");
 
             InputStream is = null;
@@ -76,21 +63,24 @@ public class GenerationIT {
                 conn = getConn();
 
                 is = getClass().getResourceAsStream("/scripts/anmn_ts.sql");
-                conn.prepareStatement( "drop schema if exists anmn_ts cascade").execute();
+                conn.prepareStatement("drop schema if exists anmn_ts cascade").execute();
                 importSQL(conn, is);
 
                 is = getClass().getResourceAsStream("/scripts/anmn_nrs_ctd_profiles.sql");
-                conn.prepareStatement( "drop schema if exists anmn_nrs_ctd_profiles cascade").execute();
+                conn.prepareStatement("drop schema if exists anmn_nrs_ctd_profiles cascade").execute();
                 importSQL(conn, is);
 
                 is = getClass().getResourceAsStream("/scripts/soop_sst.sql");
-                conn.prepareStatement( "drop schema if exists soop_sst cascade").execute();
+                conn.prepareStatement("drop schema if exists soop_sst cascade").execute();
                 importSQL(conn, is);
-            } finally {
-                if( is != null)
+            }
+            finally {
+                if (is != null) {
                     is.close();
-                if( conn != null)
+                }
+                if (conn != null) {
                     conn.close();
+                }
             }
             dbIsPrepared = true;
         }
@@ -99,18 +89,18 @@ public class GenerationIT {
     private static void importSQL(Connection conn, InputStream is) throws Exception {
 
         // Supports Postgres data copy actions over jdbc
-        final String regularStmts [] = {"SET", "CREATE", "COMMENT", "ALTER", "SELECT"};
+        final String regularStmts[] = {"SET", "CREATE", "COMMENT", "ALTER", "SELECT"};
         Statement st = conn.createStatement();
-        CopyManager copyManager=((PGConnection)conn).getCopyAPI();
+        CopyManager copyManager = ((PGConnection)conn).getCopyAPI();
 
         logger.info("Importing SQL");
 
         int ch = -1;
-        while((ch = is.read()) >= 0) {
+        while ((ch = is.read()) >= 0) {
             StringBuilder sb = new StringBuilder();
 
             // glob firstToken
-            while(ch >= 0 && ch != ' ' && ch != '\n') {
+            while (ch >= 0 && ch != ' ' && ch != '\n') {
                 sb.append((char)ch);
                 ch = is.read();
             }
@@ -118,19 +108,21 @@ public class GenerationIT {
             String firstTok = sb.toString();
 
             // empty line
-            if(firstTok.equals("")) {
+            if (firstTok.equals("")) {
                 continue;
             }
             // comment
-            if(firstTok.equals( "--" )) {
-                while(ch >= 0 && ch != '\n')
+            if (firstTok.equals("--")) {
+                while (ch >= 0 && ch != '\n') {
                     ch = is.read();
+                }
                 continue;
             }
             // glob rest of the stmt
-            while(ch >= 0 && ch != ';') {
-                if(ch >= 0)
+            while (ch >= 0 && ch != ';') {
+                if (ch >= 0) {
                     sb.append((char)ch);
+                }
                 ch = is.read();
             }
 
@@ -139,26 +131,28 @@ public class GenerationIT {
 
             // statement type
             boolean regularStmt = false;
-            for(String stmt : regularStmts)
-                if(stmt.equals(firstTok))
+            for (String stmt : regularStmts) {
+                if (stmt.equals(firstTok)) {
                     regularStmt = true;
+                }
+            }
 
-            if(regularStmt) {
+            if (regularStmt) {
                 logger.debug("query " + sql);
                 st.execute(sql);
             }
-            else if(firstTok.equals("COPY")) {
+            else if (firstTok.equals("COPY")) {
                 logger.debug("Copying data");
                 is.read(); // \n
 
                 // the copyManager reads to eof and doesn't respect the \n\\. terminating sequence. so we have
                 // to scan ourselves
                 CopyIn copyIn = copyManager.copyIn(sql);
-                byte [] b = new byte [3];
+                byte[] b = new byte[3];
 
                 is.mark(3);
                 is.read(b, 0, 3);
-                while(!( b[0] == '\n' && b[1] == '\\' && b[2] == '.')) {
+                while (!(b[0] == '\n' && b[1] == '\\' && b[2] == '.')) {
                     copyIn.writeToCopy(b, 0, 1);
                     is.reset();
                     is.read(); // advance one byte
@@ -168,7 +162,7 @@ public class GenerationIT {
                 copyIn.endCopy();
             }
             else {
-                throw new RuntimeException("Unknown SQL token during import '" + firstTok + "'") ;
+                throw new RuntimeException("Unknown SQL token during import '" + firstTok + "'");
             }
         }
     }
@@ -176,23 +170,24 @@ public class GenerationIT {
     private Connection getConn() throws Exception {
         Map<String, String> env = System.getenv();
 
-        String opts [] = { "POSTGRES_USER", "POSTGRES_PASS", "POSTGRES_JDBC_URL" } ;
-        for(String opt : opts) {
-            if(env.get(opt) == null)
+        String opts[] = {"POSTGRES_USER", "POSTGRES_PASS", "POSTGRES_JDBC_URL"};
+        for (String opt : opts) {
+            if (env.get(opt) == null) {
                 throw new Exception("Environment var '" + opt + "' not set");
+            }
         }
 
         Properties props = new Properties();
         props.setProperty("user", env.get("POSTGRES_USER"));
         props.setProperty("password", env.get("POSTGRES_PASS"));
-        props.setProperty("ssl","true");
-        props.setProperty("sslfactory","org.postgresql.ssl.NonValidatingFactory");
-        props.setProperty("driver","org.postgresql.Driver");
+        props.setProperty("ssl", "true");
+        props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
+        props.setProperty("driver", "org.postgresql.Driver");
 
         return DriverManager.getConnection(env.get("POSTGRES_JDBC_URL"), props);
     }
 
-    private NcdfEncoder getEncoder( InputStream config, String filterExpr, Connection conn, IOutputFormatter outputGenerator ) throws Exception {
+    private NcdfEncoder getEncoder(InputStream config, String filterExpr, Connection conn, IOutputFormatter outputGenerator) throws Exception {
 
         // we can't use the builder for this, because config is a stream...
 
@@ -209,7 +204,7 @@ public class GenerationIT {
     }
 
     private InputStream getAnmnConfig() {
-        return getClass().getResourceAsStream( "/anmn_ts.xml");
+        return getClass().getResourceAsStream("/anmn_ts.xml");
     }
 
     @BeforeClass
@@ -229,7 +224,6 @@ public class GenerationIT {
     public void testNothing() throws Exception {
         // support devel testing constructor setup
     }
-
 
     @Test
     public void testAnmnNrsCtdProfiles() throws Exception {
@@ -251,7 +245,7 @@ public class GenerationIT {
         generator.write("soop_sst_trajectory", cql, getConn(), os);
     }
 
-     @Test
+    @Test
     public void testAnmnTs() throws Exception {
         String layerConfigDir = getClass().getResource("/").getFile();
         String tmpCreationDir = TMPDIR;
@@ -265,7 +259,7 @@ public class GenerationIT {
     public void testCqlWithValidSpatialTemporalSubset() throws Exception {
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
         MockOutputterCounter outputter = new MockOutputterCounter();
-        NcdfEncoder encoder = getEncoder(getAnmnConfig(), cql, getConn(), outputter );
+        NcdfEncoder encoder = getEncoder(getAnmnConfig(), cql, getConn(), outputter);
         encoder.write();
         assertEquals(11, outputter.getCount());
     }

@@ -1,18 +1,14 @@
-
 package au.org.emii.ncdfgenerator;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-
-import java.io.InputStream;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
 
+import static org.junit.Assert.assertTrue;
 
 public class XMLDefinitionTest {
     @Before
@@ -25,7 +21,7 @@ public class XMLDefinitionTest {
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
         Node node = document.getFirstChild();
 
-        NcdfDefinition definition = new NcdfDefinitionXMLParser().parse(node) ;
+        NcdfDefinition definition = new NcdfDefinitionXMLParser().parse(node);
         assertTrue(definition != null);
     }
 }

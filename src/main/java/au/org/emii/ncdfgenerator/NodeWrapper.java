@@ -1,13 +1,11 @@
-
 package au.org.emii.ncdfgenerator;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 class NodeWrapper implements Iterable<Node> {
     // xml helper class
@@ -20,11 +18,12 @@ class NodeWrapper implements Iterable<Node> {
     }
 
     public Iterator<Node> iterator() {
-        if(nodes == null) {
+        if (nodes == null) {
             NodeList nodeList = node.getChildNodes();
             nodes = new ArrayList<Node>(nodeList.getLength());
-            for(int i = 0; i < nodeList.getLength(); i++)
+            for (int i = 0; i < nodeList.getLength(); i++) {
                 nodes.add(nodeList.item(i));
+            }
         }
 
         return nodes.iterator();

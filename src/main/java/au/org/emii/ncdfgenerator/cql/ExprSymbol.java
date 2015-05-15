@@ -1,4 +1,3 @@
-
 package au.org.emii.ncdfgenerator.cql;
 
 public class ExprSymbol implements IExpression {
@@ -13,6 +12,7 @@ public class ExprSymbol implements IExpression {
     public final int getPosition() {
         return pos;
     }
+
     public final String getValue() {
         return value;
     }

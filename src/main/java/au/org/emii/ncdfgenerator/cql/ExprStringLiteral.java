@@ -1,4 +1,3 @@
-
 package au.org.emii.ncdfgenerator.cql;
 
 public class ExprStringLiteral implements IExpression {
