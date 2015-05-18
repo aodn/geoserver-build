@@ -11,28 +11,37 @@
     <name>Emii Geoserver (pom)</name>
 
     <modules>
-         <module>src/extension</module>
-         <module>src/main</module>
+         <!-- module>src/extension</module>
+         <module>src/main</module -->
+
+         <module>src/geoserver/src/web</module>
+
+         <!-- module>src/main</module -->
     </modules>
 
     <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
-        <geoserver.version>2.7.0</geoserver.version>
+        <geoserver.version>2.8-SNAPSHOT</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
+    <!-- why don't we specify the pom as the depenency?  --> 
+
     <dependencyManagement>
         <dependencies>
-            <dependency>
+            <!--dependency>
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-app</artifactId>
                 <version>${geoserver.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
+                <type>pom</type>
+            </dependency -->
+
+
+
+            <!--dependency>
                 <groupId>org.geoserver</groupId>
                 <artifactId>gs-xslt</artifactId>
                 <version>${geoserver.version}</version>
@@ -41,16 +50,18 @@
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-wfs</artifactId>
                 <version>${geoserver.version}</version>
-            </dependency>
+            </dependency-->
         </dependencies>
     </dependencyManagement>
 
      <!-- gs-xslt plugin -->
-    <repositories>
+    <!-- repositories>
         <repository>
             <id>opengeo</id>
             <url>http://repo.boundlessgeo.com/main</url>
         </repository>
-    </repositories>
+    </repositories -->
+
+
 
 </project>
