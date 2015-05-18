@@ -14,7 +14,8 @@ public class NcdfGenerator {
         encoderBuilder.setOutputType(new ZipFormatter());
     }
 
-    public final void write(String typename, String filterExpr, Connection conn, OutputStream os) throws Exception {
+    // Method must not be final to allow mocking for testing purposes
+    public void write(String typename, String filterExpr, Connection conn, OutputStream os) throws Exception {
         try {
             NcdfEncoder encoder = encoderBuilder.create(typename, filterExpr, conn, os);
             encoder.write();
