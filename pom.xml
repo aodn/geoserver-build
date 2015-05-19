@@ -17,7 +17,7 @@
         <!-- ./src/geoserver/src/extension/xslt -->
          <module>src/geoserver/src/web</module>
 
-            <!-- maybe xslt can be included with a profile? --> 
+            <!-- xslt can be included by profile --> 
          <!-- module>src/geoserver/src/extensionkweb</module -->
 
          <module>src/aodn</module>
