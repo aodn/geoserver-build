@@ -37,12 +37,12 @@
             <version>${geoserver.version}</version>
             <scope>runtime</scope>
         </dependency -->
-        <dependency>
+        <!--dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
             <version>${geoserver.version}</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency-->
     </dependencies>
 
     <build>
