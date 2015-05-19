@@ -27,6 +27,9 @@ mvn -P wps,xslt install -DskipTests
 
 
 mvn -P wps,xslt install -DskipTests -Dmaven.test.skip=true
+
+ls ./src/emii/target/geoserver-2.8-SNAPSHOT.war
+
 ```
 
 Manual tomcat deploy (something like)
