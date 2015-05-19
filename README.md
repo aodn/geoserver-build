@@ -9,9 +9,12 @@ Configures a GeoServer war file with the following;
 
 To build:
 
+## clean is important to prevent accululation of different lib versions (geotools) in the overlay 
+
 ```
 git submodule update --init
 mvn clean install -U -Dmaven.test.skip=true
+
 
 mvn clean
 mvn -P wps,xslt install -Dmaven.test.skip=true

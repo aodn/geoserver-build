@@ -14,6 +14,7 @@
          <!-- xslt included using profile --> 
          <module>src/geoserver/src/web</module>
          <module>src/extension/geoserver-layer-filter-extension</module>
+         <!--module>src/extension/ncdfgenerator</module -->
          <module>src/aodn</module>
     </modules>
 
