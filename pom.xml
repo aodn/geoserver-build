@@ -28,7 +28,21 @@
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
-    <!-- why don't we specify the pom as the depenency?  --> 
+    <!-- it's not possible to trigger a profile from a pom. must be explicit or in a custom settings.xml
+    <profiles>
+        <profile>
+            <id>wps</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+   </profiles>
+
+    -->
+
+
+
+    <!-- why don't we specify the pom as the depenency?  -->
 
     <dependencyManagement>
         <dependencies>
