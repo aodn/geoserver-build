@@ -8,18 +8,17 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
 
-    <name>Emii Geoserver (pom)</name>
+    <name>AODN Geoserver (pom)</name>
 
     <modules>
          <!-- module>src/extension</module>
          <module>src/main</module -->
 
          <module>src/geoserver/src/web</module>
-
-         <module>src/main</module>
+         <module>src/aodn</module>
     </modules>
 
-    <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
+    <description>AODN Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>

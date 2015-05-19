@@ -7,8 +7,8 @@
     <packaging>war</packaging>
     <version>1.0.0</version>
 
-    <name>AODN Geoserver (war)</name>
-    <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
+    <name>eMII Geoserver (war)</name>
+    <description>eMII Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <parent>
@@ -68,7 +68,7 @@
                             <artifactId>gs-web-app</artifactId>
                         </overlay>
                     </overlays>
-                    <warName>geoserver-${project.version}-imos</warName>
+                    <warName>geoserver-${geoserver.version}</warName>
                 </configuration>
             </plugin>
             <plugin>

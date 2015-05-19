@@ -13,7 +13,7 @@ To build:
 git submodule update --init
 mvn clean install -U -Dmaven.test.skip=true
 
-
+mvn clean
 mvn -P wps install -Dmaven.test.skip=true
 ```
 
