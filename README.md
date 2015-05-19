@@ -25,10 +25,15 @@ mvn clean
 mvn -P wps,xslt install -DskipTests
 #mvn -P wps,xslt install -Dmaven.test.skip=true
 
+# or
+rm -rf $( find -type d -iname '*target*' ) 
 
 mvn -P wps,xslt install -DskipTests -Dmaven.test.skip=true
 
 ls ./src/emii/target/geoserver-2.8-SNAPSHOT.war
+
+# start build from intermediate module
+mvn install -rf :netcdf-output
 
 ```
 

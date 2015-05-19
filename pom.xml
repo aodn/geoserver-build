@@ -13,7 +13,7 @@
     <modules>
          <!-- xslt included using profile --> 
 
-         <module>src/geoserver/src/wfs</module>
+         <module>src/geoserver/src/wfs</module> <!-- for wfs extension download --> 
          <module>src/geoserver/src/web</module>
          <!-- there's may be a geoserver dependnecy that hasn't been built required for the layer filter extension failing tests --> 
          <module>src/geoserver-layer-filter-extension</module>
