@@ -15,8 +15,11 @@ mvn clean install -U -Dmaven.test.skip=true
 
 
 mvn -P wps install -Dmaven.test.skip=true
+```
 
-
+Manual tomcat deploy (something like)
+```
+sudo -s
 rm /var/lib/tomcat7/webapps/geoserver* -rf
 ls /var/lib/tomcat7/webapps/
 cp ./src/geoserver/src/web/app/target/geoserver.war  /var/lib/tomcat7/webapps/ -i

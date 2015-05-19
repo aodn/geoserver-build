@@ -19,25 +19,28 @@
     </parent>
 
     <dependencies>
-        <dependency>
+        <!--dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
+            <version>${geoserver.version}</version>
             <scope>runtime</scope>
             <type>war</type>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-xslt</artifactId>
+            <version>${geoserver.version}</version>
             <scope>runtime</scope>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
+            <version>${geoserver.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
