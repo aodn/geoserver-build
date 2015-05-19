@@ -12,6 +12,8 @@
 
     <modules>
          <!-- xslt included using profile --> 
+
+         <module>src/geoserver/src/wfs</module>
          <module>src/geoserver/src/web</module>
          <!-- there's may be a geoserver dependnecy that hasn't been built required for the layer filter extension failing tests --> 
          <module>src/geoserver-layer-filter-extension</module>
@@ -23,7 +25,7 @@
     <url>http://www.emii.org.au</url>
 
     <properties>
-        <geoserver.version>2.8-SNAPSHOT</geoserver.version>
+        <geoserver.version>2.7.0</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
