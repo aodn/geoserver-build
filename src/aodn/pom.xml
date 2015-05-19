@@ -15,15 +15,25 @@
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
         <version>1.0.0</version>
-        <relativePath>../../pom.xml</relativePath>
+        <!--relativePath>../../pom.xml</relativePath -->
     </parent>
 
     <dependencies>
-        <dependency>
+        <!-- dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
-        </dependency>
+        </dependency -->
+
+
+        <!-- dependency>
+            <groupId>au.org.emii.wps</groupId>
+            <artifactId>netcdf-output</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency -->
+
+
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
@@ -31,6 +41,15 @@
             <scope>runtime</scope>
             <type>war</type>
         </dependency>
+
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-wfs</artifactId>
+            <version>${geoserver.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
         <!--dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-xslt</artifactId>

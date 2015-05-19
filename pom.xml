@@ -13,8 +13,8 @@
     <modules>
          <!-- xslt included using profile --> 
          <module>src/geoserver/src/web</module>
-         <module>src/extension/geoserver-layer-filter-extension</module>
-         <!--module>src/extension/ncdfgenerator</module -->
+         <!-- module>src/extension/geoserver-layer-filter-extension</module -->
+         <!-- module>src/ncdfgenerator</module-->
          <module>src/aodn</module>
     </modules>
 
@@ -51,9 +51,6 @@
                 <version>${geoserver.version}</version>
                 <type>pom</type>
             </dependency -->
-
-
-
             <!--dependency>
                 <groupId>org.geoserver</groupId>
                 <artifactId>gs-xslt</artifactId>
