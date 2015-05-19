@@ -19,6 +19,9 @@ mvn clean install -U -Dmaven.test.skip=true
 mvn clean
 mvn -P wps,xslt install -DskipTests
 #mvn -P wps,xslt install -Dmaven.test.skip=true
+
+
+mvn -P wps,xslt install -DskipTests -Dmaven.test.skip=true
 ```
 
 Manual tomcat deploy (something like)
