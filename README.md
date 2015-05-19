@@ -1,20 +1,25 @@
 Geoserver Build
 ===============
 
-Configures a GeoServer war file with the following;
+Build a GeoServer war file with the following;
 
 * The XSLT extension installed
 * CSV with metadata header plugin
 * Layer filter extension
+* Netcdf output extension
 
 To build:
 
-## clean is important to prevent accululation of different lib versions (geotools) in the overlay 
+## clean is important to prevent accululation of different lib versions (geotools) in the overlay
 
 ```
 git submodule update --init
 mvn clean install -U -Dmaven.test.skip=true
 
+# issue with clean not propagating,
+pushd src/geoserver/src
+mvn clean
+popd
 
 mvn clean
 mvn -P wps,xslt install -DskipTests
