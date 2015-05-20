@@ -6,3 +6,7 @@
 	path = geoserver
 	url = git@github.com:geoserver/geoserver
 	branch = master
+[submodule "ncdfgenerator"]
+	path = ncdfgenerator
+	url = git@github.com:aodn/ncdfgenerator
+	branch = gs
