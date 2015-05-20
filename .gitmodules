@@ -1,7 +1,7 @@
 [submodule "src/extension/geoserver-layer-filter-extension"]
 	path = geoserver-layer-filter-extension
 	url = git@github.com:aodn/geoserver-layer-filter-extension
-	branch = master
+	branch = gs
 [submodule "src/geoserver"]
 	path = geoserver
 	url = git@github.com:geoserver/geoserver
