@@ -27,33 +27,6 @@
         <geoserver.version>2.7.0</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
-
     </properties>
-
-
-
-    <!-- it's not possible to trigger a profile from a pom. must be explicit or in a custom settings.xml
-    <profiles>
-        <profile>
-            <id>wps</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-   </profiles>
-
-    -->
-
-
-
-     <!-- gs-xslt plugin -->
-    <!-- repositories>
-        <repository>
-            <id>opengeo</id>
-            <url>http://repo.boundlessgeo.com/main</url>
-        </repository>
-    </repositories -->
-
-
 
 </project>
