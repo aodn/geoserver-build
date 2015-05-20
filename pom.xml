@@ -17,8 +17,8 @@
          <module>src/geoserver/src/web</module>
          <!-- there's may be a geoserver dependnecy that hasn't been built required for the layer filter extension failing tests --> 
          <module>src/geoserver-layer-filter-extension</module>
-         <module>src/ncdfgenerator</module>
-         <module>src/emii</module>
+         <!-- module>src/ncdfgenerator</module -->
+         <!-- module>src/emii</module -->
     </modules>
 
     <description>AODN Geoserver v${project.version}</description>
@@ -48,12 +48,28 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.geoserver.web</groupId>
+                <artifactId>gs-web-core</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency>
+
+            <!-- dependency>
+               <groupId>org.geoserver</groupId>
+               <artifactId>gs-main</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency -->
+         
+
+
             <!--dependency>
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-app</artifactId>
                 <version>${geoserver.version}</version>
                 <type>pom</type>
             </dependency -->
+
             <!--dependency>
                 <groupId>org.geoserver</groupId>
                 <artifactId>gs-xslt</artifactId>
