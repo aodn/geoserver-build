@@ -27,7 +27,9 @@
         <geoserver.version>2.7.0</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
+
     </properties>
+
 
 
     <!-- it's not possible to trigger a profile from a pom. must be explicit or in a custom settings.xml

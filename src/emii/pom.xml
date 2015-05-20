@@ -32,12 +32,14 @@
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>au.org.emii.wps</groupId>
             <artifactId>netcdf-output</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- for CSVWithMetadataHeaderOutputFormat-->  
