@@ -33,25 +33,6 @@
     </properties>
 
 
-    <dependencyManagement>
-      <dependencies>
-           <dependency>
-               <!--groupId>org.geoserver.extension</groupId-->
-               <!--groupId>org.geoserver</groupId-->
-               <!--groupId>org.geoserver.wps</groupId -->
-               <!--groupId>org.geoserver.extension.wps</groupId-->
-               <!--groupId>org.geoserver</groupId -->
-                <!--groupId>org.geoserver.web</groupId-->
-                <groupId>org.geoserver.web</groupId>
-               <artifactId>gs-wps-core</artifactId>
-                <version>${geoserver.version}</version>
-                <scope>provided</scope>
-                <type>jar</type>
-                <!-- issue that it's a different classifier -->
-           </dependency>
-      </dependencies>
-    </dependencyManagement>
-
     <!-- it's not possible to trigger a profile from a pom. must be explicit or in a custom settings.xml
     <profiles>
         <profile>
