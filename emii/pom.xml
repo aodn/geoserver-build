@@ -15,7 +15,6 @@
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
         <version>1.0.0</version>
-        <!--relativePath>../../pom.xml</relativePath-->
     </parent>
 
     <dependencies>
@@ -42,7 +41,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- for CSVWithMetadataHeaderOutputFormat-->  
+        <!-- for CSVWithMetadataHeaderOutputFormat, not war archiving -->  
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
