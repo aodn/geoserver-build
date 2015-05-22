@@ -126,6 +126,10 @@ class Variable implements IVariable {
         // int [] origin = new int[1];
         // writer.write(variableName, origin, A);
         writer.write(variableName, array);
+
+        convertedAttributes.clear();
+        convertedAttributesMap.clear();
+        buffer.clear();
     }
 
     public String getName() {
