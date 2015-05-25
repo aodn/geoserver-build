@@ -15,8 +15,8 @@ class Variable implements IVariable {
     private final IValueEncoder encodeValue;
     private final List<Attribute> attributes;
     private final IAttributeValueParser attributeValueParser;
-    private final List<Object> convertedAttributes; // output ordered (change name Values  )
-    private final Map<String, Object> convertedAttributesMap; // to support encoder lookup...
+    private List<Object> convertedAttributes; // output ordered (change name Values  )
+    private Map<String, Object> convertedAttributesMap; // to support encoder lookup...
     private List<Object> buffer;
 
     public Variable(
@@ -29,13 +29,15 @@ class Variable implements IVariable {
         this.encodeValue = encodeValue;
         this.attributes = attributes;
         this.dimensions = dimensions;
-        this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be responsible to instantiate
-        this.convertedAttributes = new ArrayList<Object>();
-        this.convertedAttributesMap = new HashMap<String, Object>();
+        this.attributeValueParser = new AttributeValueParser();  // TODO this class should not be instantiated here
+        this.convertedAttributes = null;
+        this.convertedAttributesMap = null;
         this.buffer = null;
     }
 
     public void prepare() {
+        convertedAttributes = new ArrayList<Object>();
+        convertedAttributesMap = new HashMap<String, Object>();
         buffer = new ArrayList<Object>();
     }
 
