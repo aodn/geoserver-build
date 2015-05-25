@@ -55,7 +55,7 @@ class NcdfEncoder {
         this.outputFormatter = outputFormatter;
         this.os = os;
 
-        fetchSize = 1000;
+        fetchSize = 10000;
     }
 
     public void write() throws Exception {
@@ -69,6 +69,9 @@ class NcdfEncoder {
             PreparedStatement pathStmt = conn.prepareStatement("set search_path=" + dataSource.getSchema() + ", public");
             pathStmt.execute();
             pathStmt.close();
+
+            //Batch results set
+            conn.setAutoCommit(false);
 
             IExpression selectionExpr = exprParser.parseExpression(filterExpr);
             String selectionClause = translate.process(selectionExpr);
