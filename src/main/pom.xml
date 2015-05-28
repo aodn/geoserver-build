@@ -25,6 +25,11 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
+            <groupId>au.org.emii.wps</groupId>
+            <artifactId>ncdfgenerator</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
             <scope>runtime</scope>
@@ -39,6 +44,12 @@
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-wps-core</artifactId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
@@ -73,8 +84,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                     <source>1.5</source>
-                     <target>1.5</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
             </plugin>
         </plugins>
