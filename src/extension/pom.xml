@@ -18,7 +18,8 @@
     </parent>
 
     <modules>
-       <module>geoserver-layer-filter-extension</module>
+        <module>geoserver-layer-filter-extension</module>
+        <module>ncdfgenerator</module>
     </modules>
 
 </project>
