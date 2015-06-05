@@ -5,3 +5,6 @@
 [submodule "src/extension/ncdfgenerator"]
 	path = src/extension/ncdfgenerator
 	url = git@github.com:aodn/ncdfgenerator
+[submodule "src/extension/go-go-duck"]
+	path = src/extension/go-go-duck
+	url = git@github.com:aodn/go-go-duck.git
