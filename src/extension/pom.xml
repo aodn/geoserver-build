@@ -20,6 +20,7 @@
     <modules>
         <module>geoserver-layer-filter-extension</module>
         <module>ncdfgenerator</module>
+        <module>go-go-duck/web-app/resources/java-worker</module>
     </modules>
 
 </project>
