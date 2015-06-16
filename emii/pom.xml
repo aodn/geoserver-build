@@ -35,9 +35,14 @@
         </dependency>
 
         <dependency>
-            <groupId>au.org.emii.wps</groupId>
+            <!--groupId>au.org.emii.wps</groupId>
             <artifactId>netcdf-output</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1-SNAPSHOT</version-->
+
+            <groupId>au.org.emii.wps</groupId>
+            <artifactId>ncdfgenerator</artifactId>
+            <version>1.0.0</version>
+
             <scope>compile</scope>
         </dependency>
 

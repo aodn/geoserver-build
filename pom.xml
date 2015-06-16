@@ -11,6 +11,7 @@
     <name>AODN Geoserver (pom)</name>
 
     <modules>
+        <module>geotools</module> 
         <!-- xslt included via profile --> 
         <module>geoserver/src/wfs</module> <!-- needed for csv output dep resolution --> 
         <module>geoserver/src/extension/wps/wps-core</module> <!-- activation by profile wont add gs-wps-core to reactor deps -->
