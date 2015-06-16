@@ -10,3 +10,7 @@
 	path = ncdfgenerator
 	url = git@github.com:aodn/ncdfgenerator
 	branch = gs
+
+[submodule "geotools"]
+	path = geotools
+	url = git@github.com:geotools/geotools
