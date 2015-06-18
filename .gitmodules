@@ -1,16 +1,12 @@
 [submodule "src/extension/geoserver-layer-filter-extension"]
 	path = geoserver-layer-filter-extension
 	url = git@github.com:aodn/geoserver-layer-filter-extension
-	branch = gs
 [submodule "src/geoserver"]
 	path = geoserver
-	url = git@github.com:geoserver/geoserver
-	branch = master
+	url = git@github.com:aodn/geoserver
 [submodule "ncdfgenerator"]
 	path = ncdfgenerator
 	url = git@github.com:aodn/ncdfgenerator
-	branch = gs
-
 [submodule "geotools"]
 	path = geotools
-	url = git@github.com:geotools/geotools
+	url = git@github.com:aodn/geotools
