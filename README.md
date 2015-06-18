@@ -7,11 +7,8 @@ Build a GeoServer war file with the following;
 * CSV with metadata header plugin
 * Layer filter extension
 * Netcdf output extension
-* wps resource limit fixes
 
 # To build:
-
-
 ```
 git submodule update --init
 mvn clean
@@ -19,9 +16,7 @@ mvn -P wps,xslt install -DskipTests
 
 ```
 
-
 # Other notes:
-
 ```
 # issue with clean not propagating,
 pushd src/geoserver/src
