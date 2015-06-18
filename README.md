@@ -8,7 +8,7 @@ Build a GeoServer war file with the following;
 * Layer filter extension
 * Netcdf output extension
 
-# To build:
+### To build:
 ```
 git submodule update --init
 mvn clean
@@ -16,7 +16,7 @@ mvn -P wps,xslt install -DskipTests
 
 ```
 
-# Other notes:
+### Other notes:
 ```
 # issue with clean not propagating,
 pushd src/geoserver/src
