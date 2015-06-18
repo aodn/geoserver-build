@@ -1,27 +1,32 @@
 Geoserver Build
 ===============
 
-Configures a GeoServer war file with the following;
+Build a GeoServer war file with the following;
 
 * The XSLT extension installed
 * CSV with metadata header plugin
 * Layer filter extension
+* Netcdf output extension
 
-To build:
-
+### To build:
 ```
 git submodule update --init
-mvn clean install -U -Dmaven.test.skip=true 
-```
-
-To update the submodule(s), e.g.:
+mvn clean
+mvn -P wps,xslt install -DskipTests
 
 ```
-cd src/extension/geoserver-layer-filter-extension/
-git pull origin master 
-cd -
-git status
-git add src/extension/geoserver-layer-filter-extension
-git commit -m "update filter plugin extension"
-git push origin master
+
+### Other notes:
+```
+# issue with clean not propagating,
+pushd src/geoserver/src
+mvn clean
+popd
+
+# and/or
+rm -rf $( find -type d -iname '*target*' )
+
+# start build from intermediate module
+mvn install -rf :netcdf-output
+
 ```
