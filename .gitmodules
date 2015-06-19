@@ -1,7 +1,7 @@
-[submodule "src/extension/geoserver-layer-filter-extension"]
+[submodule "geoserver-layer-filter-extension"]
 	path = geoserver-layer-filter-extension
 	url = git@github.com:aodn/geoserver-layer-filter-extension
-[submodule "src/geoserver"]
+[submodule "geoserver"]
 	path = geoserver
 	url = git@github.com:aodn/geoserver
 [submodule "ncdfgenerator"]
