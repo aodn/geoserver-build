@@ -12,7 +12,7 @@ Build a GeoServer war file with the following;
 ```
 git submodule update --init
 mvn clean
-mvn -P wps,xslt install -DskipTests
+mvn -P wps,xslt package
 
 ```
 
