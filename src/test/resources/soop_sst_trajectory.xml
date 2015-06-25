@@ -94,8 +94,10 @@
     </variable>
     <variable>
       <name>TIME</name>
-      <encoder>time</encoder>
+      <encoder>time</encoder>  
       <dimensions>
+      <!--  SO i am  following what's in the anmn_ts template but i  questioning the encoder thta is used here 'time'. NODC recommends time to be of type double, which is also the current IMOS convention. Why using type 'time' then (except the fact that TIME  is a timestamp in the DB). TIME should be converted back to double to conform the NODC format? Am i missing something here?
+      -->
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
@@ -104,7 +106,7 @@
         <attribute name="units" value="'days since 1950-01-01 00:00:00 UTC'"/>
         <attribute name="calendar" value="'gregorian'"/>
         <attribute name="axis" value="'T'"/>
-        <attribute name="_FillValue" value="-999999."/>   --- not sure about the fillvalue for type time. Probably not necessary anyway.
+        <attribute name="_FillValue" value="-999999."/>   
         <attribute name="valid_min" value="0."/>
         <attribute name="valid_max" value="90000."/>
         <attribute name="ancillary_variables" value="'TIME_quality_control'"/>
