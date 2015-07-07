@@ -7,61 +7,56 @@
     <packaging>war</packaging>
     <version>1.0.0</version>
 
-    <name>eMII Geoserver (war)</name>
-    <description>eMII Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
+    <name>AODN Geoserver (war)</name>
+    <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <parent>
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
         <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-app</artifactId>
-            <version>${geoserver.version}</version>
-            <scope>runtime</scope>
-            <type>war</type>
-        </dependency>
-
         <dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>au.org.emii.wps</groupId>
             <artifactId>ncdfgenerator</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
-
-        <!-- for CSVWithMetadataHeaderOutputFormat, not war archiving -->  
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-app</artifactId>
+            <scope>runtime</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver</groupId>
+            <artifactId>gs-xslt</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-wfs</artifactId>
-            <version>${geoserver.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
-
-        <!--dependency>
-            <groupId>org.geoserver</groupId>
-            <artifactId>gs-xslt</artifactId>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-wps-core</artifactId>
             <version>${geoserver.version}</version>
             <scope>runtime</scope>
-        </dependency -->
-        <!--dependency>
-            <groupId>org.geoserver.web</groupId>
-            <artifactId>gs-web-wfs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-web-wps</artifactId>
             <version>${geoserver.version}</version>
-            <scope>compile</scope>
-        </dependency-->
-
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -87,7 +82,7 @@
                             <artifactId>gs-web-app</artifactId>
                         </overlay>
                     </overlays>
-                    <warName>geoserver-${geoserver.version}</warName>
+                    <warName>geoserver-${project.version}-imos</warName>
                 </configuration>
             </plugin>
             <plugin>
