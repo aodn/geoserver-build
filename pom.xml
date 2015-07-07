@@ -8,21 +8,14 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
 
-    <name>AODN Geoserver (pom)</name>
+    <name>Emii Geoserver (pom)</name>
 
     <modules>
-        <module>geotools</module> 
-        <!-- xslt included via profile --> 
-        <module>geoserver/src/wfs</module> <!-- needed for csv output dep resolution --> 
-        <module>geoserver/src/extension/wps/wps-core</module> <!-- activation by profile wont add gs-wps-core to reactor deps -->
-        <module>geoserver/src/extension/wps/web-wps</module>
-        <module>geoserver/src/web</module>
-        <module>geoserver-layer-filter-extension</module>
-        <module>ncdfgenerator</module>
-        <module>emii</module>
+         <module>src/extension</module>
+         <module>src/main</module>
     </modules>
 
-    <description>AODN Geoserver v${project.version}</description>
+    <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
     <url>http://www.emii.org.au</url>
 
     <properties>
@@ -30,5 +23,34 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.geoserver.web</groupId>
+                <artifactId>gs-web-app</artifactId>
+                <version>${geoserver.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.geoserver</groupId>
+                <artifactId>gs-xslt</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geoserver.web</groupId>
+                <artifactId>gs-web-wfs</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+     <!-- gs-xslt plugin -->
+    <repositories>
+        <repository>
+            <id>opengeo</id>
+            <url>http://repo.boundlessgeo.com/main</url>
+        </repository>
+    </repositories>
 
 </project>
