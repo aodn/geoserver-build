@@ -14,11 +14,14 @@
         ||'_'
         ||platform_code
         ||'_FV01_'
-        ||'END-'
+        ||voyage_number
+        ||'_END-'
         ||to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
+        ||'_id-'
+        ||instance_id
         ||'.nc'
         from $data
-        group by platform_code, instance_id
+        group by platform_code, voyage_number, instance_id
     </sql>
   </filename>
   <dimensions>
