@@ -107,7 +107,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'latitude'"/>
-        <attribute name="long_name" value="'Latitude'"/>
+        <attribute name="long_name" value="'Latitude north'"/>
         <attribute name="units" value="'degrees north'"/>
         <attribute name="axis" value="'Y'"/>
         <attribute name="reference_datum" value="'geographical coordinates, WGS84 projection'"/>
@@ -140,7 +140,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'longitude'"/>
-        <attribute name="long_name" value="'Longitude'"/>
+        <attribute name="long_name" value="'Longitude east'"/>
         <attribute name="units" value="'degrees east'"/>
         <attribute name="axis" value="'X'"/>
         <attribute name="reference_datum" value="'geographical coordinates, WGS84 projection'"/>
