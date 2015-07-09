@@ -488,7 +488,7 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
         <attribute name="long_name" value="'Practical salinity of the water body'"/>
-        <attribute name="units" value="'1 e-3'"/>
+        <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
         <attribute name="_FillValue" value="-9999.f"/>
@@ -520,7 +520,7 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
         <attribute name="long_name" value="'Practical salinity of the water body'"/>
-        <attribute name="units" value="'1 e-3'"/>
+        <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
         <attribute name="_FillValue" value="-9999.f"/>
@@ -552,7 +552,7 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
         <attribute name="long_name" value="'Practical salinity of the water body'"/>
-        <attribute name="units" value="'1 e-3'"/>
+        <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
         <attribute name="_FillValue" value="-9999.f"/>
