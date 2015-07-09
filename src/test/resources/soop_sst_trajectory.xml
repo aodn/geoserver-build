@@ -7,7 +7,7 @@
     <virtualInstanceTable>select * from soop_sst_nrt_trajectory_map</virtualInstanceTable>
   </source>
   <filename>
-    <sql>       
+    <sql>
         select
         'IMOS_SOOP-SST_'
         ||to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
@@ -18,7 +18,7 @@
         ||to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
         ||'.nc'
         from $data
-        group by platform_code, instance_id    
+        group by platform_code, instance_id
     </sql>
   </filename>
   <dimensions>
@@ -27,13 +27,13 @@
   <globalattributes/>
     <attribute name="title" value="'Sea surface temperature and meteorological data'"/>  <--Same as in soop_sst file-->
     <attribute name="file_version" value="'Level 1 - Quality Controlled Data'"/>
-	<attribute name="file_version_quality_control">
-		<value>'Data in this file has been through the BOM quality control procedure (Reference Table F). Every data point in this file has an associated quality flag.'</value>
+    <attribute name="file_version_quality_control">
+    <value>'Data in this file has been through the BOM quality control procedure (Reference Table F). Every data point in this file has an associated quality flag.'</value>
     </attribute>
-    <attribute name="project" value=" "/> <-- Soop sst doesn't provide as abstract in its netcdf file. need to come up with something here -->
+    <attribute name="project" value=" "/>  <-- Soop sst doesn't provide as abstract in its netcdf file. need to come up with something here -->
     <attribute name="project" value="'Integrated Marine Observing System (IMOS)'"/>
-    <attribute name="Conventions" value="'CF-1.6,IMOS-1.3'"/> 
-    <attribute name="institution" value="'Australian Bureau of Meteorology'"/> 
+    <attribute name="Conventions" value="'CF-1.6,IMOS-1.3'"/>
+    <attribute name="institution" value="'Australian Bureau of Meteorology'"/>
     <attribute name="standard_name_vocabulary" value="'CF-1.6'"/>
     <attribute name="date_created">
       <sql>select to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')</sql>
@@ -67,7 +67,6 @@
     <attribute name="data_centre" value="'eMarine Information Infrastructure (eMII)'"/>
     <attribute name="data_centre_email" value="'info@emii.org.au'"/>
     <attribute name="institution_references" value="'http://www.imos.org.au/emii.html'"/>
-
     <attribute name="citation">
       <value>'The citation in a list of references is: "IMOS [year-of-data-download], [Title], [data-access-url], accessed [date-of-access]"'</value>
     </attribute>
@@ -84,7 +83,7 @@
   <variables>
     <variable>
       <name>TIME</name>
-      <encoder>time</encoder>  
+      <encoder>time</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
@@ -155,14 +154,14 @@
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
+      <attributes>
         <attribute name="standard_name" value="'longitude status_flag'"/>
         <attribute name="long_name" value="'Quality flag for longitude'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>AIRT</name>
@@ -172,14 +171,14 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'air_temperature'"/>
-		<attribute name="long_name" value="'Temperature of the atmosphere'"/>
-		<attribute name="units" value="'Celsius"/>
-		<attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="long_name" value="'Temperature of the atmosphere'"/>
+        <attribute name="units" value="'Celsius"/>
+        <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="-50.f"/>
         <attribute name="valid_max" value="50.f"/>
-        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>		
-		<attribute name="ancillary_variables" value="'AIRT_quality_control'"/>
-	  </attributes>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'AIRT_quality_control'"/>
+      </attributes>
     </variable>
     <variable>
       <name>AIRT_quality_control</name>
@@ -188,30 +187,30 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'air_temperature status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for air_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'air_temperature status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for air_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
        </attributes>
-    </variable>	
-        <variable>
+    </variable>
+    <variable>
       <name>ATMP</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'air_pressure'"/>
-		<attribute name="long_name" value="'Pressure (measured variable) exerted by the atmosphere'"/>
-		<attribute name="units" value="'millibar'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-	    <attribute name="valid_min" value="900.f"/>
+        <attribute name="standard_name" value="'air_pressure'"/>
+        <attribute name="long_name" value="'Pressure (measured variable) exerted by the atmosphere'"/>
+        <attribute name="units" value="'millibar'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="900.f"/>
         <attribute name="valid_max" value="1100.f"/>
-        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>		
-		<attribute name="ancillary_variables" value="'ATMP_quality_control'"/>
-	  </attributes>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'ATMP_quality_control'"/>
+      </attributes>
     </variable>
     <variable>
       <name>ATMP_quality_control</name>
@@ -220,14 +219,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'air_pressure status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for air_pressure'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'air_pressure status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for air_pressure'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>			   
+      </attributes>
+    </variable>
     <variable>
       <name>CNDC</name>
       <encoder>float</encoder>
@@ -258,7 +257,7 @@
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>CNDC_2</name>
@@ -290,7 +289,7 @@
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>CNDC_3</name>
@@ -305,7 +304,7 @@
         <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="50000.f"/>
         <attribute name="_FillValue" value="-9999.f"/>
-	    <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'CNDC_3_quality_control'"/>
       </attributes>
     </variable>
@@ -322,8 +321,8 @@
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable> 
+      </attributes>
+    </variable>
     <variable>
       <name>DEWT</name>
       <encoder>float</encoder>
@@ -331,16 +330,16 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'dew_point_temperature'"/>
-		<attribute name="long_name" value="'Dew point temperature of the atmosphere'"/>
-		<attribute name="units" value="'Celsius'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="valid_min" value="-50.f"/>
+        <attribute name="standard_name" value="'dew_point_temperature'"/>
+        <attribute name="long_name" value="'Dew point temperature of the atmosphere'"/>
+        <attribute name="units" value="'Celsius'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="-50.f"/>
         <attribute name="valid_max" value="50.f"/>
-	    <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>		
-		<attribute name="ancillary_variables" value="'DEWT_quality_control'"/>
-	  </attributes>
-    </variable>	
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'DEWT_quality_control'"/>
+      </attributes>
+    </variable>
    <variable>
       <name>DEWT_quality_control</name>
       <encoder>char</encoder>
@@ -348,41 +347,41 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'dew_point_temperature status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for dew_point_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'dew_point_temperature status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for dew_point_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>           
+      </attributes>
+    </variable>
     <variable>
       <name>PL_CRS</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-      <attributes> 
-        <attribute name="standard_name" value="'platform_course"/> 
-      	<attribute name="long_name" value="'Direction of motion (over ground) of measurement platform'"/>    	
-		<attribute name="units" value="'degrees (clockwise towards true north)'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="valid_min" value="0.f"/>
+      <attributes>
+        <attribute name="standard_name" value="'platform_course"/>
+        <attribute name="long_name" value="'Direction of motion (over ground) of measurement platform'"/>
+        <attribute name="units" value="'degrees (clockwise towards true north)'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="360.f"/>
-	    <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/> 
-		<attribute name="ancillary_variables" value="PL_CRS_quality_control"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="PL_CRS_quality_control"/>
       </attributes>
-    </variable>	
+    </variable>
     <variable>
       <name>PL_CRS_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-      <attributes>   
-	    <attribute name="standard_name" value="'platform_course status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for platform_course'"/>
-		<attribute name="quality_control_set" value="3."/>
+      <attributes>
+        <attribute name="standard_name" value="'platform_course status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for platform_course'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
@@ -395,28 +394,28 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'platform_speed_wrt_ground'"/>
-		<attribute name="long_name" value="'Speed (over ground) of measurement platform'"/>
-		<attribute name="units" value="'m s-1'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-	    <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-		<attribute name="ancillary_variables" value="'PL_SPD_quality_control'"/>
+        <attribute name="standard_name" value="'platform_speed_wrt_ground'"/>
+        <attribute name="long_name" value="'Speed (over ground) of measurement platform'"/>
+        <attribute name="units" value="'m s-1'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'PL_SPD_quality_control'"/>
       </attributes>
     </variable>
-   <variable>
+    <variable>
       <name>PL_SPD_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'platform_speed_wrt_ground status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for platform_speed_wrt_ground'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'platform_speed_wrt_ground status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for platform_speed_wrt_ground'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>PL_WDIR</name>
@@ -425,56 +424,56 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-		<attribute name="long_name" value="'Wind direction (relative to moving platform) in the atmosphere'"/>
-		<attribute name="units" value="'degrees (clockwise towards true north)'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="valid_min" value="0.f"/>
+        <attribute name="long_name" value="'Wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="units" value="'degrees (clockwise towards true north)'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="360.f"/>
-	    <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/> 
-		<attribute name="ancillary_variables" value="'PL_WDIR_quality_control'"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'PL_WDIR_quality_control'"/>
       </attributes>
     </variable>
-   <variable>
+    <variable>
       <name>PL_WDIR_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-		<attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
-        <variable>
+    <variable>
       <name>PL_WSPD</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-		<attribute name="long_name" value="'Wind speed (relative to moving platform) in the atmosphere'"/>
-		<attribute name="units" value="'m s-1'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-		<attribute name="ancillary_variables" value="'PL_WSPD_quality_control'"/>
+        <attribute name="long_name" value="'Wind speed (relative to moving platform) in the atmosphere'"/>
+        <attribute name="units" value="'m s-1'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'PL_WSPD_quality_control'"/>
       </attributes>
     </variable>
-   <variable>
+    <variable>
       <name>PL_WSPD_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-		<attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>PSAL</name>
@@ -489,7 +488,7 @@
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
         <attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'PSAL_quality_control'"/>
       </attributes>
     </variable>
@@ -502,12 +501,12 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
         <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>	
+      </attributes>
+    </variable>
     <variable>
       <name>PSAL_2</name>
       <encoder>float</encoder>
@@ -534,12 +533,12 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
         <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>	
+      </attributes>
+    </variable>
     <variable>
       <name>PSAL_3</name>
       <encoder>float</encoder>
@@ -566,12 +565,12 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
         <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>	
+      </attributes>
+    </variable>
     <variable>
       <name>RELH</name>
       <encoder>float</encoder>
@@ -598,14 +597,14 @@
       <attributes>
         <attribute name="standard_name" value="'surface_downwelling_photosynthetic_radiative_flux_in_air status_flag'"/>
         <attribute name="long_name" value="'Quality flag for surface_downwelling_photosynthetic_radiative_flux_in_air'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>  
+      </attributes>
+    </variable>
     <!-- this is a new variable replacing variable TEMP measured by Fantasea Wonder .The harvester has to be modified to create this new var in the DB -->
-     <variable>  
+    <variable>
       <name>SST</name>
       <encoder>float</encoder>
       <dimensions>
@@ -613,7 +612,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_surface_temperature'"/>
-        <attribute name="long_name" value="'Skin temperature of the water body'"/>  
+        <attribute name="long_name" value="'Skin temperature of the water body'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
@@ -628,31 +627,31 @@
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
+      <attributes>
         <attribute name="standard_name" value="'sea_surface_temperature status_flag'"/>
         <attribute name="long_name" value="'Quality flag for sea_surface_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>  
+      </attributes>
+    </variable>
     <variable>
       <name>TEMP</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature'"/>
-		<attribute name="long_name" value="'Temperature of the water body'"/>
-		<attribute name="units" value="'Celsius'"/>
+      <attributes>
+        <attribute name="standard_name" value="'sea_water_temperature'"/>
+        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
         <attribute name="_FillValue" value="999999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'TEMP_quality_control"/>
-	   </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>TEMP_quality_control</name>
@@ -661,30 +660,30 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>	
+      </attributes>
+    </variable>
     <variable>
       <name>TEMP_2</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature'"/>
-		<attribute name="long_name" value="'Temperature of the water body'"/>
-		<attribute name="units" value="'Celsius'"/>
+      <attributes>
+        <attribute name="standard_name" value="'sea_water_temperature'"/>
+        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
         <attribute name="_FillValue" value="999999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'TEMP_quality_control"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>TEMP_2_quality_control</name>
@@ -693,13 +692,13 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>TEMP_3</name>
@@ -707,16 +706,16 @@
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature'"/>
-		<attribute name="long_name" value="'Temperature of the water body'"/>
-		<attribute name="units" value="'Celsius'"/>
+      <attributes>
+        <attribute name="standard_name" value="'sea_water_temperature'"/>
+        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
         <attribute name="_FillValue" value="999999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'TEMP_quality_control"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>TEMP_3_quality_control</name>
@@ -725,13 +724,13 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-		<attribute name="long_name" value="'quality flags for sea_water_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
+        <attribute name="long_name" value="'quality flags for sea_water_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>WDIR</name>
@@ -741,45 +740,45 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'wind_from_direction'"/>
-		<attribute name="long_name" value="'Wind from direction in the atmosphere'"/>
-		<attribute name="units" value="'degrees (clockwise from true north)'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="valid_min" value="0.f"/>
+        <attribute name="long_name" value="'Wind from direction in the atmosphere'"/>
+        <attribute name="units" value="'degrees (clockwise from true north)'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="360.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-		<attribute name="ancillary_variables" value="'WDIR_quality_control'" />
+        <attribute name="ancillary_variables" value="'WDIR_quality_control'"/>
       </attributes>
-    </variable>	
-	<variable>
+    </variable>
+    <variable>
       <name>WDIR_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'wind_from_direction status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for wind_from_direction'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'wind_from_direction status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for wind_from_direction'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>    	
+      </attributes>
+    </variable>
     <variable>
       <name>WETT</name>
       <encoder>float</encoder>
       <dimensions>
         <dimension name="TIME"/>
       </dimensions>
-       <attributes>
-       	<attribute name="standard_name" value="'wet_bulb_temperature'"/>
-		<attribute name="long_name" value="'Wet bulb temperature of the atmosphere'"/>
-		<attribute name="units" value="'Celsius'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-		<attribute name="ancillary_variables" value="'WETT_quality_control'"/>
-	   </attributes>
-    </variable>	
+      <attributes>
+        <attribute name="standard_name" value="'wet_bulb_temperature'"/>
+        <attribute name="long_name" value="'Wet bulb temperature of the atmosphere'"/>
+        <attribute name="units" value="'Celsius'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'WETT_quality_control'"/>
+      </attributes>
+    </variable>
     <variable>
       <name>WETT_quality_control</name>
       <encoder>char</encoder>
@@ -787,14 +786,14 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'wet_bulb_temperature status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for wet_bulb_temperature'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'wet_bulb_temperature status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for wet_bulb_temperature'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
-    </variable>		
+      </attributes>
+    </variable>
     <variable>
       <name>WSPD</name>
       <encoder>float</encoder>
@@ -802,12 +801,12 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'wind_speed'"/>
-		<attribute name="long_name" value="'Wind speed in the atmosphere'"/>
-		<attribute name="units" value="'m s-1'"/>
-		<attribute name="_FillValue" value="-9999.f"/>
-		<attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-		<attribute name="ancillary_variables" value="'WSPD_quality_control'"/>
+        <attribute name="standard_name" value="'wind_speed'"/>
+        <attribute name="long_name" value="'Wind speed in the atmosphere'"/>
+        <attribute name="units" value="'m s-1'"/>
+        <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
+        <attribute name="ancillary_variables" value="'WSPD_quality_control'"/>
       </attributes>
     </variable>
     <variable>
@@ -817,13 +816,13 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-       	<attribute name="standard_name" value="'wind_speed status_flag'"/>
-		<attribute name="long_name" value="'Quality flags for wind_speed'"/>
-		<attribute name="quality_control_set" value="3."/>
+        <attribute name="standard_name" value="'wind_speed status_flag'"/>
+        <attribute name="long_name" value="'Quality flags for wind_speed'"/>
+        <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>      
   </variables>
 </definition>
