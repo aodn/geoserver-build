@@ -98,7 +98,6 @@
         <attribute name="axis" value="'T'"/>
         <attribute name="valid_min" value="0."/>
         <attribute name="valid_max" value="90000."/>
-        <attribute name="ancillary_variables" value="'TIME_quality_control'"/>
       </attributes>
     </variable>
       <name>LATITUDE</name>
