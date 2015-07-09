@@ -400,6 +400,8 @@
         <attribute name="long_name" value="'Speed (over ground) of measurement platform'"/>
         <attribute name="units" value="'m s-1'"/>
         <attribute name="_FillValue" value="-9999.f"/>
+        <attribute name="valid_min" value="0.f"/>
+        <attribute name="valid_max" value="20.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'PL_SPD_quality_control'"/>
       </attributes>
