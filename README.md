@@ -39,6 +39,17 @@ jfca@10-nsp-mel:~$ ncdump  /mnt/opendap/1/IMOS/opendap/eMII/checker_test/ANMN/ti
 profile example,
 jfca@10-nsp-mel:~$ ncdump /mnt/opendap/1/IMOS/opendap/eMII/checker_test/ANMN/profile/IMOS_ANMN-NRS_CDEKOSTUZ_20150224T023931Z_NRSROT_FV01_Profile-SBE19plus_C-20150227T052824Z.nc  | less
 
+# Running from the command line
+
+```
+$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args=""
+```
+
+Example:
+```
+$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args="-d jdbc:postgresql://dbprod.emii.org.au:5432/harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory -u jodaac_username -p jodaac_password -c \"INTERSECTS(geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'\" -P anmn_ts"
+```
+
 ----
 
 http://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/reference/faq.html

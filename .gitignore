@@ -9,3 +9,4 @@ env.*sh
 .idea/*
 !.idea/codeStyleSettings.xml
 *.iml
+*.zip
