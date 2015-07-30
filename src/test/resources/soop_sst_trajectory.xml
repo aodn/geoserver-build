@@ -23,6 +23,7 @@
         from $data
         group by platform_code, voyage_number, instance_id
     </sql>
+    <!-- potential issue related to the use of voyage_number cause the var is sometimes emtpy. Might need to modify the harvester to avoid potential problems -->
   </filename>
   <dimensions>
     <dimension name="TIME"/>
