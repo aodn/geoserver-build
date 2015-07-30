@@ -1,12 +1,12 @@
 [submodule "geoserver-layer-filter-extension"]
 	path = geoserver-layer-filter-extension
-	url = git@github.com:aodn/geoserver-layer-filter-extension
+	url = https://github.com/aodn/geoserver-layer-filter-extension
 [submodule "geoserver"]
 	path = geoserver
-	url = git@github.com:aodn/geoserver
+	url = https://github.com/aodn/geoserver
 [submodule "ncdfgenerator"]
 	path = ncdfgenerator
-	url = git@github.com:aodn/ncdfgenerator
+	url = https://github.com/aodn/ncdfgenerator
 [submodule "geotools"]
 	path = geotools
-	url = git@github.com:aodn/geotools
+	url = https://github.com/aodn/geotools
