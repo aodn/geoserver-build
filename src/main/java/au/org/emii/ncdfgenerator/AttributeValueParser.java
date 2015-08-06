@@ -83,6 +83,13 @@ class AttributeValueParser implements IAttributeValueParser {
                     ar.setByte(i++, (Byte)e.getValue());
                 }
             }
+            else if (first instanceof Character) {
+                ar = Array.factory(DataType.CHAR, shape);
+                int i = 0;
+                for (AttributeValue e : items) {
+                    ar.setChar(i++, (Character)e.getValue());
+                }
+            }
             else if (first instanceof Integer) {
                 ar = Array.factory(DataType.INT, shape);
                 int i = 0;

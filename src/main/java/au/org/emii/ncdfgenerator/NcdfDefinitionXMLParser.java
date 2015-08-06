@@ -276,6 +276,9 @@ class NcdfDefinitionXMLParser {
             else if (tag.equals("double")) {
                 return new DoubleValueEncoder();
             }
+            else if (tag.equals("char")) {
+                return new CharValueEncoder();
+            }
             else if (tag.equals("byte")) {
                 return new ByteValueEncoder();
             }
