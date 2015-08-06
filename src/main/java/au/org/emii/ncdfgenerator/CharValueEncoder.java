@@ -37,23 +37,23 @@ class CharValueEncoder implements IValueEncoder {
         }
     }
 
-    public void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
+    public void encode(Array array, int index, Object value) throws NcdfGeneratorException {
         if (value == null) {
             if (haveFill) {
-                array.setChar(ima, fill);
+                array.setChar(index, fill);
             }
             else {
                 throw new NcdfGeneratorException("Missing value and no fill attribute defined");
             }
         }
         else if (value instanceof Character) {
-            array.setChar(ima, (Character)value);
+            array.setChar(index, (Character)value);
         }
         else if (value instanceof String && ((String)value).length() == 1) {
             // interpret one char string literals using ascii value
             String s = (String)value;
             char ch = s.charAt(0);
-            array.setChar(ima, ch);
+            array.setChar(index, ch);
         }
         else {
             throw new NcdfGeneratorException("Failed to convert type to char");

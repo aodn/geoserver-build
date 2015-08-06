@@ -30,20 +30,20 @@ public class DoubleValueEncoder implements IValueEncoder {
         }
     }
 
-    public final void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
+    public final void encode(Array array, int index, Object value) throws NcdfGeneratorException {
         if (value == null) {
             if (haveFill) {
-                array.setDouble(ima, fill);
+                array.setDouble(index, fill);
             }
             else {
                 throw new NcdfGeneratorException("Missing value and no fill attribute defined");
             }
         }
         else if (value instanceof Float) {
-            array.setDouble(ima, (double)(Float)value);
+            array.setDouble(index, (double)(Float)value);
         }
         else if (value instanceof Double) {
-            array.setDouble(ima, (double)value);
+            array.setDouble(index, (double)value);
         }
         else {
             throw new NcdfGeneratorException("Failed to coerce type '" + value.getClass() + "' to double");

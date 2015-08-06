@@ -30,20 +30,20 @@ public class FloatValueEncoder implements IValueEncoder {
         }
     }
 
-    public final void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
+    public final void encode(Array array, int index, Object value) throws NcdfGeneratorException {
         if (value == null) {
             if (haveFill) {
-                array.setFloat(ima, fill);
+                array.setFloat(index, fill);
             }
             else {
                 throw new NcdfGeneratorException("Missing value and no fill attribute defined");
             }
         }
         else if (value instanceof Float) {
-            array.setFloat(ima, (Float)value);
+            array.setFloat(index, (Float)value);
         }
         else if (value instanceof Double) {
-            array.setFloat(ima, (float)(double)(Double)value);
+            array.setFloat(index, (float)(double)(Double)value);
         }
         else {
             throw new NcdfGeneratorException("Failed to coerce type '" + value.getClass() + "' to float");
