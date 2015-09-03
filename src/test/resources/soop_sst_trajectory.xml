@@ -109,7 +109,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'latitude'"/>
-        <attribute name="long_name" value="'Latitude north'"/>
+        <attribute name="long_name" value="'latitude'"/>
         <attribute name="units" value="'degrees north'"/>
         <attribute name="axis" value="'Y'"/>
         <attribute name="reference_datum" value="'geographical coordinates, WGS84 projection'"/>
@@ -128,7 +128,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'latitude status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for latitude'"/>
+        <attribute name="long_name" value="'quality flag for latitude'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -143,7 +143,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'longitude'"/>
-        <attribute name="long_name" value="'Longitude east'"/>
+        <attribute name="long_name" value="'longitude'"/>
         <attribute name="units" value="'degrees east'"/>
         <attribute name="axis" value="'X'"/>
         <attribute name="reference_datum" value="'geographical coordinates, WGS84 projection'"/>
@@ -162,7 +162,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'longitude status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for longitude'"/>
+        <attribute name="long_name" value="'quality flag for longitude'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -177,7 +177,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'air_temperature'"/>
-        <attribute name="long_name" value="'Temperature of the atmosphere'"/>
+        <attribute name="long_name" value="'air_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="-50.f"/>
@@ -195,7 +195,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'air_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for air_temperature'"/>
+        <attribute name="long_name" value="'quality flag for air_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -210,7 +210,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'air_pressure'"/>
-        <attribute name="long_name" value="'Pressure (measured variable) exerted by the atmosphere'"/>
+        <attribute name="long_name" value="'air_pressure'"/>
         <attribute name="units" value="'millibar'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="900.f"/>
@@ -228,7 +228,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'air_pressure status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for air_pressure'"/>
+        <attribute name="long_name" value="'quality flag for air_pressure'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -243,7 +243,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity'"/>
-        <attribute name="long_name" value="'Electrical conductivity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_electrical_conductivity'"/>
         <attribute name="units" value="'S m-1'"/>
         <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="50000.f"/>
@@ -261,7 +261,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_electrical_conductivity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_electrical_conductivity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -276,7 +276,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity'"/>
-        <attribute name="long_name" value="'Electrical conductivity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_electrical_conductivity'"/>
         <attribute name="units" value="'S m-1'"/>
         <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="50000.f"/>
@@ -294,7 +294,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_electrical_conductivity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_electrical_conductivity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -309,7 +309,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity'"/>
-        <attribute name="long_name" value="'Electrical conductivity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_electrical_conductivity'"/>
         <attribute name="units" value="'S m-1'"/>
         <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="50000.f"/>
@@ -327,7 +327,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_electrical_conductivity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_electrical_conductivity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_electrical_conductivity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -342,7 +342,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'dew_point_temperature'"/>
-        <attribute name="long_name" value="'Dew point temperature of the atmosphere'"/>
+        <attribute name="long_name" value="'dew_point_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="-50.f"/>
@@ -360,7 +360,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'dew_point_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for dew_point_temperature'"/>
+        <attribute name="long_name" value="'quality flag for dew_point_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -375,7 +375,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'platform_course'"/>
-        <attribute name="long_name" value="'Direction of motion (over ground) of measurement platform'"/>
+        <attribute name="long_name" value="'platform_course'"/>
         <attribute name="units" value="'degrees (clockwise towards true north)'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="0.f"/>
@@ -393,7 +393,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'platform_course status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for platform_course'"/>
+        <attribute name="long_name" value="'quality flag for platform_course'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -408,7 +408,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'platform_speed_wrt_ground'"/>
-        <attribute name="long_name" value="'Speed (over ground) of measurement platform'"/>
+        <attribute name="long_name" value="'platform_speed_wrt_ground'"/>
         <attribute name="units" value="'m s-1'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="0.f"/>
@@ -426,7 +426,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'platform_speed_wrt_ground status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for platform_speed_wrt_ground'"/>
+        <attribute name="long_name" value="'quality flag for platform_speed_wrt_ground'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -457,7 +457,7 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="''"/>
-        <attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="long_name" value="'quality flag for wind direction (relative to moving platform) in the atmosphere'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -486,7 +486,7 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="''"/>
-        <attribute name="long_name" value="'Quality flags for wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="long_name" value="'quality flag for wind direction (relative to moving platform) in the atmosphere'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -501,7 +501,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
-        <attribute name="long_name" value="'Practical salinity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_salinity'"/>
         <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
@@ -519,7 +519,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_salinity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -534,7 +534,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
-        <attribute name="long_name" value="'Practical salinity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_salinity'"/>
         <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
@@ -552,7 +552,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_salinity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -567,7 +567,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_salinity'"/>
-        <attribute name="long_name" value="'Practical salinity of the water body'"/>
+        <attribute name="long_name" value="'sea_water_salinity'"/>
         <attribute name="units" value="'1e-3'"/>
         <attribute name="valid_min" value="2.f"/>
         <attribute name="valid_max" value="41.f"/>
@@ -585,7 +585,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_salinity status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_water_salinity'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_salinity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -600,7 +600,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'relative_humidity'"/>
-        <attribute name="long_name" value="'Relative humidity of the atmosphere'"/>
+        <attribute name="long_name" value="'relative_humidity'"/>
         <attribute name="units" value="'percent'"/>
         <attribute name="valid_min" value="0.f"/>
         <attribute name="valid_max" value="100.f"/>
@@ -617,8 +617,8 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="''"/>
-        <attribute name="standard_name" value="'surface_downwelling_photosynthetic_radiative_flux_in_air status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for surface_downwelling_photosynthetic_radiative_flux_in_air'"/>
+        <attribute name="standard_name" value="'relative_humidity status_flag'"/>
+        <attribute name="long_name" value="'quality flag for relative_humidity'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -634,7 +634,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_surface_temperature'"/>
-        <attribute name="long_name" value="'Skin temperature of the water body'"/>
+        <attribute name="long_name" value="'sea_surface_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
@@ -652,7 +652,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_surface_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flag for sea_surface_temperature'"/>
+        <attribute name="long_name" value="'quality flag for sea_surface_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -667,7 +667,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_temperature'"/>
-        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="long_name" value="'sea_water_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
@@ -685,7 +685,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -700,7 +700,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_temperature'"/>
-        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="long_name" value="'sea_water_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
@@ -718,7 +718,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for sea_water_temperature'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -733,7 +733,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'sea_water_temperature'"/>
-        <attribute name="long_name" value="'Temperature of the water body'"/>
+        <attribute name="long_name" value="'sea_water_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
@@ -751,7 +751,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'sea_water_temperature status_flag'"/>
-        <attribute name="long_name" value="'quality flags for sea_water_temperature'"/>
+        <attribute name="long_name" value="'quality flag for sea_water_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -766,7 +766,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'wind_from_direction'"/>
-        <attribute name="long_name" value="'Wind from direction in the atmosphere'"/>
+        <attribute name="long_name" value="'wind_from_direction'"/>
         <attribute name="units" value="'degrees (clockwise from true north)'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="0.f"/>
@@ -784,7 +784,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'wind_from_direction status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for wind_from_direction'"/>
+        <attribute name="long_name" value="'quality flag for wind_from_direction'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -799,7 +799,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'wet_bulb_temperature'"/>
-        <attribute name="long_name" value="'Wet bulb temperature of the atmosphere'"/>
+        <attribute name="long_name" value="'wet_bulb_temperature'"/>
         <attribute name="units" value="'Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
@@ -815,7 +815,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'wet_bulb_temperature status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for wet_bulb_temperature'"/>
+        <attribute name="long_name" value="'quality flag for wet_bulb_temperature'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -830,7 +830,7 @@
       </dimensions>
       <attributes>
         <attribute name="standard_name" value="'wind_speed'"/>
-        <attribute name="long_name" value="'Wind speed in the atmosphere'"/>
+        <attribute name="long_name" value="'wind_speed'"/>
         <attribute name="units" value="'m s-1'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
@@ -846,7 +846,7 @@
       <attributes>
         <attribute name="_FillValue" value="''"/>
         <attribute name="standard_name" value="'wind_speed status_flag'"/>
-        <attribute name="long_name" value="'Quality flags for wind_speed'"/>
+        <attribute name="long_name" value="'quality flag for wind_speed'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
