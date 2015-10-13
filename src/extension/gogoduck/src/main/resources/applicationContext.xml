@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <bean id="goGoDuckProcess" class="au.org.emii.wps.GoGoDuckProcess">
+      <constructor-arg index="0" ref="wpsResourceManager"/>
+      <constructor-arg index="1" ref="geoServer"/>
+      <constructor-arg index="2" ref="resourceLoader"/>
+    </bean>
+</beans>
