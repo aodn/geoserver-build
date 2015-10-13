@@ -1,0 +1,74 @@
+
+PRIORITY
+
+- factory for Variable to hide detail of attribute parser instantiation.
+
+TODO
+
+- postgres - parametize query parameters, rather than use text, injection attack
+- refactor variable class to avoid being both definition and mutable buffer - srp
+- spring
+- investigate netcdf generation in memory
+    See here,
+    http://www.massapi.com/source/manual/thredds/cdm/src/main/java/ucar/nc2/NetcdfFile.java.html#576
+    and
+    http://www.unidata.ucar.edu/software/thredds/v4.6/netcdf-java/javadocAll/ucar/unidata/io/InMemoryRandomAccessFile.html
+    
+- pass table as parameter to encoder strategy (not sure)
+
+----
+
+WHAT'S DONE
+
+- done get dates correctly encoded  (to enable verificiation of filter date range)
+- done sequencing the definition, and data writing phases of netcdf generation
+- done basic subset expression parser/
+- done postgres dialect rewriter instance
+- done netcdf encoder
+- done localized convention/ config strategy
+- done experimented with a couple of query approaches favor time to start streaming, total time etc.
+- done - write required attributes with strategy
+- done - write multiple files (and get the writable instantiation working ) (pass at the time).
+- done-  should specify dimension of a var by name, then we can infer size/count.
+- done - think we have to invert it, instead of trying to infer, use an explicit configuration.
+	- It's part of the task.
+	- meaning use spring.
+- done - mvn project
+- done layer configuration into xml file
+- done need to be able to select different feature types - and command line arguments
+- done take dims from config file..
+- done - have a timeseries, need a trajectory. failsafe to run a specific integration test...
+- done xml config.
+- done factor encoder strategy chooser - so it's not instantiated, or else use property setters instead of constructor for the writer.
+- done tidy xml examples - to be more complete .
+- push the sql projections into the xml.
+- done done check integration test IT naming conventions. change test names to ITtimeseries with IT first
+- done get date correctly encoded
+---
+
+- done - organize project sources
+- done - add support to parser/expr for geometry for spatial constraint choice
+- done - zip the file stream
+- done - move db connection management into unit tests.
+- done - the createWritable generates local files, - needs to be able to handle creating/using concurrently
+- done - interface and single method to communicate with server.
+- done - cql filter subset expression parsing
+- done - wkt
+- done - config to specify the tables. eg. xml
+- done - attribute arrays.
+- done - attribute values are typed - check GG xml. check ncdf api.
+- done - gg all dimensions and attribute variables
+- done order of dimensions and attributes
+- done carry a context when decoding the xml, to perform lookup of dimensions, etc...
+- done index on prod data.
+- done sql lookup for global attributes
+- done - logger
+- done - java linter
+- done - prototype demonstrate end-to-end filter to subset netcdf generation, with streaming on prod data.
+- done - need float and string cql literal types.
+- done - unary operators
+- done - fix qc vars which are being encoded incorrectly?
+- done - Angus cql examples - in integration tests
+- done - fix integration tests + naming
+- done - integration test should use a subset of prod data and be included in github
+- done - re-check that works with profile, and trajectory
