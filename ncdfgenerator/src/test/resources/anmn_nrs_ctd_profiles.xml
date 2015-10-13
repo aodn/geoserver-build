@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<definition>
+  <!-- anmn_nrs_ctd_profiles -->
+  <source>
+    <schema>anmn_nrs_ctd_profiles</schema>
+    <virtualDataTable>select file_id as instance_id, * from measurements</virtualDataTable>
+    <virtualInstanceTable>select * from indexed_file</virtualInstanceTable>
+  </source>
+  <filename>
+    <sql>select 'file-'||(select id from $instance)||'.nc'
+    </sql>
+  </filename>
+  <dimensions>
+    <dimension name="DEPTH"/>
+  </dimensions>
+  <globalattributes>
+  </globalattributes>
+  <variables>
+    <!-- LAT and LON vary with depth for profile -->
+    <variable>
+      <name>LATITUDE</name>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <encoder>float</encoder>
+      <attributes>
+        <attribute name="_FillValue" value="99999.f"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>LONGITUDE</name>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <encoder>float</encoder>
+      <attributes>
+        <attribute name="_FillValue" value="99999.f"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>TIME</name>
+      <encoder>time</encoder>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999."/>
+        <attribute name="units" value="'days since 1950-01-01 00:00:00 UTC'"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>TEMP</name>
+      <encoder>float</encoder>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999.f"/>
+        <attribute name="example" value="'examplevalue'"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>DEPTH_quality_control</name>
+      <encoder>byte</encoder>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="0b"/>
+      </attributes>
+    </variable>
+    <variable>
+      <name>DEPTH</name>
+      <encoder>float</encoder>
+      <dimensions>
+        <dimension name="DEPTH"/>
+      </dimensions>
+      <attributes>
+        <attribute name="_FillValue" value="99999.f"/>
+        <attribute name="units" value="'days since 1950-01-01 00:00:00 UTC'"/>
+      </attributes>
+    </variable>
+  </variables>
+</definition>
