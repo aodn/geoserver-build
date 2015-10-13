@@ -1,7 +1,0 @@
-[submodule "src/extension/geoserver-layer-filter-extension"]
-	path = src/extension/geoserver-layer-filter-extension
-	url = git@github.com:aodn/geoserver-layer-filter-extension
-	branch = master
-[submodule "src/extension/ncdfgenerator"]
-	path = src/extension/ncdfgenerator
-	url = git@github.com:aodn/ncdfgenerator
