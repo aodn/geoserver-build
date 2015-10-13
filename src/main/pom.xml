@@ -38,6 +38,11 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
+            <groupId>au.org.emii.geoserver.wms</groupId>
+            <artifactId>ncwms</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.geoserver.web</groupId>
             <artifactId>gs-web-app</artifactId>
             <scope>runtime</scope>

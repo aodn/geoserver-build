@@ -22,6 +22,7 @@
         <module>ncdfgenerator</module>
         <module>gogoduck</module>
         <module>notifier</module>
+        <module>ncwms</module>
     </modules>
 
 </project>
