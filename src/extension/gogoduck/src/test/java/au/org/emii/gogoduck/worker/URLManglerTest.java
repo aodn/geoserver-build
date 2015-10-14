@@ -4,14 +4,17 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class URLManglerTest {
     @Test
     public void testMangle() throws Exception {
-        URL u;
+        URLMangler.setUrlManglingMap(Main.getUrlMangling());
 
+        URL u;
         u = URLMangler.mangle(new URI("/mnt/imos-t3/file.nc"));
         assertEquals(u, new URL("https://data.aodn.org.au/file.nc"));
 

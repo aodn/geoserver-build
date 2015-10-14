@@ -2,7 +2,21 @@ package au.org.emii.gogoduck.worker;
 
 import org.apache.commons.cli.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Main {
+
+    private static Map<String, String> urlMangling = new HashMap<String, String>();
+    static {
+        urlMangling.put("^/mnt/imos-t3/", "https://data.aodn.org.au/");
+        urlMangling.put("^/mnt/opendap/2/SRS/", "https://thredds.aodn.org.au/thredds/fileServer/srs/");
+        urlMangling.put("^IMOS/", "http://imos-data.aodn.org.au/IMOS/");
+    }
+
+    public static Map<String, String> getUrlMangling() {
+        return urlMangling;
+    }
 
     public static void usage(Options options) {
         HelpFormatter formatter = new HelpFormatter();
@@ -12,6 +26,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        URLMangler.setUrlManglingMap(getUrlMangling());
+
         Options options = new Options();
 
         options.addOption("g", "geoserver", true, "Geoserver to get list of URLs from. Default is http://geoserver-123.aodn.org.au/geoserver");

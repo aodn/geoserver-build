@@ -1,10 +1,12 @@
 package au.org.emii.wps;
 
 import java.io.File;
+import java.util.Map;
 
 import au.org.emii.gogoduck.worker.GoGoDuckException;
 import au.org.emii.gogoduck.worker.GoGoDuck;
 
+import au.org.emii.gogoduck.worker.URLMangler;
 import net.opengis.wps10.ExecuteType;
 import org.apache.commons.io.FilenameUtils;
 import org.geoserver.config.impl.GeoServerImpl;
@@ -147,5 +149,9 @@ public class GoGoDuckProcess implements GeoServerProcess {
             logger.info("Exception accessing working directory: \n" + e);
             return System.getProperty("java.io.tmpdir");
         }
+    }
+
+    public void setUrlMangling(Map<String, String> urlMangling) {
+        URLMangler.setUrlManglingMap(urlMangling);
     }
 }
