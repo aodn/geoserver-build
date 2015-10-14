@@ -78,6 +78,9 @@
                         <overlay>
                             <groupId>org.geoserver.web</groupId>
                             <artifactId>gs-web-app</artifactId>
+                                <excludes>
+                                    <exclude>WEB-INF/lib/postgresql*jdbc*.jar</exclude>
+                                </excludes>
                         </overlay>
                     </overlays>
                     <warName>geoserver-${project.version}-imos</warName>
