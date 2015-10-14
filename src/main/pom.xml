@@ -17,11 +17,11 @@
     </parent>
 
     <dependencies>
-        <dependency>
+<!--      <dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>geoserver-layer-filter-extension</artifactId>
             <version>1.0.0</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>ncdfgenerator</artifactId>
