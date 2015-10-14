@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -68,5 +69,23 @@ public class GoGoDuckModuleTest {
         assertEquals(nc.findGlobalAttribute("test_attribute").getStringValue(), "test_value");
 
         Files.delete(tmpFile.toPath());
+    }
+
+
+    @Test
+    public void testNextProfile() throws Exception {
+        Method nextProfileMethod = GoGoDuckModule.class.getDeclaredMethod("nextProfile", String.class);
+        nextProfileMethod.setAccessible(true);
+
+        String profile = "this_is_a_profile";
+
+        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
+        assertEquals(profile, "this_is_a");
+
+        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
+        assertEquals(profile, "this_is");
+
+        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
+        assertEquals(profile, "this");
     }
 }

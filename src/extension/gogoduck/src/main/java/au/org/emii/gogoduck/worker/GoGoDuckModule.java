@@ -173,4 +173,40 @@ public class GoGoDuckModule {
         subsetParametersNoTime.remove("TIME");
         return subsetParametersNoTime;
     }
+
+    public static GoGoDuckModule newInstance(String profile, String geoserver, String subset, UserLog userLog) {
+        String thisPackage = GoGoDuckModule.class.getPackage().getName();
+        String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
+
+        GoGoDuckModule module = null;
+        while (null == module && !classToInstantiate.isEmpty()) {
+            logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
+            try {
+                Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
+                module = (GoGoDuckModule) classz.newInstance();
+                module.init(profile, geoserver, subset, userLog);
+                logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
+                return module;
+            }
+            catch (Exception e) {
+                logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
+            }
+            classToInstantiate = nextProfile(classToInstantiate);
+        }
+
+        throw new GoGoDuckException(String.format("Error initializing class for profile '%s'", profile));
+    }
+
+    /* Finds the correct profile to run for the given layer, starts with:
+    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries_url
+    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries
+    GoGoDuckModule_acorn_hourly_avg_sag_nonqc
+    GoGoDuckModule_acorn_hourly_avg_sag
+    GoGoDuckModule_acorn_hourly_avg
+    GoGoDuckModule_acorn_hourly
+    GoGoDuckModule_acorn
+    GoGoDuckModule */
+    private static String nextProfile(String profile) {
+        return profile.substring(0, profile.lastIndexOf("_"));
+    }
 }

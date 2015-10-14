@@ -1,7 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -23,12 +22,6 @@ import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
-
-    private static final Map<String, String> replacePrefixes = new HashMap<String, String>();
-    static {
-        replacePrefixes.put("/mnt/imos-t3/", "https://data.aodn.org.au/");
-        replacePrefixes.put("/mnt/opendap/2/SRS/", "https://thredds.aodn.org.au/thredds/fileServer/srs/");
-    }
 
     public static final String ncksPath = "/usr/bin/ncks";
     public static final String ncrcatPath = "/usr/bin/ncrcat";
@@ -86,7 +79,7 @@ public class GoGoDuck {
     }
 
     public void run() {
-        GoGoDuckModule module = getProfileModule(profile, geoserverUrl, subset, userLog);
+        GoGoDuckModule module = GoGoDuckModule.newInstance(profile, geoserverUrl, subset, userLog);
 
         Path tmpDir = null;
 
@@ -157,7 +150,7 @@ public class GoGoDuck {
     }
 
     private void downloadFile(URI uri, Path dst) {
-        URL url = fileURItoURL(uri);
+        URL url = URLMangler.mangle(uri);
         logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
         try {
@@ -196,21 +189,6 @@ public class GoGoDuck {
             if (extension.equals("gz")) {
                 gunzipInPlace(dst.toFile());
             }
-        }
-    }
-
-    private static URL fileURItoURL(URI uri) {
-        try {
-            String uriStr = uri.toString();
-            for (String key : replacePrefixes.keySet()) {
-                if (uriStr.startsWith(key)) {
-                    uriStr = uriStr.replace(key, replacePrefixes.get(key));
-                }
-            }
-            return new URL(uriStr);
-        }
-        catch (MalformedURLException e) {
-            throw new GoGoDuckException(e.getMessage());
         }
     }
 
@@ -415,42 +393,6 @@ public class GoGoDuck {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static GoGoDuckModule getProfileModule(String profile, String geoserver, String subset, UserLog userLog) {
-        String thisPackage = GoGoDuckModule.class.getPackage().getName();
-        String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
-
-        GoGoDuckModule module = null;
-        while (null == module && "" != classToInstantiate) {
-            logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
-            try {
-                Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
-                module = (GoGoDuckModule) classz.newInstance();
-                module.init(profile, geoserver, subset, userLog);
-                logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
-                return module;
-            }
-            catch (Exception e) {
-                logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
-            }
-            classToInstantiate = nextProfile(classToInstantiate);
-        }
-
-        throw new GoGoDuckException(String.format("Error initializing class for profile '%s'", profile));
-    }
-
-    /* Finds the correct profile to run for the given layer, starts with:
-       GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries_url
-       GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries
-       GoGoDuckModule_acorn_hourly_avg_sag_nonqc
-       GoGoDuckModule_acorn_hourly_avg_sag
-       GoGoDuckModule_acorn_hourly_avg
-       GoGoDuckModule_acorn_hourly
-       GoGoDuckModule_acorn
-       GoGoDuckModule */
-    private static String nextProfile(String profile) {
-        return profile.substring(0, profile.lastIndexOf("_"));
     }
 
     public static int execute(List<String> command) throws Exception {

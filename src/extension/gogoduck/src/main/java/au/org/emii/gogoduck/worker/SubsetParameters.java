@@ -30,7 +30,7 @@ public class SubsetParameters extends HashMap<String, SubsetParameter> {
         super(sp);
     }
 
-    public List<String> getNcksParameters() {
+    public synchronized  List<String> getNcksParameters() {
         List<String> ncksParameters = new ArrayList<String>();
 
         for (String key : keySet()) {
