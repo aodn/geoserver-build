@@ -17,8 +17,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 
-import au.org.emii.gogoduck.worker.GoGoDuck.UserLog;
-
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
 
