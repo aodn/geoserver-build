@@ -17,11 +17,18 @@ import org.opengis.util.ProgressListener;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
+
+    // Max execution time is determined by geoserver configuration, this is
+    // here merely to have a value to satisfy awaitTermination of the JAVA API
+    private static final int MAX_EXECUTION_TIME_DAYS = 365;
 
     public static final String ncksPath = "/usr/bin/ncks";
     public static final String ncrcatPath = "/usr/bin/ncrcat";
@@ -252,34 +259,27 @@ public class GoGoDuck {
         private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
         private String name;
-        private Deque<File> workQueue;
+        private File file;
         private GoGoDuckModule module = null;
         private GoGoDuck gogoduck = null;
         private ProgressListener progressListener = null;
 
-        NcksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, GoGoDuck gogoduck) {
+        NcksRunnable(File file, GoGoDuckModule module, GoGoDuck gogoduck) {
             this.name = name;
-            this.workQueue = workQueue;
+            this.file = file;
             this.module = module;
             this.gogoduck = gogoduck;
         }
 
         public void run() {
-            try {
-                File file = null;
-                while ((file = workQueue.pop()) != null) {
-                    if (gogoduck.isCancelled()) {
-                        gogoduck.userLog.log("Job was cancelled");
-                        logger.warn("Cancelled by progress listener.");
-                        return;
-                    }
-                    gogoduck.userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
-                    applySubsetSingleFileNcks(file, module);
-                }
+            if (gogoduck.isCancelled()) {
+                gogoduck.userLog.log("Job was cancelled");
+                logger.warn("Cancelled by progress listener.");
+                return;
             }
-            catch (NoSuchElementException e) {
-                logger.info(String.format("Thread %s finished successfully", name));
-            }
+
+            gogoduck.userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
+            applySubsetSingleFileNcks(file, module);
         }
     }
 
@@ -290,27 +290,17 @@ public class GoGoDuck {
         File[] directoryListing = tmpDir.toFile().listFiles();
         logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
-        Deque<File> workQueue = new ConcurrentLinkedDeque<File>();
-        for (File file : directoryListing) {
-            workQueue.push(file);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        for (final File file : directoryListing) {
+            executorService.submit(new NcksRunnable(file, module, this));
         }
 
+        executorService.shutdown();
         try {
-            Thread[] threads = new Thread[threadCount];
-            for (int i = 0; i < threadCount; i++) {
-                String threadName = String.format("Subset_%d", i + 1);
-                threads[i] = new Thread(new NcksRunnable(threadName, workQueue, module, this));
-            }
-            for (int i = 0; i < threadCount; i++) {
-                threads[i].start();
-            }
-            for (int i = 0; i < threadCount; i++) {
-                threads[i].join();
-            }
+            executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         }
         catch (InterruptedException e) {
-            userLog.log("Failed ");
-            throw new GoGoDuckException(String.format("InterruptedException: '%s'", e.getMessage()));
+            throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         }
     }
 
