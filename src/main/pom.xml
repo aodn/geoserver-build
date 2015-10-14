@@ -23,7 +23,7 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>au.org.emii.wps</groupId>
+            <groupId>au.org.emii</groupId>
             <artifactId>ncdfgenerator</artifactId>
             <version>1.0.0</version>
         </dependency>
