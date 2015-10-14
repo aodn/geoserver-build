@@ -27,6 +27,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.geoserver</groupId>
+                <artifactId>geoserver</artifactId>
+                <version>${geoserver.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
                 <groupId>org.geoserver.web</groupId>
                 <artifactId>gs-web-app</artifactId>
                 <version>${geoserver.version}</version>
@@ -45,7 +52,6 @@
         </dependencies>
     </dependencyManagement>
 
-     <!-- gs-xslt plugin -->
     <repositories>
         <repository>
             <id>opengeo</id>
