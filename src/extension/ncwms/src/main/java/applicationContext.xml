@@ -2,8 +2,8 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-    <!-- Spring will reference the instance of the HelloWorld class
-           by the id name "helloService" -->
+    <!-- Spring will reference the instance of the Ncwms class
+           by the id name "ncwms" -->
     <bean id="ncwms" class="au.org.emii.geoserver.wms.Ncwms">
         <property name="wfsServer" value="http://localhost:8080/geoserver/ows"/>
         <property name="timeFieldName" value="time"/>
@@ -30,7 +30,6 @@
         <!-- a list of functions for this service -->
         <constructor-arg index="3">
             <list>
-                <value>sayHello</value>
                 <value>getMetadata</value>
                 <value>getMap</value>
             </list>

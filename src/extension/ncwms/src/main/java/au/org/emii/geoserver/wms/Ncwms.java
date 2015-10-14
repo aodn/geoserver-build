@@ -29,11 +29,6 @@ public class Ncwms {
 
     public Ncwms() {}
 
-    public void sayHello(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-        response.getOutputStream().write( getWfsServer().getBytes() );
-    }
-
     public void setUrlFieldName(String urlFieldName1) { urlFieldName = urlFieldName1; }
     public String getUrlFieldName() { return urlFieldName; }
 
@@ -48,18 +43,12 @@ public class Ncwms {
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("1");
         LOGGER.log(Level.INFO, "GetMetadata");
         final String layerAndVariable = request.getParameter("layerName"); // TOOD needs to be case insensitive
-        System.out.println("2");
         final String wfsLayer = layerAndVariable.split("/")[0];
-        final String variable = layerAndVariable.split("/")[1];
         final String item = request.getParameter("item");
-        System.out.println("3");
-        System.out.println(item);
 
         if (item != null && item.compareTo("timesteps") == 0) {
-            System.out.println("layerDetails");
             String day = request.getParameter("day");
             String cqlFilter = cqlFilterForSameDay(day, getTimeFieldName());
             String urlParameters = getWfsUrlParameters(wfsLayer, timeFieldName, cqlFilter);
@@ -71,12 +60,9 @@ public class Ncwms {
             response.getOutputStream().write(resultJson.toString().getBytes());
         }
         else if (item != null && item.compareTo("layerDetails") == 0) {
-            System.out.println("4");
             LOGGER.log(Level.INFO, "Returning all available dates");
-            System.out.println("layerDetails");
             String urlParameters = getWfsUrlParameters(wfsLayer, timeFieldName, null);
             URL url = new URL(getWfsServer() + "?" + urlParameters);
-            System.out.println(url.toString());
             url.openConnection().getInputStream();
             LOGGER.log(Level.INFO, String.format("Returning all available dates from '%s'", url));
 
@@ -84,19 +70,16 @@ public class Ncwms {
             resultJson.put("datesWithData", getUniqueDates(url.openConnection().getInputStream()));
             resultJson.put("supportedStyles", getSupportedStyles());
             resultJson.put("palettes", getPalettes());
-            System.out.println(resultJson.toString());
             response.getOutputStream().write(resultJson.toString().getBytes());
         }
     }
 
     public void getMap(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("0");
         String layerAndVariable = request.getParameter("LAYERS"); // TOOD needs to be case insensitive
         String wfsLayer = layerAndVariable.split("/")[0];
         String variable = layerAndVariable.split("/")[1];
 
-        System.out.println("1");
 
         String time = request.getParameter("TIME");
 
@@ -105,30 +88,24 @@ public class Ncwms {
         String cqlFilter = null;
         if (time != null && time != "") {
             cqlFilter = cqlFilterForTimestamp(time, getTimeFieldName());
-            System.out.println(String.format("Adding CQL_FILTER=%s", cqlFilter));
             extraUrlParameters = "";
         }
 
-        System.out.println("2");
         String urlParameters = getWfsUrlParameters(wfsLayer, getUrlFieldName(), cqlFilter);
         urlParameters += "&" + "maxFeatures=1";
         urlParameters += extraUrlParameters;
         URL url = new URL(getWfsServer() + "?" + urlParameters);
-        System.out.println(url);
 
         try {
             LOGGER.log(Level.INFO, String.format("Accessing '%s'", url));
 
             String wmsUrlStr = getWmsUrl(url.openConnection().getInputStream(), getUrlSubstitutions());
-            System.out.println(wmsUrlStr);
 
             Map<String, String[]> wmsParameters = new HashMap(request.getParameterMap());
             wmsParameters.remove("TIME");
             wmsParameters.put("LAYERS", new String[] { variable });
-            System.out.println(wmsParameters);
 
             String queryString = encodeMapForRequest(wmsParameters);
-            System.out.println(queryString);
 
             URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
 
@@ -194,13 +171,11 @@ public class Ncwms {
         String timeEnd = getNextDay(timeStart);
         LOGGER.log(Level.INFO, String.format("Returning times of day '%s'", day));
 
-        String cqlFilter = String.format(
+        return String.format(
             "%s >= %s AND %s < %s",
             timeFieldName, timeStart,
             timeFieldName, timeEnd
         );
-
-        return cqlFilter;
     }
 
     private static String getWfsUrlParameters(String wfsLayer, String propertyName, String cqlFilter) throws UnsupportedEncodingException {
@@ -210,7 +185,7 @@ public class Ncwms {
                 wfsLayer, propertyName
             );
 
-        if (cqlFilter != null && cqlFilter != "") {
+        if (cqlFilter != null && ! cqlFilter.isEmpty()) {
             urlParameters += String.format("&CQL_FILTER=%s", URLEncoder.encode(cqlFilter, StandardCharsets.UTF_8.name()));
         }
 
