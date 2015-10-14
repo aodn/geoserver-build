@@ -142,6 +142,35 @@ public class GoGoDuck {
         // All good - keep going :)
     }
 
+    private static boolean fileExists(File file) {
+        return file.exists() && ! file.isDirectory();
+    }
+
+    private void createSymbolicLink(File srcFile, Path dst) {
+        try {
+            logger.info(String.format("Linking '%s' -> '%s'", srcFile, dst));
+            Files.createSymbolicLink(dst, srcFile.toPath());
+        } catch (IOException e) {
+            userLog.log(String.format("Failed accessing '%s'", srcFile));
+            throw new GoGoDuckException(e.getMessage());
+        }
+    }
+
+    private void downloadFile(URI uri, Path dst) {
+        URL url = fileURItoURL(uri);
+        logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
+
+        try {
+            ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+            FileOutputStream fos = new FileOutputStream(dst.toFile());
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        }
+        catch (IOException e) {
+            userLog.log(String.format("Failed downloading '%s'", url));
+            throw new GoGoDuckException(e.getMessage());
+        }
+    }
+
     private void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         logger.info(String.format("Downloading %d file(s)", uriList.size()));
 
@@ -155,30 +184,11 @@ public class GoGoDuck {
             String basename = new File(uri.toString()).getName();
             Path dst = new File(tmpDir + File.separator + basename).toPath();
 
-            if (srcFile.exists() && !srcFile.isDirectory()) {
-                Path src = new File(uri.toString()).toPath();
-
-                try {
-                    logger.info(String.format("Linking '%s' -> '%s'", src, dst));
-                    Files.createSymbolicLink(dst, src);
-                } catch (IOException e) {
-                    userLog.log(String.format("Failed accessing '%s'", src));
-                    throw new GoGoDuckException(e.getMessage());
-                }
+            if (fileExists(srcFile)) {
+                createSymbolicLink(srcFile, dst);
             }
             else {
-                URL url = fileURItoURL(uri);
-                logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
-
-                try {
-                    ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                    FileOutputStream fos = new FileOutputStream(dst.toFile());
-                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                }
-                catch (IOException e) {
-                    userLog.log(String.format("Failed downloading '%s'", url));
-                    throw new GoGoDuckException(e.getMessage());
-                }
+                downloadFile(uri, dst);
             }
 
             String extension = FilenameUtils.getExtension(dst.getFileName().toString());
