@@ -18,6 +18,7 @@ import org.opengis.util.ProgressListener;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
@@ -33,7 +34,7 @@ public class GoGoDuck {
     public static final String ncrcatPath = "/usr/bin/ncrcat";
     public static final String ncdpqPath = "/usr/bin/ncpdq";
 
-    private final String geoserver;
+    private final String geoserverUrl;
     private final String profile;
     private final String subset;
     private final Path outputFile;
@@ -43,8 +44,8 @@ public class GoGoDuck {
     private UserLog userLog = null;
     private ProgressListener progressListener = null;
 
-    public GoGoDuck(String geoserver, String profile, String subset, String outputFile, Integer limit) {
-        this.geoserver = geoserver;
+    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, Integer limit) {
+        this.geoserverUrl = geoserverUrl;
         this.profile = profile;
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
@@ -70,7 +71,7 @@ public class GoGoDuck {
         this.progressListener = progressListener;
     }
 
-    public boolean isCancelled() {
+    public synchronized  boolean isCancelled() {
         if (null != progressListener) {
             return progressListener.isCanceled();
         }
@@ -85,7 +86,7 @@ public class GoGoDuck {
     }
 
     public void run() {
-        GoGoDuckModule module = getProfileModule(profile, geoserver, subset, userLog);
+        GoGoDuckModule module = getProfileModule(profile, geoserverUrl, subset, userLog);
 
         Path tmpDir = null;
 
@@ -154,7 +155,7 @@ public class GoGoDuck {
             String basename = new File(uri.toString()).getName();
             Path dst = new File(tmpDir + File.separator + basename).toPath();
 
-            if(srcFile.exists() && !srcFile.isDirectory()) {
+            if (srcFile.exists() && !srcFile.isDirectory()) {
                 Path src = new File(uri.toString()).toPath();
 
                 try {
@@ -183,7 +184,7 @@ public class GoGoDuck {
             String extension = FilenameUtils.getExtension(dst.getFileName().toString());
 
             if (extension.equals("gz")) {
-                gunzip(dst.toFile());
+                gunzipInPlace(dst.toFile());
             }
         }
     }
@@ -203,7 +204,7 @@ public class GoGoDuck {
         }
     }
 
-    private static void gunzip(File file) {
+    private static void gunzipInPlace(File file) {
         try {
             logger.info(String.format("Gunzipping '%s'", file));
             File gunzipped = File.createTempFile("tmp", ".nc");
@@ -259,7 +260,7 @@ public class GoGoDuck {
         // TODO implement!
     }
 
-    private static class ncksRunnable implements Runnable {
+    private static class NcksRunnable implements Runnable {
         private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
         private String name;
@@ -268,7 +269,7 @@ public class GoGoDuck {
         private GoGoDuck gogoduck = null;
         private ProgressListener progressListener = null;
 
-        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, GoGoDuck gogoduck) {
+        NcksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, GoGoDuck gogoduck) {
             this.name = name;
             this.workQueue = workQueue;
             this.module = module;
@@ -301,7 +302,7 @@ public class GoGoDuck {
         File[] directoryListing = tmpDir.toFile().listFiles();
         logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
-        Deque<File> workQueue = new ArrayDeque<File>();
+        Deque<File> workQueue = new ConcurrentLinkedDeque<File>();
         for (File file : directoryListing) {
             workQueue.push(file);
         }
@@ -310,7 +311,7 @@ public class GoGoDuck {
             Thread[] threads = new Thread[threadCount];
             for (int i = 0; i < threadCount; i++) {
                 String threadName = String.format("Subset_%d", i + 1);
-                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module, this));
+                threads[i] = new Thread(new NcksRunnable(threadName, workQueue, module, this));
             }
             for (int i = 0; i < threadCount; i++) {
                 threads[i].start();
@@ -360,7 +361,7 @@ public class GoGoDuck {
             // Special case where we have only 1 file
             File file = directoryListing[0];
             try {
-                if(outputFile.toFile().exists() && outputFile.toFile().isFile()) {
+                if (outputFile.toFile().exists() && outputFile.toFile().isFile()) {
                     logger.info(String.format("Deleting '%s'", outputFile));
                     Files.delete(outputFile);
                 }
