@@ -1,6 +1,11 @@
 package au.org.emii.ncdfgenerator;
 
 import org.apache.commons.cli.*;
+import org.geoserver.wps.ProcessDismissedException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.sql.*;
 
@@ -19,6 +24,7 @@ public class Main {
         options.addOption("p", "password", true, "Database password.");
         options.addOption("d", "db", true, "Database connection string.");
         options.addOption("D", "driver", true, "Database driver class.");
+        options.addOption("s", "schema", true, "Database schema to use.");
         options.addOption("c", "cql", true, "CQL filter to apply.");
         options.addOption("P", "profile", true, "Profile to use.");
         options.addOption("o", "output", true, "Output file to use (output.zip as default).");
@@ -41,11 +47,13 @@ public class Main {
         String profile = cmd.getOptionValue("P");
         String outputFile = cmd.getOptionValue("o", "output.zip");
         String tmpDir = cmd.getOptionValue("t", System.getProperty("java.io.tmpdir"));
+        String schema = cmd.getOptionValue("s", profile);
 
         if (username == null) { usage(options); }
         if (password == null) { usage(options); }
         if (connectionString == null) { usage(options); }
         if (databaseDriver == null) { usage(options); }
+        if (schema == null) { usage(options); }
         if (cql == null) { usage(options); }
         if (profile == null) { usage(options); }
 
@@ -62,7 +70,7 @@ public class Main {
             System.exit(1);
         }
 
-        Connection result = null;
+        Connection conn = null;
         try {
             Class.forName(databaseDriver).newInstance();
         }
@@ -73,7 +81,7 @@ public class Main {
         }
 
         try {
-            result = DriverManager.getConnection(connectionString, username, password);
+            conn = DriverManager.getConnection(connectionString, username, password);
         }
         catch (SQLException e){
             System.out.printf("Cannot connect to db: '%s'%n", connectionString);
@@ -82,8 +90,25 @@ public class Main {
         }
 
         try {
-            NcdfGenerator generator = new NcdfGenerator("./src/test/resources", tmpDir);
-            generator.write(profile, cql, result, outputStream);
+            NcdfEncoderBuilder encoderBuilder = new NcdfEncoderBuilder();
+
+            // decode definition
+            InputStream config = new FileInputStream(String.format("./src/test/resources/%s.xml", profile));
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
+            Node node = document.getFirstChild();
+            NcdfDefinition definition = new NcdfDefinitionXMLParser().parse(node);
+
+            encoderBuilder.setTmpCreationDir(tmpDir)
+                    .setDefinition(definition)
+                    .setFilterExpr(cql)
+                    .setConnection(conn)
+                    .setSchema(schema)
+            ;
+
+            NcdfEncoder encoder = encoderBuilder.create();
+
+            encoder.prepare(new ZipFormatter(outputStream));
+            while (encoder.writeNext()) {}
         }
         catch (Exception e) {
             System.out.println("Write exception");

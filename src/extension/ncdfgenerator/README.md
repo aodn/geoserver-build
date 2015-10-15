@@ -47,12 +47,12 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args=""
 
 Example (anmn_ts):
 ```
-$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args="-d jdbc:postgresql://dbprod.emii.org.au:5432/harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory -u jodaac_username -p jodaac_password -c \"INTERSECTS(geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'\" -P anmn_ts"
+$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args="-d jdbc:postgresql://dbprod.emii.org.au:5432/harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory -u jodaac_username -p jodaac_password -c \"INTERSECTS(geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'\" -P anmn_ts -s anmn_ts"
 ```
 
 Example (soop_sst_trajectory):
 ```
-$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args="-d jdbc:postgresql://dbprod.emii.org.au:5432/harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory -u jodaac_username -p jodaac_password -c \"INTERSECTS(instance_geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09)))\" -P soop_sst_trajectory"
+$ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args="-d jdbc:postgresql://dbprod.emii.org.au:5432/harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory -u jodaac_username -p jodaac_password -c \"INTERSECTS(instance_geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09)))\" -P soop_sst_trajectory -s soop_sst"
 ```
 
 ----
