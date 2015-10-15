@@ -1,18 +1,18 @@
 package au.org.emii.ncdfgenerator;
 
-class DataSource {
-    private final String schema;
+public class DataSource {
+    private final String dataStoreName;
     private final String virtualDataTable;
     private final String virtualInstanceTable;
 
-    public DataSource(String schema, String virtualDataTable, String virtualInstanceTable) {
-        this.schema = schema;
+    public DataSource(String dataStoreName, String virtualDataTable, String virtualInstanceTable) {
+        this.dataStoreName = dataStoreName;
         this.virtualDataTable = virtualDataTable;
         this.virtualInstanceTable = virtualInstanceTable;
     }
 
-    public String getSchema() {
-        return schema;
+    public String getDataStoreName() {
+        return dataStoreName;
     }
 
     public String getVirtualDataTable() {

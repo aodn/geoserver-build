@@ -2,7 +2,7 @@ package au.org.emii.ncdfgenerator;
 
 import java.util.List;
 
-class NcdfDefinition {
+public class NcdfDefinition {
     private final DataSource dataSource;
     private final FilenameTemplate filenameTemplate;
     private final List<Attribute> globalAttributes;
@@ -23,23 +23,23 @@ class NcdfDefinition {
         this.variables = variables;
     }
 
-    DataSource getDataSource() {
+    public DataSource getDataSource() {
         return dataSource;
     }
 
-    FilenameTemplate getFilenameTemplate() {
+    public FilenameTemplate getFilenameTemplate() {
         return filenameTemplate;
     }
 
-    List<IDimension> getDimensions() {
+    public List<IDimension> getDimensions() {
         return dimensions;
     }
 
-    List<IVariable> getVariables() {
+    public List<IVariable> getVariables() {
         return variables;
     }
 
-    List<Attribute> getGlobalAttributes() {
+    public List<Attribute> getGlobalAttributes() {
         return globalAttributes;
     }
 }
