@@ -20,6 +20,7 @@
     <modules>
         <module>geoserver-layer-filter-extension</module>
         <module>ncdfgenerator</module>
+        <module>gogoduck</module>
     </modules>
 
 </project>
