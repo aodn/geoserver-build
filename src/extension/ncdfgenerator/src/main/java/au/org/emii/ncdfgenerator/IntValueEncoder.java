@@ -27,15 +27,15 @@ public class IntValueEncoder implements IValueEncoder {
         }
     }
 
-    public final void encode(Array array, int index, Object value) throws NcdfGeneratorException {
+    public final void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
         if (value == null) {
-            array.setInt(index, fill);
+            array.setInt(ima, fill);
         }
         else if (value instanceof Integer) {
-            array.setInt(index, (Integer)value);
+            array.setInt(ima, (Integer)value);
         }
         else if (value instanceof Long) {
-            array.setInt(index, (int)(long)(Long)value);
+            array.setInt(ima, (int)(long)(Long)value);
         }
         else {
             throw new NcdfGeneratorException("Failed to coerce type '" + value.getClass() + "' to int");

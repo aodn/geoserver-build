@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <definition>
   <source>
-    <schema>anmn_ts</schema>
+    <dataStoreName>anmn_ts</dataStoreName>
     <virtualDataTable>select ts_id as instance_id, * from measurement</virtualDataTable>
     <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from timeseries</virtualInstanceTable>
   </source>
