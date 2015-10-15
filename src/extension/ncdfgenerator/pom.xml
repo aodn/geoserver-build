@@ -7,7 +7,7 @@
     <artifactId>ncdfgenerator</artifactId>
     <packaging>jar</packaging>
     <name>NcdfGenerator artifact (jar)</name>
-    <version>1.0</version>
+    <version>1.0.0</version>
 
     <parent>
         <groupId>org.geoserver</groupId>
