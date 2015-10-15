@@ -1,8 +1,12 @@
 package au.org.emii.gogoduck.worker;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SubsetParametersTest {
 
@@ -28,12 +32,13 @@ public class SubsetParametersTest {
         SubsetParameters sp = new SubsetParameters("PARAM1,1,2;PARAM2,2,3;PARAM3,4,5");
 
         assertEquals(sp.getNcksParameters().get(0), "-d");
-        assertEquals(sp.getNcksParameters().get(1), "PARAM3,4,5");
-
         assertEquals(sp.getNcksParameters().get(2), "-d");
-        assertEquals(sp.getNcksParameters().get(3), "PARAM1,1,2");
-
         assertEquals(sp.getNcksParameters().get(4), "-d");
-        assertEquals(sp.getNcksParameters().get(5), "PARAM2,2,3");
+
+        List<String> results = Arrays.asList("PARAM1,1,2", "PARAM2,2,3", "PARAM3,4,5");
+
+        assertTrue(results.contains(sp.getNcksParameters().get(1)));
+        assertTrue(results.contains(sp.getNcksParameters().get(3)));
+        assertTrue(results.contains(sp.getNcksParameters().get(5)));
     }
 }
