@@ -9,6 +9,8 @@ public class Main {
 
     private static Map<String, String> urlMangling = new HashMap<String, String>();
     static {
+        urlMangling.put("^CARS2009_Australia_weekly.nc$", "/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_Australia_weekly.nc");
+        urlMangling.put("^CARS2009_World_monthly.nc$", "/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc");
         urlMangling.put("^/mnt/imos-t3/", "https://data.aodn.org.au/");
         urlMangling.put("^/mnt/opendap/2/SRS/", "https://thredds.aodn.org.au/thredds/fileServer/srs/");
         urlMangling.put("^IMOS/", "http://imos-data.aodn.org.au/IMOS/");
