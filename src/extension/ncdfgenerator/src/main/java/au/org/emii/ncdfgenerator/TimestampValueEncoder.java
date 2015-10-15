@@ -57,11 +57,11 @@ public class TimestampValueEncoder implements IValueEncoder {
         }
     }
 
-    public final void encode(Array array, int index, Object value) throws NcdfGeneratorException {
+    public final void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
 
         if (value == null) {
             if (haveFill) {
-                array.setDouble(index, fill);
+                array.setDouble(ima, fill);
             }
             else {
                 throw new NcdfGeneratorException("Missing value and no fill attribute defined");
@@ -82,7 +82,7 @@ public class TimestampValueEncoder implements IValueEncoder {
                 throw new NcdfGeneratorException("Unrecognized time unit " + unit);
             }
 
-            array.setDouble(index, val);
+            array.setDouble(ima, val);
         }
         else {
             throw new NcdfGeneratorException("Not a timestamp");

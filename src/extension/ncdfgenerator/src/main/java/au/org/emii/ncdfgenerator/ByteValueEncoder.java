@@ -25,18 +25,18 @@ class ByteValueEncoder implements IValueEncoder {
         }
     }
 
-    public void encode(Array array, int index, Object value) throws NcdfGeneratorException {
+    public void encode(Array array, int ima, Object value) throws NcdfGeneratorException {
         if (value == null) {
-            array.setByte(index, fill);
+            array.setByte(ima, fill);
         }
         else if (value instanceof Byte) {
-            array.setByte(index, (Byte)value);
+            array.setByte(ima, (Byte)value);
         }
         else if (value instanceof String && ((String)value).length() == 1) {
             // interpret one char string literals using ascii value
             String s = (String)value;
             int ch = s.getBytes()[0] - '0';
-            array.setByte(index, (byte)ch);
+            array.setByte(ima, (byte)ch);
         }
         else {
             throw new NcdfGeneratorException("Failed to convert type to byte");
