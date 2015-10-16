@@ -20,13 +20,14 @@ public class NotifierProcessTest {
     RawData notifiableData;
     URL callbackUrl;
     String callbackParams;
+    String executionId = "abcd-1234";
 
     URL serverUrl;
 
     @Before
     public void setUp() throws IOException {
         resourceManager = mock(WPSResourceManager.class);
-        when(resourceManager.getExecutionId(true)).thenReturn("abcd-1234");
+        when(resourceManager.getExecutionId(true)).thenReturn(executionId);
 
         httpNotifier = mock(HttpNotifier.class);
 
@@ -47,6 +48,6 @@ public class NotifierProcessTest {
     @Test
     public void testExecuteNotifiesViaCallback() throws IOException {
         process.execute(notifiableData, callbackUrl, callbackParams);
-        verify(httpNotifier).notify(callbackUrl, serverUrl, "abcd-1234", callbackParams);
+        verify(httpNotifier).notify(callbackUrl, serverUrl, executionId, callbackParams);
     }
 }
