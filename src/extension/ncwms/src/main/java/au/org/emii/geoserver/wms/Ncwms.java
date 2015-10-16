@@ -18,8 +18,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 public class Ncwms {
-    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.extensions.filters");
+    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.ncwms");
 
     private static String timeFieldName = "time";
     private static String urlFieldName= "file_url";
@@ -29,22 +35,23 @@ public class Ncwms {
 
     public Ncwms() {}
 
-    public void setUrlFieldName(String urlFieldName1) { urlFieldName = urlFieldName1; }
+    public void setUrlFieldName(String urlFieldName) { Ncwms.urlFieldName = urlFieldName; }
     public String getUrlFieldName() { return urlFieldName; }
 
-    public void setTimeFieldName(String timeFieldName1) { timeFieldName = timeFieldName1; }
+    public void setTimeFieldName(String timeFieldName) { Ncwms.timeFieldName = timeFieldName; }
     public String getTimeFieldName() { return timeFieldName; }
 
-    public void setWfsServer(String wfsServer1) { wfsServer = wfsServer1; }
+    public void setWfsServer(String wfsServer) { Ncwms.wfsServer = wfsServer; }
     public String getWfsServer() { return wfsServer; }
 
-    public void setUrlSubstitutions(Map<String, String> urlSubstitutions1) { urlSubstitutions = urlSubstitutions1; }
+    public void setUrlSubstitutions(Map<String, String> urlSubstitutions) { Ncwms.urlSubstitutions = urlSubstitutions; }
     public Map<String, String> getUrlSubstitutions() { return urlSubstitutions; }
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LOGGER.log(Level.INFO, "GetMetadata");
         final String layerAndVariable = request.getParameter("layerName"); // TOOD needs to be case insensitive
+        String variable = layerAndVariable.split("/")[1];
         final String wfsLayer = layerAndVariable.split("/")[0];
         final String item = request.getParameter("item");
 
@@ -52,24 +59,21 @@ public class Ncwms {
             String day = request.getParameter("day");
             String cqlFilter = cqlFilterForSameDay(day, getTimeFieldName());
             String urlParameters = getWfsUrlParameters(wfsLayer, timeFieldName, cqlFilter);
-            URL url = new URL(getWfsServer() + "?" + urlParameters);
-            LOGGER.log(Level.INFO, String.format("Getting times of day from '%s'", url));
 
             JSONObject resultJson = new JSONObject();
-            resultJson.put("timesteps", getTimesForDay(url.openConnection().getInputStream()));
+            resultJson.put("timesteps", getTimesForDay(wfsQuery(urlParameters)));
             response.getOutputStream().write(resultJson.toString().getBytes());
         }
         else if (item != null && item.compareTo("layerDetails") == 0) {
             LOGGER.log(Level.INFO, "Returning all available dates");
             String urlParameters = getWfsUrlParameters(wfsLayer, timeFieldName, null);
-            URL url = new URL(getWfsServer() + "?" + urlParameters);
-            url.openConnection().getInputStream();
-            LOGGER.log(Level.INFO, String.format("Returning all available dates from '%s'", url));
+
+            Document getCapabilitiesDocument = getCapabilitiesXml(wfsLayer);
 
             JSONObject resultJson = new JSONObject();
-            resultJson.put("datesWithData", getUniqueDates(url.openConnection().getInputStream()));
-            resultJson.put("supportedStyles", getSupportedStyles());
-            resultJson.put("palettes", getPalettes());
+            resultJson.put("datesWithData", getUniqueDates(wfsQuery(urlParameters)));
+            resultJson.put("supportedStyles", getSupportedStyles(getCapabilitiesDocument, variable));
+            resultJson.put("palettes", getPalettes(getCapabilitiesDocument, variable));
             response.getOutputStream().write(resultJson.toString().getBytes());
         }
     }
@@ -80,27 +84,11 @@ public class Ncwms {
         String wfsLayer = layerAndVariable.split("/")[0];
         String variable = layerAndVariable.split("/")[1];
 
-
         String time = request.getParameter("TIME");
 
-        // By default form a query to get the last file ordered by timestamp (reverse)
-        String extraUrlParameters = "&" + String.format("sortBy=%s+D", timeFieldName); // Sort by time, descending
-        String cqlFilter = null;
-        if (time != null && time != "") {
-            cqlFilter = cqlFilterForTimestamp(time, getTimeFieldName());
-            extraUrlParameters = "";
-        }
-
-        String urlParameters = getWfsUrlParameters(wfsLayer, getUrlFieldName(), cqlFilter);
-        urlParameters += "&" + "maxFeatures=1";
-        urlParameters += extraUrlParameters;
-        URL url = new URL(getWfsServer() + "?" + urlParameters);
+        String wmsUrlStr = getWmsUrl(wfsLayer, time);
 
         try {
-            LOGGER.log(Level.INFO, String.format("Accessing '%s'", url));
-
-            String wmsUrlStr = getWmsUrl(url.openConnection().getInputStream(), getUrlSubstitutions());
-
             Map<String, String[]> wmsParameters = new HashMap(request.getParameterMap());
             wmsParameters.remove("TIME");
             wmsParameters.put("LAYERS", new String[] { variable });
@@ -112,7 +100,7 @@ public class Ncwms {
             IOUtils.copy(wmsUrl.openConnection().getInputStream(), response.getOutputStream());
         }
         catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", url));
+            LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", wmsUrlStr));
             e.printStackTrace();
         }
     }
@@ -134,7 +122,9 @@ public class Ncwms {
         return sb.toString();
     }
 
-    private List<String> getSupportedStyles() {
+    private List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
+        // TODO parse getCapabilitiesXml
+
         return new ArrayList<String>() {{
             add("barb");
             add("fancyvec");
@@ -146,7 +136,9 @@ public class Ncwms {
         }};
     }
 
-    private List<String> getPalettes() {
+    private List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
+        // TODO parse getCapabilitiesXml
+
         return new ArrayList<String>() {{
             add("redblue");
             add("alg");
@@ -161,12 +153,38 @@ public class Ncwms {
         }};
     }
 
-    private static String cqlFilterForTimestamp(String timestamp, String timeFieldName) {
+    private Document getCapabilitiesXml(String wfsLayer)
+        throws IOException {
+        String wmsUrl = null;
+        try {
+            wmsUrl = getWmsUrl(wfsLayer, null);
+            String getCapabilitiesUrl =
+                String.format("%s?service=WMS&version=1.3.0&request=GetCapabilities",
+                    wmsUrl
+                );
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new URL(getCapabilitiesUrl).openStream());
+
+            return doc;
+        }
+        catch (SAXException e) {
+            LOGGER.log(Level.SEVERE, String.format("Error parsing GetCapabilities XML document at '%s'", wmsUrl));
+            throw new IOException(e);
+        }
+        catch (ParserConfigurationException e) {
+            LOGGER.log(Level.SEVERE, String.format("Error parsing GetCapabilities XML document at '%s'", wmsUrl));
+            throw new IOException(e);
+        }
+    }
+
+    private String cqlFilterForTimestamp(String timestamp, String timeFieldName) {
         LOGGER.log(Level.INFO, String.format("Returning cql for timestamp '%s'", timestamp));
         return String.format("%s = %s", timeFieldName, timestamp);
     }
 
-    private static String cqlFilterForSameDay(String day, String timeFieldName) {
+    private String cqlFilterForSameDay(String day, String timeFieldName) {
         String timeStart = day;
         String timeEnd = getNextDay(timeStart);
         LOGGER.log(Level.INFO, String.format("Returning times of day '%s'", day));
@@ -178,7 +196,7 @@ public class Ncwms {
         );
     }
 
-    private static String getWfsUrlParameters(String wfsLayer, String propertyName, String cqlFilter) throws UnsupportedEncodingException {
+    private String getWfsUrlParameters(String wfsLayer, String propertyName, String cqlFilter) throws UnsupportedEncodingException {
         String urlParameters =
             String.format(
                 "typeName=%s&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0&PROPERTYNAME=%s",
@@ -192,24 +210,24 @@ public class Ncwms {
         return urlParameters;
     }
 
-    private static String getTimeFromDate(String date) {
+    private String getTimeFromDate(String date) {
         DateTime jodaDate = new DateTime(date);
         return jodaDate.toLocalTime().toString() + "Z";
     }
 
-    private static String getNextDay(String date) {
+    private String getNextDay(String date) {
         DateTime jodaDate = new DateTime(date);
         return jodaDate.plusDays(1).toString();
     }
 
-    public static CSVReader processCsvInput(InputStream csv) throws IOException {
+    public CSVReader processCsvInput(InputStream csv) throws IOException {
         CSVReader csvReader = new CSVReader(new InputStreamReader(csv, StandardCharsets.UTF_8.name()));
 
         csvReader.readNext(); // Skip first line, it's the header
         return csvReader;
     }
 
-    public static Map<Integer, Map<Integer, Set<Integer>> > getUniqueDates(InputStream csv) throws IOException {
+    public Map<Integer, Map<Integer, Set<Integer>> > getUniqueDates(InputStream csv) throws IOException {
         CSVReader csvReader = processCsvInput(csv);
 
         Map<Integer, Map<Integer, Set<Integer> > > dates =
@@ -241,7 +259,7 @@ public class Ncwms {
         return dates;
     }
 
-    public static List<String> getTimesForDay(InputStream csv) throws IOException {
+    public List<String> getTimesForDay(InputStream csv) throws IOException {
         CSVReader csvReader = processCsvInput(csv);
 
         List<String> timesOfDay = new ArrayList<String>();
@@ -258,20 +276,36 @@ public class Ncwms {
         return timesOfDay;
     }
 
-    public static String getWmsUrl(InputStream csv, Map<String, String> urlSubstitutions) throws IOException {
-        CSVReader csvReader = processCsvInput(csv);
+    public InputStream wfsQuery(String urlParameters) throws IOException {
+        URL url = new URL(wfsServer + "?" + urlParameters);
+        LOGGER.log(Level.INFO, String.format("WFS query '%s'", url));
+        return url.openConnection().getInputStream();
+    }
 
-        String url = "";
-        for (String[] currentRow = csvReader.readNext();
-            currentRow != null;
-            currentRow = csvReader.readNext()) {
+    public String getWmsUrl(String wfsLayer, String time) throws IOException {
+        // By default form a query to get the last file ordered by timestamp (reverse)
+        String extraUrlParameters = "&" + String.format("sortBy=%s+D", timeFieldName); // Sort by time, descending
+        String cqlFilter = null;
+        if (time != null && time != "") {
+            cqlFilter = cqlFilterForTimestamp(time, timeFieldName);
+            extraUrlParameters = "";
+        }
 
-            url = currentRow[1];
-            // Apply ugly replacing
-            for (final String search : urlSubstitutions.keySet()) {
-                final String replace = urlSubstitutions.get(search);
-                url = url.replaceAll(search, replace);
-            }
+        String urlParameters = getWfsUrlParameters(wfsLayer, timeFieldName, cqlFilter);
+        urlParameters += "&" + "maxFeatures=1";
+        urlParameters += extraUrlParameters;
+
+        CSVReader csvReader = processCsvInput(wfsQuery(urlParameters));
+
+        String wmsUrl = "";
+        String[] currentRow = csvReader.readNext();
+        return mangleUrl(currentRow[1]);
+    }
+
+    private String mangleUrl(String url) {
+        for (final String search : urlSubstitutions.keySet()) {
+            final String replace = urlSubstitutions.get(search);
+            url = url.replaceAll(search, replace);
         }
 
         return url;
