@@ -2,12 +2,16 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-    <!-- Spring will reference the instance of the Ncwms class
-           by the id name "ncwms" -->
-    <bean id="ncwms" class="au.org.emii.geoserver.wms.Ncwms">
+    <bean id="urlIndex" class="au.org.emii.geoserver.wms.URLIndexWFSHttp">
         <property name="wfsServer" value="http://localhost:8080/geoserver/ows"/>
         <property name="timeFieldName" value="time"/>
         <property name="urlFieldName" value="file_url"/>
+    </bean>
+
+    <!-- Spring will reference the instance of the Ncwms class
+           by the id name "ncwms" -->
+    <bean id="ncwms" class="au.org.emii.geoserver.wms.Ncwms">
+        <constructor-arg index="0" ref="urlIndex"/>
         <property name="urlSubstitutions">
             <props>
                 <prop key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</prop>
