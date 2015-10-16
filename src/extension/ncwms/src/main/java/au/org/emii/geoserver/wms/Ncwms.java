@@ -80,6 +80,16 @@ public class Ncwms {
 
     public void getMap(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        proxyWmsRequest(request, response);
+    }
+
+    public void getLegendGraphic(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        proxyWmsRequest(request, response);
+    }
+
+    public void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String layerAndVariable = request.getParameter("LAYERS"); // TOOD needs to be case insensitive
         String wfsLayer = layerAndVariable.split("/")[0];
         String variable = layerAndVariable.split("/")[1];
