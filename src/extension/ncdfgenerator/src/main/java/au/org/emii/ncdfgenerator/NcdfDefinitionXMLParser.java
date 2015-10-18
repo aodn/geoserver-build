@@ -24,7 +24,7 @@ final class Helper {
     }
 }
 
-class NcdfDefinitionXMLParser {
+public class NcdfDefinitionXMLParser {
     class Context {
         // required to resolve references to dimensions from the variable definitions
         private List<IDimension> dimensions;
@@ -43,7 +43,7 @@ class NcdfDefinitionXMLParser {
         }
     }
 
-    NcdfDefinition parse(Node node) throws NcdfGeneratorException {
+    public NcdfDefinition parse(Node node) throws NcdfGeneratorException {
         if (node.getNodeName().equals("definition")) {
             return new DefinitionParser().parse(node);
         }
@@ -94,14 +94,14 @@ class NcdfDefinitionXMLParser {
     }
 
     class DataSourceParser {
-        private String schema;
+        private String dataStoreName;
         private String virtualDataTable;
         private String virtualInstanceTable;
 
         private void extractValue(Node child) throws NcdfGeneratorException {
             String tag = child.getNodeName();
-            if (tag.equals("schema")) {
-                schema = Helper.nodeVal(child);
+            if (tag.equals("dataStoreName")) {
+                dataStoreName = Helper.nodeVal(child);
             }
             else if (tag.equals("virtualDataTable")) {
                 virtualDataTable = Helper.nodeVal(child);
@@ -125,7 +125,7 @@ class NcdfDefinitionXMLParser {
                 }
             }
 
-            return new DataSource(schema, virtualDataTable, virtualInstanceTable);
+            return new DataSource(dataStoreName, virtualDataTable, virtualInstanceTable);
         }
     }
 
