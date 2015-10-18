@@ -6,7 +6,6 @@ import org.geoserver.wps.resource.WPSResourceManager;
 import org.geoserver.wps.process.RawData;
 
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.io.IOException;
 
 import static org.junit.Assert.*;

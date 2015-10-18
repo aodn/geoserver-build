@@ -1,16 +1,11 @@
 package au.org.emii.wps;
 
 import java.net.URL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.geotools.data.ows.HTTPClient;
 import org.apache.http.client.utils.URIBuilder;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class HttpNotifier {
-    private static final Logger logger = LoggerFactory.getLogger(NotifierProcess.class);
-
     private final HTTPClient httpClient;
 
     public HttpNotifier(HTTPClient httpClient) {
