@@ -244,7 +244,7 @@ public class GenerationIT {
         file.mkdirs();
     }
 
-    @Test
+    /*@Test
     public void testNothing() throws Exception {
         // support devel testing constructor setup
     }
@@ -360,6 +360,5 @@ public class GenerationIT {
         consumeEncoderOutput(encoder);
         assertEquals(10, outputter.getCount());
         // TODO, should check that we only include obs with temp_qc = 4 etc, not just that instances are constrained.
-    }
+    }*/
 }
-
