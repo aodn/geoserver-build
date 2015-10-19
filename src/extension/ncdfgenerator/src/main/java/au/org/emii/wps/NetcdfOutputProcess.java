@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -24,6 +26,7 @@ import org.geotools.process.factory.DescribeResult;
 
 import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.process.FileRawData;
+import org.geoserver.wps.process.RawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geoserver.wps.ProcessDismissedException;
 import org.geoserver.catalog.Catalog;
@@ -67,7 +70,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
 
     @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
 
-    public FileRawData execute(
+    public RawData execute(
         @DescribeParameter(name="typeName", description="Collection to download")
         String typeName,
         @DescribeParameter(name="cqlFilter", description="CQL Filter to apply")
@@ -152,7 +155,8 @@ public class NetcdfOutputProcess implements GeoServerProcess {
                     logger.info("problem closing connection");
                 }
             }
-            throw new ProcessException(e);
+
+            return getErrorData(new ProcessException(e));
         } finally {
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
@@ -170,4 +174,23 @@ public class NetcdfOutputProcess implements GeoServerProcess {
             return System.getProperty("java.io.tmpdir");
        }
    }
+
+    private RawData getErrorData(final Exception e) {
+        logger.info("error", e);
+        return new RawData() {
+            public String getMimeType() {
+                return "plain/text";
+            }
+
+            public InputStream getInputStream() throws IOException {
+                String errorFileContents =
+                    String.format("Error creating NetCDF file:\n\n%s", e.getLocalizedMessage());
+                return new ByteArrayInputStream(errorFileContents.getBytes(StandardCharsets.UTF_8));
+            }
+
+            public String getFileExtension() {
+                return "txt";
+            }
+        };
+    }
 }
