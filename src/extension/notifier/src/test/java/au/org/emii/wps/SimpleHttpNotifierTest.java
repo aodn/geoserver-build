@@ -9,12 +9,12 @@ import org.geotools.data.ows.HTTPClient;
 
 import static org.mockito.Mockito.*;
 
-public class HttpNotifierTest {
+public class SimpleHttpNotifierTest {
 
     @Test
     public void testNotifyMakeHttpRequest() throws IOException {
         HTTPClient httpClient = mock(SimpleHttpClient.class);
-        HttpNotifier notifier = new HttpNotifier(httpClient);
+        SimpleHttpNotifier notifier = new SimpleHttpNotifier(httpClient);
 
         URL notificationUrl = new URL("http://notifiee");
         URL wpsServiceUrl = new URL("http://notifier");

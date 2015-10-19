@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 public class NotifierProcessTest {
 
     WPSResourceManager resourceManager;
-    HttpNotifier httpNotifier;
+    SimpleHttpNotifier httpNotifier;
     NotifierProcess process;
 
     RawData notifiableData;
@@ -28,7 +28,7 @@ public class NotifierProcessTest {
         resourceManager = mock(WPSResourceManager.class);
         when(resourceManager.getExecutionId(true)).thenReturn("abcd-1234");
 
-        httpNotifier = mock(HttpNotifier.class);
+        httpNotifier = mock(SimpleHttpNotifier.class);
 
         process = spy(new NotifierProcess(resourceManager, httpNotifier));
         serverUrl = new URL("http://wpsserver.com");
