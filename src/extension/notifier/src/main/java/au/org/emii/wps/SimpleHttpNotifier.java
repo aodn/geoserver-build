@@ -5,7 +5,7 @@ import org.geotools.data.ows.HTTPClient;
 import org.apache.http.client.utils.URIBuilder;
 import java.io.IOException;
 
-public class SimpleHttpNotifier {
+public class SimpleHttpNotifier implements HttpNotifier {
     private final HTTPClient httpClient;
 
     public SimpleHttpNotifier(HTTPClient httpClient) {
