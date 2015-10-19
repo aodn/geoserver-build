@@ -21,6 +21,7 @@
         <module>geoserver-layer-filter-extension</module>
         <module>ncdfgenerator</module>
         <module>gogoduck</module>
+        <module>notifier</module>
     </modules>
 
 </project>
