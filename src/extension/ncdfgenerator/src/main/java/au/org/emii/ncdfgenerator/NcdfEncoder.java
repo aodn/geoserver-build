@@ -83,9 +83,6 @@ public class NcdfEncoder {
         // Batch results set
         conn.setAutoCommit(false);
 
-        IExpression selectionExpr = exprParser.parseExpression(filterExpr);
-        selectionClause = translate.process(selectionExpr);
-
         // if we combine both tables, then it's actually simpler, since don't need to process twice
         // or discriminate about which attributes come from which tables.
         // And there's no optimisation penalty since both the initial and instance queries have to hit the big data table
@@ -93,10 +90,11 @@ public class NcdfEncoder {
             "select distinct data.instance_id"
             + " from (" + getVirtualDataTable() + ") as data"
             + " left join (" + getVirtualInstanceTable() + ") instance"
-            + " on instance.id = data.instance_id"
-            + " where " + selectionClause
-            + ";";
+            + " on instance.id = data.instance_id";
 
+        instanceQuery = applyFilter(instanceQuery);
+
+        instanceQuery += ";";
 
         PreparedStatement featuresStmt = conn.prepareStatement(instanceQuery);
         featuresStmt.setFetchSize(fetchSize);
@@ -105,6 +103,15 @@ public class NcdfEncoder {
         featureInstancesRS = featuresStmt.executeQuery();
     }
 
+    private String applyFilter(String query) throws Exception {
+        if (filterExpr != null) {
+            IExpression selectionExpr = exprParser.parseExpression(filterExpr);
+            selectionClause = translate.process(selectionExpr);
+            query += " where " + selectionClause;
+        }
+
+        return query;
+    }
 
     public boolean writeNext() throws Exception
     {
@@ -315,4 +322,3 @@ public class NcdfEncoder {
         }
     }
 }
-

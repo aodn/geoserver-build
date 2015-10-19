@@ -25,7 +25,7 @@ public class Main {
         options.addOption("d", "db", true, "Database connection string.");
         options.addOption("D", "driver", true, "Database driver class.");
         options.addOption("s", "schema", true, "Database schema to use.");
-        options.addOption("c", "cql", true, "CQL filter to apply.");
+        options.addOption("c", "cql", true, "CQL filter to apply (optional).");
         options.addOption("P", "profile", true, "Profile to use.");
         options.addOption("o", "output", true, "Output file to use (output.zip as default).");
         options.addOption("t", "tmp-dir", true, "Set temporary directory for operation.");
@@ -54,7 +54,6 @@ public class Main {
         if (connectionString == null) { usage(options); }
         if (databaseDriver == null) { usage(options); }
         if (schema == null) { usage(options); }
-        if (cql == null) { usage(options); }
         if (profile == null) { usage(options); }
 
         System.out.println("Cql for operation is:");
