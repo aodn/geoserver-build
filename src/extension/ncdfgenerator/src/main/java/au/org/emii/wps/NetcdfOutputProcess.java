@@ -68,8 +68,6 @@ public class NetcdfOutputProcess implements GeoServerProcess {
     @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
 
     public FileRawData execute(
-        @DescribeParameter(name="namespace", description="Namespace for collection")
-        String namespace,
         @DescribeParameter(name="typeName", description="Collection to download")
         String typeName,
         @DescribeParameter(name="cqlFilter", description="CQL Filter to apply")
@@ -86,16 +84,10 @@ public class NetcdfOutputProcess implements GeoServerProcess {
 
         try {
             // lookup the layer in the catalog
-            LayerInfo layerInfo = null;
-            if(namespace != null && !namespace.equals("")) {
-                NamespaceInfo ns = catalog.getNamespaceByPrefix(namespace);
-                layerInfo = catalog.getLayerByName(new NameImpl(ns.getURI(), typeName));
-            } else {
-                layerInfo = catalog.getLayerByName(typeName);
-            }
+            LayerInfo layerInfo = catalog.getLayerByName(typeName);
 
-            if(layerInfo == null) {
-                throw new ProcessException("Failed to find typename '" + typeName + "', namespace '" + namespace + "'");
+            if (layerInfo == null) {
+                throw new ProcessException(String.format("Failed to find typename '%s'", typeName));
             }
 
             // get xml definition file path
@@ -112,7 +104,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
 
             // get store
             String dataStoreName = definition.getDataSource().getDataStoreName();
-            DataStoreInfo dsinfo = catalog.getDataStoreByName(namespace, dataStoreName);
+            DataStoreInfo dsinfo = catalog.getDataStoreByName(dataStoreName);
             JDBCDataStore store = (JDBCDataStore)dsinfo.getDataStore(null);
 
             // resources
@@ -179,4 +171,3 @@ public class NetcdfOutputProcess implements GeoServerProcess {
        }
    }
 }
-
