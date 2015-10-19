@@ -4,6 +4,8 @@
     <bean id="notifierProcess" class="au.org.emii.wps.NotifierProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
         <constructor-arg index="1" ref="httpNotifier"/>
+        <constructor-arg index="2" value="3" />
+        <constructor-arg index="3" value="300000" />
     </bean>
     <bean id="httpNotifier" class="au.org.emii.wps.HttpNotifier">
         <constructor-arg index="0" ref="httpClient"/>

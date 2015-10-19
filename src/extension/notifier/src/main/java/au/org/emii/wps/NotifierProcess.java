@@ -22,10 +22,14 @@ public class NotifierProcess implements GeoServerProcess {
 
     private final WPSResourceManager resourceManager;
     private final HttpNotifier httpNotifier;
+    private final int maxNotificationAttempts;
+    private final int retryInterval;
 
-    public NotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier) {
+    public NotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, int maxNotificationAttempts, int retryInterval) {
         this.resourceManager = resourceManager;
         this.httpNotifier = httpNotifier;
+        this.maxNotificationAttempts = maxNotificationAttempts;
+        this.retryInterval = retryInterval;
     }
 
     @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
@@ -39,8 +43,31 @@ public class NotifierProcess implements GeoServerProcess {
     ) throws ProcessException {
 
         try {
-            httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), callbackParams);
-            return notifiableData;
+            IOException lastException;
+            int attempt = 1;
+
+            do {
+                try {
+                    logger.debug("Notification attempt #" + attempt);
+                    httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), callbackParams);
+
+                    return notifiableData;
+                }
+                catch (IOException e) {
+                    logger.info("Attempt #" + attempt + " failed", e);
+                    lastException = e;
+
+                    try {
+                        Thread.sleep(retryInterval);
+                    }
+                    catch (InterruptedException ie) {
+                        logger.debug("Sleep interrupted", ie);
+                    }
+                }
+            }
+            while (attempt++ < maxNotificationAttempts);
+
+            throw lastException;
         }
         catch (IOException e) {
             logger.error("Error sending notification", e);
