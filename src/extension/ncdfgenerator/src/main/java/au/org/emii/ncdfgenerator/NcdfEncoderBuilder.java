@@ -28,9 +28,6 @@ public class NcdfEncoderBuilder {
         else if(definition == null) {
            throw new IllegalArgumentException("definition not set");
         }
-        else if(filterExpr == null || filterExpr.equals("")) {
-           throw new IllegalArgumentException("filterExpr not set");
-        }
         else if(conn == null) {
            throw new IllegalArgumentException("conn not set");
         }
@@ -68,4 +65,3 @@ public class NcdfEncoderBuilder {
         return this;
     }
 }
-

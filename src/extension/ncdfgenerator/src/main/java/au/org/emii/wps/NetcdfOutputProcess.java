@@ -70,7 +70,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
     public FileRawData execute(
         @DescribeParameter(name="typeName", description="Collection to download")
         String typeName,
-        @DescribeParameter(name="cqlFilter", description="CQL Filter to apply")
+        @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
         String cqlFilter,
         ProgressListener progressListener
     ) throws ProcessException {
