@@ -5,10 +5,10 @@ import org.geotools.data.ows.HTTPClient;
 import org.apache.http.client.utils.URIBuilder;
 import java.io.IOException;
 
-public class HttpNotifier {
+public class SimpleHttpNotifier {
     private final HTTPClient httpClient;
 
-    public HttpNotifier(HTTPClient httpClient) {
+    public SimpleHttpNotifier(HTTPClient httpClient) {
         this.httpClient = httpClient;
     }
 

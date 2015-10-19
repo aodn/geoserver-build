@@ -21,9 +21,9 @@ public class NotifierProcess implements GeoServerProcess {
     private static final Logger logger = LoggerFactory.getLogger(NotifierProcess.class);
 
     private final WPSResourceManager resourceManager;
-    private final HttpNotifier httpNotifier;
+    private final SimpleHttpNotifier httpNotifier;
 
-    public NotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier) {
+    public NotifierProcess(WPSResourceManager resourceManager, SimpleHttpNotifier httpNotifier) {
         this.resourceManager = resourceManager;
         this.httpNotifier = httpNotifier;
     }
