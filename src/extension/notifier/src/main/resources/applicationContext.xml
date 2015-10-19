@@ -3,10 +3,15 @@
 <beans>
     <bean id="notifierProcess" class="au.org.emii.wps.NotifierProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1" ref="simpleHttpNotifier"/>
+        <constructor-arg index="1" ref="retryingHttpNotifier"/>
     </bean>
     <bean id="simpleHttpNotifier" class="au.org.emii.wps.SimpleHttpNotifier">
         <constructor-arg index="0" ref="httpClient"/>
+    </bean>
+    <bean id="retryingHttpNotifier" class="au.org.emii.wps.RetryingHttpNotifier">
+        <constructor-arg index="0" ref="simpleHttpNotifier"/>
+        <constructor-arg index="1" value="3" />
+        <constructor-arg index="2" value="300000" />
     </bean>
     <bean id="httpClient" class="org.geotools.data.ows.SimpleHttpClient"/>
 </beans>
