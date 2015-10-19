@@ -87,7 +87,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
             LayerInfo layerInfo = catalog.getLayerByName(typeName);
 
             if (layerInfo == null) {
-                throw new ProcessException("Failed to find typename '" + typeName + "'");
+                throw new ProcessException(String.format("Failed to find typename '%s'", typeName));
             }
 
             // get xml definition file path
