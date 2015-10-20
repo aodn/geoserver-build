@@ -3,4 +3,23 @@ target
 *~
 *.swp
 *.swo
+*.iml
+target
+stacktrace.log
+.DS_Store
+DELETED_UNIT_TESTS
+.classpath
+.project
+.settings
+target-eclipse
+.link_to_grails_plugins
+*.lock
+plugins
+\#*\#
+.\#*
+
+# Include code style settings for IntelliJ IDEA projects
+.idea/*
+!.idea/codeStyleSettings.xml
+
 
