@@ -37,13 +37,13 @@
         <wps:Input>
             <ows:Identifier>callbackUrl</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>http://jkburges.emii.org.au:8080/aodn-portal/wps/jobComplete</wps:LiteralData>
+                <wps:LiteralData>http://localhost:8080/aodn-portal/wps/jobComplete</wps:LiteralData>
             </wps:Data>
         </wps:Input>
         <wps:Input>
             <ows:Identifier>callbackParams</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>email.to=jkburges@gmail.com</wps:LiteralData>
+                <wps:LiteralData>email.to=bob@example.com</wps:LiteralData>
             </wps:Data>
         </wps:Input>
     </wps:DataInputs>
