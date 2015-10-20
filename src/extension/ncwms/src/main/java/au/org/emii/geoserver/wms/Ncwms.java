@@ -114,10 +114,10 @@ public class Ncwms {
         return sb.toString();
     }
 
-    private List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
+    public static List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
         // TODO parse getCapabilitiesXml
 
-        return new ArrayList<String>() {{
+        Set<String> stylesSet = new HashSet<String>() {{
             add("barb");
             add("fancyvec");
             add("trivec");
@@ -126,12 +126,17 @@ public class Ncwms {
             add("vector");
             add("boxfill");
         }};
+
+        List<String> styles = new ArrayList<String>();
+        styles.addAll(stylesSet);
+
+        return styles;
     }
 
-    private List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
+    public static List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
         // TODO parse getCapabilitiesXml
 
-        return new ArrayList<String>() {{
+        Set<String> palettesSet = new HashSet<String>() {{
             add("redblue");
             add("alg");
             add("greyscale");
@@ -143,6 +148,11 @@ public class Ncwms {
             add("ferret");
             add("occam_pastel-30");
         }};
+
+        List<String> palettes = new ArrayList<String>();
+        palettes.addAll(palettesSet);
+
+        return palettes;
     }
 
     private Document getCapabilitiesXml(LayerDescriptor layerDescriptor)
