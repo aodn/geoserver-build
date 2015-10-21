@@ -214,7 +214,6 @@ public class GenerationIT {
         encoderBuilder.setTmpCreationDir(TMPDIR)
             .setDefinition(definition)
             .setFilterExpr(cqlFilter)
-            .setConnection(conn)
             .setSchema(schema)
         ;
 

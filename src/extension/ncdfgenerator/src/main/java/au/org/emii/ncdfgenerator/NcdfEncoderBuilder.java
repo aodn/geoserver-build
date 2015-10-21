@@ -1,6 +1,7 @@
 package au.org.emii.ncdfgenerator;
 
 import java.sql.Connection;
+import org.geotools.jdbc.JDBCDataStore;
 
 import au.org.emii.ncdfgenerator.cql.ExprParser;
 import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
@@ -14,7 +15,7 @@ public class NcdfEncoderBuilder {
     private String tmpCreationDir;
     private NcdfDefinition definition;
     private String filterExpr;
-    private Connection conn;
+    private JDBCDataStore dataStore;
     private String schema;
 
     public NcdfEncoderBuilder() {
@@ -22,14 +23,14 @@ public class NcdfEncoderBuilder {
 
     public final NcdfEncoder create() throws Exception {
 
-        if(tmpCreationDir == null) {
+        if (tmpCreationDir == null) {
            throw new IllegalArgumentException("tmpCreationDir not set");
         }
-        else if(definition == null) {
+        else if (definition == null) {
            throw new IllegalArgumentException("definition not set");
         }
-        else if(conn == null) {
-           throw new IllegalArgumentException("conn not set");
+        else if (dataStore == null) {
+           throw new IllegalArgumentException("dataStore not set");
         }
 
         IExprParser parser = new ExprParser();
@@ -37,7 +38,7 @@ public class NcdfEncoderBuilder {
         ICreateWritable createWritable = new CreateWritable(tmpCreationDir);
         IAttributeValueParser attributeValueParser = new AttributeValueParser();
 
-        return new NcdfEncoder(parser, translate, conn, schema, createWritable, attributeValueParser, definition, filterExpr);
+        return new NcdfEncoder(parser, translate, dataStore, schema, createWritable, attributeValueParser, definition, filterExpr);
     }
 
     public final NcdfEncoderBuilder setTmpCreationDir(String tmpCreationDir) {
@@ -55,8 +56,8 @@ public class NcdfEncoderBuilder {
         return this;
     }
 
-    public final NcdfEncoderBuilder setConnection(Connection conn) {
-        this.conn = conn;
+    public final NcdfEncoderBuilder setDataStore(JDBCDataStore dataStore) {
+        this.dataStore = dataStore;
         return this;
     }
 

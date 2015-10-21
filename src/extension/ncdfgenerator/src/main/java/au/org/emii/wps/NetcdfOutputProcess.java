@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.commons.io.IOUtils;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.Transaction;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.feature.NameImpl;
@@ -117,7 +118,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
             encoderBuilder.setTmpCreationDir(workingDir)
                 .setDefinition(definition)
                 .setFilterExpr(cqlFilter)
-                .setConnection(conn)
+                .setDataStore(store)
                 .setSchema(store.getDatabaseSchema())
             ;
 
@@ -158,7 +159,6 @@ public class NetcdfOutputProcess implements GeoServerProcess {
             IOUtils.closeQuietly(os);
         }
     }
-
 
     private String getWorkingDir(WPSResourceManager resourceManager) {
        try {

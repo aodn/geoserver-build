@@ -8,11 +8,22 @@ import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFileWriteable;
 
+import org.geotools.data.postgis.PostGISDialect;
+import org.geotools.data.postgis.PostgisFilterToSQL;
+import org.geotools.filter.text.cql2.CQL;
+import org.geotools.jdbc.JDBCDataStore;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
+import org.geotools.jdbc.VirtualTable;
+
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +35,7 @@ public class NcdfEncoder {
     private final IExprParser exprParser;
     private final IDialectTranslate translate;
     private final Connection conn;
+    private final JDBCDataStore dataStore;
     private final String schema;
     private final ICreateWritable createWritable;
     private final NcdfDefinition definition;
@@ -33,7 +45,7 @@ public class NcdfEncoder {
     private final int fetchSize;
 
     private ResultSet featureInstancesRS;
-    private String selectionClause ;
+    private String whereClause;
     private String orderClause;
 
     private IOutputFormatter outputFormatter;
@@ -41,16 +53,17 @@ public class NcdfEncoder {
     public NcdfEncoder(
         IExprParser exprParser,
         IDialectTranslate translate,
-        Connection conn,
+        JDBCDataStore dataStore,
         String schema,
         ICreateWritable createWritable,
         IAttributeValueParser attributeValueParser,
         NcdfDefinition definition,
         String filterExpr
-    ) {
+    ) throws SQLException {
         this.exprParser = exprParser;
         this.translate = translate;
-        this.conn = conn;
+        this.dataStore = dataStore;
+        this.conn = dataStore.getDataSource().getConnection();
         this.schema = schema;
         this.createWritable = createWritable;
         this.attributeValueParser = attributeValueParser;
@@ -62,13 +75,19 @@ public class NcdfEncoder {
         featureInstancesRS = null;
     }
 
-
     private String getVirtualDataTable() {
         return definition.getDataSource().getVirtualDataTable();
     }
 
     private String getVirtualInstanceTable() {
         return definition.getDataSource().getVirtualInstanceTable();
+    }
+
+    private String getVirtualTable() {
+        return "select *"
+            + " from (" + getVirtualDataTable() + ") as data"
+            + " left join (" + getVirtualInstanceTable() + ") instance"
+            + " on instance.id = data.instance_id";
     }
 
     public void prepare(IOutputFormatter outputFormatter) throws Exception
@@ -105,9 +124,22 @@ public class NcdfEncoder {
 
     private String applyFilter(String query) throws Exception {
         if (filterExpr != null) {
-            IExpression selectionExpr = exprParser.parseExpression(filterExpr);
-            selectionClause = translate.process(selectionExpr);
-            query += " where " + selectionClause;
+            // TODO: revisit
+            VirtualTable vt = new VirtualTable("vt", getVirtualTable());
+            vt.addGeometryMetadatata("geom", Geometry.class, 4326, 2);
+
+            dataStore.createVirtualTable(vt);
+
+            Filter filter = CQL.toFilter(filterExpr);
+            PostgisFilterToSQL sqlEncoder = new PostgisFilterToSQL(new PostGISDialect(null));
+            sqlEncoder.setSqlNameEscape("\"");
+
+            SimpleFeatureType featureType = dataStore.getSchema("vt");
+
+            sqlEncoder.setFeatureType(featureType);
+
+            whereClause = sqlEncoder.encodeToString(filter);
+            query += " " + whereClause;
         }
 
         return query;
@@ -136,11 +168,8 @@ public class NcdfEncoder {
         }
 
         String query =
-            "select *"
-            + " from (" + getVirtualDataTable() + ") as data"
-            + " left join (" + getVirtualInstanceTable() + ") instance"
-            + " on instance.id = data.instance_id"
-            + " where " + selectionClause
+            getVirtualTable()
+            + " " + whereClause
             + " and data.instance_id = " + Long.toString(instanceId)
             + " order by " + orderClause
             + ";";
@@ -160,7 +189,7 @@ public class NcdfEncoder {
                 value = attributeValueParser.parse(attribute.getValue()).getValue();
             }
             else if (attribute.getSql() != null) {
-                value = evaluateSql(instanceId, selectionClause, orderClause, attribute.getSql());
+                value = evaluateSql(instanceId, whereClause, orderClause, attribute.getSql());
             }
             else {
                 throw new NcdfGeneratorException("No value defined for global attribute '" + name + "'");
@@ -205,7 +234,7 @@ public class NcdfEncoder {
         writer.close();
 
         // get filename
-        Object filename = evaluateSql(instanceId, selectionClause, orderClause, definition.getFilenameTemplate().getSql());
+        Object filename = evaluateSql(instanceId, whereClause, orderClause, definition.getFilenameTemplate().getSql());
 
         // this is awful...
         // format the file into the output stream
@@ -217,7 +246,7 @@ public class NcdfEncoder {
     }
 
 
-    private Object evaluateSql(long instanceId, String selectionClause, String orderClause, String sql) throws Exception {
+    private Object evaluateSql(long instanceId, String whereClause, String orderClause, String sql) throws Exception {
         // we need aliases for the inner select, and to support wrapping the where selection
         sql = sql.replaceAll("\\$instance",
             "( select *"
@@ -231,7 +260,7 @@ public class NcdfEncoder {
             + " from (" + getVirtualDataTable() + ") as data"
             + " left join (" + getVirtualInstanceTable() + ") instance"
             + " on instance.id = data.instance_id"
-            + " where " + selectionClause
+            + " " + whereClause
             + " and data.instance_id = " + Long.toString(instanceId)
             + " order by " + orderClause
             + " ) as data"

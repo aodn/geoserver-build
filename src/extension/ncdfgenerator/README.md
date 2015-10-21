@@ -58,7 +58,7 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
       -d $JODAAC_JDBC_URL -u $JODAAC_USERNAME -p $JODAAC_PASSWORD \
       -c \"INTERSECTS(geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09))) \
            AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-01-15T00:00:00Z'\" \
-      -P anmn_ts \ 
+      -P anmn_ts \
       -s anmn_ts"
 ```
 
@@ -86,4 +86,3 @@ http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/tutorial/Netcdf
 http://www.unidata.ucar.edu/software/netcdf/docs/BestPractices.html
 
 https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/CDL-Data-Types.html
-

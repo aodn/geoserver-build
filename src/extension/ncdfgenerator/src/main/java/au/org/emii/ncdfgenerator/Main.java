@@ -8,6 +8,10 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.sql.*;
+import java.util.*;
+
+import org.geotools.jdbc.JDBCDataStore;
+import org.geotools.data.DataStoreFinder;
 
 public class Main {
     public static void usage(Options options) {
@@ -88,7 +92,20 @@ public class Main {
             System.exit(1);
         }
 
+        JDBCDataStore dataStore = null;
+
         try {
+            Map<String, Object> dsParams = new HashMap<String, Object>();
+            dsParams.put("dbtype", "postgis");
+            dsParams.put("host", "dbprod.emii.org.au");
+            dsParams.put("port", 5432);
+            dsParams.put("database", "harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory");
+            dsParams.put("schema", schema);
+            dsParams.put("user", username);
+            dsParams.put("passwd", password);
+
+            dataStore = (JDBCDataStore)DataStoreFinder.getDataStore(dsParams);
+
             NcdfEncoderBuilder encoderBuilder = new NcdfEncoderBuilder();
 
             // decode definition
@@ -100,7 +117,7 @@ public class Main {
             encoderBuilder.setTmpCreationDir(tmpDir)
                     .setDefinition(definition)
                     .setFilterExpr(cql)
-                    .setConnection(conn)
+                    .setDataStore(dataStore)
                     .setSchema(schema)
             ;
 
