@@ -42,6 +42,12 @@
         </constructor-arg>
     </bean>
 
+    <bean id="paletteKvpParser" class="org.geoserver.wms.kvp.PaletteKvpParser">
+        <property name="service" value="WMS"/>
+        <!-- Avoid the palleteKvpParser denying palettes that are not defined
+             in geoserver but may be defined on thredds (ncwms) -->
+    </bean>
+
     <!-- http url mapping -->
     <bean id="ncwmsURLMapping"
         class="org.geoserver.ows.OWSHandlerMapping">

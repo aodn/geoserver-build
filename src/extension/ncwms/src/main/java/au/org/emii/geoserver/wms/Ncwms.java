@@ -40,7 +40,7 @@ public class Ncwms {
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LOGGER.log(Level.INFO, "GetMetadata");
-        final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName")); // TOOD needs to be case insensitive
+        final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName")); // TODO needs to be case insensitive
         final String item = request.getParameter("item");
 
         if (item != null && item.compareTo("timesteps") == 0) {
@@ -70,7 +70,7 @@ public class Ncwms {
 
     public void getLegendGraphic(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        proxyWmsRequest(request, response);
+        proxyWmsRequest(request, response, "LAYER");
     }
 
     public void getFeatureInfo(HttpServletRequest request, HttpServletResponse response)
@@ -80,7 +80,12 @@ public class Ncwms {
 
     private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("LAYERS")); // TOOD needs to be case insensitive
+        proxyWmsRequest(request, response, "LAYERS");
+    }
+
+    private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response, String layerParameter)
+            throws ServletException, IOException {
+        LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter(layerParameter)); // TODO needs to be case insensitive
 
         String time = request.getParameter("TIME");
 
@@ -90,7 +95,7 @@ public class Ncwms {
             Map<String, String[]> wmsParameters = new HashMap(request.getParameterMap());
             wmsParameters.remove("TIME");
             wmsParameters.put("VERSION", new String[] { wmsVersion });
-            wmsParameters.put("LAYERS", new String[] { layerDescriptor.variable });
+            wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
 
             // Needed for GetFeatureInfo
             if (wmsParameters.containsKey("QUERY_LAYERS")) {
