@@ -1,13 +1,9 @@
 package au.org.emii.geoserver.wms;
 
-import au.com.bytecode.opencsv.CSVReader;
 import org.geotools.util.logging.Logging;
 import org.joda.time.DateTime;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -44,27 +40,24 @@ public class URLIndexWFSHttp implements URLIndexInterface {
         urlParameters += "&" + "maxFeatures=1";
         urlParameters += extraUrlParameters;
 
-        CSVReader csvReader = processCsvInput(wfsQuery(urlParameters));
-
-        String wmsUrl = "";
-        String[] currentRow = csvReader.readNext();
-        return currentRow[1];
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
+        bufferedReader.readLine(); // Skip header
+        return bufferedReader.readLine().split(",")[1];
     }
 
     public List<String> getTimesForDay(LayerDescriptor layerDescriptor, String day) throws IOException {
         String cqlFilter = cqlFilterForSameDay(day, getTimeFieldName());
         String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), timeFieldName, cqlFilter);
 
-        CSVReader csvReader = processCsvInput(wfsQuery(urlParameters));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
+        bufferedReader.readLine(); // Skip header
 
         List<String> timesOfDay = new ArrayList<String>();
 
-        for (String[] currentRow = csvReader.readNext();
-             currentRow != null;
-             currentRow = csvReader.readNext()) {
-
-            LOGGER.log(Level.INFO, String.format("Processing row '%s'", currentRow));
-            String time = getTimeFromDate(currentRow[1]);
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            LOGGER.log(Level.INFO, String.format("Processing row '%s'", line));
+            String time = getTimeFromDate(line.split(",")[1]);
             timesOfDay.add(time);
         }
 
@@ -74,18 +67,17 @@ public class URLIndexWFSHttp implements URLIndexInterface {
     public Map<Integer, Map<Integer, Set<Integer>> > getUniqueDates(LayerDescriptor layerDescriptor) throws IOException {
         String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), timeFieldName, null);
 
-        CSVReader csvReader = processCsvInput(wfsQuery(urlParameters));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
+        bufferedReader.readLine(); // Skip header
 
         Map<Integer, Map<Integer, Set<Integer> > > dates =
                 new HashMap<Integer , Map<Integer, Set<Integer> > >();
 
-        for (String[] currentRow = csvReader.readNext();
-             currentRow != null;
-             currentRow = csvReader.readNext()) {
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            LOGGER.log(Level.INFO, String.format("Processing row '%s'", line));
 
-            LOGGER.log(Level.INFO, String.format("Processing row '%s'", currentRow));
-
-            DateTime date = new DateTime(currentRow[1]);
+            DateTime date = new DateTime(line.split(",")[1]);
 
             Integer year = date.getYear();
             Integer month = (date.getMonthOfYear() - 1); // Zero indexed
@@ -103,13 +95,6 @@ public class URLIndexWFSHttp implements URLIndexInterface {
         }
 
         return dates;
-    }
-
-    public CSVReader processCsvInput(InputStream csv) throws IOException {
-        CSVReader csvReader = new CSVReader(new InputStreamReader(csv, StandardCharsets.UTF_8.name()));
-
-        csvReader.readNext(); // Skip first line, it's the header
-        return csvReader;
     }
 
     private String cqlFilterForTimestamp(String timestamp, String timeFieldName) {
