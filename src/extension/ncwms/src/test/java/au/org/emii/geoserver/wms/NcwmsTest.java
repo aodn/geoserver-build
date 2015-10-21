@@ -1,20 +1,16 @@
 package au.org.emii.geoserver.wms;
 
 import junit.framework.TestCase;
-import org.w3c.dom.Document;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileInputStream;
 import java.util.*;
 
 public class NcwmsTest extends TestCase {
     private Document getCapabilitiesDocument() throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(new FileInputStream("./src/test/resources/get_capabilities.xml"));
-
-        return doc;
+        SAXReader reader = new SAXReader();
+        return reader.read(new FileInputStream("./src/test/resources/get_capabilities.xml"));
     }
 
     public void testGetSupportedStyles() throws Exception {
