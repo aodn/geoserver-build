@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 public class Ncwms {
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.ncwms");
 
+    public static String wmsVersion = "1.3.0";
+
     public static Map<String, String> urlSubstitutions = new HashMap<String, String>();
 
     private final URLIndexInterface urlIndexInterface;
@@ -71,6 +73,11 @@ public class Ncwms {
         proxyWmsRequest(request, response);
     }
 
+    public void getFeatureInfo(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        proxyWmsRequest(request, response);
+    }
+
     private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("LAYERS")); // TOOD needs to be case insensitive
@@ -82,7 +89,14 @@ public class Ncwms {
         try {
             Map<String, String[]> wmsParameters = new HashMap(request.getParameterMap());
             wmsParameters.remove("TIME");
+            wmsParameters.put("VERSION", new String[] { wmsVersion });
             wmsParameters.put("LAYERS", new String[] { layerDescriptor.variable });
+
+            // Needed for GetFeatureInfo
+            if (wmsParameters.containsKey("QUERY_LAYERS")) {
+                wmsParameters.put("QUERY_LAYERS", new String[] { layerDescriptor.variable });
+            }
+
 
             String queryString = encodeMapForRequest(wmsParameters);
 

@@ -37,6 +37,7 @@
                 <value>getMetadata</value>
                 <value>getMap</value>
                 <value>getLegendGraphic</value>
+                <value>getFeatureInfo</value>
             </list>
         </constructor-arg>
     </bean>
