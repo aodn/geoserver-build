@@ -1,20 +1,22 @@
 package au.org.emii.geoserver.wms;
 
 import junit.framework.TestCase;
-import org.w3c.dom.Document;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class NcwmsTest extends TestCase {
-    private Document getCapabilitiesDocument() throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(new FileInputStream("./src/test/resources/get_capabilities.xml"));
 
-        return doc;
+    private NcwmsStyle getNcwmsStyle() throws Exception {
+
+        SAXReader reader = new SAXReader();
+        Document doc = reader.read(new FileInputStream("./src/test/resources/get_capabilities.xml"));
+
+        return Ncwms.getStyles(doc, "sea_water_velocity");
     }
 
     public void testGetSupportedStyles() throws Exception {
@@ -29,7 +31,7 @@ public class NcwmsTest extends TestCase {
         }};
         Collections.sort(expectedStyles);
 
-        List<String> returnedStyles = Ncwms.getSupportedStyles(getCapabilitiesDocument(), "sea_water_velocity");
+        List<String> returnedStyles = Ncwms.getSupportedStyles(getNcwmsStyle());
         Collections.sort(returnedStyles);
 
         assertEquals(expectedStyles, returnedStyles);
@@ -50,7 +52,7 @@ public class NcwmsTest extends TestCase {
         }};
         Collections.sort(expectedPalettes);
 
-        List<String> returnedPalettes = Ncwms.getPalettes(getCapabilitiesDocument(), "sea_water_velocity");
+        List<String> returnedPalettes = Ncwms.getPalettes(getNcwmsStyle());
         Collections.sort(returnedPalettes);
 
         assertEquals(expectedPalettes, returnedPalettes);

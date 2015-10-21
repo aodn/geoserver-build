@@ -1,35 +1,38 @@
 package au.org.emii.geoserver.wms;
 
 public class LayerDescriptor {
-    public final String layer;
+    public final String groupLayerName;
     public final String workspace;
-    public final String variable;
+    public final String layerName;
+
     LayerDescriptor(String layerString) {
         String layerAndWorkspace = layerString.split("/")[0];
-        variable = layerString.split("/")[1];
+        layerName = layerString.split("/")[1];
         if (layerString.contains(":")) {
             workspace = layerAndWorkspace.split(":")[0];
-            layer = layerAndWorkspace.split(":")[1];
+            groupLayerName = layerAndWorkspace.split(":")[1];
         }
         else {
             workspace = null;
-            layer = layerAndWorkspace;
+            groupLayerName = layerAndWorkspace;
         }
     }
 
     private String getWorkspace() {
-        if (workspace == null)
+        if (workspace == null) {
             return "";
-        else
+        }
+        else {
             return workspace + ":";
+        }
     }
 
     public String geoserverName() {
-        return String.format("%s%s", getWorkspace(), layer);
+        return String.format("%s%s", getWorkspace(), groupLayerName);
     }
 
     @Override
     public String toString() {
-        return String.format("%s/%s", geoserverName(), variable);
+        return String.format("%s/%s", geoserverName(), layerName);
     }
 }
