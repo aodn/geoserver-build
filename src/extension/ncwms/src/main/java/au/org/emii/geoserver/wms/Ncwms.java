@@ -1,6 +1,11 @@
 package au.org.emii.geoserver.wms;
 
 import org.apache.commons.io.IOUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.SAXReader;
+import org.dom4j.tree.DefaultText;
+import org.dom4j.xpath.DefaultXPath;
 import org.geotools.util.logging.Logging;
 import org.json.JSONObject;
 
@@ -15,12 +20,6 @@ import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 public class Ncwms {
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.ncwms");
@@ -114,45 +113,35 @@ public class Ncwms {
         return sb.toString();
     }
 
+    private static List<String> getCombinedStyles(Document getCapabilitiesXml, String layerName) {
+        List<String> combinedStyles = new ArrayList<String>();
+
+        DefaultXPath xpath = new DefaultXPath("//x:Layer/x:Title[.=\'" + layerName + "\']/../x:Style/x:Name/text()");
+        Map<String,String> namespaces = new TreeMap<String, String>();
+        namespaces.put("x", "http://www.opengis.net/wms");
+        xpath.setNamespaceURIs(namespaces);
+        List<DefaultText> list = xpath.selectNodes(getCapabilitiesXml);
+
+        for (final DefaultText text : list) {
+            combinedStyles.add(text.getText());
+        }
+        return combinedStyles;
+    }
+
     public static List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
-        // TODO parse getCapabilitiesXml
-
-        Set<String> stylesSet = new HashSet<String>() {{
-            add("barb");
-            add("fancyvec");
-            add("trivec");
-            add("stumpvec");
-            add("linevec");
-            add("vector");
-            add("boxfill");
-        }};
-
-        List<String> styles = new ArrayList<String>();
-        styles.addAll(stylesSet);
-
-        return styles;
+        Set<String> styles = new HashSet<String>();
+        for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
+            styles.add(combinedStyle.split("/")[0]);
+        }
+        return new ArrayList<String>(styles);
     }
 
     public static List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
-        // TODO parse getCapabilitiesXml
-
-        Set<String> palettesSet = new HashSet<String>() {{
-            add("redblue");
-            add("alg");
-            add("greyscale");
-            add("alg2");
-            add("ncview");
-            add("occam");
-            add("rainbow");
-            add("sst_36");
-            add("ferret");
-            add("occam_pastel-30");
-        }};
-
-        List<String> palettes = new ArrayList<String>();
-        palettes.addAll(palettesSet);
-
-        return palettes;
+        Set<String> palettes = new HashSet<String>();
+        for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
+            palettes.add(combinedStyle.split("/")[1]);
+        }
+        return new ArrayList<String>(palettes);
     }
 
     private Document getCapabilitiesXml(LayerDescriptor layerDescriptor)
@@ -165,17 +154,10 @@ public class Ncwms {
                     wmsUrl
                 );
 
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new URL(getCapabilitiesUrl).openStream());
-
-            return doc;
+            SAXReader reader = new SAXReader();
+            return reader.read(new URL(getCapabilitiesUrl));
         }
-        catch (SAXException e) {
-            LOGGER.log(Level.SEVERE, String.format("Error parsing GetCapabilities XML document at '%s'", wmsUrl));
-            throw new IOException(e);
-        }
-        catch (ParserConfigurationException e) {
+        catch (DocumentException e) {
             LOGGER.log(Level.SEVERE, String.format("Error parsing GetCapabilities XML document at '%s'", wmsUrl));
             throw new IOException(e);
         }
