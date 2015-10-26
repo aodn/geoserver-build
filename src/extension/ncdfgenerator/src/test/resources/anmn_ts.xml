@@ -2,7 +2,6 @@
 <definition>
   <source>
     <dataStoreName>anmn_ts</dataStoreName>
-    <!-- TODO: revisit having to use qualified (schema) table names -->
     <virtualDataTable>select ts_id as instance_id, * from anmn_ts.measurement</virtualDataTable>
     <virtualInstanceTable>select instrument_nominal_depth as "NOMINAL_DEPTH", * from anmn_ts.timeseries</virtualInstanceTable>
   </source>
