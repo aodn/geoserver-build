@@ -3,15 +3,7 @@ package au.org.emii.ncdfgenerator;
 import java.sql.Connection;
 import org.geotools.jdbc.JDBCDataStore;
 
-import au.org.emii.ncdfgenerator.cql.ExprParser;
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
-import au.org.emii.ncdfgenerator.cql.IExprParser;
-import au.org.emii.ncdfgenerator.cql.PGDialectTranslate;
-
-
 public class NcdfEncoderBuilder {
-    // assemble the NcdfEncoder
-
     private String tmpCreationDir;
     private NcdfDefinition definition;
     private String filterExpr;
@@ -33,12 +25,10 @@ public class NcdfEncoderBuilder {
            throw new IllegalArgumentException("dataStore not set");
         }
 
-        IExprParser parser = new ExprParser();
-        IDialectTranslate translate = new PGDialectTranslate();
         ICreateWritable createWritable = new CreateWritable(tmpCreationDir);
         IAttributeValueParser attributeValueParser = new AttributeValueParser();
 
-        return new NcdfEncoder(parser, translate, dataStore, schema, createWritable, attributeValueParser, definition, filterExpr);
+        return new NcdfEncoder(dataStore, schema, createWritable, attributeValueParser, definition, filterExpr);
     }
 
     public final NcdfEncoderBuilder setTmpCreationDir(String tmpCreationDir) {

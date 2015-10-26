@@ -1,6 +1,5 @@
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.cql.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;

@@ -1,8 +1,5 @@
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.cql.IDialectTranslate;
-import au.org.emii.ncdfgenerator.cql.IExprParser;
-import au.org.emii.ncdfgenerator.cql.IExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
@@ -28,11 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO ucar.nc2.NetcdfFile
-
 public class NcdfEncoder {
-    private final IExprParser exprParser;
-    private final IDialectTranslate translate;
     private final Connection conn;
     private final JDBCDataStore dataStore;
     private final String schema;
@@ -50,8 +43,6 @@ public class NcdfEncoder {
     private IOutputFormatter outputFormatter;
 
     public NcdfEncoder(
-        IExprParser exprParser,
-        IDialectTranslate translate,
         JDBCDataStore dataStore,
         String schema,
         ICreateWritable createWritable,
@@ -59,8 +50,6 @@ public class NcdfEncoder {
         NcdfDefinition definition,
         String filterExpr
     ) throws SQLException {
-        this.exprParser = exprParser;
-        this.translate = translate;
         this.dataStore = dataStore;
         this.conn = dataStore.getDataSource().getConnection();
         this.schema = schema;
