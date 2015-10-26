@@ -14,7 +14,6 @@ import org.geotools.filter.text.cql2.CQL;
 import org.geotools.jdbc.JDBCDataStore;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-import org.geotools.jdbc.VirtualTable;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -124,18 +123,11 @@ public class NcdfEncoder {
 
     private String applyFilter(String query) throws Exception {
         if (filterExpr != null) {
-            // TODO: revisit
-            VirtualTable vt = new VirtualTable("vt", getVirtualTable());
-            vt.addGeometryMetadatata("geom", Geometry.class, 4326, 2);
-
-            dataStore.createVirtualTable(vt);
-
             Filter filter = CQL.toFilter(filterExpr);
+            SimpleFeatureType featureType = FeatureTypeFactory.guessFeatureType(dataStore, getVirtualTable(), true);
+
             PostgisFilterToSQL sqlEncoder = new PostgisFilterToSQL(new PostGISDialect(null));
             sqlEncoder.setSqlNameEscape("\"");
-
-            SimpleFeatureType featureType = dataStore.getSchema("vt");
-
             sqlEncoder.setFeatureType(featureType);
 
             whereClause = sqlEncoder.encodeToString(filter);
