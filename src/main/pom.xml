@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>au.org.emii</groupId>
-            <artifactId>geoserver-layer-filter-extension</artifactId>
+            <artifactId>layer-filters</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>

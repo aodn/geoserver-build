@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>au.org.emii</groupId>
-    <artifactId>geoserver-layer-filter-extension</artifactId>
+    <artifactId>layer-filters</artifactId>
     <packaging>jar</packaging>
 
-    <name>GeoServer Layer Filter Extension (jar)</name>
+    <name>Layer Filters Extension (jar)</name>
 
     <parent>
         <groupId>org.geoserver</groupId>

@@ -18,7 +18,7 @@
     </parent>
 
     <modules>
-        <module>geoserver-layer-filter-extension</module>
+        <module>layer-filters</module>
         <module>ncdfgenerator</module>
         <module>gogoduck</module>
         <module>notifier</module>
