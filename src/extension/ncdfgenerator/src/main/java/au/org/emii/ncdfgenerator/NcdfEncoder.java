@@ -113,7 +113,7 @@ public class NcdfEncoder {
     private String applyFilter(String query) throws Exception {
         if (filterExpr != null) {
             Filter filter = CQL.toFilter(filterExpr);
-            SimpleFeatureType featureType = FeatureTypeFactory.guessFeatureType(dataStore, getVirtualTable(), true);
+            SimpleFeatureType featureType = FeatureTypeFactory.getFeatureType(dataStore, getVirtualTable(), true);
 
             PostgisFilterToSQL sqlEncoder = new PostgisFilterToSQL(new PostGISDialect(null));
             sqlEncoder.setSqlNameEscape("\"");
