@@ -4,7 +4,33 @@
   <source>
     <dataStoreName>soop_sst</dataStoreName>
     <virtualDataTable>select trajectory_id as instance_id, * from soop_sst.measurements</virtualDataTable>
-    <virtualInstanceTable>select trajectory_id as id, geom as instance_geom, * from soop_sst.soop_sst_nrt_trajectory_map</virtualInstanceTable>
+    <virtualInstanceTable>
+      select trajectory_id as id,
+        geom as instance_geom,
+        url,
+        platform_code,
+        vessel_name,
+        voyage_number,
+        time_start,
+        time_end,
+        colour,
+        "AIRT_b",
+        "ATMP_b",
+        "CNDC_b",
+        "DEWT_b",
+        "GPS_HEIGHT_b",
+        "PL_CRS_b",
+        "PL_SPD_b",
+        "PL_WDIR_b",
+        "PL_WSPD_b",
+        "PSAL_b",
+        "RELH_b",
+        "TEMP_b",
+        "WDIR_b",
+        "WETT_b",
+        "WSPD_b",
+        size
+      from soop_sst.soop_sst_nrt_trajectory_map</virtualInstanceTable>
   </source>
   <filename>
     <sql>
