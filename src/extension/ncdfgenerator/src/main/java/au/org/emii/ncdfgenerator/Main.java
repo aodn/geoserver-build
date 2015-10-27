@@ -24,11 +24,13 @@ public class Main {
     public static void main(String[] args) {
         Options options = new Options();
 
-        options.addOption("u", "username", true, "Database user.");
-        options.addOption("p", "password", true, "Database password.");
-        options.addOption("d", "db", true, "Database connection string.");
-        options.addOption("D", "driver", true, "Database driver class.");
-        options.addOption("s", "schema", true, "Database schema to use.");
+        options.addOption("u", "database username", true, "Database user.");
+        options.addOption("p", "database password", true, "Database password.");
+        options.addOption("d", "database name", true, "Database name, including parameters, e.g.: \"harvest?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory\"");
+        options.addOption("t", "database type", true, "Database type.");
+        options.addOption("port", "database port", true, "Database port.");
+        options.addOption("h", "database host", true, "Database host.");
+        options.addOption("s", "database schema", true, "Database schema to use.");
         options.addOption("c", "cql", true, "CQL filter to apply (optional).");
         options.addOption("P", "profile", true, "Profile to use.");
         options.addOption("o", "output", true, "Output file to use (output.zip as default).");
@@ -46,7 +48,9 @@ public class Main {
         String username = cmd.getOptionValue("u");
         String password = cmd.getOptionValue("p");
         String connectionString = cmd.getOptionValue("d");
-        String databaseDriver = cmd.getOptionValue("D", "org.postgresql.Driver");
+        String type = cmd.getOptionValue("t", "postgis");
+        Integer port = Integer.valueOf(cmd.getOptionValue("port", "5432"));
+        String host = cmd.getOptionValue("h", "localhost");
         String cql = cmd.getOptionValue("c");
         String profile = cmd.getOptionValue("P");
         String outputFile = cmd.getOptionValue("o", "output.zip");
@@ -56,7 +60,6 @@ public class Main {
         if (username == null) { usage(options); }
         if (password == null) { usage(options); }
         if (connectionString == null) { usage(options); }
-        if (databaseDriver == null) { usage(options); }
         if (schema == null) { usage(options); }
         if (profile == null) { usage(options); }
 
@@ -77,10 +80,10 @@ public class Main {
 
         try {
             Map<String, Object> dsParams = new HashMap<String, Object>();
-            dsParams.put("dbtype", "postgis");
-            dsParams.put("host", "dbprod.emii.org.au");
-            dsParams.put("port", 5432);
-            dsParams.put("database", "harvest?loginTimeout=1000&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory");
+            dsParams.put("dbtype", type);
+            dsParams.put("host", host);
+            dsParams.put("port", port);
+            dsParams.put("database", connectionString);
             dsParams.put("schema", schema);
             dsParams.put("user", username);
             dsParams.put("passwd", password);

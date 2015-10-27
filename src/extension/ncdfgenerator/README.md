@@ -48,14 +48,20 @@ jfca@10-nsp-mel:~$ ncdump /mnt/opendap/1/IMOS/opendap/eMII/checker_test/ANMN/pro
 $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main -Dexec.args=""
 ```
 
-e.g.: assuming environment variables `JODAAC_USERNAME`, `JODAAC_PASSWORD` and `JODAAC_JDBC_URL` are set appropriately:
+e.g.: assuming the following environment variables are set appropriately:
+
+* `JODAAC_DB_USERNAME`
+* `JODAAC_DB_PASSWORD`
+* `JODAAC_DB_NAME`
+* `JODAAC_DB_HOST`
+
 
 **anmn_ts**
 
 ```
 $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
     -Dexec.args=" \
-      -d $JODAAC_JDBC_URL -u $JODAAC_USERNAME -p $JODAAC_PASSWORD \
+      -u $JODAAC_DB_USERNAME -p $JODAAC_DB_PASSWORD -d $JODAAC_DB_NAME -h $JODAAC_DB_HOST \
       -c \"INTERSECTS(geom,POLYGON((113.33 -33.09,113.33 -30.98,117.11 -30.98,117.11 -33.09,113.33 -33.09))) \
            AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-01-15T00:00:00Z'\" \
       -P anmn_ts \
@@ -67,7 +73,7 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
 ```
 $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
     -Dexec.args=" \
-        -d $JODAAC_JDBC_URL -u $JODAAC_USERNAME -p $JODAAC_PASSWORD \
+        -u $JODAAC_DB_USERNAME -p $JODAAC_DB_PASSWORD -d $JODAAC_DB_NAME -h $JODAAC_DB_HOST \
         -c \"INTERSECTS(instance_geom,POLYGON((159 -43,159 -39,165 -39,165 -43,159 -43)))\" \
         -P soop_sst_trajectory \
         -s soop_sst"
