@@ -73,25 +73,6 @@ public class Main {
             System.exit(1);
         }
 
-        Connection conn = null;
-        try {
-            Class.forName(databaseDriver).newInstance();
-        }
-        catch (Exception e){
-            System.out.printf("Check classpath. Cannot load db driver: '%s'%n", databaseDriver);
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        try {
-            conn = DriverManager.getConnection(connectionString, username, password);
-        }
-        catch (SQLException e){
-            System.out.printf("Cannot connect to db: '%s'%n", connectionString);
-            e.printStackTrace();
-            System.exit(1);
-        }
-
         JDBCDataStore dataStore = null;
 
         try {
