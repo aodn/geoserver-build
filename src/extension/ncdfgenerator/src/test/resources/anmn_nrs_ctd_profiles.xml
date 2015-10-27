@@ -3,8 +3,8 @@
   <!-- anmn_nrs_ctd_profiles -->
   <source>
     <dataStoreName>anmn_nrs_ctd_profiles</dataStoreName>
-    <virtualDataTable>select file_id as instance_id, * from measurements</virtualDataTable>
-    <virtualInstanceTable>select * from indexed_file</virtualInstanceTable>
+    <virtualDataTable>select file_id as instance_id, * from anmn_nrs_ctd_profiles.measurements</virtualDataTable>
+    <virtualInstanceTable>select * from anmn_nrs_ctd_profiles.indexed_file</virtualInstanceTable>
   </source>
   <filename>
     <sql>select 'file-'||(select id from $instance)||'.nc'

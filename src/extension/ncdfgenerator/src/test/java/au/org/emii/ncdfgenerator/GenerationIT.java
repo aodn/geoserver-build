@@ -1,6 +1,5 @@
 package au.org.emii.ncdfgenerator;
 
-import au.org.emii.ncdfgenerator.cql.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -214,7 +213,6 @@ public class GenerationIT {
         encoderBuilder.setTmpCreationDir(TMPDIR)
             .setDefinition(definition)
             .setFilterExpr(cqlFilter)
-            .setConnection(conn)
             .setSchema(schema)
         ;
 
