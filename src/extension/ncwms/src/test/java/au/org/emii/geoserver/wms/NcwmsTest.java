@@ -1,18 +1,21 @@
 package au.org.emii.geoserver.wms;
 
-import junit.framework.TestCase;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.util.*;
 
-public class NcwmsTest extends TestCase {
+import static org.apache.wicket.util.tester.WicketTesterHelper.assertEquals;
+
+public class NcwmsTest {
     private Document getCapabilitiesDocument() throws Exception {
         SAXReader reader = new SAXReader();
         return reader.read(new FileInputStream("./src/test/resources/get_capabilities.xml"));
     }
 
+    @Test
     public void testGetSupportedStyles() throws Exception {
         List<String> expectedStyles = new ArrayList<String>() {{
             add("barb");
@@ -31,6 +34,7 @@ public class NcwmsTest extends TestCase {
         assertEquals(expectedStyles, returnedStyles);
     }
 
+    @Test
     public void testGetPalettes() throws Exception {
         List<String> expectedPalettes = new ArrayList<String>() {{
             add("alg");

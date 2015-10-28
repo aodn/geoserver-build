@@ -59,7 +59,6 @@ public class LayerDescriptor {
         return urlField;
     }
 
-
     @Override
     public String toString() {
         return String.format("%s/%s", geoserverName(), variable);

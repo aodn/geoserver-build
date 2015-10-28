@@ -11,19 +11,18 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class URLIndexWFSHttp implements URLIndexInterface {
-    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.URLIndexWFSHttp");
+public class UrlIndexWfsHttp implements UrlIndexInterface {
+    static Logger LOGGER = Logging.getLogger(UrlIndexWfsHttp.class);
 
     private static String wfsServer = "http://localhost:8080/geoserver/ows";
 
-    public void setWfsServer(String wfsServer) { URLIndexWFSHttp.wfsServer = wfsServer; }
-    public String getWfsServer() { return wfsServer; }
+    public void setWfsServer(String wfsServer) { UrlIndexWfsHttp.wfsServer = wfsServer; }
 
     public String getUrlForTimestamp(LayerDescriptor layerDescriptor, String timestamp) throws IOException {
         // By default form a query to get the last file ordered by timestamp (reverse)
         String extraUrlParameters = "&" + String.format("sortBy=%s+D", layerDescriptor.getTimeFieldName()); // Sort by time, descending
         String cqlFilter = null;
-        if (timestamp != null && timestamp != "") {
+        if (timestamp != null && timestamp.compareTo("") != -1) {
             cqlFilter = cqlFilterForTimestamp(timestamp, layerDescriptor.getTimeFieldName());
             extraUrlParameters = "";
         }

@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-    <bean id="urlIndex" class="au.org.emii.geoserver.wms.URLIndexWFSHttp">
+    <bean id="urlIndex" class="au.org.emii.geoserver.wms.UrlIndexWfsHttp">
         <property name="wfsServer" value="http://localhost:8080/geoserver/ows"/>
     </bean>
 

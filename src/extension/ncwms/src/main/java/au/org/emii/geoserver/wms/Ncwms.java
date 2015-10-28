@@ -22,25 +22,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class Ncwms {
-    static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.ncwms");
+    static Logger LOGGER = Logging.getLogger(Ncwms.class);
 
     public static String wmsVersion = "1.3.0";
 
     public static Map<String, String> urlSubstitutions = new HashMap<String, String>();
 
-    private final URLIndexInterface urlIndexInterface;
+    private final UrlIndexInterface urlIndexInterface;
 
     public void setUrlSubstitutions(Map<String, String> urlSubstitutions) { Ncwms.urlSubstitutions = urlSubstitutions; }
-    public Map<String, String> getUrlSubstitutions() { return urlSubstitutions; }
 
-    public Ncwms(URLIndexInterface urlIndexInterface) {
+    public Ncwms(UrlIndexInterface urlIndexInterface) {
         this.urlIndexInterface = urlIndexInterface;
     }
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LOGGER.log(Level.INFO, "GetMetadata");
-        final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName")); // TODO needs to be case insensitive
+        final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName"));
         final String item = request.getParameter("item");
 
         if (item != null && item.compareTo("timesteps") == 0) {
@@ -85,14 +84,15 @@ public class Ncwms {
 
     private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response, String layerParameter)
             throws ServletException, IOException {
-        LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter(layerParameter)); // TODO needs to be case insensitive
+        LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter(layerParameter));
 
         String time = request.getParameter("TIME");
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
         try {
-            Map<String, String[]> wmsParameters = new HashMap(request.getParameterMap());
+            @SuppressWarnings("unchecked")
+            Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
             wmsParameters.remove("TIME");
             wmsParameters.put("VERSION", new String[] { wmsVersion });
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
@@ -101,7 +101,6 @@ public class Ncwms {
             if (wmsParameters.containsKey("QUERY_LAYERS")) {
                 wmsParameters.put("QUERY_LAYERS", new String[] { layerDescriptor.variable });
             }
-
 
             String queryString = encodeMapForRequest(wmsParameters);
 
@@ -139,6 +138,8 @@ public class Ncwms {
         Map<String,String> namespaces = new TreeMap<String, String>();
         namespaces.put("x", "http://www.opengis.net/wms");
         xpath.setNamespaceURIs(namespaces);
+
+        @SuppressWarnings("unchecked")
         List<DefaultText> list = xpath.selectNodes(getCapabilitiesXml);
 
         for (final DefaultText text : list) {

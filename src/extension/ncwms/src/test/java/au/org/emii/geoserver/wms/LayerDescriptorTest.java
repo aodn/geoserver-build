@@ -1,9 +1,10 @@
 package au.org.emii.geoserver.wms;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 
-public class LayerDescriptorTest extends TestCase {
+import static junit.framework.TestCase.assertEquals;
+
+public class LayerDescriptorTest {
     @Test
     public void testSimpleParsing() throws Exception {
         LayerDescriptor layerDescriptor;
