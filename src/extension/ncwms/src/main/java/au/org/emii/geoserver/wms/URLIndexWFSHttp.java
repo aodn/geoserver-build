@@ -14,29 +14,21 @@ import java.util.logging.Logger;
 public class URLIndexWFSHttp implements URLIndexInterface {
     static Logger LOGGER = Logging.getLogger("au.org.emii.geoserver.wms.URLIndexWFSHttp");
 
-    private static String timeFieldName = "time";
-    private static String urlFieldName= "file_url";
     private static String wfsServer = "http://localhost:8080/geoserver/ows";
-
-    public void setUrlFieldName(String urlFieldName) { URLIndexWFSHttp.urlFieldName = urlFieldName; }
-    public String getUrlFieldName() { return urlFieldName; }
-
-    public void setTimeFieldName(String timeFieldName) { URLIndexWFSHttp.timeFieldName = timeFieldName; }
-    public String getTimeFieldName() { return timeFieldName; }
 
     public void setWfsServer(String wfsServer) { URLIndexWFSHttp.wfsServer = wfsServer; }
     public String getWfsServer() { return wfsServer; }
 
     public String getUrlForTimestamp(LayerDescriptor layerDescriptor, String timestamp) throws IOException {
         // By default form a query to get the last file ordered by timestamp (reverse)
-        String extraUrlParameters = "&" + String.format("sortBy=%s+D", timeFieldName); // Sort by time, descending
+        String extraUrlParameters = "&" + String.format("sortBy=%s+D", layerDescriptor.getTimeFieldName()); // Sort by time, descending
         String cqlFilter = null;
         if (timestamp != null && timestamp != "") {
-            cqlFilter = cqlFilterForTimestamp(timestamp, timeFieldName);
+            cqlFilter = cqlFilterForTimestamp(timestamp, layerDescriptor.getTimeFieldName());
             extraUrlParameters = "";
         }
 
-        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), urlFieldName, cqlFilter);
+        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), layerDescriptor.getUrlFieldName(), cqlFilter);
         urlParameters += "&" + "maxFeatures=1";
         urlParameters += extraUrlParameters;
 
@@ -46,8 +38,8 @@ public class URLIndexWFSHttp implements URLIndexInterface {
     }
 
     public List<String> getTimesForDay(LayerDescriptor layerDescriptor, String day) throws IOException {
-        String cqlFilter = cqlFilterForSameDay(day, getTimeFieldName());
-        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), timeFieldName, cqlFilter);
+        String cqlFilter = cqlFilterForSameDay(day, layerDescriptor.getTimeFieldName());
+        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), layerDescriptor.getTimeFieldName(), cqlFilter);
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
         bufferedReader.readLine(); // Skip header
@@ -65,7 +57,7 @@ public class URLIndexWFSHttp implements URLIndexInterface {
     }
 
     public Map<Integer, Map<Integer, Set<Integer>> > getUniqueDates(LayerDescriptor layerDescriptor) throws IOException {
-        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), timeFieldName, null);
+        String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), layerDescriptor.getTimeFieldName(), null);
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
         bufferedReader.readLine(); // Skip header

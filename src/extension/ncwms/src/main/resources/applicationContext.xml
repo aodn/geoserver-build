@@ -4,8 +4,6 @@
 <beans>
     <bean id="urlIndex" class="au.org.emii.geoserver.wms.URLIndexWFSHttp">
         <property name="wfsServer" value="http://localhost:8080/geoserver/ows"/>
-        <property name="timeFieldName" value="time"/>
-        <property name="urlFieldName" value="file_url"/>
     </bean>
 
     <!-- Spring will reference the instance of the Ncwms class
