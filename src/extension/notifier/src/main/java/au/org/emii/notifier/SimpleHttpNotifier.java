@@ -1,4 +1,4 @@
-package au.org.emii.wps;
+package au.org.emii.notifier;
 
 import java.net.URL;
 import org.geotools.data.ows.HTTPClient;

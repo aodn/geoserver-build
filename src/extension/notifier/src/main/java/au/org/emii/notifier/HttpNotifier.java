@@ -1,4 +1,4 @@
-package au.org.emii.wps;
+package au.org.emii.notifier;
 
 import java.io.IOException;
 import java.net.URL;

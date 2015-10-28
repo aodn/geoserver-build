@@ -1,5 +1,7 @@
 package au.org.emii.wps;
 
+import au.org.emii.notifier.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.geoserver.wps.resource.WPSResourceManager;

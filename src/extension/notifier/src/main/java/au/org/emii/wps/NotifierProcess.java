@@ -1,5 +1,7 @@
 package au.org.emii.wps;
 
+import au.org.emii.notifier.*;
+
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.IOException;
