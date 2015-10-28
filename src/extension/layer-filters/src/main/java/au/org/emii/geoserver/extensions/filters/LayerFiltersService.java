@@ -40,6 +40,7 @@ import java.util.Set;
 public class LayerFiltersService {
 
     private Catalog catalog;
+    private List<String> uniqueValuesAllowedRegex = null;
 
     @Autowired
     private ServletContext context;
@@ -52,6 +53,27 @@ public class LayerFiltersService {
 
     public Catalog getCatalog() {
         return catalog;
+    }
+
+    public void setUniqueValuesAllowedRegex(List<String> uniqueValuesAllowedRegex) {
+        this.uniqueValuesAllowedRegex = uniqueValuesAllowedRegex;
+    }
+
+    public List<String> getUniqueValuesAllowedRegex() {
+        return uniqueValuesAllowedRegex;
+    }
+
+    private boolean uniqueValuesAllowed(String workspace, String layer, String propertyName) {
+        if (uniqueValuesAllowedRegex == null)
+            return true;
+
+        String fullLayerName = String.format("%s:%s/%s", workspace, layer, propertyName);
+        for (final String regex : getUniqueValuesAllowedRegex()) {
+            if (fullLayerName.matches(regex)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void enabledFilters(HttpServletRequest request, HttpServletResponse response)
@@ -74,6 +96,11 @@ public class LayerFiltersService {
         String workspace = request.getParameter("workspace");
         String layer = request.getParameter("layer");
         String propertyName = request.getParameter("propertyName");
+
+        if (! uniqueValuesAllowed(workspace, layer, propertyName)) {
+            throw new RuntimeException(String.format("uniqueValues not allowed for '%s:%s/%s'",
+                workspace, layer, propertyName));
+        }
 
         try {
             respondWithDocument(response, getUniqueValuesDocument(workspace, layer, propertyName));
