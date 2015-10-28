@@ -19,9 +19,7 @@
 
     <modules>
         <module>layer-filters</module>
-        <module>ncdfgenerator</module>
-        <module>gogoduck</module>
-        <module>notifier</module>
+        <module>wps</module>
     </modules>
 
 </project>

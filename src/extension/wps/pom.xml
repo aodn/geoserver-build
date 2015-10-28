@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>au.org.emii.wps</groupId>
-    <artifactId>gogoduck</artifactId>
+    <artifactId>wps</artifactId>
     <packaging>jar</packaging>
-    <name>GoGoDuck artifact (jar)</name>
+    <name>WPS artifact (jar)</name>
     <version>2.0</version>
 
     <parent>
