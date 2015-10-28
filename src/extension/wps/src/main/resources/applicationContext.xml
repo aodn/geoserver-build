@@ -29,4 +29,9 @@
         <constructor-arg index="2" value="300000" />
     </bean>
     <bean id="httpClient" class="org.geotools.data.ows.SimpleHttpClient"/>
+    <bean id="netcdfOutputProcess" class="au.org.emii.wps.NetcdfOutputProcess">
+      <constructor-arg index="0" ref="wpsResourceManager"/>
+      <constructor-arg index="1" ref="catalog"/>
+      <constructor-arg index="2" ref="servletContext"/>
+    </bean>
 </beans>
