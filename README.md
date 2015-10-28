@@ -10,18 +10,18 @@ Configures a GeoServer war file with the following;
 To build:
 
 ```
-git submodule update --init
-mvn clean install -U -Dmaven.test.skip=true 
+mvn clean install -U 
 ```
 
-To update the submodule(s), e.g.:
+To run:
 
 ```
-cd src/extension/geoserver-layer-filter-extension/
-git pull origin master 
-cd -
-git status
-git add src/extension/geoserver-layer-filter-extension
-git commit -m "update filter plugin extension"
-git push origin master
+cd src/main
+mvn jetty:run
+```
+
+GeoServer will then be available at:
+
+```
+http://localhost:8080
 ```
