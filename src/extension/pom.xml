@@ -20,6 +20,7 @@
     <modules>
         <module>layer-filters</module>
         <module>wps</module>
+        <module>ncwms</module>
     </modules>
 
 </project>
