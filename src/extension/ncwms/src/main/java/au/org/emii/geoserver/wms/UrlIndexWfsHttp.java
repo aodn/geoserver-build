@@ -2,6 +2,10 @@ package au.org.emii.geoserver.wms;
 
 import org.geotools.util.logging.Logging;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.*;
 import java.net.URL;
@@ -98,10 +102,12 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
         DateTime timeEnd = timeStart.plusDays(1); // Just the next day
         LOGGER.log(Level.INFO, String.format("Returning times of day '%s'", day));
 
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        
         return String.format(
                 "%s >= %s AND %s < %s",
-                timeFieldName, timeStart,
-                timeFieldName, timeEnd
+                timeFieldName, formatter.print(timeStart.withZone(DateTimeZone.UTC)),
+                timeFieldName, formatter.print(timeEnd.withZone(DateTimeZone.UTC))
         );
     }
 
