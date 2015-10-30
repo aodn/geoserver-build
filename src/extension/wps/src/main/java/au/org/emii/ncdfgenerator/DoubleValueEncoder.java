@@ -43,7 +43,7 @@ public class DoubleValueEncoder implements IValueEncoder {
             array.setDouble(index, (double)(Float)value);
         }
         else if (value instanceof Double) {
-            array.setDouble(index, (double)value);
+            array.setDouble(index, (Double)value);
         }
         else {
             throw new NcdfGeneratorException("Failed to coerce type '" + value.getClass() + "' to double");
