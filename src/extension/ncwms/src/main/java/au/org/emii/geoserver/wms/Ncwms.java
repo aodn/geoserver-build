@@ -1,5 +1,6 @@
 package au.org.emii.geoserver.wms;
 
+import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -7,7 +8,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultText;
 import org.dom4j.xpath.DefaultXPath;
 import org.geotools.util.logging.Logging;
-import org.json.JSONObject;
 
 import java.io.*;
 import java.net.URLEncoder;

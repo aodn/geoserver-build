@@ -31,9 +31,9 @@
             <version>1.5</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20150729</version>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <classifier>jdk15</classifier>
         </dependency>
         <dependency>
             <groupId>dom4j</groupId>

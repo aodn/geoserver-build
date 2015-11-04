@@ -5,7 +5,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.*;
 import java.net.URL;
@@ -59,14 +58,14 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
         return timesOfDay;
     }
 
-    public Map<Integer, Map<Integer, Set<Integer>> > getUniqueDates(LayerDescriptor layerDescriptor) throws IOException {
+    public Map<String, Map<String, Set<String>>> getUniqueDates(LayerDescriptor layerDescriptor) throws IOException {
         String urlParameters = getWfsUrlParameters(layerDescriptor.geoserverName(), layerDescriptor.getTimeFieldName(), null);
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
         bufferedReader.readLine(); // Skip header
 
-        Map<Integer, Map<Integer, Set<Integer> > > dates =
-                new HashMap<Integer , Map<Integer, Set<Integer> > >();
+        Map<String, Map<String, Set<String> > > dates =
+                new HashMap<String, Map<String, Set<String> > >();
 
         String line;
         while ((line = bufferedReader.readLine()) != null) {
@@ -74,16 +73,20 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
 
             DateTime date = new DateTime(line.split(",")[1]);
 
-            Integer year = date.getYear();
-            Integer month = (date.getMonthOfYear() - 1); // Zero indexed
-            Integer day = date.getDayOfMonth();
+            Integer yearInt = date.getYear();
+            Integer monthInt = (date.getMonthOfYear() - 1); // Zero indexed
+            Integer dayInt = date.getDayOfMonth();
+
+            String year = yearInt.toString();
+            String month = monthInt.toString();
+            String day = dayInt.toString();
 
             if (!dates.containsKey(year)) {
-                dates.put(year, new HashMap<Integer, Set<Integer> >());
+                dates.put(year, new HashMap<String, Set<String> >());
             }
 
             if (!dates.get(year).containsKey(month)) {
-                dates.get(year).put(month, new HashSet<Integer>());
+                dates.get(year).put(month, new HashSet<String>());
             }
 
             dates.get(year).get(month).add(day);

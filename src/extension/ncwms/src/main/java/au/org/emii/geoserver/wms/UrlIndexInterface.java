@@ -11,5 +11,5 @@ public interface UrlIndexInterface {
 
     List<String> getTimesForDay(LayerDescriptor layerDescriptor, String day) throws IOException;
 
-    Map<Integer, Map<Integer, Set<Integer>>> getUniqueDates(LayerDescriptor layerDescriptor) throws IOException;
+    Map<String, Map<String, Set<String>>> getUniqueDates(LayerDescriptor layerDescriptor) throws IOException;
 }
