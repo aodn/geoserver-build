@@ -122,20 +122,20 @@ public class UrlIndexWfsHttpTest {
         csvString += "acorn_hourly_avg_rot_qc_timeseries_url.fid-607eb861_1502bdb829d_-1c93,2011-01-22T18:30:00\n";
         csvString += "acorn_hourly_avg_rot_qc_timeseries_url.fid-607eb861_1502bdb829d_-1c92,2011-01-22T20:30:00\n";
 
-        Map<Integer, Map<Integer, Set<Integer>> > expected =
-                new HashMap<Integer , Map<Integer, Set<Integer> > >();
+        Map<String, Map<String, Set<String>>> expected =
+                new HashMap<String, Map<String, Set<String>>>();
 
-        expected.put(2010, new HashMap<Integer, Set<Integer> >());
-        expected.get(2010).put(1, new HashSet<Integer>());
-        expected.get(2010).get(1).add(23);
-        expected.get(2010).put(2, new HashSet<Integer>());
-        expected.get(2010).get(2).add(9);
-        expected.get(2010).get(2).add(10);
-        expected.get(2010).get(2).add(11);
+        expected.put("2010", new HashMap<String, Set<String>>());
+        expected.get("2010").put("1", new HashSet<String>());
+        expected.get("2010").get("1").add("23");
+        expected.get("2010").put("2", new HashSet<String>());
+        expected.get("2010").get("2").add("9");
+        expected.get("2010").get("2").add("10");
+        expected.get("2010").get("2").add("11");
 
-        expected.put(2011, new HashMap<Integer, Set<Integer> >());
-        expected.get(2011).put(0, new HashSet<Integer>());
-        expected.get(2011).get(0).add(22);
+        expected.put("2011", new HashMap<String, Set<String>>());
+        expected.get("2011").put("0", new HashSet<String>());
+        expected.get("2011").get("0").add("22");
 
         String expectedQuery =
                 "typeName=acorn_hourly_avg_rot_qc_timeseries_url&SERVICE=WFS&outputFormat=csv" +
