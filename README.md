@@ -7,13 +7,34 @@ Configures a GeoServer war file with the following;
 * CSV with metadata header plugin
 * Layer filter extension
 
-To build:
+### To build
 
 ```
 mvn clean install -U 
 ```
+### To setup to run
 
-To run:
+Create an empty postgres schema that geoserver can connect to as follows: 
+
+| | |
+- | -
+host | localhost
+port | 5432
+database | geoserver
+schema | geoserver
+user | geoserver
+password | geoserver
+
+the schema will be populated with default test data using liquibase
+
+Copy the sample context.xml file to configure the default/additional jndi resources
+
+```
+cd src/main/src/jetty
+cp context-sample.xml context.xml
+```
+
+### To run
 
 ```
 cd src/main

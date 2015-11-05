@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
+    <New id="defaultDs" class="org.eclipse.jetty.plus.jndi.Resource">
+       <Arg></Arg>
+       <Arg>jdbc/default</Arg>
+       <Arg>
+          <New class="org.postgresql.ds.PGSimpleDataSource">
+             <Set name="User">geoserver</Set>
+             <Set name="Password">geoserver</Set>
+             <Set name="DatabaseName">geoserver</Set>
+             <Set name="ServerName">localhost</Set>
+             <Set name="PortNumber">5432</Set>
+          </New>
+       </Arg>
+    </New>
+</Configure>
