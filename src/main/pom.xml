@@ -107,7 +107,27 @@
                 <version>9.2.11.v20150529</version>
                 <configuration>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
+                    <scanTargets>
+                        <scanTarget>src/jetty</scanTarget>
+                    </scanTargets>
+                    <webApp>
+                        <overrideDescriptor>src/jetty/override-web.xml</overrideDescriptor>
+                        <extraClasspath>src/jetty/resources</extraClasspath>
+                     </webApp>
+                    <contextXml>src/jetty/context.xml</contextXml>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4-1201-jdbc41</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-core</artifactId>
+                        <version>3.4.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
        </plugins>
 
