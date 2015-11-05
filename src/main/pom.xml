@@ -107,9 +107,14 @@
                 <version>9.2.11.v20150529</version>
                 <configuration>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
-                    <scanTargets>
-                        <scanTarget>src/jetty</scanTarget>
-                    </scanTargets>
+                    <scanTargetPatterns>
+                      <scanTargetPattern>
+                        <directory>src/jetty</directory>
+                        <excludes>
+                          <exclude>geoserver_data</exclude>
+                        </excludes>
+                      </scanTargetPattern>
+                    </scanTargetPatterns>
                     <webApp>
                         <overrideDescriptor>src/jetty/override-web.xml</overrideDescriptor>
                         <extraClasspath>src/jetty/resources</extraClasspath>
