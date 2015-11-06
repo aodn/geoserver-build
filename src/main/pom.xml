@@ -117,7 +117,7 @@
                     </scanTargetPatterns>
                     <webApp>
                         <overrideDescriptor>src/jetty/override-web.xml</overrideDescriptor>
-                        <extraClasspath>src/jetty/resources</extraClasspath>
+                        <extraClasspath>src/jetty/database</extraClasspath>
                      </webApp>
                     <contextXml>src/jetty/context.xml</contextXml>
                 </configuration>

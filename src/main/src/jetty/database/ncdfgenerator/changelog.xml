@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="talend" id="add_sample_timeseries_data">
+        <!-- From anmn_ts_timeseries harvester -->
+        <sql>
+            CREATE TABLE ts_timeseries
+            (
+              id bigint NOT NULL,
+              file_id bigint NOT NULL,
+              site_code text NOT NULL,
+              platform_code text NOT NULL,
+              deployment_code text NOT NULL,
+              "LATITUDE" double precision,
+              "LATITUDE_quality_control" character(1),
+              "LONGITUDE" double precision,
+              "LONGITUDE_quality_control" character(1),
+              geom geometry(Geometry,4326),
+              instrument_nominal_depth real,
+              site_nominal_depth real,
+              site_depth_at_deployment real,
+              instrument text,
+              instrument_serial_number text,
+              time_coverage_start timestamp with time zone,
+              time_coverage_end timestamp with time zone,
+              time_deployment_start timestamp with time zone,
+              time_deployment_end timestamp with time zone,
+              comment text,
+              history text,
+              toolbox_version text,
+              depth_b boolean,
+              sea_water_temperature_b boolean,
+              sea_water_electrical_conductivity_b boolean,
+              sea_water_salinity_b boolean,
+              sea_water_pressure_b boolean,
+              sea_water_pressure_due_to_sea_water_b boolean,
+              CONSTRAINT ts_timeseries_pk PRIMARY KEY (id ),
+              CONSTRAINT ts_timeseries_deployment_instrument_depth_uc UNIQUE (deployment_code, instrument, instrument_nominal_depth),
+              CONSTRAINT ts_timeseries_deployment_serial_number_uc UNIQUE (deployment_code, instrument_serial_number)
+            );
+  
+            ALTER TABLE ts_timeseries ADD CHECK (st_isvalid(geom));
+            CREATE INDEX ts_timeseries_gist_idx ON ts_timeseries USING GIST (geom); 
+
+            CREATE TABLE ts_measurement
+            (
+              ts_id bigint NOT NULL,
+              index bigint NOT NULL,
+              "TIME" timestamp with time zone NOT NULL,
+              "TIME_quality_control" character(1),
+              "DEPTH" real,
+              "DEPTH_quality_control" character(1),
+              "TEMP" real,
+              "TEMP_quality_control" character(1),
+              "CNDC" real,
+              "CNDC_quality_control" character(1),
+              "PSAL" real,
+              "PSAL_quality_control" character(1),
+              "PRES" real,
+              "PRES_quality_control" character(1),
+              "PRES_REL" real,
+              "PRES_REL_quality_control" character(1),
+              CONSTRAINT ts_measurement_fk PRIMARY KEY (ts_id , index ),
+              CONSTRAINT ts_measurement_ts_fk FOREIGN KEY (ts_id)
+                  REFERENCES ts_timeseries (id) MATCH SIMPLE
+                  ON UPDATE CASCADE ON DELETE CASCADE
+            );
+  
+            CREATE INDEX ts_measurement_time_idx ON ts_measurement USING btree ("TIME");
+            COMMENT ON COLUMN ts_measurement.index IS 'index of measurement in netCDF file';
+        </sql>
+
+        <sqlFile path="ts_timeseries.sql" relativeToChangelogFile="true"/>
+        <sqlFile path="ts_measurement.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>
