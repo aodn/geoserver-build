@@ -1,0 +1,8 @@
+logs
+src/jetty/geoserver_data/security/geoserver.jceks
+src/jetty/geoserver_data/security/masterpw.digest
+src/jetty/geoserver_data/security/version.properties
+src/jetty/geoserver_data/gwc-layers
+src/jetty/geoserver_data/gwc/tmp
+src/jetty/geoserver_data/temp
+
