@@ -16,14 +16,14 @@ mvn clean install -U
 
 Create an empty postgres schema that geoserver can connect to as follows: 
 
-| | |
-- | -
-host | localhost
-port | 5432
-database | geoserver
-schema | geoserver
-user | geoserver
-password | geoserver
+| Parameter | Value |
+| ---- | ---- |
+| host | localhost |
+| port | 5432 |
+| database | geoserver |
+| schema | geoserver |
+| user | geoserver |
+| password | geoserver |
 
 the schema will be populated with default test data using liquibase
 
