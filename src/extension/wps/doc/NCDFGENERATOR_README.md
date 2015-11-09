@@ -79,6 +79,14 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
         -s soop_sst"
 ```
 
+# Running using WPS
+
+In order to run as a WPS request, you can run the following:
+
+```
+$ curl --data @doc/wps-ts_timeseries.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/wps
+```
+
 ----
 
 http://www.unidata.ucar.edu/software/thredds/v4.3/netcdf-java/reference/faq.html
