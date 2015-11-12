@@ -32,10 +32,10 @@ public class NotifierProcess implements GeoServerProcess {
         this.httpNotifier = httpNotifier;
     }
 
-    @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
+    @DescribeResult(name="result", description="Wrapped process response", meta={"mimeTypes=application/xml"})
     public RawData execute(
-        @DescribeParameter(name="notifiable", description="NetCDF file")
-        RawData notifiableData,
+        @DescribeParameter(name="wrappedProcessResponse", description="Wrapped process response")
+        RawData response,
         @DescribeParameter(name="callbackUrl", description="Callback URL")
         URL callbackUrl,
         @DescribeParameter(name="callbackParams", description="Parameters to append to the callback")
@@ -44,7 +44,7 @@ public class NotifierProcess implements GeoServerProcess {
 
         try {
             httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), callbackParams);
-            return notifiableData;
+            return response;
         }
         catch (IOException e) {
             logger.error("Error sending notification", e);
