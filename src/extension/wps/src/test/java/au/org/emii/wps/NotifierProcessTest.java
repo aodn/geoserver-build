@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URL;
 
-import org.geoserver.wps.process.StringRawData;
+import org.geoserver.wps.process.RawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class NotifierProcessTest {
     SimpleHttpNotifier httpNotifier;
     NotifierProcess process;
 
-    StringRawData wrappedProcessResponse;
+    RawData wrappedProcessResponse;
     URL callbackUrl;
     String callbackParams;
 
@@ -40,7 +40,7 @@ public class NotifierProcessTest {
         serverUrl = new URL("http://wpsserver.com");
         doReturn(serverUrl).when(process).getWpsUrl();
 
-        wrappedProcessResponse = mock(StringRawData.class);
+        wrappedProcessResponse = mock(RawData.class);
         callbackUrl = new URL("http://example.com");
         callbackParams = "email.to=bob@example.com";
     }
