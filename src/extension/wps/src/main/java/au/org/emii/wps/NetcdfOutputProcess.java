@@ -7,49 +7,46 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.servlet.ServletContext;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
-
-import org.geotools.data.DataStore;
-import org.geotools.data.Transaction;
+import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.DataStoreInfo;
+import org.geoserver.catalog.LayerInfo;
+import org.geoserver.config.GeoServerDataDirectory;
+import org.geoserver.platform.GeoServerResourceLoader;
+import org.geoserver.wps.ProcessDismissedException;
+import org.geoserver.wps.gs.GeoServerProcess;
+import org.geoserver.wps.process.FileRawData;
+import org.geoserver.wps.process.RawData;
+import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.data.DefaultTransaction;
-import org.geotools.feature.NameImpl;
+import org.geotools.data.Transaction;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
-
-import org.geoserver.wps.gs.GeoServerProcess;
-import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.resource.WPSResourceManager;
-import org.geoserver.wps.ProcessDismissedException;
-import org.geoserver.catalog.Catalog;
-import org.geoserver.catalog.DataStoreInfo;
-import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.NamespaceInfo;
-import org.geoserver.config.GeoServerDataDirectory;
-import org.geoserver.platform.GeoServerResourceLoader;
+import org.geotools.process.factory.DescribeResults;
 import org.opengis.util.ProgressListener;
-
-import au.org.emii.ncdfgenerator.NcdfEncoder;
-import au.org.emii.ncdfgenerator.NcdfEncoderBuilder;
-import au.org.emii.ncdfgenerator.ZipFormatter;
-import au.org.emii.ncdfgenerator.NcdfDefinitionXMLParser;
-import au.org.emii.ncdfgenerator.NcdfDefinition;
-
-import javax.servlet.ServletContext;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-@DescribeProcess(title="NetCDF download", description="Subset and download collection as NetCDF files")
-public class NetcdfOutputProcess implements GeoServerProcess {
+import au.org.emii.ncdfgenerator.NcdfDefinition;
+import au.org.emii.ncdfgenerator.NcdfDefinitionXMLParser;
+import au.org.emii.ncdfgenerator.NcdfEncoder;
+import au.org.emii.ncdfgenerator.NcdfEncoderBuilder;
+import au.org.emii.ncdfgenerator.ZipFormatter;
 
+@DescribeProcess(title="NetCDF download", description="Subset and download collection as NetCDF files")
+public class NetcdfOutputProcess implements GeoServerProcess, SubsetOperation {
+
+    private static final String RESULT_TYPE = "application/zip";
     private static final String NETCDF_FILENAME = "netcdf.xml";
     private static final Logger logger = LoggerFactory.getLogger(NetcdfOutputProcess.class);
     private final WPSResourceManager resourceManager;
@@ -66,16 +63,23 @@ public class NetcdfOutputProcess implements GeoServerProcess {
         logger.info("constructor");
     }
 
-    @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
+    @DescribeResults({
+        @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=" + RESULT_TYPE},
+                primary=true, type=RawData.class),
+        @DescribeResult(name="errors", description="Errors returned trying to perform subset", type=String.class)
+    })
+    public Map<String, Object> execute(
+            @DescribeParameter(name="typeName", description="Collection to download")
+            String typeName,
+            @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
+            String cqlFilter,
+            ProgressListener progressListener
+        ) {
+       SubsetExceptionHandler handler = new SubsetExceptionHandler(this);
+       return handler.subset(typeName, cqlFilter, progressListener);
+    }
 
-    public FileRawData execute(
-        @DescribeParameter(name="typeName", description="Collection to download")
-        String typeName,
-        @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
-        String cqlFilter,
-        ProgressListener progressListener
-    ) throws ProcessException {
-
+    public RawData subset(String typeName, String cqlFilter, ProgressListener progressListener) throws Exception {
         logger.info("execute");
 
         Transaction transaction = null;
@@ -136,7 +140,7 @@ public class NetcdfOutputProcess implements GeoServerProcess {
                 }
             }
 
-            return new FileRawData(outputFile, "application/zip");
+            return new FileRawData(outputFile, RESULT_TYPE, "zip");
 
         } catch (Exception e) {
             if (transaction != null) {
@@ -153,11 +157,15 @@ public class NetcdfOutputProcess implements GeoServerProcess {
                     logger.info("problem closing connection");
                 }
             }
-            throw new ProcessException(e);
+            throw e;
         } finally {
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
         }
+    }
+
+    public String getResultType() {
+        return RESULT_TYPE;
     }
 
     private String getWorkingDir(WPSResourceManager resourceManager) {

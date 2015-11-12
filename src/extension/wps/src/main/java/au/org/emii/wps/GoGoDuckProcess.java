@@ -3,32 +3,6 @@ package au.org.emii.wps;
 import java.io.File;
 import java.util.Map;
 
-import au.org.emii.gogoduck.worker.GoGoDuckException;
-import au.org.emii.gogoduck.worker.GoGoDuck;
-
-import au.org.emii.gogoduck.worker.URLMangler;
-import net.opengis.wps10.ExecuteType;
-import org.apache.commons.io.FilenameUtils;
-import org.geoserver.config.impl.GeoServerImpl;
-import org.geoserver.ows.Dispatcher;
-import org.geoserver.platform.GeoServerResourceLoader;
-import org.geoserver.platform.Operation;
-import org.geoserver.platform.exception.GeoServerRuntimException;
-import org.geoserver.wps.WPSException;
-import org.geoserver.wps.WPSInfo;
-import org.opengis.util.ProgressListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.geotools.process.ProcessException;
-import org.geotools.process.factory.DescribeParameter;
-import org.geotools.process.factory.DescribeProcess;
-import org.geotools.process.factory.DescribeResult;
-import org.geoserver.wps.gs.GeoServerProcess;
-import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.resource.WPSResourceManager;
-import org.w3c.dom.Document;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -36,12 +10,36 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import net.opengis.wps10.ExecuteType;
+
+import org.apache.commons.io.FilenameUtils;
+import org.geoserver.ows.Dispatcher;
+import org.geoserver.platform.GeoServerResourceLoader;
+import org.geoserver.platform.Operation;
+import org.geoserver.wps.gs.GeoServerProcess;
+import org.geoserver.wps.process.FileRawData;
+import org.geoserver.wps.process.RawData;
+import org.geoserver.wps.resource.WPSResourceManager;
+import org.geotools.process.ProcessException;
+import org.geotools.process.factory.DescribeParameter;
+import org.geotools.process.factory.DescribeProcess;
+import org.geotools.process.factory.DescribeResult;
+import org.geotools.process.factory.DescribeResults;
+import org.opengis.util.ProgressListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import au.org.emii.gogoduck.worker.GoGoDuck;
+import au.org.emii.gogoduck.worker.URLMangler;
+
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
-public class GoGoDuckProcess implements GeoServerProcess {
-    private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
+public class GoGoDuckProcess implements GeoServerProcess, SubsetOperation {
+    private static final String RESULT_TYPE = "application/x-netcdf";
+
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
 
     private final WPSResourceManager resourceManager;
-    private final WPSInfo wpsInfo;
     private final GeoServerResourceLoader resourceLoader;
 
     private final String CONFIG_FILE = "wps/gogoduck.xml";
@@ -52,49 +50,57 @@ public class GoGoDuckProcess implements GeoServerProcess {
     private final String THREAD_COUNT_KEY = "/gogoduck/threadCount";
     private final String THREAD_COUNT_DEFAULT = "0";
 
-    public GoGoDuckProcess(WPSResourceManager resourceManager, GeoServerImpl geoServer, GeoServerResourceLoader resourceLoader) {
+    public GoGoDuckProcess(WPSResourceManager resourceManager, GeoServerResourceLoader resourceLoader) {
         this.resourceManager = resourceManager;
         this.resourceLoader = resourceLoader;
-        wpsInfo = geoServer.getService(WPSInfo.class);
     }
 
-    @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
-    public FileRawData execute(
+    @DescribeResults({
+        @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=" + RESULT_TYPE},
+                primary=true, type=RawData.class),
+        @DescribeResult(name="errors", description="Errors returned trying to perform subset", type=String.class)
+    })
+    public Map<String, Object> execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
             String subset,
             ProgressListener progressListener
-    ) throws ProcessException {
-        try {
-            final int threadCount = getThreadCount();
-            final int fileLimit = getFileLimit();
+    ) {
+        SubsetExceptionHandler handler = new SubsetExceptionHandler(this);
+        return handler.subset(layer, subset, progressListener);
+    }
 
-            if (threadCount <= 0) {
-                throw new ProcessException("threadCount set to 0 or below, job will not run");
-            }
+    public RawData subset(String layer, String subset, ProgressListener progressListener) {
+        final int threadCount = getThreadCount();
+        final int fileLimit = getFileLimit();
 
-            if (fileLimit <= 0) {
-                throw new ProcessException("fileLimit set to 0 or below, job will not run");
-            }
-
-            final File outputFile = resourceManager.getOutputResource(
-                    resourceManager.getExecutionId(true), layer + ".nc").file();
-
-            final String filePath = outputFile.toPath().toAbsolutePath().toString();
-
-            GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
-
-            ggd.setTmpDir(getWorkingDir(resourceManager));
-            ggd.setThreadCount(threadCount);
-            ggd.setProgressListener(progressListener);
-
-            ggd.run();
-            return new FileRawData(outputFile, "application/x-netcdf", "nc");
-        } catch (GoGoDuckException e) {
-            logger.error(e.toString());
-            throw new ProcessException(e);
+        if (threadCount <= 0) {
+            throw new ProcessException("threadCount set to 0 or below, job will not run");
         }
+
+        if (fileLimit <= 0) {
+            throw new ProcessException("fileLimit set to 0 or below, job will not run");
+        }
+
+        final File outputFile = resourceManager.getOutputResource(
+                resourceManager.getExecutionId(true), layer + ".nc").file();
+
+        final String filePath = outputFile.toPath().toAbsolutePath().toString();
+
+        GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
+
+        ggd.setTmpDir(getWorkingDir(resourceManager));
+        ggd.setThreadCount(threadCount);
+        ggd.setProgressListener(progressListener);
+
+        ggd.run();
+
+        return new FileRawData(outputFile, RESULT_TYPE, "nc");
+    }
+
+    public String getResultType() {
+        return RESULT_TYPE;
     }
 
     private String getBaseUrl() {

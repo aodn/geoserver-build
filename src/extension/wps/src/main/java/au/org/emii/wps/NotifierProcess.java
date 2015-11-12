@@ -1,11 +1,11 @@
 package au.org.emii.wps;
 
-import au.org.emii.notifier.*;
-
-import java.net.URL;
-import java.net.MalformedURLException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import net.opengis.wps10.ExecuteType;
+
 import org.geoserver.ows.Dispatcher;
 import org.geoserver.platform.Operation;
 import org.geoserver.wps.gs.GeoServerProcess;
@@ -17,6 +17,8 @@ import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="Notifier", description="Notify subscribers when a WPS process completes")
 public class NotifierProcess implements GeoServerProcess {
