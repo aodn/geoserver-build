@@ -35,4 +35,6 @@
       <constructor-arg index="1" ref="catalog"/>
       <constructor-arg index="2" ref="servletContext"/>
     </bean>
-</beans>
+
+    <bean id="xmlRawDataPPIO" class="au.org.emii.wps.StringRawDataXmlPPIO"/>
+ </beans>

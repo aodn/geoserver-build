@@ -1,17 +1,21 @@
 package au.org.emii.wps;
 
-import au.org.emii.notifier.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URL;
+
+import org.geoserver.wps.process.StringRawData;
+import org.geoserver.wps.resource.WPSResourceManager;
 import org.junit.Before;
 import org.junit.Test;
-import org.geoserver.wps.resource.WPSResourceManager;
-import org.geoserver.wps.process.RawData;
 
-import java.net.URL;
-import java.io.IOException;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import au.org.emii.notifier.SimpleHttpNotifier;
 
 public class NotifierProcessTest {
 
@@ -19,7 +23,7 @@ public class NotifierProcessTest {
     SimpleHttpNotifier httpNotifier;
     NotifierProcess process;
 
-    RawData notifiableData;
+    StringRawData wrappedProcessResponse;
     URL callbackUrl;
     String callbackParams;
 
@@ -36,19 +40,19 @@ public class NotifierProcessTest {
         serverUrl = new URL("http://wpsserver.com");
         doReturn(serverUrl).when(process).getWpsUrl();
 
-        notifiableData = mock(RawData.class);
+        wrappedProcessResponse = mock(StringRawData.class);
         callbackUrl = new URL("http://example.com");
         callbackParams = "email.to=bob@example.com";
     }
 
     @Test
     public void testExecuteReturnsGivenData() throws IOException {
-        assertEquals(notifiableData, process.execute(notifiableData, callbackUrl, callbackParams));
+        assertEquals(wrappedProcessResponse, process.execute(wrappedProcessResponse, callbackUrl, callbackParams));
     }
 
     @Test
     public void testExecuteNotifiesViaCallback() throws IOException {
-        process.execute(notifiableData, callbackUrl, callbackParams);
+        process.execute(wrappedProcessResponse, callbackUrl, callbackParams);
         verify(httpNotifier).notify(callbackUrl, serverUrl, "abcd-1234", callbackParams);
     }
 }
