@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,7 +20,6 @@ import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.ProcessDismissedException;
 import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.process.RawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
@@ -30,7 +28,6 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
-import org.geotools.process.factory.DescribeResults;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +41,8 @@ import au.org.emii.ncdfgenerator.NcdfEncoderBuilder;
 import au.org.emii.ncdfgenerator.ZipFormatter;
 
 @DescribeProcess(title="NetCDF download", description="Subset and download collection as NetCDF files")
-public class NetcdfOutputProcess implements GeoServerProcess, SubsetOperation {
+public class NetcdfOutputProcess implements GeoServerProcess {
 
-    private static final String RESULT_TYPE = "application/zip";
     private static final String NETCDF_FILENAME = "netcdf.xml";
     private static final Logger logger = LoggerFactory.getLogger(NetcdfOutputProcess.class);
     private final WPSResourceManager resourceManager;
@@ -63,23 +59,16 @@ public class NetcdfOutputProcess implements GeoServerProcess, SubsetOperation {
         logger.info("constructor");
     }
 
-    @DescribeResults({
-        @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=" + RESULT_TYPE},
-                primary=true, type=RawData.class),
-        @DescribeResult(name="errors", description="Errors returned trying to perform subset", type=String.class)
-    })
-    public Map<String, Object> execute(
-            @DescribeParameter(name="typeName", description="Collection to download")
-            String typeName,
-            @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
-            String cqlFilter,
-            ProgressListener progressListener
-        ) {
-       SubsetExceptionHandler handler = new SubsetExceptionHandler(this);
-       return handler.subset(typeName, cqlFilter, progressListener);
-    }
+    @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
 
-    public RawData subset(String typeName, String cqlFilter, ProgressListener progressListener) throws Exception {
+    public FileRawData execute(
+        @DescribeParameter(name="typeName", description="Collection to download")
+        String typeName,
+        @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
+        String cqlFilter,
+        ProgressListener progressListener
+    ) throws ProcessException {
+
         logger.info("execute");
 
         Transaction transaction = null;
@@ -140,7 +129,7 @@ public class NetcdfOutputProcess implements GeoServerProcess, SubsetOperation {
                 }
             }
 
-            return new FileRawData(outputFile, RESULT_TYPE, "zip");
+            return new FileRawData(outputFile, "application/zip");
 
         } catch (Exception e) {
             if (transaction != null) {
@@ -157,15 +146,11 @@ public class NetcdfOutputProcess implements GeoServerProcess, SubsetOperation {
                     logger.info("problem closing connection");
                 }
             }
-            throw e;
+            throw new ProcessException(e.getMessage());
         } finally {
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
         }
-    }
-
-    public String getResultType() {
-        return RESULT_TYPE;
     }
 
     private String getWorkingDir(WPSResourceManager resourceManager) {

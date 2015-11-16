@@ -18,26 +18,23 @@ import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.platform.Operation;
 import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.process.RawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
-import org.geotools.process.factory.DescribeResults;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import au.org.emii.gogoduck.worker.GoGoDuck;
+import au.org.emii.gogoduck.worker.GoGoDuckException;
 import au.org.emii.gogoduck.worker.URLMangler;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
-public class GoGoDuckProcess implements GeoServerProcess, SubsetOperation {
-    private static final String RESULT_TYPE = "application/x-netcdf";
-
-    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
+public class GoGoDuckProcess implements GeoServerProcess {
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
     private final WPSResourceManager resourceManager;
     private final GeoServerResourceLoader resourceLoader;
@@ -55,52 +52,43 @@ public class GoGoDuckProcess implements GeoServerProcess, SubsetOperation {
         this.resourceLoader = resourceLoader;
     }
 
-    @DescribeResults({
-        @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=" + RESULT_TYPE},
-                primary=true, type=RawData.class),
-        @DescribeResult(name="errors", description="Errors returned trying to perform subset", type=String.class)
-    })
-    public Map<String, Object> execute(
+    @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
+    public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
             String subset,
             ProgressListener progressListener
-    ) {
-        SubsetExceptionHandler handler = new SubsetExceptionHandler(this);
-        return handler.subset(layer, subset, progressListener);
-    }
+    ) throws ProcessException {
+        try {
+            final int threadCount = getThreadCount();
+            final int fileLimit = getFileLimit();
 
-    public RawData subset(String layer, String subset, ProgressListener progressListener) {
-        final int threadCount = getThreadCount();
-        final int fileLimit = getFileLimit();
+            if (threadCount <= 0) {
+                throw new ProcessException("threadCount set to 0 or below, job will not run");
+            }
 
-        if (threadCount <= 0) {
-            throw new ProcessException("threadCount set to 0 or below, job will not run");
+            if (fileLimit <= 0) {
+                throw new ProcessException("fileLimit set to 0 or below, job will not run");
+            }
+
+            final File outputFile = resourceManager.getOutputResource(
+                    resourceManager.getExecutionId(true), layer + ".nc").file();
+
+            final String filePath = outputFile.toPath().toAbsolutePath().toString();
+
+            GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
+
+            ggd.setTmpDir(getWorkingDir(resourceManager));
+            ggd.setThreadCount(threadCount);
+            ggd.setProgressListener(progressListener);
+
+            ggd.run();
+            return new FileRawData(outputFile, "application/x-netcdf", "nc");
+        } catch (GoGoDuckException e) {
+            logger.error(e.toString());
+            throw new ProcessException(e);
         }
-
-        if (fileLimit <= 0) {
-            throw new ProcessException("fileLimit set to 0 or below, job will not run");
-        }
-
-        final File outputFile = resourceManager.getOutputResource(
-                resourceManager.getExecutionId(true), layer + ".nc").file();
-
-        final String filePath = outputFile.toPath().toAbsolutePath().toString();
-
-        GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
-
-        ggd.setTmpDir(getWorkingDir(resourceManager));
-        ggd.setThreadCount(threadCount);
-        ggd.setProgressListener(progressListener);
-
-        ggd.run();
-
-        return new FileRawData(outputFile, RESULT_TYPE, "nc");
-    }
-
-    public String getResultType() {
-        return RESULT_TYPE;
     }
 
     private String getBaseUrl() {
