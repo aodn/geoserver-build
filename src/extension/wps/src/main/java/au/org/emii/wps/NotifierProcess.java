@@ -9,7 +9,7 @@ import net.opengis.wps10.ExecuteType;
 import org.geoserver.ows.Dispatcher;
 import org.geoserver.platform.Operation;
 import org.geoserver.wps.gs.GeoServerProcess;
-import org.geoserver.wps.process.RawData;
+import org.geoserver.wps.process.StringRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
@@ -32,10 +32,10 @@ public class NotifierProcess implements GeoServerProcess {
         this.httpNotifier = httpNotifier;
     }
 
-    @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
-    public RawData execute(
-        @DescribeParameter(name="notifiable", description="NetCDF file")
-        RawData notifiableData,
+    @DescribeResult(name="result", description="Wrapped process response", meta={"mimeTypes=application/xml"})
+    public StringRawData execute(
+        @DescribeParameter(name="wrappedProcessResponse", description="Wrapped process response")
+        StringRawData response,
         @DescribeParameter(name="callbackUrl", description="Callback URL")
         URL callbackUrl,
         @DescribeParameter(name="callbackParams", description="Parameters to append to the callback")
@@ -44,7 +44,7 @@ public class NotifierProcess implements GeoServerProcess {
 
         try {
             httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), callbackParams);
-            return notifiableData;
+            return response;
         }
         catch (IOException e) {
             logger.error("Error sending notification", e);
