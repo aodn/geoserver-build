@@ -7,6 +7,8 @@ Configures a GeoServer war file with the following;
 * CSV with metadata header plugin
 * Layer filter extension
 
+Check out the [extensions' readme](https://github.com/aodn/geoserver-build/blob/master/src/extension/wps/README.md) for more information.
+
 ### To build
 
 ```
