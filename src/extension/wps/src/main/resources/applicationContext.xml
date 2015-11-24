@@ -29,10 +29,8 @@
 
     <bean id="netcdfOutputProcess" class="au.org.emii.wps.NetcdfOutputProcess">
       <constructor-arg index="0" ref="wpsResourceManager"/>
-      <constructor-arg index="1" ref="simpleHttpNotifier"/>
+      <constructor-arg index="1" ref="retryingHttpNotifier"/>
       <constructor-arg index="2" ref="catalog"/>
       <constructor-arg index="3" ref="servletContext"/>
     </bean>
-
-    <bean id="xmlRawDataPPIO" class="au.org.emii.wps.StringRawDataXmlPPIO"/>
  </beans>
