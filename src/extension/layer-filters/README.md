@@ -26,8 +26,8 @@ There are three components to the extension.
 
 ### Layer Property Configuration
 
-Once the extension is installed log in as an admin user and toward the bottom of the main menu
-on the left there should an item **WMS Layer Filters**
+Once the extension is installed, log in as an admin user and toward the bottom of the main menu
+on the left there should an item **WMS Layer Filters**.
 
 From the list select the layer you wish to configure filters for. Note that you can filter the results
 using the search bar on the top right of the list of layers.
