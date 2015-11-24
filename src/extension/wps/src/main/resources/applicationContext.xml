@@ -3,7 +3,8 @@
 <beans>
     <bean id="goGoDuckProcess" class="au.org.emii.wps.GoGoDuckProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1" ref="resourceLoader"/>
+        <constructor-arg index="1" ref="retryingHttpNotifier"/>
+        <constructor-arg index="2" ref="resourceLoader"/>
 
         <property name="urlMangling">
             <map>
@@ -16,10 +17,6 @@
         </property>
     </bean>
 
-    <bean id="notifierProcess" class="au.org.emii.wps.NotifierProcess">
-        <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1" ref="retryingHttpNotifier"/>
-    </bean>
     <bean id="retryingHttpNotifier" class="au.org.emii.notifier.RetryingHttpNotifier">
         <constructor-arg index="0" ref="simpleHttpNotifier"/>
         <constructor-arg index="1" value="3" />
@@ -32,8 +29,9 @@
 
     <bean id="netcdfOutputProcess" class="au.org.emii.wps.NetcdfOutputProcess">
       <constructor-arg index="0" ref="wpsResourceManager"/>
-      <constructor-arg index="1" ref="catalog"/>
-      <constructor-arg index="2" ref="servletContext"/>
+      <constructor-arg index="1" ref="simpleHttpNotifier"/>
+      <constructor-arg index="2" ref="catalog"/>
+      <constructor-arg index="3" ref="servletContext"/>
     </bean>
 
     <bean id="xmlRawDataPPIO" class="au.org.emii.wps.StringRawDataXmlPPIO"/>

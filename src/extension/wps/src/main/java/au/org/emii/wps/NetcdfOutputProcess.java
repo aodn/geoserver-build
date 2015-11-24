@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -18,7 +19,6 @@ import org.geoserver.catalog.LayerInfo;
 import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.ProcessDismissedException;
-import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.data.DefaultTransaction;
@@ -39,22 +39,23 @@ import au.org.emii.ncdfgenerator.NcdfDefinitionXMLParser;
 import au.org.emii.ncdfgenerator.NcdfEncoder;
 import au.org.emii.ncdfgenerator.NcdfEncoderBuilder;
 import au.org.emii.ncdfgenerator.ZipFormatter;
+import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="NetCDF download", description="Subset and download collection as NetCDF files")
-public class NetcdfOutputProcess implements GeoServerProcess {
+public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
     private static final String NETCDF_FILENAME = "netcdf.xml";
     private static final Logger logger = LoggerFactory.getLogger(NetcdfOutputProcess.class);
-    private final WPSResourceManager resourceManager;
     private final Catalog catalog;
     private final String workingDir;
     private final ServletContext context;
 
-    public NetcdfOutputProcess(WPSResourceManager resourceManager, Catalog catalog, ServletContext context) {
-        this.resourceManager = resourceManager;
+    public NetcdfOutputProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
+            Catalog catalog, ServletContext context) {
+        super(resourceManager, httpNotifier);
         this.catalog = catalog;
         this.context = context;
-        this.workingDir = getWorkingDir(resourceManager);
+        this.workingDir = getWorkingDir();
 
         logger.info("constructor");
     }
@@ -66,6 +67,10 @@ public class NetcdfOutputProcess implements GeoServerProcess {
         String typeName,
         @DescribeParameter(name="cqlFilter", description="CQL Filter to apply", min=0)
         String cqlFilter,
+        @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
+        URL callbackUrl,
+        @DescribeParameter(name="callbackParams", description="Parameters to append to the callback", min=0)
+        String callbackParams,
         ProgressListener progressListener
     ) throws ProcessException {
 
@@ -117,8 +122,8 @@ public class NetcdfOutputProcess implements GeoServerProcess {
 
             NcdfEncoder encoder = encoderBuilder.create();
 
-            final File outputFile = resourceManager.getOutputResource(
-                resourceManager.getExecutionId(true), typeName + ".zip").file();
+            final File outputFile = getResourceManager().getOutputResource(
+                getResourceManager().getExecutionId(true), typeName + ".zip").file();
 
             os = new FileOutputStream(outputFile);
 
@@ -150,17 +155,9 @@ public class NetcdfOutputProcess implements GeoServerProcess {
         } finally {
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
+
+            notify(callbackUrl, callbackParams);
         }
     }
 
-    private String getWorkingDir(WPSResourceManager resourceManager) {
-       try {
-            // Use WPSResourceManager to create a temporary directory that will get cleaned up
-            // when the process has finished executing (Hack! Should be a method on the resource manager)
-            return resourceManager.getTemporaryResource("").dir().getAbsolutePath();
-       } catch (Exception e) {
-            logger.info("Exception accessing working directory: \n" + e);
-            return System.getProperty("java.io.tmpdir");
-       }
-   }
 }

@@ -1,6 +1,7 @@
 package au.org.emii.wps;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -10,13 +11,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import net.opengis.wps10.ExecuteType;
-
 import org.apache.commons.io.FilenameUtils;
-import org.geoserver.ows.Dispatcher;
 import org.geoserver.platform.GeoServerResourceLoader;
-import org.geoserver.platform.Operation;
-import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.process.ProcessException;
@@ -31,12 +27,12 @@ import org.w3c.dom.Document;
 import au.org.emii.gogoduck.worker.GoGoDuck;
 import au.org.emii.gogoduck.worker.GoGoDuckException;
 import au.org.emii.gogoduck.worker.URLMangler;
+import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
-public class GoGoDuckProcess implements GeoServerProcess {
-    private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
+public class GoGoDuckProcess extends AbstractNotifierProcess {
+    static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
-    private final WPSResourceManager resourceManager;
     private final GeoServerResourceLoader resourceLoader;
 
     private final String CONFIG_FILE = "wps/gogoduck.xml";
@@ -47,8 +43,9 @@ public class GoGoDuckProcess implements GeoServerProcess {
     private final String THREAD_COUNT_KEY = "/gogoduck/threadCount";
     private final String THREAD_COUNT_DEFAULT = "0";
 
-    public GoGoDuckProcess(WPSResourceManager resourceManager, GeoServerResourceLoader resourceLoader) {
-        this.resourceManager = resourceManager;
+    public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
+            GeoServerResourceLoader resourceLoader) {
+        super(resourceManager, httpNotifier);
         this.resourceLoader = resourceLoader;
     }
 
@@ -58,6 +55,10 @@ public class GoGoDuckProcess implements GeoServerProcess {
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
             String subset,
+            @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
+            URL callbackUrl,
+            @DescribeParameter(name="callbackParams", description="Parameters to append to the callback", min=0)
+            String callbackParams,
             ProgressListener progressListener
     ) throws ProcessException {
         try {
@@ -72,14 +73,14 @@ public class GoGoDuckProcess implements GeoServerProcess {
                 throw new ProcessException("fileLimit set to 0 or below, job will not run");
             }
 
-            final File outputFile = resourceManager.getOutputResource(
-                    resourceManager.getExecutionId(true), layer + ".nc").file();
+            final File outputFile = getResourceManager().getOutputResource(
+                    getResourceManager().getExecutionId(true), layer + ".nc").file();
 
             final String filePath = outputFile.toPath().toAbsolutePath().toString();
 
             GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
 
-            ggd.setTmpDir(getWorkingDir(resourceManager));
+            ggd.setTmpDir(getWorkingDir());
             ggd.setThreadCount(threadCount);
             ggd.setProgressListener(progressListener);
 
@@ -88,15 +89,9 @@ public class GoGoDuckProcess implements GeoServerProcess {
         } catch (GoGoDuckException e) {
             logger.error(e.toString());
             throw new ProcessException(e);
+        } finally {
+            notify(callbackUrl, callbackParams);
         }
-    }
-
-    private String getBaseUrl() {
-        // TODO is there a nicer way of getting BaseUrl?
-        Dispatcher.REQUEST.get().getOperation();
-        Operation op = Dispatcher.REQUEST.get().getOperation();
-        ExecuteType execute = (ExecuteType) op.getParameters()[0];
-        return execute.getBaseUrl();
     }
 
     private int getFileLimit() {
@@ -134,18 +129,8 @@ public class GoGoDuckProcess implements GeoServerProcess {
         return (String) expr.evaluate(doc, XPathConstants.STRING);
     }
 
-    private String getWorkingDir(WPSResourceManager resourceManager) {
-        try {
-            // Use WPSResourceManager to create a temporary directory that will get cleaned up
-            // when the process has finished executing (Hack! Should be a method on the resource manager)
-            return resourceManager.getTemporaryResource("").dir().getAbsolutePath();
-        } catch (Exception e) {
-            logger.info("Exception accessing working directory: \n" + e);
-            return System.getProperty("java.io.tmpdir");
-        }
-    }
-
     public void setUrlMangling(Map<String, String> urlMangling) {
         URLMangler.setUrlManglingMap(urlMangling);
     }
+
 }
