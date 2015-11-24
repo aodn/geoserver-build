@@ -1,8 +1,5 @@
 GeoServer Layer Filter Extension
 ================================
-
-[![Build Status](https://travis-ci.org/aodn/geoserver-layer-filter-extension.png?branch=master)](https://travis-ci.org/aodn/geoserver-layer-filter-extension)
-
 This extension provides the ability to configure layers to present properties by which they
 can be subset.
 
