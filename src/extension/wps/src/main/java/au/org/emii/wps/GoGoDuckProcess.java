@@ -85,12 +85,12 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             ggd.setProgressListener(progressListener);
 
             ggd.run();
+            notifySuccess(callbackUrl, callbackParams);
             return new FileRawData(outputFile, "application/x-netcdf", "nc");
         } catch (GoGoDuckException e) {
             logger.error(e.toString());
+            notifyFailure(callbackUrl, callbackParams);
             throw new ProcessException(e);
-        } finally {
-            notify(callbackUrl, callbackParams);
         }
     }
 

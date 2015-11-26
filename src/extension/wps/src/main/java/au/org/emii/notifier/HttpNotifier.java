@@ -5,5 +5,5 @@ import java.net.URL;
 
 public interface HttpNotifier {
 
-    void notify(URL notificationUrl, URL wpsServerUrl, String uuid, String notificationParams) throws IOException;
+    void notify(URL notificationUrl, URL wpsServerUrl, String uuid, boolean successful, String notificationParams) throws IOException;
 }

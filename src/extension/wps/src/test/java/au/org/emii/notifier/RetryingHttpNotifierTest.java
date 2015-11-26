@@ -19,6 +19,7 @@ public class RetryingHttpNotifierTest {
     URL wpsServerUrl;
     String uuid = "uuid";
     String notificationParams = "notificationParams";
+    boolean successful = true;
 
     @Before
     public void setUp() throws IOException {
@@ -31,19 +32,19 @@ public class RetryingHttpNotifierTest {
 
     @Test(expected = IOException.class)
     public void testExecuteRetriesFixedNumberOfTimes() throws IOException {
-        doThrow(new IOException()).when(wrappedNotifier).notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        doThrow(new IOException()).when(wrappedNotifier).notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
 
-        retryingNotifier.notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        retryingNotifier.notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
 
-        verify(wrappedNotifier, times(notificationAttempts)).notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        verify(wrappedNotifier, times(notificationAttempts)).notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
     }
 
     @Test
     public void testExecuteRetriesUntilSuccess() throws IOException {
-        doThrow(new IOException()).doNothing(/* will succeed */).when(wrappedNotifier).notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        doThrow(new IOException()).doNothing(/* will succeed */).when(wrappedNotifier).notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
 
-        retryingNotifier.notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        retryingNotifier.notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
 
-        verify(wrappedNotifier, times(2)).notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+        verify(wrappedNotifier, times(2)).notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
     }
 }

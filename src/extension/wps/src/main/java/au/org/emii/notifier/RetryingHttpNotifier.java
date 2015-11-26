@@ -23,6 +23,7 @@ public class RetryingHttpNotifier implements HttpNotifier {
         URL notificationUrl,
         URL wpsServerUrl,
         String uuid,
+        boolean successful,
         String notificationParams) throws IOException
     {
         IOException lastException;
@@ -31,7 +32,7 @@ public class RetryingHttpNotifier implements HttpNotifier {
         do {
             try {
                 logger.debug("Notification attempt #" + attempt);
-                httpNotifier.notify(notificationUrl, wpsServerUrl, uuid, notificationParams);
+                httpNotifier.notify(notificationUrl, wpsServerUrl, uuid, successful, notificationParams);
                 return;
             }
             catch (IOException e) {
