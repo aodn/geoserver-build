@@ -19,12 +19,13 @@ public class SimpleHttpNotifierTest {
         URL notificationUrl = new URL("http://notifiee");
         URL wpsServiceUrl = new URL("http://notifier");
         String id = "1234";
+        boolean successful = true;
 
         String notificationParams = "foo=bar";
 
-        notifier.notify(notificationUrl, wpsServiceUrl, id, notificationParams);
+        notifier.notify(notificationUrl, wpsServiceUrl, id, successful, notificationParams);
 
-        URL expectedUrl = new URL("http://notifiee?server=http%3A%2F%2Fnotifier&uuid=1234&foo=bar");
+        URL expectedUrl = new URL("http://notifiee?server=http%3A%2F%2Fnotifier&uuid=1234&successful=true&foo=bar");
         verify(httpClient).get(expectedUrl);
     }
 }

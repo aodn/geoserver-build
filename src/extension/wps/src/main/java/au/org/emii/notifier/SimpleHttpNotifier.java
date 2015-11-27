@@ -16,12 +16,14 @@ public class SimpleHttpNotifier implements HttpNotifier {
         URL notificationUrl,
         URL wpsServerUrl,
         String uuid,
+        boolean successful,
         String notificationParams
     ) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(notificationUrl.toURI());
             builder.setParameter("server", wpsServerUrl.toExternalForm());
             builder.setParameter("uuid", uuid);
+            builder.setParameter("successful", Boolean.toString(successful));
 
             String callbackUrlAsString = builder.build().toURL().toExternalForm();
             callbackUrlAsString += "&" + notificationParams;

@@ -25,11 +25,21 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
         this.httpNotifier = httpNotifier;
     }
 
-    protected void notify(URL callbackUrl, String callbackParams) {
+    protected void notifySuccess(URL callbackUrl, String callbackParams) {
+        boolean successful = true;
+        notify(successful, callbackUrl, callbackParams);
+    }
+
+    protected void notifyFailure(URL callbackUrl, String callbackParams) {
+        boolean successful = false;
+        notify(successful, callbackUrl, callbackParams);
+    }
+
+    protected void notify(boolean successful, URL callbackUrl, String callbackParams) {
         if (callbackUrl == null) return;
 
         try {
-            httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), callbackParams);
+            httpNotifier.notify(callbackUrl, getWpsUrl(), getId(), successful, callbackParams);
         } catch (IOException ioe) {
             logger.error("Could not call callback", ioe);
         }
