@@ -41,6 +41,10 @@ cp context-sample.xml context.xml
 ```
 cd src/main
 mvn jetty:run
+
+or something like...
+
+MAVEN_OPTS='-Xms100m -Xmx512m -XX:MaxPermSize=192m' mvn jetty:run -Djetty.port=9090
 ```
 
 GeoServer will then be available at:
