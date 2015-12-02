@@ -28,6 +28,11 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
+            <groupId>au.org.emii.geoserver.wfs</groupId>
+            <artifactId>csv-with-metadata-header</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>au.org.emii.geoserver.wms</groupId>
             <artifactId>ncwms</artifactId>
             <version>1.0.0</version>
