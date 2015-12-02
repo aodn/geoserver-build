@@ -46,7 +46,7 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
         bufferedReader.readLine(); // Skip header
 
-        List<String> timesOfDay = new ArrayList<String>();
+        List<String> timesOfDay = new ArrayList<>();
 
         String line;
         while ((line = bufferedReader.readLine()) != null) {
@@ -64,8 +64,7 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(wfsQuery(urlParameters)));
         bufferedReader.readLine(); // Skip header
 
-        Map<String, Map<String, Set<String> > > dates =
-                new HashMap<String, Map<String, Set<String> > >();
+        Map<String, Map<String, Set<String> > > dates = new HashMap<>();
 
         String line;
         while ((line = bufferedReader.readLine()) != null) {
@@ -108,18 +107,18 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         
         return String.format(
-                "%s >= %s AND %s < %s",
-                timeFieldName, formatter.print(timeStart.withZone(DateTimeZone.UTC)),
-                timeFieldName, formatter.print(timeEnd.withZone(DateTimeZone.UTC))
+            "%s >= %s AND %s < %s",
+            timeFieldName, formatter.print(timeStart.withZone(DateTimeZone.UTC)),
+            timeFieldName, formatter.print(timeEnd.withZone(DateTimeZone.UTC))
         );
     }
 
     private String getWfsUrlParameters(String wfsLayer, String propertyName, String cqlFilter) throws UnsupportedEncodingException {
         String urlParameters =
-                String.format(
-                        "typeName=%s&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0&PROPERTYNAME=%s",
-                        wfsLayer, propertyName
-                );
+            String.format(
+                "typeName=%s&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0&PROPERTYNAME=%s",
+                wfsLayer, propertyName
+            );
 
         if (cqlFilter != null && ! cqlFilter.isEmpty()) {
             urlParameters += String.format("&CQL_FILTER=%s", URLEncoder.encode(cqlFilter, StandardCharsets.UTF_8.name()));
@@ -134,7 +133,7 @@ public class UrlIndexWfsHttp implements UrlIndexInterface {
     }
 
     public InputStream wfsQuery(String urlParameters) throws IOException {
-        URL url = new URL(wfsServer + "?" + urlParameters);
+        URL url = new URL(String.format("%s?%s", wfsServer, urlParameters));
         LOGGER.log(Level.INFO, String.format("WFS query '%s'", url));
         return url.openConnection().getInputStream();
     }

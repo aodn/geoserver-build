@@ -34,7 +34,7 @@ public class UrlIndexWfsHttpTest {
         String csvString = "FID,time\n";
         csvString += "acorn_hourly_avg_rot_qc_timeseries_url.fid-607eb861_1502c191468_-7d5a,/mnt/imos-t3/IMOS/opendap/ACORN/gridded_1h-avg-current-map_QC/ROT/2014/06/06/IMOS_ACORN_V_20140606T003000Z_ROT_FV01_1-hour-avg.nc\n";
 
-        Map<String, String> urlSubstitutions = new HashMap<String, String>();
+        Map<String, String> urlSubstitutions = new HashMap<>();
         urlSubstitutions.put("/mnt/imos-t3/IMOS/opendap/", "http://some_url/");
         Ncwms.urlSubstitutions = urlSubstitutions;
 
@@ -123,7 +123,7 @@ public class UrlIndexWfsHttpTest {
         csvString += "acorn_hourly_avg_rot_qc_timeseries_url.fid-607eb861_1502bdb829d_-1c92,2011-01-22T20:30:00\n";
 
         Map<String, Map<String, Set<String>>> expected =
-                new HashMap<String, Map<String, Set<String>>>();
+                new HashMap<>();
 
         expected.put("2010", new HashMap<String, Set<String>>());
         expected.get("2010").put("1", new HashSet<String>());

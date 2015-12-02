@@ -26,7 +26,7 @@ public class Ncwms {
 
     public static String wmsVersion = "1.3.0";
 
-    public static Map<String, String> urlSubstitutions = new HashMap<String, String>();
+    public static Map<String, String> urlSubstitutions = new HashMap<>();
 
     private final UrlIndexInterface urlIndexInterface;
 
@@ -132,10 +132,10 @@ public class Ncwms {
     }
 
     private static List<String> getCombinedStyles(Document getCapabilitiesXml, String layerName) {
-        List<String> combinedStyles = new ArrayList<String>();
+        List<String> combinedStyles = new ArrayList<>();
 
         DefaultXPath xpath = new DefaultXPath("//x:Layer/x:Title[.=\'" + layerName + "\']/../x:Style/x:Name/text()");
-        Map<String,String> namespaces = new TreeMap<String, String>();
+        Map<String,String> namespaces = new TreeMap<>();
         namespaces.put("x", "http://www.opengis.net/wms");
         xpath.setNamespaceURIs(namespaces);
 
@@ -149,19 +149,19 @@ public class Ncwms {
     }
 
     public static List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
-        Set<String> styles = new HashSet<String>();
+        Set<String> styles = new HashSet<>();
         for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
             styles.add(combinedStyle.split("/")[0]);
         }
-        return new ArrayList<String>(styles);
+        return new ArrayList<>(styles);
     }
 
     public static List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
-        Set<String> palettes = new HashSet<String>();
+        Set<String> palettes = new HashSet<>();
         for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
             palettes.add(combinedStyle.split("/")[1]);
         }
-        return new ArrayList<String>(palettes);
+        return new ArrayList<>(palettes);
     }
 
     private Document getCapabilitiesXml(LayerDescriptor layerDescriptor)
