@@ -11,12 +11,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import java.util.logging.Logger;
 
@@ -29,14 +27,9 @@ import org.geoserver.platform.ServiceException;
 import org.geoserver.wfs.WFSGetFeatureOutputFormat;
 import org.geoserver.wfs.request.FeatureCollectionResponse;
 import org.geoserver.wfs.response.CSVOutputFormat;
-import org.geotools.data.FeatureSource;
 import org.geotools.data.Transaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.jdbc.JDBCDataStore;
-import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.FeatureType;
 
 public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat {
 
@@ -84,8 +77,6 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                                String metadataFeatureName,
                                BufferedWriter w) throws IOException {
 
-        String metadataSummaryBuildFunction = "build_metadata_summary";
-
         JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollection);
         Connection cx = null;
         PreparedStatement stmt = null;
@@ -124,8 +115,6 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
 
     private String getMetadataFeatureName(
             FeatureCollectionResponse featureCollection) throws IOException {
-        SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
-
         // There is an assumption that metadata will be in a table/view under the "parameters_mapping" schema, with
         // the naming scheme:
         //
