@@ -389,6 +389,7 @@ public class GoGoDuck {
         logger.info(command.toString());
 
         ProcessBuilder builder = new ProcessBuilder(command);
+        builder.redirectErrorStream(true);
         Map<String, String> environ = builder.environment();
 
         final Process process = builder.start();
