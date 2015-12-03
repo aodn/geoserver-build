@@ -1,8 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import au.org.emii.gogoduck.worker.SubsetParameters.SubsetParameter;
 
@@ -17,11 +15,22 @@ public class SubsetParameters extends HashMap<String, SubsetParameter> {
         }
     }
 
+    private static final Set<String> floatVariableNames = new HashSet<String>() {{
+        add("depth");
+        add("latitude");
+        add("longitude");
+        add("lat");
+        add("lon");
+    }};
+
     public SubsetParameters(String subset) {
         super();
         for (String part : subset.split(";")) {
             String[] subsetParts = part.split(",");
-            put(subsetParts[0], new SubsetParameter(subsetParts[1], subsetParts[2]));
+            String key = subsetParts[0];
+            String start = fixFloat(key, subsetParts[1]);
+            String end = fixFloat(key, subsetParts[2]);
+            put(key, new SubsetParameter(start, end));
         }
     }
 
@@ -40,6 +49,16 @@ public class SubsetParameters extends HashMap<String, SubsetParameter> {
 
         return ncksParameters;
     }
+
+    private String fixFloat(String key, String value) {
+        if (floatVariableNames.contains(key.toLowerCase()) && ! value.contains(".")) {
+            return String.format("%s.0", value);
+        }
+        else {
+            return value;
+        }
+    }
+
 
     public String toString() {
         return getNcksParameters().toString();
