@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import au.org.emii.gogoduck.worker.SubsetParameters.SubsetParameter;
@@ -51,8 +52,9 @@ public class SubsetParameters extends HashMap<String, SubsetParameter> {
     }
 
     private String fixFloat(String key, String value) {
-        if (floatVariableNames.contains(key.toLowerCase()) && ! value.contains(".")) {
-            return String.format("%s.0", value);
+        if (floatVariableNames.contains(key.toLowerCase())) {
+            BigDecimal floatValue = new BigDecimal(value);
+            return String.format("%.4f", floatValue);
         }
         else {
             return value;

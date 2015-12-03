@@ -17,28 +17,28 @@ public class SubsetParametersTest {
         assertEquals(sp.get("TIME").start, "2009-01-01T00:00:00.000Z");
         assertEquals(sp.get("TIME").end,   "2009-12-25T23:04:00.000Z");
 
-        assertEquals(sp.get("LATITUDE").start, "-33.433849");
-        assertEquals(sp.get("LATITUDE").end,   "-32.150743");
+        assertEquals(sp.get("LATITUDE").start, "-33.4338");
+        assertEquals(sp.get("LATITUDE").end,   "-32.1507");
 
-        assertEquals(sp.get("LONGITUDE").start, "114.15197");
-        assertEquals(sp.get("LONGITUDE").end,   "115.741219");
+        assertEquals(sp.get("LONGITUDE").start, "114.1520");
+        assertEquals(sp.get("LONGITUDE").end,   "115.7412");
 
-        assertEquals(sp.get("DEPTH").start, "0.0");
-        assertEquals(sp.get("DEPTH").end,   "100.0");
+        assertEquals(sp.get("DEPTH").start, "0.0000");
+        assertEquals(sp.get("DEPTH").end,   "100.0000");
     }
 
     @Test
     public void testParameterParsingFixFloats() {
         SubsetParameters sp = new SubsetParameters("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-90,90;LONGITUDE,-180,180;DEPTH,0,100");
 
-        assertEquals(sp.get("LATITUDE").start, "-90.0");
-        assertEquals(sp.get("LATITUDE").end,   "90.0");
+        assertEquals(sp.get("LATITUDE").start, "-90.0000");
+        assertEquals(sp.get("LATITUDE").end,   "90.0000");
 
-        assertEquals(sp.get("LONGITUDE").start, "-180.0");
-        assertEquals(sp.get("LONGITUDE").end,   "180.0");
+        assertEquals(sp.get("LONGITUDE").start, "-180.0000");
+        assertEquals(sp.get("LONGITUDE").end,   "180.0000");
 
-        assertEquals(sp.get("DEPTH").start, "0.0");
-        assertEquals(sp.get("DEPTH").end,   "100.0");
+        assertEquals(sp.get("DEPTH").start, "0.0000");
+        assertEquals(sp.get("DEPTH").end,   "100.0000");
     }
 
     @Test
