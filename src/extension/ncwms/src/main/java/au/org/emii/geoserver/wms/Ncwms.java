@@ -26,14 +26,25 @@ public class Ncwms {
 
     public static String wmsVersion = "1.3.0";
 
-    public static Map<String, String> urlSubstitutions = new HashMap<>();
+    /* Sample tiny config file:
+       <ncwms>
+         <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+         <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+         <urlSubstitution key="^/IMOS/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+       </ncwms>
+    */
+
+    private final Map<String, String> urlSubstitutions;
 
     private final UrlIndexInterface urlIndexInterface;
 
-    public void setUrlSubstitutions(Map<String, String> urlSubstitutions) { Ncwms.urlSubstitutions = urlSubstitutions; }
-
-    public Ncwms(UrlIndexInterface urlIndexInterface) {
+    public Ncwms(UrlIndexInterface urlIndexInterface, NcwmsConfig ncwmsConfig) {
         this.urlIndexInterface = urlIndexInterface;
+        urlSubstitutions = ncwmsConfig.getConfigMap("/ncwms/urlSubstitution");
+
+        for (Map.Entry<String, String> entry : urlSubstitutions.entrySet()) {
+            LOGGER.log(Level.INFO, String.format("urlSubstitution: '%s' -> '%s'", entry.getKey(), entry.getValue()));
+        }
     }
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)

@@ -34,10 +34,6 @@ public class UrlIndexWfsHttpTest {
         String csvString = "FID,time\n";
         csvString += "acorn_hourly_avg_rot_qc_timeseries_url.fid-607eb861_1502c191468_-7d5a,/mnt/imos-t3/IMOS/opendap/ACORN/gridded_1h-avg-current-map_QC/ROT/2014/06/06/IMOS_ACORN_V_20140606T003000Z_ROT_FV01_1-hour-avg.nc\n";
 
-        Map<String, String> urlSubstitutions = new HashMap<>();
-        urlSubstitutions.put("/mnt/imos-t3/IMOS/opendap/", "http://some_url/");
-        Ncwms.urlSubstitutions = urlSubstitutions;
-
         String expected = "/mnt/imos-t3/IMOS/opendap/ACORN/gridded_1h-avg-current-map_QC/ROT/2014/06/06/IMOS_ACORN_V_20140606T003000Z_ROT_FV01_1-hour-avg.nc";
 
         String expectedQuery =

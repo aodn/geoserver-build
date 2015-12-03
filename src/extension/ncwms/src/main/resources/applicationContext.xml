@@ -2,19 +2,19 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+    <bean id="ncwmsConfig" class="au.org.emii.geoserver.wms.NcwmsConfig">
+        <constructor-arg index="0" ref="resourceLoader"/>
+    </bean>
+
     <bean id="urlIndex" class="au.org.emii.geoserver.wms.UrlIndexWfsHttp">
-        <property name="wfsServer" value="http://localhost:8080/geoserver/ows"/>
+        <constructor-arg index="0" ref="ncwmsConfig"/>
     </bean>
 
     <!-- Spring will reference the instance of the Ncwms class
            by the id name "ncwms" -->
     <bean id="ncwms" class="au.org.emii.geoserver.wms.Ncwms">
         <constructor-arg index="0" ref="urlIndex"/>
-        <property name="urlSubstitutions">
-            <props>
-                <prop key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</prop>
-            </props>
-        </property>
+        <constructor-arg index="1" ref="ncwmsConfig"/>
     </bean>
 
     <!-- This creates a Service descriptor, which allows the org.geoserver.ows.Dispatcher

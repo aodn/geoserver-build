@@ -17,9 +17,12 @@ import java.util.logging.Logger;
 public class UrlIndexWfsHttp implements UrlIndexInterface {
     static Logger LOGGER = Logging.getLogger(UrlIndexWfsHttp.class);
 
-    private static String wfsServer = "http://localhost:8080/geoserver/ows";
+    private final String wfsServer;
 
-    public void setWfsServer(String wfsServer) { UrlIndexWfsHttp.wfsServer = wfsServer; }
+    public UrlIndexWfsHttp(NcwmsConfig ncwmsConfig) {
+        wfsServer = ncwmsConfig.getConfigVariable("/ncwms/wfsServer", "http://localhost:8080/geoserver/ows");
+        LOGGER.log(Level.INFO, String.format("Using wfsServer '%s'", wfsServer));
+    }
 
     public String getUrlForTimestamp(LayerDescriptor layerDescriptor, String timestamp) throws IOException {
         // By default form a query to get the last file ordered by timestamp (reverse)
