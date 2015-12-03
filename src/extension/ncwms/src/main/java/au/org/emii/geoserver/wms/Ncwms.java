@@ -26,14 +26,25 @@ public class Ncwms {
 
     public static String wmsVersion = "1.3.0";
 
-    public static Map<String, String> urlSubstitutions = new HashMap<String, String>();
+    /* Sample tiny config file:
+       <ncwms>
+         <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+         <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+         <urlSubstitution key="^/IMOS/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+       </ncwms>
+    */
+
+    private final Map<String, String> urlSubstitutions;
 
     private final UrlIndexInterface urlIndexInterface;
 
-    public void setUrlSubstitutions(Map<String, String> urlSubstitutions) { Ncwms.urlSubstitutions = urlSubstitutions; }
-
-    public Ncwms(UrlIndexInterface urlIndexInterface) {
+    public Ncwms(UrlIndexInterface urlIndexInterface, NcwmsConfig ncwmsConfig) {
         this.urlIndexInterface = urlIndexInterface;
+        urlSubstitutions = ncwmsConfig.getConfigMap("/ncwms/urlSubstitution");
+
+        for (Map.Entry<String, String> entry : urlSubstitutions.entrySet()) {
+            LOGGER.log(Level.INFO, String.format("urlSubstitution: '%s' -> '%s'", entry.getKey(), entry.getValue()));
+        }
     }
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
@@ -132,10 +143,10 @@ public class Ncwms {
     }
 
     private static List<String> getCombinedStyles(Document getCapabilitiesXml, String layerName) {
-        List<String> combinedStyles = new ArrayList<String>();
+        List<String> combinedStyles = new ArrayList<>();
 
         DefaultXPath xpath = new DefaultXPath("//x:Layer/x:Title[.=\'" + layerName + "\']/../x:Style/x:Name/text()");
-        Map<String,String> namespaces = new TreeMap<String, String>();
+        Map<String,String> namespaces = new TreeMap<>();
         namespaces.put("x", "http://www.opengis.net/wms");
         xpath.setNamespaceURIs(namespaces);
 
@@ -149,19 +160,19 @@ public class Ncwms {
     }
 
     public static List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
-        Set<String> styles = new HashSet<String>();
+        Set<String> styles = new HashSet<>();
         for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
             styles.add(combinedStyle.split("/")[0]);
         }
-        return new ArrayList<String>(styles);
+        return new ArrayList<>(styles);
     }
 
     public static List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
-        Set<String> palettes = new HashSet<String>();
+        Set<String> palettes = new HashSet<>();
         for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
             palettes.add(combinedStyle.split("/")[1]);
         }
-        return new ArrayList<String>(palettes);
+        return new ArrayList<>(palettes);
     }
 
     private Document getCapabilitiesXml(LayerDescriptor layerDescriptor)
