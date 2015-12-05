@@ -136,7 +136,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
             notifySuccess(callbackUrl, callbackParams);
 
-            return new FileRawData(outputFile, "application/zip");
+            return new FileRawData(outputFile, "application/zip", "zip");
 
         } catch (Exception e) {
             if (transaction != null) {
