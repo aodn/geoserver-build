@@ -139,6 +139,9 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             return new FileRawData(outputFile, "application/zip", "zip");
 
         } catch (Exception e) {
+            notifyFailure(callbackUrl, callbackParams);
+            throw new ProcessException(e.getMessage());
+        } finally {
             if (transaction != null) {
                 try {
                     transaction.close();
@@ -153,9 +156,6 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                     logger.info("problem closing connection");
                 }
             }
-            notifyFailure(callbackUrl, callbackParams);
-            throw new ProcessException(e.getMessage());
-        } finally {
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
         }
