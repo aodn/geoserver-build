@@ -79,7 +79,7 @@ public class FeatureTypeFactory {
         // if so, try to build an override feature type
         Connection cx = null;
         try {
-            store.getConnection(Transaction.AUTO_COMMIT);
+            cx = store.getConnection(Transaction.AUTO_COMMIT);
             SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
             tb.setName(base.getName());
             for (AttributeDescriptor ad : base.getAttributeDescriptors()) {
