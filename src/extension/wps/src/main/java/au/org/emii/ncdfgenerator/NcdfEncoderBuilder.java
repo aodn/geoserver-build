@@ -1,6 +1,5 @@
 package au.org.emii.ncdfgenerator;
 
-import java.sql.Connection;
 import org.geotools.jdbc.JDBCDataStore;
 
 public class NcdfEncoderBuilder {

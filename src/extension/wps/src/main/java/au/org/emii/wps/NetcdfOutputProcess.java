@@ -3,11 +3,8 @@ package au.org.emii.wps;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,8 +18,6 @@ import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.ProcessDismissedException;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
-import org.geotools.data.DefaultTransaction;
-import org.geotools.data.Transaction;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
@@ -76,10 +71,9 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
         logger.info("execute");
 
-        Transaction transaction = null;
-        Connection conn = null;
         InputStream config = null;
         FileOutputStream os = null;
+        NcdfEncoder encoder = null;
 
         try {
             // lookup the layer in the catalog
@@ -106,10 +100,6 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             DataStoreInfo dsinfo = catalog.getDataStoreByName(dataStoreName);
             JDBCDataStore store = (JDBCDataStore)dsinfo.getDataStore(null);
 
-            // resources
-            transaction = new DefaultTransaction("handle");
-            conn = store.getConnection(transaction);
-
             // create the netcdf encoder
             NcdfEncoderBuilder encoderBuilder = new NcdfEncoderBuilder();
 
@@ -120,7 +110,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 .setSchema(store.getDatabaseSchema())
             ;
 
-            NcdfEncoder encoder = encoderBuilder.create();
+            encoder = encoderBuilder.create();
 
             final File outputFile = getResourceManager().getOutputResource(
                 getResourceManager().getExecutionId(true), typeName + ".zip").file();
@@ -142,19 +132,8 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             notifyFailure(callbackUrl, callbackParams);
             throw new ProcessException(e.getMessage());
         } finally {
-            if (transaction != null) {
-                try {
-                    transaction.close();
-                } catch (IOException e_) {
-                    logger.info("problem closing transaction");
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e_) {
-                    logger.info("problem closing connection");
-                }
+            if (encoder != null) {
+                encoder.closeQuietly();
             }
             IOUtils.closeQuietly(config);
             IOUtils.closeQuietly(os);
