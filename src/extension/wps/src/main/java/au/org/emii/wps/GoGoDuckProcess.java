@@ -1,17 +1,11 @@
 package au.org.emii.wps;
 
-import java.io.File;
-import java.net.URL;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
+import au.org.emii.gogoduck.worker.GoGoDuck;
+import au.org.emii.gogoduck.worker.GoGoDuckException;
+import au.org.emii.gogoduck.worker.URLMangler;
+import au.org.emii.notifier.HttpNotifier;
 import org.apache.commons.io.FilenameUtils;
+import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
@@ -24,10 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import au.org.emii.gogoduck.worker.GoGoDuck;
-import au.org.emii.gogoduck.worker.GoGoDuckException;
-import au.org.emii.gogoduck.worker.URLMangler;
-import au.org.emii.notifier.HttpNotifier;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.net.URL;
+import java.util.Map;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
@@ -44,8 +43,8 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     private final String THREAD_COUNT_DEFAULT = "0";
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
-            GeoServerResourceLoader resourceLoader) {
-        super(resourceManager, httpNotifier);
+            GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
+        super(resourceManager, httpNotifier, geoserver);
         this.resourceLoader = resourceLoader;
     }
 
