@@ -1,28 +1,31 @@
 package au.org.emii.wps;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import au.org.emii.notifier.HttpNotifier;
 import net.opengis.wps10.ExecuteType;
 
+import org.geoserver.config.GeoServer;
 import org.geoserver.ows.Dispatcher;
+import org.geoserver.ows.util.ResponseUtils;
 import org.geoserver.platform.Operation;
 import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.org.emii.notifier.HttpNotifier;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public abstract class AbstractNotifierProcess implements GeoServerProcess {
     private final WPSResourceManager resourceManager;
     private final HttpNotifier httpNotifier;
     private static final Logger logger = LoggerFactory.getLogger(AbstractNotifierProcess.class);
+    private final GeoServer geoserver;
 
-    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier) {
+    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, GeoServer geoserver) {
         this.resourceManager = resourceManager;
         this.httpNotifier = httpNotifier;
+        this.geoserver = geoserver;
     }
 
     protected void notifySuccess(URL callbackUrl, String callbackParams) {
@@ -46,17 +49,20 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
     }
 
     protected URL getWpsUrl() throws MalformedURLException {
-        return new URL(getBaseUrl() + "ows");
+        return new URL(ResponseUtils.appendPath(getBaseUrl(), "ows"));
     }
 
     protected String getBaseUrl() {
-        // TODO is there a nicer way of getting BaseUrl?
-        Dispatcher.REQUEST.get().getOperation();
-        Operation op = Dispatcher.REQUEST.get().getOperation();
-        ExecuteType execute = (ExecuteType) op.getParameters()[0];
-        return execute.getBaseUrl();
-    }
+        String url = ((geoserver != null) ? geoserver.getSettings().getProxyBaseUrl() : null);
 
+        if (url == null) {
+            Operation op = Dispatcher.REQUEST.get().getOperation();
+            ExecuteType execute = (ExecuteType) op.getParameters()[0];
+            url = execute.getBaseUrl();
+        }
+
+        return url;
+    }
 
     protected String getId() {
         return resourceManager.getExecutionId(true);
