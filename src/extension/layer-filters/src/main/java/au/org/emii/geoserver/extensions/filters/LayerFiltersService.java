@@ -14,12 +14,17 @@ import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfiguratio
 import au.org.emii.geoserver.extensions.filters.layer.data.io.PossibleValuesReader;
 import au.org.emii.geoserver.extensions.filters.layer.data.ValuesDocument;
 
+import org.apache.commons.io.FilenameUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
+import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.platform.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.naming.NamingException;
@@ -27,17 +32,30 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class LayerFiltersService {
+    static final Logger logger = LoggerFactory.getLogger(LayerFiltersService.class);
+
+    public final static String CONFIG_FILE = "filters.xml";
+
+    private GeoServerResourceLoader resourceLoader;
 
     private Catalog catalog;
     private List<String> uniqueValuesAllowedRegex = null;
@@ -55,16 +73,49 @@ public class LayerFiltersService {
         return catalog;
     }
 
-    public void setUniqueValuesAllowedRegex(List<String> uniqueValuesAllowedRegex) {
-        this.uniqueValuesAllowedRegex = uniqueValuesAllowedRegex;
+    public void setResourceLoader(GeoServerResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    public GeoServerResourceLoader getResourceLoader() {
+        return resourceLoader;
     }
 
     public List<String> getUniqueValuesAllowedRegex() {
+        if (uniqueValuesAllowedRegex != null) {
+            return uniqueValuesAllowedRegex;
+        }
+
+        try {
+            uniqueValuesAllowedRegex = new ArrayList<>();
+
+            File configFile = new File(FilenameUtils.concat(getResourceLoader().getBaseDirectory().toString(), CONFIG_FILE));
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(configFile);
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xp = xpathFactory.newXPath();
+
+            XPathExpression expr = xp.compile("/filters/allowed/regex");
+            NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+            for(int i = 0; i < nl.getLength() ; i++) {
+                String regex = nl.item(i).getTextContent();
+                uniqueValuesAllowedRegex.add(regex);
+                logger.warn(String.format("Allowing uniqueValues regex '%s'", regex));
+            }
+        }
+        catch (Exception e) {
+            logger.error(String.format("Could not parse allowed regex from config file '%s': '%s'", CONFIG_FILE, e.getMessage()));
+            logger.warn("Allowing uniqueValues on any configured layer.");
+        }
+
         return uniqueValuesAllowedRegex;
     }
 
     private boolean uniqueValuesAllowed(String workspace, String layer, String propertyName) {
-        if (uniqueValuesAllowedRegex == null)
+        if (getUniqueValuesAllowedRegex().isEmpty())
             return true;
 
         String fullLayerName = String.format("%s:%s/%s", workspace, layer, propertyName);
