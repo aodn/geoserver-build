@@ -20,6 +20,7 @@
 
     <bean id="layerFiltersService" class="au.org.emii.geoserver.extensions.filters.LayerFiltersService">
         <property name="catalog" ref="catalog"/>
+        <property name="resourceLoader" ref="resourceLoader"/>
     </bean>
 
     <!-- This creates a Service descriptor, which allows the org.geoserver.ows.Dispatcher
