@@ -100,8 +100,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 .setDefinition(definition)
                 .setFilterExpr(cqlFilter)
                 .setDataStore(store)
-                .setSchema(store.getDatabaseSchema())
-            ;
+                .setSchema(store.getDatabaseSchema());
 
             encoder = encoderBuilder.create();
 
@@ -113,7 +112,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             encoder.prepare(new ZipFormatter(os));
             while (encoder.writeNext()) {
                 if (progressListener.isCanceled()) {
-                    throw new ProcessDismissedException(progressListener);
+                    throw new ProcessDismissedException("The job has been stopped due to excessive server resources required");
                 }
             }
 
