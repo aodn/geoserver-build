@@ -112,7 +112,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             encoder.prepare(new ZipFormatter(os));
             while (encoder.writeNext()) {
                 if (progressListener.isCanceled()) {
-                    throw new ProcessDismissedException("The job has been stopped due to excessive server resources required");
+                    throw new ProcessDismissedException("The job has been cancelled");
                 }
             }
 
