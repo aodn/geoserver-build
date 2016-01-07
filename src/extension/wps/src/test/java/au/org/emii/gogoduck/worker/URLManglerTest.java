@@ -10,7 +10,12 @@ import static org.junit.Assert.assertEquals;
 public class URLManglerTest {
     @Test
     public void testMangle() throws Exception {
-        URLMangler.setUrlManglingMap(Main.getUrlMangling());
+        Map<String, String> urlMangling = new HashMap<String, String>();
+        urlMangling.put("^/mnt/imos-t3/", "https://data.aodn.org.au/");
+        urlMangling.put("^/mnt/opendap/2/SRS/", "https://thredds.aodn.org.au/thredds/fileServer/IMOS/SRS/");
+        urlMangling.put("^IMOS/", "http://imos-data.aodn.org.au/IMOS/");
+
+        URLMangler.setUrlManglingMap(urlMangling);
 
         URL u;
         u = URLMangler.mangle(new URI("/mnt/imos-t3/file.nc"));
