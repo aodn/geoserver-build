@@ -102,7 +102,7 @@ And last, a real example of an online resource:
             <gmd:URL>http://geoserver-123.aodn.org.au/geoserver/ncwms</gmd:URL>
         </gmd:linkage>
         <gmd:protocol>
-            <gco:CharacterString>IMOS:NCWMS--abom</gco:CharacterString>
+            <gco:CharacterString>IMOS:NCWMS--proto</gco:CharacterString>
         </gmd:protocol>
         <gmd:name>
             <gco:CharacterString>acorn_hourly_avg_rot_qc_timeseries_url/sea_water_velocity</gco:CharacterString>
