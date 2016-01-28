@@ -6,6 +6,7 @@ import au.org.emii.gogoduck.worker.URLMangler;
 import au.org.emii.notifier.HttpNotifier;
 import org.apache.commons.io.FilenameUtils;
 import org.geoserver.config.GeoServer;
+import org.geoserver.catalog.Catalog;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
@@ -32,6 +33,7 @@ import java.util.Map;
 public class GoGoDuckProcess extends AbstractNotifierProcess {
     static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
+    private final Catalog catalog;
     private final GeoServerResourceLoader resourceLoader;
 
     private final String CONFIG_FILE = "wps/gogoduck.xml";
@@ -43,8 +45,9 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     private final String THREAD_COUNT_DEFAULT = "0";
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
-            GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
+            Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
         super(resourceManager, httpNotifier, geoserver);
+        this.catalog = catalog;
         this.resourceLoader = resourceLoader;
     }
 
@@ -77,7 +80,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
             final String filePath = outputFile.toPath().toAbsolutePath().toString();
 
-            GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
+            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, fileLimit);
 
             ggd.setTmpDir(getWorkingDir());
             ggd.setThreadCount(threadCount);

@@ -25,7 +25,7 @@ public class GoGoDuckModuleTest {
     @Before
     public void beforeEach() {
         ggdm = new GoGoDuckModule();
-        ggdm.init("", "", "TIME,1,2;LONGITUDE,2,3", null);
+        ggdm.init("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class GoGoDuckModuleTest {
         Files.copy(sampleNetcdf.toPath(), tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         ggdm = new GoGoDuckModule_test();
-        ggdm.init("", "", "TIME,1,2;LONGITUDE,2,3", null);
+        ggdm.init("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
         ggdm.updateMetadata(tmpFile.toPath());
 
         // Verify attribute was written to file
