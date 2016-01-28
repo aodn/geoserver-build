@@ -36,6 +36,7 @@
                 <value>getMap</value>
                 <value>getLegendGraphic</value>
                 <value>getFeatureInfo</value>
+                <value>getCapabilities</value>
             </list>
         </constructor-arg>
     </bean>

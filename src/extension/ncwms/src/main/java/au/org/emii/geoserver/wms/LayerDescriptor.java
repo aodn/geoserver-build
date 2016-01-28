@@ -11,13 +11,15 @@ public class LayerDescriptor {
     public static final String defaultUrlField = "file_url";
 
     LayerDescriptor(String layerString) {
-        if (!layerString.contains("/")) {
-            throw new RuntimeException(String.format("Layer descriptor '%s' does not contain a '/'", layerString));
+        String layerAndWorkspace = layerString;
+        if (layerString.contains("/")) {
+            layerAndWorkspace = layerString.split("/")[0];
+            variable = layerString.split("/")[1];
+        } else {
+            variable = null;
         }
 
-        String layerAndWorkspace = layerString.split("/")[0];
         String layerInformation;
-        variable = layerString.split("/")[1];
         if (layerString.contains(":")) {
             workspace = layerAndWorkspace.split(":")[0];
             layerInformation = layerAndWorkspace.split(":")[1];
@@ -61,6 +63,10 @@ public class LayerDescriptor {
 
     @Override
     public String toString() {
-        return String.format("%s/%s", geoserverName(), variable);
+        if (variable != null) {
+            return String.format("%s/%s", geoserverName(), variable);
+        } else {
+            return geoserverName();
+        }
     }
 }
