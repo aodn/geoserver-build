@@ -79,11 +79,11 @@ public class UrlIndexFeatureSource implements UrlIndexInterface {
         SimpleFeatureIterator iterator = getFeatures(layerDescriptor.geoserverName(), query);
 
         try {
-            while (iterator.hasNext()) { 
+            while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
                 Date timestamp = (Date) feature.getAttribute(layerDescriptor.getTimeFieldName());
                 LOGGER.log(Level.INFO, String.format("Processing timestamp '%s'", timestamp));
-                timesOfDay.add(toISODate(timestamp));
+                timesOfDay.add(getTimeFromDate(timestamp));
             }
        } finally {
            iterator.close();
@@ -101,7 +101,7 @@ public class UrlIndexFeatureSource implements UrlIndexInterface {
         SimpleFeatureIterator iterator = getFeatures(layerDescriptor.geoserverName(), query);
 
         try {
-            while (iterator.hasNext()) { 
+            while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
 
                 Date timestamp = (Date) feature.getAttribute(layerDescriptor.getTimeFieldName());
@@ -148,7 +148,7 @@ public class UrlIndexFeatureSource implements UrlIndexInterface {
         LOGGER.log(Level.INFO, String.format("Returning times of day '%s'", day));
 
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        
+
         try {
             return CQL.toFilter(String.format(
                 "%s >= '%s' AND %s < '%s'",
@@ -166,9 +166,8 @@ public class UrlIndexFeatureSource implements UrlIndexInterface {
         return collection.features();
     }
 
-    private String toISODate(Date timestamp) {
-        DateTime dt = new DateTime(timestamp.getTime());
-        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        return fmt.print(dt);
+    private String getTimeFromDate(Date timestamp) {
+        DateTime jodaDate = new DateTime(timestamp);
+        return jodaDate.toLocalTime().toString() + "Z";
     }
 }
