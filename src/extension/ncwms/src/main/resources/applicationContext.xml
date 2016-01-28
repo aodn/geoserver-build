@@ -6,8 +6,8 @@
         <constructor-arg index="0" ref="resourceLoader"/>
     </bean>
 
-    <bean id="urlIndex" class="au.org.emii.geoserver.wms.UrlIndexWfsHttp">
-        <constructor-arg index="0" ref="ncwmsConfig"/>
+    <bean id="urlIndex" class="au.org.emii.geoserver.wms.UrlIndexFeatureSource">
+        <constructor-arg index="0" ref="catalog"/>
     </bean>
 
     <!-- Spring will reference the instance of the Ncwms class
