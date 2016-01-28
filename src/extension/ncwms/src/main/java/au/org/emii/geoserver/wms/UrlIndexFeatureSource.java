@@ -85,9 +85,9 @@ public class UrlIndexFeatureSource implements UrlIndexInterface {
                 LOGGER.log(Level.INFO, String.format("Processing timestamp '%s'", timestamp));
                 timesOfDay.add(getTimeFromDate(timestamp));
             }
-       } finally {
-           iterator.close();
-       }
+        } finally {
+            iterator.close();
+        }
 
         return timesOfDay;
     }
