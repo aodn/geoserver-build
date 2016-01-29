@@ -1,15 +1,9 @@
 package au.org.emii.gogoduck.worker;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,90 +14,26 @@ import ucar.nc2.NetcdfFileWriter;
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
 
+    // TODO Should not be hard coded
+    private static final String TIME_FIELD = "time";
+    private static final String URL_FIELD = "file_url";
+
     protected String profile = null;
-    protected String geoserver = null;
     protected SubsetParameters subset = null;
     protected UserLog userLog = null;
+    protected IndexReader indexReader = null;
 
     public GoGoDuckModule() {}
 
-    public void init(String profile, String geoserver, String subset, UserLog userLog) {
+    public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
         this.profile = profile;
-        this.geoserver = geoserver;
+        this.indexReader = indexReader;
         this.subset = new SubsetParameters(subset);
         this.userLog = userLog;
     }
 
     public URIList getUriList() throws GoGoDuckException {
-        String timeCoverageStart = subset.get("TIME").start;
-        String timeCoverageEnd = subset.get("TIME").end;
-
-        URIList uriList = null;
-
-        try {
-            uriList = new URIList();
-
-            String downloadUrl = String.format("%s/wfs", geoserver);
-            String cqlFilter = String.format("time >= %s and time <= %s", timeCoverageStart, timeCoverageEnd);
-
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("typeName", profile);
-            params.put("SERVICE", "WFS");
-            params.put("outputFormat", "csv");
-            params.put("REQUEST", "GetFeature");
-            params.put("VERSION", "1.0.0");
-            params.put("CQL_FILTER", cqlFilter);
-
-            byte[] postDataBytes = encodeMapForPostRequest(params);
-
-            URL url = new URL(downloadUrl);
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-            conn.setDoOutput(true);
-            conn.getOutputStream().write(postDataBytes);
-
-            InputStream inputStream = conn.getInputStream();
-            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
-
-            logger.info(String.format("Getting list of files from '%s'", downloadUrl));
-            logger.debug(String.format("Parameters: '%s'", new String(postDataBytes)));
-            String line = null;
-            Integer i = 0;
-            while ((line = dataInputStream.readLine()) != null) {
-                if (i > 0) { // Skip first line - it's the headers
-                    String[] lineParts = line.split(",");
-                    uriList.add(new URI(lineParts[2]));
-                }
-                i++;
-            }
-        }
-        catch (Exception e) {
-            userLog.log("We could not obtain list of URLs, does the collection still exist?");
-            throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
-        }
-
-        return uriList;
-    }
-
-    private byte[] encodeMapForPostRequest(Map<String, String> params) {
-        byte[] postDataBytes = null;
-        try {
-            StringBuilder postData = new StringBuilder();
-            for (Map.Entry<String, String> param : params.entrySet()) {
-                if (postData.length() != 0) postData.append('&');
-                postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-                postData.append('=');
-                postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-            }
-            postDataBytes = postData.toString().getBytes("UTF-8");
-        }
-        catch (Exception e) {
-            logger.error(String.format("Error encoding parameters: '%s'", e.getMessage()));
-        }
-
-        return postDataBytes;
+        return indexReader.getUriList(profile, TIME_FIELD, URL_FIELD, subset);
     }
 
     public void postProcess(File file) {
@@ -172,7 +102,7 @@ public class GoGoDuckModule {
         return subsetParametersNoTime;
     }
 
-    public static GoGoDuckModule newInstance(String profile, String geoserver, String subset, UserLog userLog) {
+    public static GoGoDuckModule newInstance(String profile, IndexReader indexReader, String subset, UserLog userLog) {
         String thisPackage = GoGoDuckModule.class.getPackage().getName();
         String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
 
@@ -182,7 +112,7 @@ public class GoGoDuckModule {
             try {
                 Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
                 module = (GoGoDuckModule) classz.newInstance();
-                module.init(profile, geoserver, subset, userLog);
+                module.init(profile, indexReader, subset, userLog);
                 logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
                 return module;
             }

@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opengis.util.ProgressListener;
 
+import org.geoserver.catalog.Catalog;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
@@ -34,7 +34,7 @@ public class GoGoDuck {
     public static final String ncrcatPath = "/usr/bin/ncrcat";
     public static final String ncdpqPath = "/usr/bin/ncpdq";
 
-    private final String geoserverUrl;
+    private IndexReader indexReader = null;
     private final String profile;
     private final String subset;
     private final Path outputFile;
@@ -44,14 +44,23 @@ public class GoGoDuck {
     private UserLog userLog = null;
     private ProgressListener progressListener = null;
 
-    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, Integer limit) {
-        this.geoserverUrl = geoserverUrl;
+    protected GoGoDuck(String profile, String subset, String outputFile, Integer limit) {
         this.profile = profile;
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
         this.limit = limit;
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
         this.userLog = new UserLog();
+    }
+
+    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, Integer limit) {
+        this(profile, subset, outputFile, limit);
+        this.indexReader = new HttpIndexReader(this.userLog, geoserverUrl);
+    }
+
+    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, Integer limit) {
+        this(profile, subset, outputFile, limit);
+        this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
     }
 
     public void setTmpDir(String tmpDir) {
@@ -86,7 +95,7 @@ public class GoGoDuck {
     }
 
     public void run() {
-        GoGoDuckModule module = GoGoDuckModule.newInstance(profile, geoserverUrl, subset, userLog);
+        GoGoDuckModule module = GoGoDuckModule.newInstance(profile, indexReader, subset, userLog);
 
         Path tmpDir = null;
 
