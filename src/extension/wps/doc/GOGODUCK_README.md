@@ -74,3 +74,68 @@ Run:
 $ mvn test
 ```
 
+## Configuring GoGoDuck
+
+### Metadata Record
+
+A typical Geonetwork record for GoGoDuck will include the following online
+resource:
+```
+<gmd:onLine>
+  <gmd:CI_OnlineResource>
+    <gmd:linkage>
+      <gmd:URL>GEOSERVER_OWS_URL</gmd:URL>
+    </gmd:linkage>
+    <gmd:protocol>
+      <gco:CharacterString>OGC:WPS--gogoduck</gco:CharacterString>
+    </gmd:protocol>
+    <gmd:name>
+      <gco:CharacterString>LAYER_NAME</gco:CharacterString>
+    </gmd:name>
+    <gmd:description>
+      <gco:CharacterString>The GoGoDuck subsets and aggregates gridded data.  Data is returned as a NetCDF file</gco:CharacterString>
+    </gmd:description>
+  </gmd:CI_OnlineResource>
+</gmd:onLine>
+```
+
+A more concrete example would look like:
+```
+<gmd:onLine>
+  <gmd:CI_OnlineResource>
+    <gmd:linkage>
+      <gmd:URL>http://geoserver-123.aodn.org.au/geoserver/ows</gmd:URL>
+    </gmd:linkage>
+    <gmd:protocol>
+      <gco:CharacterString>OGC:WPS--gogoduck</gco:CharacterString>
+    </gmd:protocol>
+    <gmd:name>
+      <gco:CharacterString>acorn_hourly_avg_rot_nonqc_timeseries_url</gco:CharacterString>
+    </gmd:name>
+    <gmd:description>
+      <gco:CharacterString>The GoGoDuck subsets and aggregates gridded data.  Data is returned as a NetCDF file</gco:CharacterString>
+    </gmd:description>
+  </gmd:CI_OnlineResource>
+</gmd:onLine>
+```
+
+### Geoserver
+
+GoGoDuck supports a minimal configuration file which can be placed in your
+geoserver directory under `wps/gogoduck.xml`. An example configuration file is:
+```
+<gogoduck>
+  <fileLimit>10</fileLimit>
+  <threadCount>0</threadCount>
+</gogoduck>
+```
+
+`fileLimit` is the maximum amount of files GoGoDuck will be allowed to operate
+on in a single job. `threadCount` is the number of concurrent threads GoGoDuck
+is allowed to spawn to complete the job. You can set `threadCount` to `0` if
+you wish to disable GoGoDuck altogether.
+
+### Field Values
+
+Please take note that GoGoDuck uses `time` and `file_url` as hardcoded fields
+and will fail to operate if you have your field names named anything else.
