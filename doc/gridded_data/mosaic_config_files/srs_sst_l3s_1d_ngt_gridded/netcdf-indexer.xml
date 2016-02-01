@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Indexer>
+  <schemas>
+        <schema name="sea_surface_temperature" >
+            <attributes>the_geom:Polygon,imageindex:Integer,location:String,time:java.util.Date</attributes>
+        </schema>
+    </schemas>
+    <coverages>
+        <coverage>
+            <name>sea_surface_temperature</name>
+            <schema ref="sea_surface_temperature"></schema>
+        </coverage>
+    </coverages>
+</Indexer>

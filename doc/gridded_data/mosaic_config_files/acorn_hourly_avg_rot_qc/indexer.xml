@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Indexer>
+  <domains>
+    <domain name="time">
+       <attributes>
+           <attribute>TIME</attribute>
+       </attributes>
+    </domain>
+  </domains>
+  <schemas>
+    <schema name="default">
+      <attributes>the_geom:Polygon,imageindex:Integer,location:String,TIME:java.util.Date</attributes>
+    </schema>
+  </schemas>
+  <coverages>
+    <coverage>
+      <name>UCUR</name>
+      <schema ref="default"></schema>
+      <domains>
+        <domain ref="time" />
+      </domains>
+    </coverage>
+    <coverage>
+      <name>VCUR</name>
+      <schema ref="default"></schema>
+      <domains>
+        <domain ref="time" />
+      </domains>
+    </coverage>
+  </coverages>
+  <parameters>
+      <parameter name="AuxiliaryFile" value="netcdf-indexer.xml" />
+      <parameter name="AuxiliaryDatastoreFile" value="netcdf-datastore.properties" />
+      <parameter name="AbsolutePath" value="true" />
+      <parameter name="Caching" value="false" />
+      <parameter name="IndexingDirectories" value="/home/craigj/geoserver_gridded/geoserver_data/coverages/acorn_hourly_avg_rot_qc/data/ROT" />
+      <parameter name="Recursive" value="true" />
+      <parameter name="Wildcard" value="*.nc" />
+      <parameter name="CanBeEmpty" value="true" />
+   <!--   <parameter name="UseExistingSchema" value="true" />  -->
+  </parameters>
+</Indexer>

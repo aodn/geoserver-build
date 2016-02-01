@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Indexer>
+  <schemas>
+        <schema name="UCUR" >
+            <attributes>the_geom:Polygon,imageindex:Integer,location:String,TIME:java.util.Date</attributes>
+        </schema>
+        <schema name="VCUR" >
+            <attributes>the_geom:Polygon,imageindex:Integer,location:String,TIME:java.util.Date</attributes>
+        </schema>
+    </schemas>
+    <coverages>
+        <coverage>
+            <name>UCUR</name>
+            <schema ref="UCUR"></schema>
+        </coverage>
+        <coverage>
+            <name>VCUR</name>
+            <schema ref="VCUR"></schema>
+        </coverage>
+    </coverages>
+</Indexer>

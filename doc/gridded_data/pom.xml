@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>au.org.emii</groupId>
+    <artifactId>geoserver-gridded</artifactId>
+    <version>${geoserver.version}</version>
+    <packaging>war</packaging>
+
+    <name>Geoserver Gridded</name>
+    <description>Geoserver v${project.version} with NetCDF and image mosaic extension etc installed.</description>
+    <url>http://www.emii.org.au</url>
+
+    <properties>
+        <geoserver.version>2.8.2</geoserver.version>
+        <slf.version>1.7.10</slf.version>
+        <jetty.version>9.2.13.v20150730</jetty.version>
+        <jetty.port>8081</jetty.port>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>org.geoserver.web</groupId>
+                            <artifactId>gs-web-app</artifactId>
+                                <excludes>
+                                    <exclude>WEB-INF/lib/slf4j*.jar</exclude>
+                                    <exclude>WEB-INF/lib/log4j*.jar</exclude>
+                                    <exclude>WEB-INF/lib/gwc-*.jar</exclude>
+                                    <exclude>WEB-INF/lib/*-gwc-*.jar</exclude>
+                                </excludes>
+                        </overlay>
+                    </overlays>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/geoserver</contextPath>
+                    </webApp>
+                    <connectors>
+                        <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                            <port>${jetty.port}</port>
+                            <maxIdleTime>10000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <daemon>false</daemon>
+                    <!-- uncomment following to set a GEOSERVER_DATA_DIR -->
+                    <!--
+                      <systemProperties> <systemProperty> <name>GEOSERVER_DATA_DIR</name>
+                      <value>/home/ak/geoserver_data</value> </systemProperty> </systemProperties>
+                    -->
+                    <!-- Make sure it's not looking for annotations everywhere -->
+                    <!--<contextXml>${project.build.testOutputDirectory}/jetty-context.xml</contextXml>-->
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-app</artifactId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-grib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-web-wps</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-web-wcs2_0-eo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-netcdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-netcdf-out</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.community</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-colormap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.community</groupId>
+            <version>${geoserver.version}</version>
+            <scope>runtime</scope>
+            <artifactId>gs-wms-eo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>runtime</scope>
+            <version>${slf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${slf.version}</version>
+        </dependency>
+     </dependencies>
+
+     <repositories>
+        <repository>
+            <id>boundless</id>
+            <url>https://repo.boundlessgeo.com/main/</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository>
+    </repositories>
+</project>
