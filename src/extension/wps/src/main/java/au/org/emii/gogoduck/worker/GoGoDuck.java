@@ -1,5 +1,12 @@
 package au.org.emii.gogoduck.worker;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.geoserver.catalog.Catalog;
+import org.opengis.util.ProgressListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
@@ -7,16 +14,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opengis.util.ProgressListener;
-
-import org.geoserver.catalog.Catalog;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,36 +27,36 @@ public class GoGoDuck {
     // here merely to have a value to satisfy awaitTermination of the JAVA API
     private static final int MAX_EXECUTION_TIME_DAYS = 365;
 
-    public static final String ncksPath = "/usr/bin/ncks";
-    public static final String ncrcatPath = "/usr/bin/ncrcat";
-    public static final String ncdpqPath = "/usr/bin/ncpdq";
-
     private IndexReader indexReader = null;
     private final String profile;
     private final String subset;
-    private final Path outputFile;
+    private final List<Converter> converters;
+    private Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
     private int threadCount = 1;
     private UserLog userLog = null;
     private ProgressListener progressListener = null;
+    private String mimeType = "application/x-netcdf";
+    private String extension = "nc";
 
-    protected GoGoDuck(String profile, String subset, String outputFile, Integer limit) {
+    protected GoGoDuck(String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
         this.profile = profile;
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
+        this.converters = converters;
         this.limit = limit;
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
         this.userLog = new UserLog();
     }
 
-    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, Integer limit) {
-        this(profile, subset, outputFile, limit);
+    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
+        this(profile, subset, outputFile, converters, limit);
         this.indexReader = new HttpIndexReader(this.userLog, geoserverUrl);
     }
 
-    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, Integer limit) {
-        this(profile, subset, outputFile, limit);
+    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
+        this(profile, subset, outputFile, converters, limit);
         this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
     }
 
@@ -94,7 +91,7 @@ public class GoGoDuck {
             throw new GoGoDuckException("Job cancelled");
     }
 
-    public void run() {
+    public Path run() {
         GoGoDuckModule module = GoGoDuckModule.newInstance(profile, indexReader, subset, userLog);
 
         Path tmpDir = null;
@@ -115,6 +112,12 @@ public class GoGoDuck {
             throwIfCancelled();
             updateMetadata(module, outputFile);
             throwIfCancelled();
+            for (Converter converter : converters) {
+                outputFile = converter.convert(outputFile);
+                mimeType = converter.getMimeType();
+                extension = converter.getExtension();
+                throwIfCancelled();
+            }
             userLog.log("Your aggregation was successful!");
         }
         catch (Exception e) {
@@ -126,6 +129,7 @@ public class GoGoDuck {
         finally {
             cleanTmpDir(tmpDir);
             userLog.close();
+            return outputFile;
         }
     }
 
@@ -239,7 +243,7 @@ public class GoGoDuck {
             File tmpFile = File.createTempFile("tmp", ".nc");
 
             List<String> command = new ArrayList<String>();
-            command.add(ncksPath);
+            command.add(GoGoDuckConfig.ncksPath);
             command.add("-a");
             command.add("-4");
             command.add("-O");
@@ -337,7 +341,7 @@ public class GoGoDuck {
 
     private static void aggregateNcrcat(Path tmpDir, Path outputFile) throws GoGoDuckException {
         List<String> command = new ArrayList<String>();
-        command.add(ncrcatPath);
+        command.add(GoGoDuckConfig.ncrcatPath);
         command.add("-D2");
         command.add("-4");
         command.add("-h");
@@ -420,4 +424,8 @@ public class GoGoDuck {
 
         return process.exitValue();
     }
+
+    public String getMimeType() { return mimeType; }
+
+    public String getExtension() { return extension; }
 }

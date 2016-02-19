@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.wps.GoGoDuckProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.Attribute;
@@ -46,7 +47,7 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
             File tmpFile = File.createTempFile("ncpdq", ".nc");
 
             List<String> command = new ArrayList<String>();
-            command.add(GoGoDuck.ncdpqPath);
+            command.add(GoGoDuckConfig.ncpdqPath);
             command.add("-O");
             command.add("-U");
             command.add(file.getAbsolutePath());

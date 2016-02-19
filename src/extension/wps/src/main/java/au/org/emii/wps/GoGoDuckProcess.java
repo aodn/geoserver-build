@@ -1,8 +1,6 @@
 package au.org.emii.wps;
 
-import au.org.emii.gogoduck.worker.GoGoDuck;
-import au.org.emii.gogoduck.worker.GoGoDuckException;
-import au.org.emii.gogoduck.worker.URLMangler;
+import au.org.emii.gogoduck.worker.*;
 import au.org.emii.notifier.HttpNotifier;
 import org.apache.commons.io.FilenameUtils;
 import org.geoserver.config.GeoServer;
@@ -24,25 +22,18 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultElement;
 import org.dom4j.xpath.DefaultXPath;
 import java.io.File;
+import java.nio.file.Path;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
-    static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
-
+    static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
     private final Catalog catalog;
     private final GeoServerResourceLoader resourceLoader;
-
-    private final String CONFIG_FILE = "wps/gogoduck.xml";
-
-    private final String FILE_LIMIT_KEY = "/gogoduck/fileLimit";
-    private final String FILE_LIMIT_DEFAULT = "10";
-
-    private final String THREAD_COUNT_KEY = "/gogoduck/threadCount";
-    private final String THREAD_COUNT_DEFAULT = "0";
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
             Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
@@ -52,12 +43,14 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         URLMangler.setUrlManglingMap(getConfigMap("/gogoduck/urlSubstitution"));
     }
 
-    @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
+    @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf"})
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
             String subset,
+            @DescribeParameter(name="filter", description="Post-processing filter to apply on output file", min=0)
+            String filter,
             @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
             URL callbackUrl,
             @DescribeParameter(name="callbackParams", description="Parameters to append to the callback", min=0)
@@ -67,6 +60,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         try {
             final int threadCount = getThreadCount();
             final int fileLimit = getFileLimit();
+            List<Converter> converters = new ArrayList<>();
 
             if (threadCount <= 0) {
                 throw new ProcessException("threadCount set to 0 or below, job will not run");
@@ -76,20 +70,29 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 throw new ProcessException("fileLimit set to 0 or below, job will not run");
             }
 
-            final File outputFile = getResourceManager().getOutputResource(
+            if (filter != null && !filter.isEmpty()) {
+                List<String> filterList = new ArrayList<>(Arrays.asList(filter.split(",")));
+
+                for (String filterType : filterList) {
+                    Converter converter = Converter.newInstance(filterType);
+                    converters.add(converter);
+                }
+            }
+
+            File outputFile = getResourceManager().getOutputResource(
                     getResourceManager().getExecutionId(true), layer + ".nc").file();
 
-            final String filePath = outputFile.toPath().toAbsolutePath().toString();
+            String filePath = outputFile.toPath().toAbsolutePath().toString();
 
-            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, fileLimit);
+            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, converters, fileLimit);
 
             ggd.setTmpDir(getWorkingDir());
             ggd.setThreadCount(threadCount);
             ggd.setProgressListener(progressListener);
 
-            ggd.run();
+            Path outputPath = ggd.run();
             notifySuccess(callbackUrl, callbackParams);
-            return new FileRawData(outputFile, "application/x-netcdf", "nc");
+            return new FileRawData(outputPath.toFile(), ggd.getMimeType(), ggd.getExtension());
         } catch (GoGoDuckException e) {
             logger.error(e.toString());
             notifyFailure(callbackUrl, callbackParams);
@@ -98,15 +101,15 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     }
 
     private int getFileLimit() {
-        return Integer.parseInt(getConfigVariable(FILE_LIMIT_KEY, FILE_LIMIT_DEFAULT));
+        return Integer.parseInt(getConfigVariable(GoGoDuckConfig.FILE_LIMIT_KEY, GoGoDuckConfig.FILE_LIMIT_DEFAULT));
     }
 
     private int getThreadCount() {
-        return Integer.parseInt(getConfigVariable(THREAD_COUNT_KEY, THREAD_COUNT_DEFAULT));
+        return Integer.parseInt(getConfigVariable(GoGoDuckConfig.THREAD_COUNT_KEY, GoGoDuckConfig.THREAD_COUNT_DEFAULT));
     }
 
     private String getConfigFile() {
-        return FilenameUtils.concat(resourceLoader.getBaseDirectory().toString(), CONFIG_FILE);
+        return FilenameUtils.concat(resourceLoader.getBaseDirectory().toString(), GoGoDuckConfig.CONFIG_FILE);
     }
 
     public String getConfigVariable(String xpathString, String defaultValue) {
