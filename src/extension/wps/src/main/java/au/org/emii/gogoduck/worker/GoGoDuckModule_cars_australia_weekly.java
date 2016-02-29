@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class GoGoDuckModule_cars_australia_weekly extends GoGoDuckModule_cars {
-    private static final String CARS_FILENAME = "CARS2009_Australia_weekly.nc";
+    private static final String CARS_FILENAME = "AODN/Australian_Government/CSIRO/Climatology/CARS/2009/eMII-product/CARS2009_Australia_weekly.nc";
 
     @Override
     public URI getCarsFilename() {
