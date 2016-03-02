@@ -7,7 +7,6 @@
     <artifactId>ncwms</artifactId>
     <packaging>jar</packaging>
     <name>GeoServer Ncwms (jar)</name>
-    <version>1.0.0</version>
 
     <parent>
         <groupId>org.geoserver</groupId>
@@ -28,7 +27,6 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>net.sf.json-lib</groupId>
@@ -48,7 +46,6 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
-            <version>3.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

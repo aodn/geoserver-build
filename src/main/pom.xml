@@ -56,7 +56,6 @@
         <dependency>
             <groupId>org.geoserver.extension</groupId>
             <artifactId>gs-wps-core</artifactId>
-            <version>${geoserver.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -73,7 +72,6 @@
         <dependency>
             <groupId>org.geotools.jdbc</groupId>
             <artifactId>gt-jdbc-sqlserver</artifactId>
-            <version>12.1</version>
         </dependency>
     </dependencies>
 
