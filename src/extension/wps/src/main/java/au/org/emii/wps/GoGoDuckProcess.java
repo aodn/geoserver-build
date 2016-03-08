@@ -17,16 +17,16 @@ import org.geotools.process.factory.DescribeResult;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.SAXReader;
+import org.dom4j.tree.DefaultElement;
+import org.dom4j.xpath.DefaultXPath;
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
@@ -49,6 +49,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         super(resourceManager, httpNotifier, geoserver);
         this.catalog = catalog;
         this.resourceLoader = resourceLoader;
+        URLMangler.setUrlManglingMap(getConfigMap("/gogoduck/urlSubstitution"));
     }
 
     @DescribeResult(name="result", description="NetCDF file", meta={"mimeTypes=application/x-netcdf"})
@@ -104,35 +105,46 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         return Integer.parseInt(getConfigVariable(THREAD_COUNT_KEY, THREAD_COUNT_DEFAULT));
     }
 
-    private String getConfigVariable(String key, String defaultValue) {
-        String returnValue = defaultValue;
-        try {
-            File configFile = new File(FilenameUtils.concat(resourceLoader.getBaseDirectory().toString(), CONFIG_FILE));
-            logger.debug(String.format("Config file is at '%s'", configFile.toString()));
+    private String getConfigFile() {
+        return FilenameUtils.concat(resourceLoader.getBaseDirectory().toString(), CONFIG_FILE);
+    }
 
-            returnValue = getXPathValue(configFile, key);
-            logger.debug(String.format("Loaded config value '%s' -> '%s'", key, returnValue));
+    public String getConfigVariable(String xpathString, String defaultValue) {
+        SAXReader reader = new SAXReader();
+        String returnValue = defaultValue;
+
+        try {
+            Document doc = reader.read(getConfigFile());
+            DefaultXPath xpath = new DefaultXPath(xpathString);
+            returnValue = xpath.selectSingleNode(doc).getText();
         }
-        catch (Exception e) {
-            logger.error(String.format("Could not open config file '%s': '%s'", CONFIG_FILE, e.getMessage()));
+        catch (DocumentException e) {
+            logger.error(String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
         }
 
         return returnValue;
     }
 
-    private String getXPathValue(File xmlFile, String xpath) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(xmlFile);
-        XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xp = xpathFactory.newXPath();
+    public Map<String, String> getConfigMap(String xpathString) {
+        SAXReader reader = new SAXReader();
 
-        XPathExpression expr = xp.compile(String.format("%s/text()", xpath));
-        return (String) expr.evaluate(doc, XPathConstants.STRING);
+        Map<String, String> returnValue = new HashMap<>();
+
+        try {
+            Document doc = reader.read(getConfigFile());
+            DefaultXPath xpath = new DefaultXPath(xpathString);
+
+            @SuppressWarnings("unchecked")
+            List<DefaultElement> list = xpath.selectNodes(doc);
+
+            for (final DefaultElement element : list) {
+                returnValue.put(element.attribute("key").getText(), element.getText());
+            }
+        }
+        catch (DocumentException e) {
+            logger.error(String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
+        }
+
+        return returnValue;
     }
-
-    public void setUrlMangling(Map<String, String> urlMangling) {
-        URLMangler.setUrlManglingMap(urlMangling);
-    }
-
 }

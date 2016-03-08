@@ -2,8 +2,8 @@ package au.org.emii.gogoduck.worker;
 
 import java.net.URI;
 
-public abstract  class GoGoDuckModule_cars extends GoGoDuckModule {
-    private static final String CARS_FILENAME = "CARS2009_Australia_weekly.nc";
+public abstract class GoGoDuckModule_cars extends GoGoDuckModule {
+    private static final String CARS_FILENAME = "AODN/Australian_Government/CSIRO/Climatology/CARS/2009/eMII-product/CARS2009_Australia_weekly.nc";
 
     @Override
     public SubsetParameters getSubsetParameters() {
