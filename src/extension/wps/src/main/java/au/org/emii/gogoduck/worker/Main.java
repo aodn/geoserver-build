@@ -8,7 +8,7 @@ public class Main {
 
     private static Map<String, String> urlMangling = new HashMap<String, String>();
     static {
-        urlMangling.put("^", "http://imos-data.aodn.org.au/");
+        urlMangling.put("^", "http://data.aodn.org.au/");
     }
 
     public static void usage(Options options) {
