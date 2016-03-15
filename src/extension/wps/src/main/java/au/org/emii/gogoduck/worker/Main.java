@@ -56,15 +56,7 @@ public class Main {
         if (null == outputFile) { usage(options); }
         if (null == profile) { usage(options); }
 
-        List<Converter> converters = new ArrayList<>();
-        if (filter != null && !filter.isEmpty()) {
-            List<String> filterList = new ArrayList<>(Arrays.asList(filter.split(",")));
-
-            for (String filterType : filterList) {
-                Converter converter = Converter.newInstance(filterType);
-                converters.add(converter);
-            }
-        }
+        List<Converter> converters = GoGoDuckUtils.addFilters(filter);
 
         GoGoDuck ggd = new GoGoDuck(geoserver, profile, subset, outputFile, converters, Integer.parseInt(limit));
 

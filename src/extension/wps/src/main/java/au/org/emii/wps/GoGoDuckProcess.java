@@ -60,7 +60,6 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         try {
             final int threadCount = getThreadCount();
             final int fileLimit = getFileLimit();
-            List<Converter> converters = new ArrayList<>();
 
             if (threadCount <= 0) {
                 throw new ProcessException("threadCount set to 0 or below, job will not run");
@@ -70,14 +69,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 throw new ProcessException("fileLimit set to 0 or below, job will not run");
             }
 
-            if (filter != null && !filter.isEmpty()) {
-                List<String> filterList = new ArrayList<>(Arrays.asList(filter.split(",")));
-
-                for (String filterType : filterList) {
-                    Converter converter = Converter.newInstance(filterType);
-                    converters.add(converter);
-                }
-            }
+            List<Converter> converters = GoGoDuckUtils.addFilters(filter);
 
             File outputFile = getResourceManager().getOutputResource(
                     getResourceManager().getExecutionId(true), layer + ".nc").file();
