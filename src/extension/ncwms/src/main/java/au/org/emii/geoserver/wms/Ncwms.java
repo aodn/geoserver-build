@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 public class Ncwms {
     static Logger LOGGER = Logging.getLogger(Ncwms.class);
 
-    public static String wmsVersion = "1.3.0";
-
     /* Sample tiny config file:
        <ncwms>
          <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
@@ -105,7 +103,6 @@ public class Ncwms {
             @SuppressWarnings("unchecked")
             Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
             wmsParameters.remove("TIME");
-            wmsParameters.put("VERSION", new String[] { wmsVersion });
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
 
             // Needed for GetFeatureInfo
