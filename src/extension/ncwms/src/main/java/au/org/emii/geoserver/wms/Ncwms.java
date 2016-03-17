@@ -36,6 +36,8 @@ public class Ncwms {
 
     private final UrlIndexInterface urlIndexInterface;
 
+    private String opacity;
+    
     public Ncwms(UrlIndexInterface urlIndexInterface, NcwmsConfig ncwmsConfig) {
         this.urlIndexInterface = urlIndexInterface;
         urlSubstitutions = ncwmsConfig.getConfigMap("/ncwms/urlSubstitution");
@@ -43,6 +45,8 @@ public class Ncwms {
         for (Map.Entry<String, String> entry : urlSubstitutions.entrySet()) {
             LOGGER.log(Level.INFO, String.format("urlSubstitution: '%s' -> '%s'", entry.getKey(), entry.getValue()));
         }
+        
+        this.opacity = ncwmsConfig.getConfigVariable("/ncwms/opacity", "40");
     }
 
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
@@ -104,7 +108,8 @@ public class Ncwms {
             Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
             wmsParameters.remove("TIME");
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
-
+            wmsParameters.put("opacity", new String[] { this.opacity });
+            
             // Needed for GetFeatureInfo
             if (wmsParameters.containsKey("QUERY_LAYERS")) {
                 wmsParameters.put("QUERY_LAYERS", new String[] { layerDescriptor.variable });
