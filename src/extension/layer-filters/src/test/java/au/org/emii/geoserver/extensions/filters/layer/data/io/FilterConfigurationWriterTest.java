@@ -42,14 +42,18 @@ public class FilterConfigurationWriterTest {
         "        <arbitraryfield>TEST</arbitraryfield>\n" +
         "    </filter>\n" +
         "</filters>\n";
+    
+    private static String NO_FILTERS_XML_WITHOUT_SPACES = NO_FILTERS_XML.replaceAll("\\s","");
+    private static String FILTERS_XML_WITHOUT_SPACES = FILTERS_XML.replaceAll("\\s","");
 
     @Test
     public void writeNoFiltersTest() throws TemplateException, IOException {
         FilterConfigurationWriter filterConfigurationWriter = new FilterConfigurationWriter(new ArrayList<Filter>());
         StringWriter writer = new StringWriter();
         filterConfigurationWriter.write(writer);
+        String writer_content_without_spaces = writer.toString().replaceAll("\\s","");
 
-        assertEquals(NO_FILTERS_XML, writer.toString());
+        assertEquals(NO_FILTERS_XML_WITHOUT_SPACES, writer_content_without_spaces);
     }
 
     @Test
@@ -57,8 +61,9 @@ public class FilterConfigurationWriterTest {
         FilterConfigurationWriter filterConfigurationWriter = new FilterConfigurationWriter(getFilters());
         StringWriter writer = new StringWriter();
         filterConfigurationWriter.write(writer);
+        String writer_content_without_spaces = writer.toString().replaceAll("\\s","");
 
-        assertEquals(FILTERS_XML, writer.toString());
+        assertEquals(FILTERS_XML_WITHOUT_SPACES, writer_content_without_spaces);
     }
 
     private List<Filter> getFilters() {

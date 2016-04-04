@@ -392,8 +392,9 @@ public class GoGoDuck {
     private static void cleanTmpDir(Path tmpDir) {
         logger.debug(String.format("Removing temporary directory '%s'", tmpDir));
         try {
-            FileUtils.deleteDirectory(tmpDir.toFile());
-        } catch (IOException e) {
+            File directory = tmpDir.toFile();
+            directory.delete();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
