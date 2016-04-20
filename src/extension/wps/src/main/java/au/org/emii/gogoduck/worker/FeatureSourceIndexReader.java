@@ -33,7 +33,7 @@ public class FeatureSourceIndexReader implements IndexReader {
         String timeCoverageEnd = subset.get("TIME").end;
 
         URIList uriList = new URIList();
-
+        
         // TODO Should include also workspace, but works also without
         String typeName = profile;
 
@@ -58,12 +58,17 @@ public class FeatureSourceIndexReader implements IndexReader {
             throw new GoGoDuckException(e.getMessage());
         }
 
+        
         try {
             while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
                 String url = (String) feature.getAttribute(urlField);
-                logger.info(String.format("Processing url '%s'", url));
-                uriList.add(new URI(url));
+                // We need to exclude the duplicated URLs
+                URI newURI = new URI(url);
+                if (! uriList.contains(newURI) ) {
+                    logger.info(String.format("Processing url '%s'", url));
+                    uriList.add(newURI);
+                }
             }
         } catch (Exception e) {
             userLog.log("We could not obtain list of URLs, does the collection still exist?");
