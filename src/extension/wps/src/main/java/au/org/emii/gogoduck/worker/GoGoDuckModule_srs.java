@@ -14,7 +14,7 @@ import java.util.List;
 public class GoGoDuckModule_srs extends GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule_srs.class);
 
-    private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime,wind_speed,wind_speed_dtime_from_sst";
+    private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime";
 
     @Override
     public SubsetParameters getSubsetParameters() {
@@ -25,6 +25,8 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
         // Rename LONGITUDE -> lon
         subsetParametersNew.put("lat", subset.get("LATITUDE"));
         subsetParametersNew.put("lon", subset.get("LONGITUDE"));
+        subsetParametersNew.remove("LATITUDE");
+        subsetParametersNew.remove("LONGITUDE");
 
         return subsetParametersNew;
     }
