@@ -10,7 +10,7 @@
 
     <name>Geoserver Gridded</name>
     <description>Geoserver v${project.version} with NetCDF and image mosaic extension etc installed.</description>
-    <url>http://www.emii.org.au</url>
+    <url>http://imos.org.au</url>
 
     <properties>
         <geoserver.version>2.8.2</geoserver.version>

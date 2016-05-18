@@ -7,7 +7,7 @@
 
     <name>AODN Geoserver (war)</name>
     <description>AODN/IMOS Geoserver v${project.version} with XSLT, no GZip and CSV/metadata plugin.</description>
-    <url>http://www.emii.org.au</url>
+    <url>http://imos.org.au</url>
 
     <parent>
         <groupId>au.org.emii</groupId>
