@@ -86,7 +86,7 @@
       <sql>select to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from $data</sql>
     </attribute>
     <attribute name="data_centre" value="'eMarine Information Infrastructure (eMII)'"/>
-    <attribute name="data_centre_email" value="'info@emii.org.au'"/>
+    <attribute name="data_centre_email" value="'info@aodn.org.au'"/>
     <attribute name="institution_references" value="'http://www.imos.org.au/emii.html'"/>
     <attribute name="institution">
       <value>'The citation in a list of references is: "IMOS [year-of-data-download], [Title], [data-access-url], accessed [date-of-access]"'</value>
