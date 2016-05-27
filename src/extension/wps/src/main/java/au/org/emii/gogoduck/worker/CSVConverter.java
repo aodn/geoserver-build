@@ -1,45 +1,54 @@
 package au.org.emii.gogoduck.worker;
 
-import org.apache.commons.io.FilenameUtils;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.EnhanceScaleMissing;
+import ucar.nc2.dataset.NetcdfDataset;
+import au.org.emii.netcdf.iterator.IndexRangesBuilder;
+import au.org.emii.netcdf.iterator.IndexValue;
+import au.org.emii.netcdf.iterator.reader.NetcdfReader;
+
 public class CSVConverter extends Converter {
 
-    private String ncksPath = null;
-    private String ncpdqPath = null;
     private final String mimeType = "text/csv";
     private final String extension = "csv";
-    private Integer lineNumber = 0;
-    private Integer attributesEnd = 0;
-    private List<String> lines = new ArrayList<String>();
-    private List<String> metadata = new ArrayList<String>();
-    private List<String> attributeMetadata = new ArrayList<String>();
-    private List<Map> attributes = new ArrayList<Map>();
-    private StringBuilder csvString = new StringBuilder();
 
-    private final String NEW_LINE = System.getProperty("line.separator");
-    private final String COMMENT = "# ";
+    private final static boolean FILL_VALUE_IS_MISSING = true;
+    private final static boolean INVALID_DATA_IS_MISSING = true;
+    private final static boolean MISSING_DATA_IS_MISSING = true;
+    private final static boolean DONT_USE_NANS = false;
+
+    private Set<NetcdfDataset.Enhance> enhanceMode;
+
     private static final Logger logger = LoggerFactory.getLogger(CSVConverter.class);
 
-    public CSVConverter() {}
+    public CSVConverter() {
+        enhanceMode = new HashSet<NetcdfDataset.Enhance>();
+        enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
+        enhanceMode.add(NetcdfDataset.Enhance.ConvertEnums);
+    }
 
     @Override
     public void init() {
-        this.ncksPath = GoGoDuckConfig.ncksPath;
-        this.ncpdqPath = GoGoDuckConfig.ncpdqPath;
     }
 
     @Override
@@ -49,210 +58,140 @@ public class CSVConverter extends Converter {
     public String getExtension() { return extension; }
 
     @Override
-    public Path convert(Path outputFile) throws GoGoDuckException {
-        String baseFilename = FilenameUtils.getBaseName(String.valueOf(outputFile));
-        try {
-            File unpackedNetCDF = unpackNetCDF(outputFile.toFile());
-            Path csvPath = executeNcksAndOutputToFile(baseFilename, unpackedNetCDF.toPath());
-            Files.delete(unpackedNetCDF.toPath());
-            return csvPath;
+    public Path convert(Path inputFile) throws GoGoDuckException {
+        NetcdfDataset ncDataset = null;
+        Path outputFile = getOutputFile(inputFile);
+
+        try (PrintStream out = new PrintStream(Files.newOutputStream(outputFile, CREATE_NEW))) {
+            ncDataset = openNetcdfDataset(inputFile);
+            List<Variable> variables = ncDataset.getVariables();
+            writeHeaderLine(out, variables);
+            Map<Variable, NetcdfReader> variableReaders = createVariableReaders(variables);
+            Iterator<Set<IndexValue>> indexTupleIterator = buildIndexTupleIterator(variables);
+
+            while (indexTupleIterator.hasNext()) {
+                Set<IndexValue> indexTuple = indexTupleIterator.next();
+                writeCsvLine(out, variableReaders, indexTuple);
+            }
+
+            return outputFile;
         } catch (Exception e) {
+            FileUtils.deleteQuietly(outputFile.toFile());
+            logger.error("Error converting output to csv", e);
             throw new GoGoDuckException(String.format("Could not convert output to csv: '%s'", e.getMessage()));
+        } finally {
+            closeQuietly(ncDataset);
         }
     }
 
-    private File unpackNetCDF(File netCDFInputFile) throws Exception {
-        List<String> ncpdqCommand = new ArrayList<>();
-        File unpackedNetCDF = File.createTempFile("tmp", ".nc");
-
-        ncpdqCommand.add(ncpdqPath);
-        ncpdqCommand.add("-U");
-        ncpdqCommand.add("-O");
-        ncpdqCommand.add(netCDFInputFile.toString());
-        ncpdqCommand.add(unpackedNetCDF.getPath());
-
-        GoGoDuck.execute(ncpdqCommand);
-        return unpackedNetCDF;
+    private Path getOutputFile(Path inputFile) {
+        String outputFile = String.format("%s.%s", FilenameUtils.removeExtension(inputFile.toString()), extension);
+        return Paths.get(outputFile);
     }
 
-    private Path executeNcksAndOutputToFile(String baseFilename, Path tempFile) throws IOException, InterruptedException {
-        List<String> ncksCommand = new ArrayList<>();
-        ncksCommand.add(ncksPath);
-        ncksCommand.add("--no_nm_prn");
-        ncksCommand.add("-a");
-        ncksCommand.add(tempFile.toString());
+    private NetcdfDataset openNetcdfDataset(Path inputFile) throws IOException {
+        NetcdfDataset ncDataset = NetcdfDataset.openDataset(inputFile.toString(), enhanceMode, 0, null, null);
+        setMissingValueHandling(
+            ncDataset,
+            FILL_VALUE_IS_MISSING,
+            INVALID_DATA_IS_MISSING,
+            MISSING_DATA_IS_MISSING,
+            DONT_USE_NANS
+        );
+        return ncDataset;
+    }
 
-        logger.info(ncksCommand.toString());
-        
-        ProcessBuilder processor = new ProcessBuilder(ncksCommand);
-        processor.redirectError(ProcessBuilder.Redirect.PIPE);
+    private void setMissingValueHandling(NetcdfDataset ncDataset,
+            boolean fillValueIsMissing, boolean invalidDataIsMissing,
+            boolean missingDataIsMissing, boolean useNaNs) {
+        for (Variable ncVariable: ncDataset.getVariables()) {
+            EnhanceScaleMissing scaleMissingDecorator = (EnhanceScaleMissing) ncVariable;
+            scaleMissingDecorator.setFillValueIsMissing(fillValueIsMissing);
+            scaleMissingDecorator.setInvalidDataIsMissing(invalidDataIsMissing);
+            scaleMissingDecorator.setMissingDataIsMissing(missingDataIsMissing);
+            scaleMissingDecorator.setUseNaNs(useNaNs);
+        }
+    }
 
-        final Process process = processor.start();
-        InputStream is = process.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
+    private void writeHeaderLine(PrintStream out, List<Variable> variables) {
+        Iterator<Variable> variableIterator = variables.iterator();
 
-        InputStreamReader errorStream = new InputStreamReader(process.getErrorStream());
-        BufferedReader bufferedErrorStream = new BufferedReader(errorStream);
-        
-        StringBuilder builder = new StringBuilder();
-        String line;
-        String errLine = null;
-        while ((line = br.readLine()) != null || (errLine = bufferedErrorStream.readLine()) != null) {
-            if (line != null) {
-                builder.append(line + System.getProperty("line.separator"));
+        while (variableIterator.hasNext()) {
+            Variable ncVariable = variableIterator.next();
+            out.print(ncVariable.getShortName());
+            Attribute unitsAttribute = ncVariable.findAttribute("units");
+
+            if (unitsAttribute != null) {
+                out.format(" (%s)", unitsAttribute.getStringValue());
             }
-            if (errLine != null) {
-                logger.error(errLine);
+
+            if (variableIterator.hasNext()) {
+                out.print(",");
             }
+        }
+
+        out.println();
+    }
+
+    private Map<Variable, NetcdfReader> createVariableReaders(List<Variable> variables)
+            throws IOException {
+        Map<Variable, NetcdfReader> variableReaders = new LinkedHashMap<Variable, NetcdfReader>();
+
+        for (Variable ncVariable: variables) {
+            variableReaders.put(ncVariable, new NetcdfReader(ncVariable));
+        }
+
+        return variableReaders;
+    }
+
+    private Iterator<Set<IndexValue>> buildIndexTupleIterator(List<Variable> variables) {
+        IndexRangesBuilder indexRangesBuilder = new IndexRangesBuilder();
+
+        for (Variable ncVariable: variables) {
+            indexRangesBuilder.addDimensions(ncVariable);
+        }
+
+        return indexRangesBuilder.getIterator();
+    }
+
+    private void writeCsvLine(PrintStream out, Map<Variable, NetcdfReader> variableReaders, Set<IndexValue> indexTuple) {
+        Iterator<Variable> variableReaderIterator = variableReaders.keySet().iterator();
+
+        while (variableReaderIterator.hasNext()) {
+            Variable variable = variableReaderIterator.next();
+            out.print(getDisplayValue(variable, variableReaders.get(variable), indexTuple));
+
+            if (variableReaderIterator.hasNext()) { 
+                out.print(",");
+            }
+        }
+
+        out.println();
+    }
+
+    private String getDisplayValue(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {
+        if (isMissing(variable, variableReader, indexTuple)) {
+            return "";
+        } else {
+            return variableReader.getString(indexTuple);
+        }
+    }
+
+    private boolean isMissing(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {
+        EnhanceScaleMissing scaleMissingDecorator = (EnhanceScaleMissing) variable;
+        return scaleMissingDecorator.hasMissing() && scaleMissingDecorator.isMissing(variableReader.getDouble(indexTuple));
+    }
+
+    private void closeQuietly(NetcdfDataset ncDataset) {
+        if (ncDataset == null) {
+            return;
         }
 
         try {
-            process.waitFor();
-        } catch (InterruptedException e) {
-            logger.error(String.format("Interrupted: '%s'", e.getMessage()));
-            throw e;
-        }
-
-        String rawOutput = builder.toString();
-        String outputCSV = parseNcks(rawOutput);
-        String csvFilename = String.format("%s.%s", baseFilename, extension);
-        File csvFile = new File(csvFilename);
-        FileUtils.writeStringToFile(csvFile, outputCSV);
-
-        return csvFile.toPath();
-    }
-
-    private String parseNcks(String input) {
-        InputStream is = new ByteArrayInputStream(input.getBytes());
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            String line = br.readLine();
-
-            while (line != null) {
-                extractGlobalMetadata(line);
-                extractAttributes(line);
-                lines.add(line);
-
-                line = br.readLine();
-                lineNumber++;
-            }
-
-            for (Map attr : attributes) {
-                extractDetailedAttributes(attr);
-            }
-
-            writeMetadata();
-            writeDataBlocks();
-        }
-        catch (Exception e) {
-            logger.error(e.toString());
-        }
-
-        return csvString.toString();
-    }
-
-    private void extractGlobalMetadata(String aText) {
-        Pattern pattern = Pattern.compile("^Global", Pattern.COMMENTS);
-        Matcher matcher = pattern.matcher(aText);
-
-        if (matcher.find()) {
-            metadata.add(String.format(COMMENT + "%s", aText.split(":", 2)[1].trim()));
+            ncDataset.close();
+        } catch (IOException e) {
+            logger.warn("Failed to close input file", e);
         }
     }
 
-    private void extractAttributes(String aText) {
-        Pattern pattern = Pattern.compile("\\:\\stype", Pattern.COMMENTS);
-        Matcher matcher = pattern.matcher(aText);
-
-        while (matcher.find()) {
-            Map<String, String> attr = new HashMap<String, String>();
-            attr.put("name", aText.split(":", 2)[0].trim());
-            attr.put("lineNumber", lineNumber.toString());
-
-            attributes.add(attr);
-        }
-    }
-
-    private void extractDetailedAttributes(Map attr) {
-        String lNum = attr.get("lineNumber").toString();
-        Integer lineNumber = Integer.parseInt(lNum);
-        String line = lines.get(lineNumber);
-        attributeMetadata.add(COMMENT);
-
-        while (line.length() > 0) {
-            setHeaders(attr,line);
-            attributeMetadata.add(COMMENT + line);
-            line = lines.get(lineNumber);
-            lineNumber ++;
-            setEndOfVariableBlock(lineNumber);
-        }
-    }
-
-    private void setHeaders(Map attr, String line) {
-        Pattern pattern = Pattern.compile("\\sdimension\\s[0-9]:", Pattern.COMMENTS);
-        Matcher matcher = pattern.matcher(line);
-        Integer dimensionCount = 1;
-
-        while (matcher.find()) {
-            String dimensionName = line.split(":", 2)[1].split(",", 2)[0].trim();
-
-            if (attr.get("dimensions") == null) {
-                attr.put("dimensions", dimensionName);
-            } else {
-                attr.put("dimensions", attr.get("dimensions") + "," + dimensionName);
-            }
-
-            attr.put("dimension_count", dimensionCount);
-            dimensionCount ++;
-        }
-    }
-
-    private void writeMetadata() {
-        csvAppender("# METADATA:");
-
-        for (String m : metadata) {
-            csvAppender(m);
-        }
-
-        for (String a : attributeMetadata) {
-            csvAppender(a);
-        }
-        csvAppender(NEW_LINE);
-    }
-
-    private void writeDataBlockHeaders(Map attr) {
-        String header = attr.get("dimensions") + "," + attr.get("name");
-        String dimensions = attr.get("dimensions").toString().replace(",", "");
-
-        if (dimensions.equals(attr.get("name").toString())) {
-            header = attr.get("name").toString();
-        }
-
-        csvAppender(header);
-    }
-
-    private void writeDataBlocks() {
-        for (Map attr : attributes) {
-            writeDataBlockHeaders(attr);
-            String line = lines.get(attributesEnd );
-
-            while (line.length() > 0) {
-                line = lines.get(attributesEnd);
-                attributesEnd++;
-
-                csvAppender(line.replace(" ", ","));
-            }
-        }
-    }
-
-    private void setEndOfVariableBlock(Integer lineNumber) {
-        if (lineNumber > attributesEnd) {
-            attributesEnd = lineNumber;
-        }
-    }
-
-    private void csvAppender(String line) {
-        csvString.append(line + NEW_LINE);
-    }
 }
