@@ -9,6 +9,7 @@ import org.dom4j.xpath.DefaultXPath;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geotools.util.logging.Logging;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,30 @@ public class NcwmsConfig {
         }
         catch (DocumentException e) {
             LOGGER.log(Level.WARNING, String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
+        }
+
+        return returnValue;
+    }
+
+    public List<String> getConfigList(String xpathString) {
+        SAXReader reader = new SAXReader();
+
+        List<String> returnValue = new ArrayList<>();
+
+        try {
+            Document doc = reader.read(getConfigFile());
+            DefaultXPath xpath = new DefaultXPath(xpathString);
+
+            @SuppressWarnings("unchecked")
+            List<DefaultElement> list = xpath.selectNodes(doc);
+
+            for (final DefaultElement element : list) {
+                returnValue.add(element.getText());
+            }
+        } catch (DocumentException e) {
+            LOGGER.log(Level.WARNING, String.format("Could not read '%s' as an xml document: '%s'", getConfigFile(), e.getMessage()));
+        } catch (ClassCastException e) {
+            LOGGER.log(Level.WARNING, String.format("Error reading configuration file %s: '%s' does not return a list of elements", getConfigFile(), xpathString));
         }
 
         return returnValue;
