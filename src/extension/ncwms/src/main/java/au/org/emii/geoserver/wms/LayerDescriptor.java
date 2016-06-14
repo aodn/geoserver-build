@@ -1,11 +1,17 @@
 package au.org.emii.geoserver.wms;
 
+import org.geotools.util.logging.Logging;
+
+import java.util.logging.Logger;
+
 public class LayerDescriptor {
+    static Logger LOGGER = Logging.getLogger(Ncwms.class);
+
     public final String layer;
     public final String workspace;
     public final String timeField;
     public final String urlField;
-    public final String variable;
+    public final String netCDFVariable;
 
     public static final String defaultTimeField = "time";
     public static final String defaultUrlField = "file_url";
@@ -17,7 +23,7 @@ public class LayerDescriptor {
 
         String layerAndWorkspace = layerString.split("/")[0];
         String layerInformation;
-        variable = layerString.split("/")[1];
+        netCDFVariable = layerString.split("/")[1];
         if (layerString.contains(":")) {
             workspace = layerAndWorkspace.split(":")[0];
             layerInformation = layerAndWorkspace.split(":")[1];
@@ -59,8 +65,10 @@ public class LayerDescriptor {
         return urlField;
     }
 
+    public String getNetCDFVariableName() { return netCDFVariable; }
+
     @Override
     public String toString() {
-        return String.format("%s/%s", geoserverName(), variable);
+        return String.format("%s/%s", geoserverName(), netCDFVariable);
     }
 }
