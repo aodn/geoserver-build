@@ -97,7 +97,7 @@
      <repositories>
         <repository>
             <id>opengeo</id>
-            <url>https://boundless.artifactoryonline.com/boundless/main</url>
+            <url>http://repo.boundlessgeo.com/main</url>
         </repository>
         <repository>
             <id>osgeo</id>
