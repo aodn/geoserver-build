@@ -1,6 +1,7 @@
 package au.org.emii.geoserver.wms;
 
 import net.sf.json.JSONObject;
+
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -14,9 +15,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import java.util.regex.Pattern;
 import java.net.URL;
 import java.util.*;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,16 +33,19 @@ public class Ncwms {
          <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
          <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
          <urlSubstitution key="^/IMOS/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+         <collectionsWithTimeMismatch>^imos:srs.*</collectionsWithTimeMismatch>
        </ncwms>
     */
 
     private final Map<String, String> urlSubstitutions;
+    private final List<String> collectionsWithTimeMismatchRegExs;
 
     private final UrlIndexInterface urlIndexInterface;
 
     public Ncwms(UrlIndexInterface urlIndexInterface, NcwmsConfig ncwmsConfig) {
         this.urlIndexInterface = urlIndexInterface;
         urlSubstitutions = ncwmsConfig.getConfigMap("/ncwms/urlSubstitution");
+        collectionsWithTimeMismatchRegExs = ncwmsConfig.getConfigList("/ncwms/collectionsWithTimeMismatch");
 
         for (Map.Entry<String, String> entry : urlSubstitutions.entrySet()) {
             LOGGER.log(Level.INFO, String.format("urlSubstitution: '%s' -> '%s'", entry.getKey(), entry.getValue()));
@@ -104,7 +109,15 @@ public class Ncwms {
         try {
             @SuppressWarnings("unchecked")
             Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
-            wmsParameters.remove("TIME");
+
+            // Some collections such as SRS are indexed with a timestamp which doesn't match
+            // the timestamp thredds calculates but only have one timestamp per file meaning its 
+            // not actually required
+            // For the moment just don't include the time parameter for these collections
+            if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
+                wmsParameters.remove("TIME");
+            }
+
             wmsParameters.put("VERSION", new String[] { wmsVersion });
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
 
@@ -123,6 +136,16 @@ public class Ncwms {
             LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", wmsUrlStr));
             e.printStackTrace();
         }
+    }
+
+    private boolean isCollectionWithTimeMismatch(String layerName) {
+        for (String collectionsWithTimeMismatchRegEx: collectionsWithTimeMismatchRegExs) {
+            if (Pattern.matches(collectionsWithTimeMismatchRegEx, layerName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String encodeMapForRequest(Map<String, String[]> params) {
