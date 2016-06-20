@@ -88,7 +88,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         } catch (GoGoDuckException e) {
             logger.error(e.toString());
             notifyFailure(callbackUrl, callbackParams);
-            throw new ProcessException(e);
+            throw new ProcessException(e.getMessage());
         }
     }
 
