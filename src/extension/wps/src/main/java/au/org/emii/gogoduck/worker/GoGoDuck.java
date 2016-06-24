@@ -119,6 +119,7 @@ public class GoGoDuck {
                 throwIfCancelled();
             }
             userLog.log("Your aggregation was successful!");
+            return outputFile;
         }
         catch (Exception e) {
             userLog.log("Your aggregation failed!");
@@ -129,7 +130,6 @@ public class GoGoDuck {
         finally {
             cleanTmpDir(tmpDir);
             userLog.close();
-            return outputFile;
         }
     }
 
