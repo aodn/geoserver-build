@@ -95,11 +95,7 @@ public class GoGoDuckModule {
     }
 
     public SubsetParameters getSubsetParameters() {
-        // Remove time parameter as we don't need to subset on it, we already
-        // have only files that are in the correct time range
-        SubsetParameters subsetParametersNoTime = new SubsetParameters(subset);
-        subsetParametersNoTime.remove("TIME");
-        return subsetParametersNoTime;
+        return new SubsetParameters(subset);
     }
 
     public static GoGoDuckModule newInstance(String profile, IndexReader indexReader, String subset, UserLog userLog) {
