@@ -1,19 +1,16 @@
 package au.org.emii.gogoduck.worker;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
@@ -26,18 +23,6 @@ public class GoGoDuckModuleTest {
     public void beforeEach() {
         ggdm = new GoGoDuckModule();
         ggdm.init("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
-    }
-
-    @Test
-    public void testGetSubsetParameters() throws Exception {
-        // Make sure it removes `TIME` subset parameter
-        assertFalse(ggdm.getSubsetParameters().containsKey("TIME"));
-
-        // But did that only on a copy of the subset parameters
-        Field privateSubset = GoGoDuckModule.class.getDeclaredField("subset");
-        privateSubset.setAccessible(true);
-        SubsetParameters sp = (SubsetParameters) privateSubset.get(ggdm);
-        assertTrue(sp.containsKey("TIME"));
     }
 
     public class GoGoDuckModule_test extends GoGoDuckModule {
