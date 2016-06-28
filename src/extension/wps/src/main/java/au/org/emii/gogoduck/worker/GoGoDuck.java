@@ -30,7 +30,7 @@ public class GoGoDuck {
     private IndexReader indexReader = null;
     private final String profile;
     private final String subset;
-    private final List<Converter> converters;
+    private final String format;
     private Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
@@ -40,23 +40,23 @@ public class GoGoDuck {
     private String mimeType = "application/x-netcdf";
     private String extension = "nc";
 
-    protected GoGoDuck(String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
+    protected GoGoDuck(String profile, String subset, String outputFile, String format, Integer limit) {
         this.profile = profile;
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
-        this.converters = converters;
+        this.format = format;
         this.limit = limit;
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
         this.userLog = new UserLog();
     }
 
-    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
-        this(profile, subset, outputFile, converters, limit);
+    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, String format, Integer limit) {
+        this(profile, subset, outputFile, format, limit);
         this.indexReader = new HttpIndexReader(this.userLog, geoserverUrl);
     }
 
-    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
-        this(profile, subset, outputFile, converters, limit);
+    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, String format, Integer limit) {
+        this(profile, subset, outputFile, format, limit);
         this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
     }
 
@@ -112,12 +112,11 @@ public class GoGoDuck {
             throwIfCancelled();
             updateMetadata(module, outputFile);
             throwIfCancelled();
-            for (Converter converter : converters) {
-                outputFile = converter.convert(outputFile);
-                mimeType = converter.getMimeType();
-                extension = converter.getExtension();
-                throwIfCancelled();
-            }
+            Converter converter = Converter.newInstance(format);
+            outputFile = converter.convert(outputFile);
+            mimeType = converter.getMimeType();
+            extension = converter.getExtension();
+            throwIfCancelled();
             userLog.log("Your aggregation was successful!");
             return outputFile;
         }
