@@ -5,9 +5,13 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultText;
 import org.dom4j.xpath.DefaultXPath;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.geotools.util.logging.Logging;
 
 import java.io.*;
@@ -96,6 +100,32 @@ public class Ncwms {
     private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         proxyWmsRequest(request, response, "LAYERS");
+    }
+
+    public void getCapabilities(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Document getCapabilitiesDocument = null;
+        if (request.getParameter("DATASET") != null) {
+            getCapabilitiesDocument = getCapabilitiesXml(new LayerDescriptor(request.getParameter("DATASET")));
+        } else {
+            getCapabilitiesDocument = DocumentHelper.createDocument();
+            Element serviceExceptionReport = getCapabilitiesDocument.addElement("ServiceExceptionReport");
+
+            serviceExceptionReport.addElement("ServiceException")
+                .addAttribute("version", wmsVersion)
+                .addAttribute("xmlns", "http://www.opengis.net/ogc")
+                .addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+                .addAttribute("xsi:schemaLocation", "http://www.opengis.net/ogc http://schemas.opengis.net/wms/1.3.0/exceptions_1_3_0.xsd")
+                .addText("Must pass DATASET=");
+        }
+
+        XMLWriter writer = new XMLWriter(
+            response.getOutputStream(),
+            OutputFormat.createPrettyPrint()
+        );
+
+        writer.write(getCapabilitiesDocument);
+        writer.flush();
     }
 
     private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response, String layerParameter)

@@ -26,6 +26,12 @@ public class LayerDescriptorTest {
         assertEquals("some_layer/sea_water_velocity", layerDescriptor.toString());
         assertEquals("time", layerDescriptor.getTimeFieldName());
         assertEquals("file_url", layerDescriptor.getUrlFieldName());
+
+        layerDescriptor = new LayerDescriptor("some_layer");
+        assertEquals(null, layerDescriptor.workspace);
+        assertEquals(null, layerDescriptor.variable);
+        assertEquals("some_layer", layerDescriptor.layer);
+        assertEquals("some_layer", layerDescriptor.geoserverName());
     }
 
     @Test
