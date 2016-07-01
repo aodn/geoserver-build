@@ -1,8 +1,8 @@
 #!/bin/bash
 
 declare -r NCO_VERSION=4.3.4
-declare -r NCO_SRC=http://dust.ess.uci.edu/nco/src/nco_${NCO_VERSION}.orig.tar.gz
-declare -r DEBIAN_CONTROL_SRC=http://dust.ess.uci.edu/nco/src/nco_${NCO_VERSION}-1.debian.tar.gz
+declare -r NCO_SRC=http://nco.sourceforge.net/src/nco_${NCO_VERSION}.orig.tar.gz
+declare -r DEBIAN_CONTROL_SRC=http://nco.sourceforge.net/src/nco_${NCO_VERSION}-1.debian.tar.gz
 
 # main
 main() {
@@ -20,6 +20,9 @@ main() {
     tar -xf $nco_src_basename && \
         cd nco-$NCO_VERSION && \
         tar -xf ../$debian_src_basename
+
+    # do not index buggy html generation
+    sed -i -e '/nco.html/d' debian/rules
 
     # build!
     dpkg-buildpackage -B -nc
