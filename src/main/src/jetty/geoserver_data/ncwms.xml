@@ -1,0 +1,4 @@
+<ncwms>
+    <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+    <urlSubstitution key="^IMOS/">http://thredds.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+</ncwms>

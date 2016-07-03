@@ -36,11 +36,11 @@ All incoming WMS requests should have a `TIME=` string. Otherwise we use the
 latest time for the layer. We can obtain it by sorting by time in a descending
 order and just take the first feature, that would be the latest `TIME`.
 
-thredds has full ncwms capabilities per file, for instance:
-http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/CBG/2015/12/10/IMOS_ACORN_V_20151210T003000Z_CBG_FV00_1-hour-avg.nc?service=WMS&version=1.3.0&request=GetCapabilities
+Thredds has full ncwms capabilities per file, for instance:
+http://thredds.aodn.org.au/thredds/wms/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/CBG/2015/12/10/IMOS_ACORN_V_20151210T003000Z_CBG_FV00_1-hour-avg.nc?service=WMS&version=1.3.0&request=GetCapabilities
 
 So the wms endpoint for the file `IMOS/ACORN/gridded_1h-avg-current-map_non-QC/CBG/2015/12/10/IMOS_ACORN_V_20151210T003000Z_CBG_FV00_1-hour-avg.nc` is at:
-http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/CBG/2015/12/10/IMOS_ACORN_V_20151210T003000Z_CBG_FV00_1-hour-avg.nc
+http://thredds.aodn.org.au/thredds/wms/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/CBG/2015/12/10/IMOS_ACORN_V_20151210T003000Z_CBG_FV00_1-hour-avg.nc
 
 The abomination ncwms plugin will just proxy all requests to the wms endpoint of
 the corresponding file.

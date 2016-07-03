@@ -1,27 +1,24 @@
 package au.org.emii.geoserver.wms;
-
-import net.sf.json.JSONObject;
-
 import org.apache.commons.io.IOUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultText;
-import org.dom4j.xpath.DefaultXPath;
 import org.geotools.util.logging.Logging;
-
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.net.URL;
-import java.util.*;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class Ncwms {
     static Logger LOGGER = Logging.getLogger(Ncwms.class);
@@ -31,8 +28,8 @@ public class Ncwms {
     /* Sample tiny config file:
        <ncwms>
          <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
-         <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
-         <urlSubstitution key="^/IMOS/">http://thredds-1-aws-syd.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+         <urlSubstitution key="/mnt/imos-t3/IMOS/opendap/">http://thredds.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
+         <urlSubstitution key="^/IMOS/">http://thredds.aodn.org.au/thredds/wms/IMOS/</urlSubstitution>
          <collectionsWithTimeMismatch>^imos:srs.*</collectionsWithTimeMismatch>
        </ncwms>
     */
@@ -40,10 +37,10 @@ public class Ncwms {
     private final Map<String, String> urlSubstitutions;
     private final List<String> collectionsWithTimeMismatchRegExs;
 
-    private final UrlIndexInterface urlIndexInterface;
+    private final UriIndex geoserverUrlIndex;
 
-    public Ncwms(UrlIndexInterface urlIndexInterface, NcwmsConfig ncwmsConfig) {
-        this.urlIndexInterface = urlIndexInterface;
+    public Ncwms(UriIndex geoserverUrlIndex, NcwmsConfig ncwmsConfig) {
+        this.geoserverUrlIndex = geoserverUrlIndex;
         urlSubstitutions = ncwmsConfig.getConfigMap("/ncwms/urlSubstitution");
         collectionsWithTimeMismatchRegExs = ncwmsConfig.getConfigList("/ncwms/collectionsWithTimeMismatch");
 
@@ -62,19 +59,14 @@ public class Ncwms {
             String day = request.getParameter("day");
 
             JSONObject resultJson = new JSONObject();
-            resultJson.put("timesteps", urlIndexInterface.getTimesForDay(layerDescriptor, day));
+            resultJson.put("timesteps", geoserverUrlIndex.getTimesForDay(layerDescriptor, day));
             response.getOutputStream().write(resultJson.toString().getBytes());
-        }
-        else if (item != null && item.compareTo("layerDetails") == 0) {
-            LOGGER.log(Level.INFO, "Returning all available dates");
+        } else if (item != null && item.compareTo("layerDetails") == 0) {
 
-            Document getCapabilitiesDocument = getCapabilitiesXml(layerDescriptor);
-
-            JSONObject resultJson = new JSONObject();
-            resultJson.put("datesWithData", urlIndexInterface.getUniqueDates(layerDescriptor));
-            resultJson.put("supportedStyles", getSupportedStyles(getCapabilitiesDocument, layerDescriptor.variable));
-            resultJson.put("palettes", getPalettes(getCapabilitiesDocument, layerDescriptor.variable));
-            response.getOutputStream().write(resultJson.toString().getBytes());
+            JSONObject getMetadataJson = getMetadataJson(layerDescriptor);
+            getMetadataJson.put("datesWithData", geoserverUrlIndex.getUniqueDates(layerDescriptor));
+            LOGGER.log(Level.INFO, "Returning getMetadataJson");
+            response.getOutputStream().write(getMetadataJson.toString().getBytes());
         }
     }
 
@@ -111,7 +103,7 @@ public class Ncwms {
             Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
 
             // Some collections such as SRS are indexed with a timestamp which doesn't match
-            // the timestamp thredds calculates but only have one timestamp per file meaning its 
+            // the timestamp thredds calculates but only have one timestamp per file meaning its
             // not actually required
             // For the moment just don't include the time parameter for these collections
             if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
@@ -119,11 +111,11 @@ public class Ncwms {
             }
 
             wmsParameters.put("VERSION", new String[] { wmsVersion });
-            wmsParameters.put(layerParameter, new String[] { layerDescriptor.variable });
+            wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
 
             // Needed for GetFeatureInfo
             if (wmsParameters.containsKey("QUERY_LAYERS")) {
-                wmsParameters.put("QUERY_LAYERS", new String[] { layerDescriptor.variable });
+                wmsParameters.put("QUERY_LAYERS", new String[]{layerDescriptor.getNetCDFVariableName() });
             }
 
             String queryString = encodeMapForRequest(wmsParameters);
@@ -131,8 +123,7 @@ public class Ncwms {
             URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
 
             IOUtils.copy(wmsUrl.openConnection().getInputStream(), response.getOutputStream());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", wmsUrlStr));
             e.printStackTrace();
         }
@@ -157,68 +148,41 @@ public class Ncwms {
                 sb.append('=');
                 sb.append(URLEncoder.encode(param.getValue()[0], StandardCharsets.UTF_8.name()));
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, String.format("Error encoding parameters: '%s'", e.getMessage()));
         }
 
         return sb.toString();
     }
 
-    private static List<String> getCombinedStyles(Document getCapabilitiesXml, String layerName) {
-        List<String> combinedStyles = new ArrayList<>();
+    public JSONObject getMetadataJson(LayerDescriptor layerDescriptor) {
+        String wmsUrl;
 
-        DefaultXPath xpath = new DefaultXPath("//x:Layer/x:Title[.=\'" + layerName + "\']/../x:Style/x:Name/text()");
-        Map<String,String> namespaces = new TreeMap<>();
-        namespaces.put("x", "http://www.opengis.net/wms");
-        xpath.setNamespaceURIs(namespaces);
-
-        @SuppressWarnings("unchecked")
-        List<DefaultText> list = xpath.selectNodes(getCapabilitiesXml);
-
-        for (final DefaultText text : list) {
-            combinedStyles.add(text.getText());
-        }
-        return combinedStyles;
-    }
-
-    public static List<String> getSupportedStyles(Document getCapabilitiesXml, String layerName) {
-        Set<String> styles = new HashSet<>();
-        for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
-            styles.add(combinedStyle.split("/")[0]);
-        }
-        return new ArrayList<>(styles);
-    }
-
-    public static List<String> getPalettes(Document getCapabilitiesXml, String layerName) {
-        Set<String> palettes = new HashSet<>();
-        for (final String combinedStyle : getCombinedStyles(getCapabilitiesXml, layerName)) {
-            palettes.add(combinedStyle.split("/")[1]);
-        }
-        return new ArrayList<>(palettes);
-    }
-
-    private Document getCapabilitiesXml(LayerDescriptor layerDescriptor)
-        throws IOException {
-        String wmsUrl = null;
         try {
             wmsUrl = getWmsUrl(layerDescriptor, null);
-            String getCapabilitiesUrl =
-                String.format("%s?service=WMS&version=1.3.0&request=GetCapabilities",
-                    wmsUrl
-                );
-
-            SAXReader reader = new SAXReader();
-            return reader.read(new URL(getCapabilitiesUrl));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, String.format("Error retreiving getWmsUrl: '%s'", e.getStackTrace()));
+            e.printStackTrace();
+            return null;
         }
-        catch (DocumentException e) {
-            LOGGER.log(Level.SEVERE, String.format("Error parsing GetCapabilities XML document at '%s'", wmsUrl));
-            throw new IOException(e);
+
+        String metadataUrl = String.format("%s?service=WMS&version=1.3.0&request=GetMetadata&item=layerDetails&layerName=%s",
+                wmsUrl,
+                layerDescriptor.getNetCDFVariableName()
+        );
+
+        JSONParser parser = new JSONParser();
+
+        try {
+            return (JSONObject) parser.parse(readUrl(metadataUrl));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, String.format("Error retreiving metadataUrl: '%s'", e.getMessage()));
+            return null;
         }
     }
 
     private String getWmsUrl(LayerDescriptor layerDescriptor, String time) throws IOException {
-        return mangleUrl(urlIndexInterface.getUrlForTimestamp(layerDescriptor, time));
+        return mangleUrl(geoserverUrlIndex.getUrlForTimestamp(layerDescriptor, time));
     }
 
     private String mangleUrl(String url) {
@@ -226,7 +190,20 @@ public class Ncwms {
             final String replace = urlSubstitutions.get(search);
             url = url.replaceAll(search, replace);
         }
-
         return url;
+    }
+
+    private static String readUrl(String urlString) throws Exception {
+        URL url = new URL(urlString);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+
+            StringBuffer buffer = new StringBuffer();
+            int read;
+            char[] chars = new char[1024];
+            while ((read = reader.read(chars)) != -1)
+                buffer.append(chars, 0, read);
+
+            return buffer.toString();
+        }
     }
 }

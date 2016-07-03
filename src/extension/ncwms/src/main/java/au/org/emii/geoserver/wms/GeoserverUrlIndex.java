@@ -1,16 +1,5 @@
 package au.org.emii.geoserver.wms;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.geoserver.catalog.Catalog;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -30,12 +19,23 @@ import org.opengis.filter.FilterFactory;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 
-public class UrlIndexFeatureSource implements UrlIndexInterface {
-    static Logger LOGGER = Logging.getLogger(UrlIndexFeatureSource.class);
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class GeoserverUrlIndex implements UriIndex {
+    static Logger LOGGER = Logging.getLogger(GeoserverUrlIndex.class);
 
     private Catalog catalog;
 
-    public UrlIndexFeatureSource(Catalog catalog) {
+    public GeoserverUrlIndex(Catalog catalog) {
         this.catalog = catalog;
     }
 

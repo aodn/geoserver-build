@@ -12,7 +12,7 @@ public class LayerDescriptorTest {
         layerDescriptor = new LayerDescriptor("imos:some_layer/sea_water_velocity");
         assertEquals("imos", layerDescriptor.workspace);
         assertEquals("some_layer", layerDescriptor.layer);
-        assertEquals("sea_water_velocity", layerDescriptor.variable);
+        assertEquals("sea_water_velocity", layerDescriptor.getNetCDFVariableName());
         assertEquals("imos:some_layer", layerDescriptor.geoserverName());
         assertEquals("imos:some_layer/sea_water_velocity", layerDescriptor.toString());
         assertEquals("time", layerDescriptor.getTimeFieldName());
@@ -21,7 +21,7 @@ public class LayerDescriptorTest {
         layerDescriptor = new LayerDescriptor("some_layer/sea_water_velocity");
         assertEquals(null, layerDescriptor.workspace);
         assertEquals("some_layer", layerDescriptor.layer);
-        assertEquals("sea_water_velocity", layerDescriptor.variable);
+        assertEquals("sea_water_velocity", layerDescriptor.getNetCDFVariableName());
         assertEquals("some_layer", layerDescriptor.geoserverName());
         assertEquals("some_layer/sea_water_velocity", layerDescriptor.toString());
         assertEquals("time", layerDescriptor.getTimeFieldName());
@@ -33,7 +33,7 @@ public class LayerDescriptorTest {
         LayerDescriptor layerDescriptor = new LayerDescriptor("imos:some_layer#var1,var2/sea_water_velocity");
         assertEquals("imos", layerDescriptor.workspace);
         assertEquals("some_layer", layerDescriptor.layer);
-        assertEquals("sea_water_velocity", layerDescriptor.variable);
+        assertEquals("sea_water_velocity", layerDescriptor.getNetCDFVariableName());
         assertEquals("imos:some_layer", layerDescriptor.geoserverName());
         assertEquals("imos:some_layer/sea_water_velocity", layerDescriptor.toString());
         assertEquals("var1", layerDescriptor.getTimeFieldName());
