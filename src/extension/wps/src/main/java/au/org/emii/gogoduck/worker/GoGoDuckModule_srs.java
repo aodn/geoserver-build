@@ -1,15 +1,15 @@
 package au.org.emii.gogoduck.worker;
 
-import au.org.emii.wps.GoGoDuckProcess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 
 public class GoGoDuckModule_srs extends GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule_srs.class);
@@ -17,18 +17,11 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
     private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime";
 
     @Override
-    public SubsetParameters getSubsetParameters() {
-        SubsetParameters subsetParametersNew = new SubsetParameters(subset);
-        subsetParametersNew.remove("TIME");
-
-        // Rename LATITUDE -> lat
-        // Rename LONGITUDE -> lon
-        subsetParametersNew.put("lat", subset.get("LATITUDE"));
-        subsetParametersNew.put("lon", subset.get("LONGITUDE"));
-        subsetParametersNew.remove("LATITUDE");
-        subsetParametersNew.remove("LONGITUDE");
-
-        return subsetParametersNew;
+    public NcksSubsetParameters getNcksSubsetParameters() {
+        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
+        ncksSubsetParameters.put("lat", subset.get("LATITUDE"));
+        ncksSubsetParameters.put("lon", subset.get("LONGITUDE"));
+        return ncksSubsetParameters;
     }
 
     @Override

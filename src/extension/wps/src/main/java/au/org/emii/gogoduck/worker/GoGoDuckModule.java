@@ -19,7 +19,7 @@ public class GoGoDuckModule {
     private static final String URL_FIELD = "file_url";
 
     protected String profile = null;
-    protected SubsetParameters subset = null;
+    protected GoGoDuckSubsetParameters subset = null;
     protected UserLog userLog = null;
     protected IndexReader indexReader = null;
 
@@ -28,7 +28,7 @@ public class GoGoDuckModule {
     public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
         this.profile = profile;
         this.indexReader = indexReader;
-        this.subset = new SubsetParameters(subset);
+        this.subset = new GoGoDuckSubsetParameters(subset);
         this.userLog = userLog;
     }
 
@@ -94,12 +94,12 @@ public class GoGoDuckModule {
         }
     }
 
-    public SubsetParameters getSubsetParameters() {
-        // Remove time parameter as we don't need to subset on it, we already
-        // have only files that are in the correct time range
-        SubsetParameters subsetParametersNoTime = new SubsetParameters(subset);
-        subsetParametersNoTime.remove("TIME");
-        return subsetParametersNoTime;
+    public NcksSubsetParameters getNcksSubsetParameters() {
+        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
+        ncksSubsetParameters.put("LATITUDE", subset.get("LATITUDE"));
+        ncksSubsetParameters.put("LONGITUDE", subset.get("LONGITUDE"));
+        ncksSubsetParameters.addTimeSubset("TIME", subset.get("TIME"));
+        return ncksSubsetParameters;
     }
 
     public static GoGoDuckModule newInstance(String profile, IndexReader indexReader, String subset, UserLog userLog) {

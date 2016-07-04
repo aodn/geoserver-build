@@ -28,7 +28,7 @@ public class FeatureSourceIndexReader implements IndexReader {
     }
 
     @Override
-    public URIList getUriList(String profile, String timeField, String urlField, SubsetParameters subset) throws GoGoDuckException {
+    public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
         String timeCoverageStart = subset.get("TIME").start;
         String timeCoverageEnd = subset.get("TIME").end;
 
