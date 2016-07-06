@@ -30,8 +30,8 @@
             <New class="org.apache.commons.dbcp.BasicDataSource">
                 <Set name="driverClassName">org.postgresql.Driver</Set>
                 <Set name="url">jdbc:postgresql://db-2-aws-syd.aodn.org.au:5432/harvest?loginTimeout=1000&amp;ssl=true&amp;sslfactory=org.postgresql.ssl.NonValidatingFactory</Set>
-                <Set name="username">pmbohm</Set>
-                <Set name="password">imosemii</Set>
+                <Set name="username">user</Set>
+                <Set name="password">pass</Set>
                 <Set name="validationQuery">SELECT 1</Set>
                 <Set name="maxActive">3</Set>
                 <Set name="maxIdle">2</Set>
