@@ -27,10 +27,10 @@ import au.org.emii.netcdf.iterator.IndexRangesBuilder;
 import au.org.emii.netcdf.iterator.IndexValue;
 import au.org.emii.netcdf.iterator.reader.NetcdfReader;
 
-public class CSVConverter extends Converter {
+public class TextCsvConverter extends Converter {
 
-    private final String mimeType = "text/csv";
-    private final String extension = "csv";
+    final static String MIME_TYPE = "text/csv";
+    private final static String EXTENSION = "csv";
 
     private final static boolean FILL_VALUE_IS_MISSING = true;
     private final static boolean INVALID_DATA_IS_MISSING = true;
@@ -39,23 +39,19 @@ public class CSVConverter extends Converter {
 
     private Set<NetcdfDataset.Enhance> enhanceMode;
 
-    private static final Logger logger = LoggerFactory.getLogger(CSVConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TextCsvConverter.class);
 
-    public CSVConverter() {
+    public TextCsvConverter() {
         enhanceMode = new HashSet<NetcdfDataset.Enhance>();
         enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
         enhanceMode.add(NetcdfDataset.Enhance.ConvertEnums);
     }
 
     @Override
-    public void init() {
-    }
+    public String getMimeType() { return MIME_TYPE; }
 
     @Override
-    public String getMimeType() { return mimeType; }
-
-    @Override
-    public String getExtension() { return extension; }
+    public String getExtension() { return EXTENSION; }
 
     @Override
     public Path convert(Path inputFile) throws GoGoDuckException {
@@ -85,7 +81,7 @@ public class CSVConverter extends Converter {
     }
 
     private Path getOutputFile(Path inputFile) {
-        String outputFile = String.format("%s.%s", FilenameUtils.removeExtension(inputFile.toString()), extension);
+        String outputFile = String.format("%s.%s", FilenameUtils.removeExtension(inputFile.toString()), EXTENSION);
         return Paths.get(outputFile);
     }
 

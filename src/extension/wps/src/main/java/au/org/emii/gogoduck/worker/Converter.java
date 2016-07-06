@@ -1,12 +1,11 @@
 package au.org.emii.gogoduck.worker;
 
 import java.nio.file.Path;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Converter {
-
-    public abstract void init();
 
     public abstract Path convert(Path outputFile) throws GoGoDuckException;
 
@@ -14,23 +13,20 @@ public abstract class Converter {
 
     public abstract String getExtension();
 
-    public static Converter newInstance(String filter) {
+    public static Converter newInstance(String format) {
         Logger logger = LoggerFactory.getLogger(Converter.class);
-        String thisPackage = Converter.class.getPackage().getName();
-        String classToInstantiate = String.format("%sConverter", filter.toUpperCase());
 
-        logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
-        try {
-            Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
-            Converter converter = (Converter) classz.newInstance();
-            converter.init();
-            logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
-            return converter;
+        if (format == null) {
+            return new NetCDFConverter();
+        } else if (format.equals(TextCsvConverter.MIME_TYPE)) {
+            return new TextCsvConverter();
+        } else if (format.equals(NetCDFConverter.MIME_TYPE)) {
+            return new NetCDFConverter();
+        } else {
+            String message = String.format("Invalid output format requested: %s", format);
+            logger.error(message);
+            throw new GoGoDuckException(message);
         }
-        catch (Exception e) {
-            logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
-        }
-
-        throw new GoGoDuckException(String.format("Error initializing class for filter '%s'", filter));
     }
+
 }
