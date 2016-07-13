@@ -1,5 +1,5 @@
 <gogoduck>
     <fileLimit>10</fileLimit>
-    <threadCount>0</threadCount>
+    <threadCount>1</threadCount>
     <urlSubstitution key="^">http://data.aodn.org.au/</urlSubstitution>
 </gogoduck>
