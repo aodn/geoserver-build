@@ -7,7 +7,15 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <include file="ncdfgenerator/changelog.xml"/>
-    <include file="gogoduck-testing/changelog.xml"/>
+    <changeSet author="talend" id="add_sample_timeseries_data_acorn">
+        <sql>
+            CREATE TABLE acorn_hourly_avg_nonqc_timeseries_url (
+            file_url character varying(512) NOT NULL,
+            "time" timestamp with time zone
+            );
+        </sql>
+
+        <sqlFile path="acorn.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 
 </databaseChangeLog>
