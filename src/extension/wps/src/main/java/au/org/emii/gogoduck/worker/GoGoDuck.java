@@ -92,7 +92,7 @@ public class GoGoDuck {
     }
 
     public Path run() {
-        GoGoDuckModule module = GoGoDuckModule.newInstance(profile, indexReader, subset, userLog);
+        GoGoDuckModule module = new GoGoDuckModule(profile, indexReader, subset, userLog);
 
         Path tmpDir = null;
 
@@ -235,7 +235,7 @@ public class GoGoDuck {
     }
 
     private static void applySubsetSingleFileNcks(File file, GoGoDuckModule module) {
-        List<String> ncksSubsetParameters = module.getNcksSubsetParameters().getNcksParameters();
+        List<String> ncksSubsetParameters = module.getNcksSubsetParameters(file.getAbsoluteFile().toString()).getNcksParameters();
         List<String> ncksExtraParameters = module.ncksExtraParameters();
 
         try {
@@ -296,11 +296,9 @@ public class GoGoDuck {
     }
 
     private void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
-        userLog.log(String.format("Applying subset '%s'", module.getNcksSubsetParameters().toString()));
         logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        logger.info(String.format("Subset for operation is '%s'", module.getNcksSubsetParameters()));
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         for (final File file : directoryListing) {
@@ -320,7 +318,6 @@ public class GoGoDuck {
         logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        logger.info(String.format("Subset for operation is '%s'", module.getNcksSubsetParameters()));
 
         for (File file : directoryListing) {
             applySubsetSingleFileNcks(file, module);

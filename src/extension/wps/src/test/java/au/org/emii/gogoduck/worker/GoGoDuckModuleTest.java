@@ -1,6 +1,8 @@
 package au.org.emii.gogoduck.worker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -15,6 +17,8 @@ import org.junit.Test;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.dt.grid.GeoGrid;
+import ucar.nc2.dt.grid.GridDataset;
 
 public class GoGoDuckModuleTest {
     public GoGoDuckModule ggdm = null;
@@ -68,5 +72,32 @@ public class GoGoDuckModuleTest {
 
         profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
         assertEquals(profile, "this");
+    }
+
+    @Test
+    public void testCarsWeekly() throws Exception {
+        String location = "src/test/resources/CARS2009_Australia_weekly.nc";
+        NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters(location);
+        assertTrue(ncksSubsetParameters.containsKey("DAY_OF_YEAR"));
+        assertTrue(ncksSubsetParameters.containsKey("LATITUDE"));
+        assertTrue(ncksSubsetParameters.containsKey("LONGITUDE"));
+    }
+
+    @Test
+    public void testAcorn() throws Exception {
+        String location = "src/test/resources/IMOS_ACORN_V_20090827T163000Z_CBG_FV00_1-hour-avg.nc";
+        NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters(location);
+        assertTrue(ncksSubsetParameters.containsKey("TIME"));
+        assertTrue(ncksSubsetParameters.containsKey("LATITUDE"));
+        assertTrue(ncksSubsetParameters.containsKey("LONGITUDE"));
+    }
+
+    @Test
+    public void testSrs() throws Exception {
+        String location = "src/test/resources/20160714152000-ABOM-L3S_GHRSST-SSTskin-AVHRR_D-1d_night.nc";
+        NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters(location);
+        assertTrue(ncksSubsetParameters.containsKey("time"));
+        assertTrue(ncksSubsetParameters.containsKey("lat"));
+        assertTrue(ncksSubsetParameters.containsKey("lon"));
     }
 }
