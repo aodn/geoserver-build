@@ -1,0 +1,15 @@
+<layer>
+  <name>cars_timeseries_url</name>
+  <id>LayerInfoImpl-2a9710dc:155fc228c9e:-7ffe</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--570ae188:124761b8d78:-7ff2</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-2a9710dc:155fc228c9e:-7fff</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>
