@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Properties;
 
 public class GoGoDuckConfig {
@@ -45,5 +47,17 @@ public class GoGoDuckConfig {
                 }
             }
         }
+    }
+
+    public static Object getPropertyKeyByValue(String searchValue) {
+        Object keyObject = null;
+        Enumeration e = properties.propertyNames();
+        while (e.hasMoreElements()) {
+            String key = (String) e.nextElement();
+            if (searchValue.equals(properties.getProperty(key))) {
+                return key;
+            }
+        }
+        return keyObject;
     }
 }

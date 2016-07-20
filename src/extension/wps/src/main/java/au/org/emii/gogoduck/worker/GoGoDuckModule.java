@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +50,12 @@ public class GoGoDuckModule {
 
     public void postProcess(File file) {
         try {
-            String postProcessProperty = String.format("%s.postprocess", profile);
-            if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
-                Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", postProcessProperty), File.class);
-                method.invoke(this, file);
+            if (GoGoDuckConfig.properties.containsValue(profile)) {
+                String postProcessProperty = String.format("%s.postprocess", GoGoDuckConfig.getPropertyKeyByValue(profile));
+                if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
+                    Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", postProcessProperty), File.class);
+                    method.invoke(this, file);
+                }
             }
         } catch (Exception e) {
             throw new GoGoDuckException(String.format("Could not post process file '%s'", file.toPath()));
@@ -85,8 +89,9 @@ public class GoGoDuckModule {
 
     public List<String> ncksExtraParameters() {
         List<String> ncksExtraParameters = new ArrayList<String>();
-        String ncksParametersProperty = String.format("%s.ncks.parameters", profile);
-        if (GoGoDuckConfig.properties.containsKey(ncksParametersProperty)) {
+
+        if (GoGoDuckConfig.properties.containsValue(profile)) {
+            String ncksParametersProperty = String.format("%s.ncks.parameters", GoGoDuckConfig.getPropertyKeyByValue(profile));
             String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
             for (String ncksParameter : ncksParameters) {
                 ncksExtraParameters.add(ncksParameter);
