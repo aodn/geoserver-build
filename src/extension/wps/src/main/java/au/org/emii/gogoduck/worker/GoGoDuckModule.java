@@ -118,6 +118,14 @@ public class GoGoDuckModule {
         }
     }
 
+    public boolean addTimeSubset() {
+        if (GoGoDuckConfig.properties.containsValue(profile)) {
+            String addTimeSubsetProperty = String.format("%s.addTimeSubset", GoGoDuckConfig.getPropertyKeyByValue(profile));
+            return Boolean.valueOf(addTimeSubsetProperty).booleanValue();
+        }
+        return true;
+    }
+
     public NcksSubsetParameters getNcksSubsetParameters(String location) {
         CoordinateAxis time = null, latitude = null, longitude = null;
         GridDataset gridDs = null;
@@ -155,7 +163,9 @@ public class GoGoDuckModule {
         NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
         ncksSubsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
         ncksSubsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
-        ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+        if (addTimeSubset()) {
+            ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+        }
         return ncksSubsetParameters;
     }
 }
