@@ -51,9 +51,10 @@ public class GoGoDuckModule {
     public void postProcess(File file) {
         try {
             if (GoGoDuckConfig.properties.containsValue(profile)) {
-                String postProcessProperty = String.format("%s.postprocess", GoGoDuckConfig.getPropertyKeyByValue(profile));
+                String layer = (String) GoGoDuckConfig.getPropertyKeyByValue(profile);
+                String postProcessProperty = String.format("%s.postprocess", layer);
                 if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
-                    Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", postProcessProperty), File.class);
+                    Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", layer), File.class);
                     method.invoke(this, file);
                 }
             }
@@ -91,7 +92,8 @@ public class GoGoDuckModule {
         List<String> ncksExtraParameters = new ArrayList<String>();
 
         if (GoGoDuckConfig.properties.containsValue(profile)) {
-            String ncksParametersProperty = String.format("%s.ncks.parameters", GoGoDuckConfig.getPropertyKeyByValue(profile));
+            String layer = (String) GoGoDuckConfig.getPropertyKeyByValue(profile);
+            String ncksParametersProperty = String.format("%s.ncks.parameters", layer);
             String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
             for (String ncksParameter : ncksParameters) {
                 ncksExtraParameters.add(ncksParameter);
