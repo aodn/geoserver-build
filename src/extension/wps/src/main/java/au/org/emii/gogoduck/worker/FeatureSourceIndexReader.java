@@ -1,7 +1,9 @@
 package au.org.emii.gogoduck.worker;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +31,23 @@ public class FeatureSourceIndexReader implements IndexReader {
 
     @Override
     public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
-        String timeCoverageStart = subset.get("TIME").start;
-        String timeCoverageEnd = subset.get("TIME").end;
 
         URIList uriList = new URIList();
+
+        // Setting uri list for config GoGoDuck modules
+        try {
+            String filename = String.format("%s.filename", profile);
+            if (GoGoDuckConfig.properties.containsKey(filename)) {
+                uriList.add(new URI(GoGoDuckConfig.properties.getProperty(filename)));
+                return uriList;
+            }
+        }
+        catch (URISyntaxException e) {
+            throw new GoGoDuckException(String.format("Could not add URI for %s", profile));
+        }
+
+        String timeCoverageStart = subset.get("TIME").start;
+        String timeCoverageEnd = subset.get("TIME").end;
 
         // TODO Should include also workspace, but works also without
         String typeName = profile;
