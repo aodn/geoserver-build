@@ -30,15 +30,15 @@ public class FeatureSourceIndexReader implements IndexReader {
     }
 
     @Override
-    public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset, Properties properties) throws GoGoDuckException {
+    public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
 
         URIList uriList = new URIList();
 
         // Setting uri list for config GoGoDuck modules
         try {
             String filename = String.format("%s.filename", profile);
-            if (properties.containsKey(filename)) {
-                uriList.add(new URI(properties.getProperty(filename)));
+            if (GoGoDuckConfig.properties.containsKey(filename)) {
+                uriList.add(new URI(GoGoDuckConfig.properties.getProperty(filename)));
                 return uriList;
             }
         }

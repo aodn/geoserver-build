@@ -169,7 +169,7 @@ public class GoGoDuck {
     }
 
     private void downloadFile(URI uri, Path dst) {
-        URL url = URLMangler.mangle(uri);
+        URL url = URLMangler.mangle(uri, "urlMangler.downloadUrl");
         logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
         try {

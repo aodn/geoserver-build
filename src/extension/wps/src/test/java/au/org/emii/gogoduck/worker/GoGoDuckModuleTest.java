@@ -25,17 +25,7 @@ public class GoGoDuckModuleTest {
 
     @Before
     public void beforeEach() {
-        ggdm = new GoGoDuckModule();
-        ggdm.init("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
-    }
-
-    public class GoGoDuckModule_test extends GoGoDuckModule {
-        @Override
-        protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
-            List<Attribute> newAttributeList = new ArrayList<Attribute>();
-            newAttributeList.add(new Attribute("test_attribute", "test_value"));
-            return newAttributeList;
-        }
+        ggdm = new GoGoDuckModule("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
     }
 
     @Test
@@ -45,33 +35,22 @@ public class GoGoDuckModuleTest {
         Files.delete(tmpFile.toPath());
         Files.copy(sampleNetcdf.toPath(), tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        ggdm = new GoGoDuckModule_test();
+        ggdm = new GoGoDuckModule();
         ggdm.init("", new HttpIndexReader(null, ""), "TIME,1,2;LONGITUDE,2,3", null);
         ggdm.updateMetadata(tmpFile.toPath());
 
+        // Writing to file
+        NetcdfFileWriter ncw = NetcdfFileWriter.openExisting(tmpFile.toPath().toString());
+        NetcdfFile nc = ncw.getNetcdfFile();
+        ncw.setRedefineMode(true);
+        ncw.addGroupAttribute(null, new Attribute("test_attribute", "test_value"));
+        ncw.setRedefineMode(false);
+        ncw.close();
+
         // Verify attribute was written to file
-        NetcdfFile nc = NetcdfFileWriter.openExisting(tmpFile.toPath().toString()).getNetcdfFile();
         assertEquals(nc.findGlobalAttribute("test_attribute").getStringValue(), "test_value");
 
         Files.delete(tmpFile.toPath());
-    }
-
-
-    @Test
-    public void testNextProfile() throws Exception {
-        Method nextProfileMethod = GoGoDuckModule.class.getDeclaredMethod("nextProfile", String.class);
-        nextProfileMethod.setAccessible(true);
-
-        String profile = "this_is_a_profile";
-
-        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
-        assertEquals(profile, "this_is_a");
-
-        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
-        assertEquals(profile, "this_is");
-
-        profile = (String) nextProfileMethod.invoke(GoGoDuck.class, profile);
-        assertEquals(profile, "this");
     }
 
     @Test

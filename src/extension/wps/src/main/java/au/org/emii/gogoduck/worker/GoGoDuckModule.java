@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dt.grid.GeoGrid;
@@ -19,7 +17,6 @@ import ucar.nc2.dt.grid.GridDataset;
 
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
-    private static final String PROPERTIES_FILE = "config.properties";
 
     // TODO Should not be hard coded
     private static final String TIME_FIELD = "time";
@@ -30,44 +27,29 @@ public class GoGoDuckModule {
     private UserLog userLog = null;
     private IndexReader indexReader = null;
 
-    private InputStream input = null;
-    private Properties properties = new Properties();
+    public GoGoDuckModule() {
+
+    }
 
     public GoGoDuckModule(String profile, IndexReader indexReader, String subset, UserLog userLog) {
+        init(profile, indexReader, subset, userLog);
+    }
+
+    public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
         this.profile = profile;
         this.indexReader = indexReader;
         this.subset = new GoGoDuckSubsetParameters(subset);
         this.userLog = userLog;
-
-        try {
-            input = FeatureSourceIndexReader.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
-
-            if(input==null){
-                throw new GoGoDuckException(String.format("Sorry, unable to find %s", PROPERTIES_FILE));
-            }
-            // load a properties file
-            properties.load(input);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        } finally{
-            if(input!=null){
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage());
-                }
-            }
-        }
     }
 
     public URIList getUriList() throws GoGoDuckException {
-        return indexReader.getUriList(profile, TIME_FIELD, URL_FIELD, subset, properties);
+        return indexReader.getUriList(profile, TIME_FIELD, URL_FIELD, subset);
     }
 
     public void postProcess(File file) {
         try {
             String postProcessProperty = String.format("%s.postprocess", profile);
-            if (properties.containsKey(postProcessProperty) && properties.getProperty(postProcessProperty).equals("true")) {
+            if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
                 Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", postProcessProperty), File.class);
                 method.invoke(this, file);
             }
@@ -104,8 +86,8 @@ public class GoGoDuckModule {
     public List<String> ncksExtraParameters() {
         List<String> ncksExtraParameters = new ArrayList<String>();
         String ncksParametersProperty = String.format("%s.ncks.parameters", profile);
-        if (properties.containsKey(ncksParametersProperty)) {
-            String ncksParameters[] = properties.getProperty(ncksParametersProperty).split(";", -1);
+        if (GoGoDuckConfig.properties.containsKey(ncksParametersProperty)) {
+            String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
             for (String ncksParameter : ncksParameters) {
                 ncksExtraParameters.add(ncksParameter);
             }
@@ -113,88 +95,14 @@ public class GoGoDuckModule {
         return ncksExtraParameters;
     }
 
-    public List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
-
-        try {
-            String attributeProperty = String.format("%s.attribute.update", profile);
-            if (properties.containsKey(attributeProperty) && properties.getProperty(attributeProperty).equals("true")) {
-                Method method = this.getClass().getDeclaredMethod(String.format("getGlobalAttributesToUpdate_%s", attributeProperty), NetcdfFile.class);
-                return (List<Attribute>) method.invoke(this, nc);
-            }
-        } catch (Exception e) {
-            throw new GoGoDuckException(String.format("Could not update global attribute for '%s'", profile));
-        }
-
-        List<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-        String title = profile;
-        try {
-            title = nc.findGlobalAttribute("title").getStringValue();
-
-            // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
-            title = title.substring(0, title.lastIndexOf(","));
-        }
-        catch (Exception e) {
-            // Don't fail because of this bullshit :)
-            logger.warn("Could not find 'title' attribute in result file");
-        }
-
-        newAttributeList.add(new Attribute("title",
-                String.format("%s, %s, %s",
-                        title,
-                        subset.get("TIME").start,
-                        subset.get("TIME").end)));
-
-        newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
-
-        newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
-
-        newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
-        newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
-
-        return newAttributeList;
-    }
-
-    public List<Attribute> getGlobalAttributesToUpdate_srs_oc(NetcdfFile nc) {
-        return getGlobalAttributesToUpdate_srs(nc);
-    }
-
-    public List<Attribute> getGlobalAttributesToUpdate_srs(NetcdfFile nc) {
-        List<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-        try {
-            String title = title = nc.findGlobalAttribute("title").getStringValue();
-            newAttributeList.add(new Attribute("title",
-                    String.format("%s, %s, %s",
-                            title,
-                            subset.get("TIME").start,
-                            subset.get("TIME").end)));
-        }
-        catch (Exception e) {
-            // Don't fail because of this bullshit :)
-            logger.warn("Could not find 'title' attribute in result file");
-        }
-
-        newAttributeList.add(new Attribute("southernmost_latitude", subset.get("LATITUDE").start));
-        newAttributeList.add(new Attribute("northernmost_latitude", subset.get("LATITUDE").end));
-
-        newAttributeList.add(new Attribute("westernmost_longitude", subset.get("LONGITUDE").start));
-        newAttributeList.add(new Attribute("easternmost_longitude", subset.get("LONGITUDE").end));
-
-        newAttributeList.add(new Attribute("start_time", subset.get("TIME").start));
-        newAttributeList.add(new Attribute("stop_time", subset.get("TIME").end));
-
-        return newAttributeList;
-    }
-
     public final void updateMetadata(Path outputFile) {
         try {
-            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
+            String location = outputFile.toAbsolutePath().toString();
+            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(location);
+            GridDataset gridDs =  GridDataset.open (location);
 
             nc.setRedefineMode(true);
-            for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
+            for (Attribute newAttr : gridDs.getGlobalAttributes()) {
                 nc.addGroupAttribute(null, newAttr);
             }
             nc.setRedefineMode(false);
