@@ -1,10 +1,21 @@
 package au.org.emii.wps;
 
-import au.org.emii.gogoduck.worker.*;
-import au.org.emii.notifier.HttpNotifier;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FilenameUtils;
-import org.geoserver.config.GeoServer;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.SAXReader;
+import org.dom4j.tree.DefaultElement;
+import org.dom4j.xpath.DefaultXPath;
 import org.geoserver.catalog.Catalog;
+import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.process.FileRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
@@ -16,18 +27,11 @@ import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
-import org.dom4j.xpath.DefaultXPath;
-import java.io.File;
-import java.nio.file.Path;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.*;
+import au.org.emii.gogoduck.worker.GoGoDuck;
+import au.org.emii.gogoduck.worker.GoGoDuckConfig;
+import au.org.emii.gogoduck.worker.GoGoDuckException;
+import au.org.emii.gogoduck.worker.URLMangler;
+import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
@@ -43,18 +47,19 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         URLMangler.setUrlManglingMap(getConfigMap("/gogoduck/urlSubstitution"));
     }
 
-    @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf"})
+    @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
+            "chosenMimeType=format"})
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
             String subset,
-            @DescribeParameter(name="filter", description="Post-processing filter to apply on output file", min=0)
-            String filter,
             @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
             URL callbackUrl,
             @DescribeParameter(name="callbackParams", description="Parameters to append to the callback", min=0)
             String callbackParams,
+            @DescribeParameter(name = "format", min = 0)
+            final String format,
             ProgressListener progressListener
     ) throws ProcessException {
         try {
@@ -69,14 +74,12 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 throw new ProcessException("fileLimit set to 0 or below, job will not run");
             }
 
-            List<Converter> converters = GoGoDuckUtils.addFilters(filter);
-
             File outputFile = getResourceManager().getOutputResource(
                     getResourceManager().getExecutionId(true), layer + ".nc").file();
 
             String filePath = outputFile.toPath().toAbsolutePath().toString();
 
-            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, converters, fileLimit);
+            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, format, fileLimit);
 
             ggd.setTmpDir(getWorkingDir());
             ggd.setThreadCount(threadCount);
@@ -142,4 +145,5 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
         return returnValue;
     }
+
 }

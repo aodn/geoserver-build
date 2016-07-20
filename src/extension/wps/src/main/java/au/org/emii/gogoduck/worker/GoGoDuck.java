@@ -30,7 +30,7 @@ public class GoGoDuck {
     private IndexReader indexReader = null;
     private final String profile;
     private final String subset;
-    private final List<Converter> converters;
+    private final String format;
     private Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
@@ -40,23 +40,23 @@ public class GoGoDuck {
     private String mimeType = "application/x-netcdf";
     private String extension = "nc";
 
-    protected GoGoDuck(String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
+    protected GoGoDuck(String profile, String subset, String outputFile, String format, Integer limit) {
         this.profile = profile;
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
-        this.converters = converters;
+        this.format = format;
         this.limit = limit;
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
         this.userLog = new UserLog();
     }
 
-    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
-        this(profile, subset, outputFile, converters, limit);
+    public GoGoDuck(String geoserverUrl, String profile, String subset, String outputFile, String format, Integer limit) {
+        this(profile, subset, outputFile, format, limit);
         this.indexReader = new HttpIndexReader(this.userLog, geoserverUrl);
     }
 
-    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, List<Converter> converters, Integer limit) {
-        this(profile, subset, outputFile, converters, limit);
+    public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, String format, Integer limit) {
+        this(profile, subset, outputFile, format, limit);
         this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
     }
 
@@ -92,7 +92,7 @@ public class GoGoDuck {
     }
 
     public Path run() {
-        GoGoDuckModule module = GoGoDuckModule.newInstance(profile, indexReader, subset, userLog);
+        GoGoDuckModule module = new GoGoDuckModule(profile, indexReader, subset, userLog);
 
         Path tmpDir = null;
 
@@ -112,12 +112,11 @@ public class GoGoDuck {
             throwIfCancelled();
             updateMetadata(module, outputFile);
             throwIfCancelled();
-            for (Converter converter : converters) {
-                outputFile = converter.convert(outputFile);
-                mimeType = converter.getMimeType();
-                extension = converter.getExtension();
-                throwIfCancelled();
-            }
+            Converter converter = Converter.newInstance(format);
+            outputFile = converter.convert(outputFile);
+            mimeType = converter.getMimeType();
+            extension = converter.getExtension();
+            throwIfCancelled();
             userLog.log("Your aggregation was successful!");
             return outputFile;
         }
@@ -170,7 +169,7 @@ public class GoGoDuck {
     }
 
     private void downloadFile(URI uri, Path dst) {
-        URL url = URLMangler.mangle(uri);
+        URL url = URLMangler.mangle(uri, "urlMangler.downloadUrl");
         logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
         try {
@@ -236,7 +235,7 @@ public class GoGoDuck {
     }
 
     private static void applySubsetSingleFileNcks(File file, GoGoDuckModule module) {
-        List<String> ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
+        List<String> ncksSubsetParameters = module.getNcksSubsetParameters(file.getAbsoluteFile().toString()).getNcksParameters();
         List<String> ncksExtraParameters = module.ncksExtraParameters();
 
         try {
@@ -297,11 +296,9 @@ public class GoGoDuck {
     }
 
     private void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
-        userLog.log(String.format("Applying subset '%s'", module.getSubsetParameters().toString()));
         logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         for (final File file : directoryListing) {
@@ -321,7 +318,6 @@ public class GoGoDuck {
         logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
         for (File file : directoryListing) {
             applySubsetSingleFileNcks(file, module);
