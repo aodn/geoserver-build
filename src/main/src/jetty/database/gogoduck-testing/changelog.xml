@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="talend" id="add_sample_timeseries_data_acorn">
+        <sql>
+            CREATE TABLE acorn_hourly_avg_nonqc_timeseries_url (
+            file_url character varying(512) NOT NULL,
+            "time" timestamp with time zone
+            );
+        </sql>
+
+        <sqlFile path="acorn.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet author="talend" id="add_sample_srs_oc">
+        <sql>
+            CREATE TABLE srs_oc_timeseries_url (
+            file_url character varying(512) NOT NULL,
+            "time" timestamp with time zone
+            );
+        </sql>
+
+        <sqlFile path="srs_oc.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet author="talend" id="add_sample_srs">
+        <sql>
+            CREATE TABLE srs_timeseries_url (
+            file_url character varying(512) NOT NULL,
+            "time" timestamp with time zone
+            );
+        </sql>
+
+        <sqlFile path="srs.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet author="talend" id="add_sample_cars">
+        <sql>
+            CREATE TABLE cars_timeseries_url (
+            file_url character varying(512) NOT NULL,
+            "time" timestamp with time zone
+            );
+        </sql>
+
+        <sqlFile path="cars.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+</databaseChangeLog>
