@@ -1,13 +1,14 @@
 package au.org.emii.notifier;
 
+import org.geotools.data.ows.HTTPClient;
+import org.geotools.data.ows.SimpleHttpClient;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import org.geotools.data.ows.SimpleHttpClient;
-import org.geotools.data.ows.HTTPClient;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class SimpleHttpNotifierTest {
 

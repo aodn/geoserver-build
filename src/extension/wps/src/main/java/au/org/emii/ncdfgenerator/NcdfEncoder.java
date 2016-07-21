@@ -1,16 +1,5 @@
 package au.org.emii.ncdfgenerator;
 
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.geotools.data.postgis.PostGISDialect;
 import org.geotools.data.postgis.PostgisFilterToSQL;
 import org.geotools.filter.text.cql2.CQL;
@@ -19,9 +8,15 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFileWriteable;
+
+import java.io.InputStream;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NcdfEncoder {
     private final Connection conn;

@@ -1,15 +1,20 @@
 package au.org.emii.gogoduck.worker;
 
-import java.io.*;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.dataset.CoordinateAxis;
+import ucar.nc2.dt.grid.GeoGrid;
+import ucar.nc2.dt.grid.GridDataset;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
@@ -18,12 +23,16 @@ public class GoGoDuckModule {
     private static final String TIME_FIELD = "time";
     private static final String URL_FIELD = "file_url";
 
-    protected String profile = null;
-    protected GoGoDuckSubsetParameters subset = null;
-    protected UserLog userLog = null;
-    protected IndexReader indexReader = null;
+    private String profile = null;
+    private GoGoDuckSubsetParameters subset = null;
+    private UserLog userLog = null;
+    private IndexReader indexReader = null;
 
-    public GoGoDuckModule() {}
+    public GoGoDuckModule() { }
+
+    public GoGoDuckModule(String profile, IndexReader indexReader, String subset, UserLog userLog) {
+        init(profile, indexReader, subset, userLog);
+    }
 
     public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
         this.profile = profile;
@@ -37,104 +46,126 @@ public class GoGoDuckModule {
     }
 
     public void postProcess(File file) {
-        return;
+        try {
+            Object layerKey = GoGoDuckConfig.getPropertyKeyByValuePart(profile);
+            if (layerKey != null) {
+                String layer = (String) layerKey;
+                String postProcessProperty = String.format("%s.postprocess", layer);
+                if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
+                    Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", layer), File.class);
+                    method.invoke(this, file);
+                }
+            }
+        } catch (Exception e) {
+            throw new GoGoDuckException(String.format("Could not post process file '%s'", file.toPath()));
+        }
+    }
+
+    public void postProcess_srs_oc(File file) {
+        postProcess_srs(file);
+    }
+
+    public void postProcess_srs(File file) {
+        try {
+            File tmpFile = File.createTempFile("ncpdq", ".nc");
+
+            List<String> command = new ArrayList<String>();
+            command.add(GoGoDuckConfig.ncpdqPath);
+            command.add("-O");
+            command.add("-U");
+            command.add(file.getAbsolutePath());
+            command.add(tmpFile.getAbsolutePath());
+
+            logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
+            GoGoDuck.execute(command);
+
+            Files.delete(file.toPath());
+            Files.move(tmpFile.toPath(), file.toPath());
+        } catch (Exception e) {
+            throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file.toPath()));
+        }
     }
 
     public List<String> ncksExtraParameters() {
         List<String> ncksExtraParameters = new ArrayList<String>();
+
+        Object layerKey = GoGoDuckConfig.getPropertyKeyByValuePart(profile);
+        if (layerKey != null) {
+            String layer = (String) layerKey;
+            String ncksParametersProperty = String.format("%s.ncks.parameters", layer);
+            String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
+            for (String ncksParameter : ncksParameters) {
+                ncksExtraParameters.add(ncksParameter);
+            }
+        }
         return ncksExtraParameters;
-    }
-
-    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
-        List<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-        String title = profile;
-        try {
-            title = nc.findGlobalAttribute("title").getStringValue();
-
-            // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
-            title = title.substring(0, title.lastIndexOf(","));
-        }
-        catch (Exception e) {
-            // Don't fail because of this bullshit :)
-            logger.warn("Could not find 'title' attribute in result file");
-        }
-
-        newAttributeList.add(new Attribute("title",
-                String.format("%s, %s, %s",
-                        title,
-                        subset.get("TIME").start,
-                        subset.get("TIME").end)));
-
-        newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
-
-        newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
-
-        newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
-        newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
-
-        return newAttributeList;
     }
 
     public final void updateMetadata(Path outputFile) {
         try {
-            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
+            String location = outputFile.toAbsolutePath().toString();
+            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(location);
+            GridDataset gridDs = GridDataset.open(location);
 
             nc.setRedefineMode(true);
-            for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
+            for (Attribute newAttr : gridDs.getGlobalAttributes()) {
                 nc.addGroupAttribute(null, newAttr);
             }
             nc.setRedefineMode(false);
             nc.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
         }
     }
 
-    public NcksSubsetParameters getNcksSubsetParameters() {
-        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
-        ncksSubsetParameters.put("LATITUDE", subset.get("LATITUDE"));
-        ncksSubsetParameters.put("LONGITUDE", subset.get("LONGITUDE"));
-        ncksSubsetParameters.addTimeSubset("TIME", subset.get("TIME"));
-        return ncksSubsetParameters;
+    public boolean addTimeSubset() {
+        if (GoGoDuckConfig.properties.containsValue(profile)) {
+            String addTimeSubsetProperty = String.format("%s.addTimeSubset", GoGoDuckConfig.getPropertyKeyByValue(profile));
+            return Boolean.valueOf(addTimeSubsetProperty).booleanValue();
+        }
+        return true;
     }
 
-    public static GoGoDuckModule newInstance(String profile, IndexReader indexReader, String subset, UserLog userLog) {
-        String thisPackage = GoGoDuckModule.class.getPackage().getName();
-        String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
+    public NcksSubsetParameters getNcksSubsetParameters(String location) {
+        CoordinateAxis time = null, latitude = null, longitude = null;
+        GridDataset gridDs = null;
 
-        GoGoDuckModule module = null;
-        while (null == module && !classToInstantiate.isEmpty()) {
-            logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
-            try {
-                Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
-                module = (GoGoDuckModule) classz.newInstance();
-                module.init(profile, indexReader, subset, userLog);
-                logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
-                return module;
+        try {
+            gridDs = GridDataset.open(location);
+            List grids = gridDs.getGrids();
+
+            for (int i = 0; i < grids.size(); i++) {
+                GeoGrid grid = (GeoGrid) grids.get(i);
+                if (time == null) {
+                    time = grid.getCoordinateSystem().getTimeAxis();
+                }
+
+                if (latitude == null) {
+                    latitude = grid.getCoordinateSystem().getYHorizAxis();
+                }
+
+                if (longitude == null) {
+                    longitude = grid.getCoordinateSystem().getXHorizAxis();
+                }
+
+                if (time != null && latitude != null && longitude != null) {
+                    break;
+                }
             }
-            catch (Exception e) {
-                logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
-            }
-            classToInstantiate = nextProfile(classToInstantiate);
+        } catch (IOException e) {
+            throw new GoGoDuckException(e.getMessage());
         }
 
-        throw new GoGoDuckException(String.format("Error initializing class for profile '%s'", profile));
-    }
+        if (time == null || latitude == null || longitude == null) {
+            throw new GoGoDuckException(String.format("Unable to retrieve time:%s latitude:%s longitude:%s", time, latitude, longitude));
+        }
 
-    /* Finds the correct profile to run for the given layer, starts with:
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries_url
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc
-    GoGoDuckModule_acorn_hourly_avg_sag
-    GoGoDuckModule_acorn_hourly_avg
-    GoGoDuckModule_acorn_hourly
-    GoGoDuckModule_acorn
-    GoGoDuckModule */
-    private static String nextProfile(String profile) {
-        return profile.substring(0, profile.lastIndexOf("_"));
+        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
+        ncksSubsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
+        ncksSubsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
+        if (addTimeSubset()) {
+            ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+        }
+        return ncksSubsetParameters;
     }
 }
