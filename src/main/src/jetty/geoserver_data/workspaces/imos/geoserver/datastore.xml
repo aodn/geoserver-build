@@ -8,7 +8,7 @@
     <id>WorkspaceInfoImpl--7f665eac:150d9d01f4d:-7ffe</id>
   </workspace>
   <connectionParameters>
-    <entry key="schema">public</entry>
+    <entry key="schema">geoserver</entry>
     <entry key="dbtype">postgis</entry>
     <entry key="Loose bbox">true</entry>
     <entry key="Expose primary keys">false</entry>
