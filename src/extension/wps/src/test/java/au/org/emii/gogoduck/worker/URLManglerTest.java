@@ -4,8 +4,8 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 

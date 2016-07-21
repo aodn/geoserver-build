@@ -1,13 +1,10 @@
 package au.org.emii.wps;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import au.org.emii.gogoduck.worker.GoGoDuck;
+import au.org.emii.gogoduck.worker.GoGoDuckConfig;
+import au.org.emii.gogoduck.worker.GoGoDuckException;
+import au.org.emii.gogoduck.worker.URLMangler;
+import au.org.emii.notifier.HttpNotifier;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -27,11 +24,12 @@ import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.org.emii.gogoduck.worker.GoGoDuck;
-import au.org.emii.gogoduck.worker.GoGoDuckConfig;
-import au.org.emii.gogoduck.worker.GoGoDuckException;
-import au.org.emii.gogoduck.worker.URLMangler;
-import au.org.emii.notifier.HttpNotifier;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
@@ -40,7 +38,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     private final GeoServerResourceLoader resourceLoader;
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
-            Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
+                           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
         super(resourceManager, httpNotifier, geoserver);
         this.catalog = catalog;
         this.resourceLoader = resourceLoader;
@@ -51,13 +49,13 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             "chosenMimeType=format"})
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
-            String layer,
+                    String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated")
-            String subset,
+                    String subset,
             @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
-            URL callbackUrl,
+                    URL callbackUrl,
             @DescribeParameter(name="callbackParams", description="Parameters to append to the callback", min=0)
-            String callbackParams,
+                    String callbackParams,
             @DescribeParameter(name = "format", min = 0)
             final String format,
             ProgressListener progressListener

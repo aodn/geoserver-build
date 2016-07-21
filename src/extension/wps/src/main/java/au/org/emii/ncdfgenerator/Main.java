@@ -1,17 +1,17 @@
 package au.org.emii.ncdfgenerator;
 
 import org.apache.commons.cli.*;
-import org.geoserver.wps.ProcessDismissedException;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.jdbc.JDBCDataStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-
-import org.geotools.jdbc.JDBCDataStore;
-import org.geotools.data.DataStoreFinder;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     public static void usage(Options options) {

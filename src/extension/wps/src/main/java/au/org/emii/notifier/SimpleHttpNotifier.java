@@ -1,9 +1,10 @@
 package au.org.emii.notifier;
 
-import java.net.URL;
-import org.geotools.data.ows.HTTPClient;
 import org.apache.http.client.utils.URIBuilder;
+import org.geotools.data.ows.HTTPClient;
+
 import java.io.IOException;
+import java.net.URL;
 
 public class SimpleHttpNotifier implements HttpNotifier {
     private final HTTPClient httpClient;

@@ -1,5 +1,8 @@
 package au.org.emii.gogoduck.worker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
@@ -9,9 +12,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpIndexReader implements IndexReader {
     private static final Logger logger = LoggerFactory.getLogger(HttpIndexReader.class);
@@ -34,7 +34,7 @@ public class HttpIndexReader implements IndexReader {
         try {
             String downloadUrl = String.format("%s/wfs", geoserver);
             String cqlFilter = String.format("%s >= %s AND %s <= %s",
-                timeField, timeCoverageStart, timeField, timeCoverageEnd
+                    timeField, timeCoverageStart, timeField, timeCoverageEnd
             );
 
             Map<String, String> params = new HashMap<String, String>();
