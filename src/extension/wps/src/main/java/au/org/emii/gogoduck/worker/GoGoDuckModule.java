@@ -51,7 +51,7 @@ public class GoGoDuckModule {
             if (layerKey != null) {
                 String layer = (String) layerKey;
                 String postProcessProperty = String.format("%s.postprocess", layer);
-                if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
+                if (GoGoDuckConfig.getProperties().containsKey(postProcessProperty) && GoGoDuckConfig.getProperties().getProperty(postProcessProperty).equals("true")) {
                     Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", layer), File.class);
                     method.invoke(this, file);
                 }
@@ -93,7 +93,7 @@ public class GoGoDuckModule {
         if (layerKey != null) {
             String layer = (String) layerKey;
             String ncksParametersProperty = String.format("%s.ncks.parameters", layer);
-            String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
+            String ncksParameters[] = GoGoDuckConfig.getProperties().getProperty(ncksParametersProperty).split(";", -1);
             for (String ncksParameter : ncksParameters) {
                 ncksExtraParameters.add(ncksParameter);
             }
@@ -119,7 +119,7 @@ public class GoGoDuckModule {
     }
 
     public boolean addTimeSubset() {
-        if (GoGoDuckConfig.properties.containsValue(profile)) {
+        if (GoGoDuckConfig.getProperties().containsValue(profile)) {
             String addTimeSubsetProperty = String.format("%s.addTimeSubset", GoGoDuckConfig.getPropertyKeyByValue(profile));
             return Boolean.valueOf(addTimeSubsetProperty).booleanValue();
         }

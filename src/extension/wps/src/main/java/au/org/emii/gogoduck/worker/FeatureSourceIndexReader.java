@@ -12,7 +12,9 @@ import org.opengis.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -34,10 +36,14 @@ public class FeatureSourceIndexReader implements IndexReader {
 
         // Setting uri list for config GoGoDuck modules
         try {
-            String filename = String.format("%s.filename", profile);
-            if (GoGoDuckConfig.properties.containsKey(filename)) {
-                uriList.add(new URI(GoGoDuckConfig.properties.getProperty(filename)));
-                return uriList;
+            Object layerKey = GoGoDuckConfig.getPropertyKeyByValuePart(profile);
+            if (layerKey != null) {
+                String layer = (String) layerKey;
+                String filename = String.format("%s.filename", layer);
+                if (GoGoDuckConfig.getProperties().containsKey(filename)) {
+                    uriList.add(new URI(GoGoDuckConfig.getProperties().getProperty(filename)));
+                    return uriList;
+                }
             }
         }
         catch (URISyntaxException e) {

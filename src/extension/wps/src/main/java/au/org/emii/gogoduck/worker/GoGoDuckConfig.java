@@ -12,7 +12,7 @@ public class GoGoDuckConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckConfig.class);
     private static final String PROPERTIES_FILE = "config.properties";
-    public static Properties properties = new Properties();
+    private static Properties properties = new Properties();
     private static InputStream input = null;
 
     public static final String CONFIG_FILE = "wps/gogoduck.xml";
@@ -26,7 +26,14 @@ public class GoGoDuckConfig {
     public static final String ncpdqPath = "/usr/bin/ncpdq";
     public static final String ncrcatPath = "/usr/bin/ncrcat";
 
-    static  {
+    public static Properties getProperties() {
+        if (properties.size() == 0) {
+            loadProperties();
+        }
+        return  properties;
+    }
+
+    private static void loadProperties() {
         try {
             input = FeatureSourceIndexReader.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
 
@@ -37,6 +44,7 @@ public class GoGoDuckConfig {
             properties.load(input);
         } catch (Exception e) {
             logger.error(e.getMessage());
+            throw new GoGoDuckException(String.format("Unable to load property file %s", PROPERTIES_FILE));
         } finally{
             if(input!=null){
                 try {
@@ -50,10 +58,10 @@ public class GoGoDuckConfig {
 
     public static Object getPropertyKeyByValue(String searchValue) {
         Object keyObject = null;
-        Enumeration e = properties.propertyNames();
+        Enumeration e = getProperties().propertyNames();
         while (e.hasMoreElements()) {
             String key = (String) e.nextElement();
-            if (searchValue.equals(properties.getProperty(key))) {
+            if (searchValue.equals(getProperties().getProperty(key))) {
                 return key;
             }
         }
@@ -62,10 +70,10 @@ public class GoGoDuckConfig {
 
     public static Object getPropertyKeyByValuePart(String searchValue) {
         String lastMatchKey = null;
-        Enumeration e = properties.propertyNames();
+        Enumeration e = getProperties().propertyNames();
         while (e.hasMoreElements()) {
             String key = (String) e.nextElement();
-            if (searchValue.contains(properties.getProperty(key))) {
+            if (searchValue.contains(getProperties().getProperty(key))) {
                 // Finding the best match Ex: srs and srs_oc - need to return srs_oc
                 if (lastMatchKey == null || key.length() > lastMatchKey.length()) {
                     lastMatchKey = key;
