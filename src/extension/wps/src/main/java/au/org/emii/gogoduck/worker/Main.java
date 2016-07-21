@@ -2,8 +2,7 @@ package au.org.emii.gogoduck.worker;
 
 import org.apache.commons.cli.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
 

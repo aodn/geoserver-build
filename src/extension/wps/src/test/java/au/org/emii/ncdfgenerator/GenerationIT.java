@@ -3,9 +3,11 @@ package au.org.emii.ncdfgenerator;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -20,6 +22,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
 
 class MockOutputterCounter implements IOutputFormatter {
     int count;
