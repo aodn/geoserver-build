@@ -2,7 +2,8 @@ package au.org.emii.gogoduck.worker;
 
 import org.apache.commons.cli.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
 

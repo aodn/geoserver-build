@@ -25,4 +25,17 @@ public class URLMangler {
             throw new GoGoDuckException(e.getMessage());
         }
     }
+
+    public static URL mangle(URI uri, String property) {
+        try {
+            String uriStr = uri.toString();
+            String key = GoGoDuckConfig.getProperties().getProperty(String.format("%s.key", property));
+            String value = GoGoDuckConfig.getProperties().getProperty(String.format("%s.value", property));
+            uriStr = uriStr.replaceAll(key, value);
+            return new URL(uriStr);
+        }
+        catch (MalformedURLException e) {
+            throw new GoGoDuckException(e.getMessage());
+        }
+    }
 }
