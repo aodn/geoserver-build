@@ -15,6 +15,7 @@ target-eclipse
 .link_to_grails_plugins
 *.lock
 plugins
+overlays
 \#*\#
 .\#*
 
