@@ -78,7 +78,8 @@ public class GoGoDuckModule {
         }
 
         try {
-            if (goGoDuckConfig.getPackedVariable(profile)) {
+            if (goGoDuckConfig.getUnpackNetcdf(profile)) {
+                // Checking the config (Needed for TPAC)
                 this.containsPackedVariable = true;
             } else {
                 String location = file.getAbsolutePath();

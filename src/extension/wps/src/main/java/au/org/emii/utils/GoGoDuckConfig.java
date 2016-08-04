@@ -28,7 +28,7 @@ public class GoGoDuckConfig extends Config {
     private final String LONGITUDE_END = FILE_PREFIX + "longitude.end";
     private final String TIME_START = FILE_PREFIX + "time.start";
     private final String TIME_END = FILE_PREFIX + "time.end";
-    private final String PACKED_VARIABLE = FILE_PREFIX + "packed.variable";
+    private final String UNPACK_NETCDF = FILE_PREFIX + "unpack.netcdf";
 
     private final String TIME_FIELD = FILE_PREFIX + "time.field";
     private final String FILE_URL_FIELD = FILE_PREFIX + "file.url.field";
@@ -101,8 +101,8 @@ public class GoGoDuckConfig extends Config {
         return getConfig(TIME_END, getLayerConfigFilePath(layer));
     }
 
-    public boolean getPackedVariable(String layer) throws Exception {
-        String config = getConfig(PACKED_VARIABLE, getLayerConfigFilePath(layer));
+    public boolean getUnpackNetcdf(String layer) throws Exception {
+        String config = getConfig(UNPACK_NETCDF, getLayerConfigFilePath(layer));
         if (config == null) {
             return false;
         } else {
