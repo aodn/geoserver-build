@@ -21,6 +21,17 @@ Submitting a request using Geoserver:
 3. Choose format: application/x-netcdf
 ```
 
+### Running as a WPS service. (simulating a portal)
+   
+   In order to run as a WPS request, you can run the following:
+   
+   ```
+   $ curl --data @doc/wps-acorn.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+   $ curl --data @doc/wps-gsla.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+   $ curl --data @doc/wps-srs.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+   ```
+
+
 ## Direct calls (using IMOS Data)
 
 ### ACORN - WPS request builder
@@ -43,6 +54,8 @@ Subset, semi-colon separated: TIME,2011-10-10T00:00:00.000Z,2011-10-20T00:00:00.
 
 ### CARS - WPS request builder
 
+When running on CARS data, it handles one big NetCDF file. 
+On a development machine - it'll be slow! However
 Running on CARS data:
 
 ```
@@ -63,7 +76,6 @@ WFS layer to query: srs_sst_l3s_1d_dn_gridded_url
 Subset, semi-colon separated: TIME,2014-10-10T00:00:00.000Z,2014-10-12T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219
 
 ### Running as a WPS service. (simulating a portal)
-
    In order to run as a WPS request, you can run the following:
 
    ```
