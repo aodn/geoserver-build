@@ -36,7 +36,6 @@ public class GoGoDuckModule {
     private GoGoDuckConfig goGoDuckConfig;
 
     private Boolean containsPackedVariable = null;
-    private Boolean timeUnlimited = null;
     private List<String> ncksExtraParameters = null;
     private NcksSubsetParameters ncksSubsetParameters = null;
     private CoordinateAxis time = null, latitude = null, longitude = null;
@@ -61,7 +60,7 @@ public class GoGoDuckModule {
     }
 
     public boolean isTimeUnlimited() {
-        return timeUnlimited;
+        return time.isUnlimited();
     }
 
     public void loadFileMetadata(File file) {
@@ -69,15 +68,7 @@ public class GoGoDuckModule {
         GridDataset gridDs = null;
 
         try {
-            setNcksSubsetParameters(file.getAbsoluteFile().toString());
-            setNcksExtraParameters();
-            this.timeUnlimited = time.isUnlimited();
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new GoGoDuckException(e.getMessage(), e);
-        }
-
-        try {
+            setTimeLatLon(file.getAbsoluteFile().toString());
             if (goGoDuckConfig.getUnpackNetcdf(profile)) {
                 // Checking the config (Needed for TPAC)
                 this.containsPackedVariable = true;
@@ -110,14 +101,13 @@ public class GoGoDuckModule {
         }
     }
 
-    private void setNcksExtraParameters() throws Exception {
-        ncksExtraParameters = new ArrayList<>();
-        for (String ncksParameter : goGoDuckConfig.getNcksParameters(profile)) {
-            ncksExtraParameters.add(ncksParameter);
+    public List<String> getNcksExtraParameters() throws Exception {
+        if (ncksExtraParameters == null) {
+            ncksExtraParameters = new ArrayList<>();
+            for (String ncksParameter : goGoDuckConfig.getVariablesToInclude(profile)) {
+                ncksExtraParameters.add(ncksParameter);
+            }
         }
-    }
-
-    public List<String> getNcksExtraParameters() {
         return ncksExtraParameters;
     }
 
@@ -136,7 +126,7 @@ public class GoGoDuckModule {
             logger.warn("Could not find 'title' attribute in result file");
         }
 
-        newAttributeList.add(new Attribute("title",
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTitle(profile),
                 String.format("%s, %s, %s",
                         title,
                         subset.get("TIME").start,
@@ -171,10 +161,16 @@ public class GoGoDuckModule {
     }
 
     public NcksSubsetParameters getNcksSubsetParameters() {
+        if (ncksSubsetParameters == null) {
+            ncksSubsetParameters = new NcksSubsetParameters();
+            ncksSubsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
+            ncksSubsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
+            ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+        }
         return ncksSubsetParameters;
     }
 
-    public NcksSubsetParameters setNcksSubsetParameters(String location) {
+    private void setTimeLatLon(String location) {
         GridDataset gridDs;
 
         try {
@@ -208,11 +204,5 @@ public class GoGoDuckModule {
         if (time == null || latitude == null || longitude == null) {
             throw new GoGoDuckException(String.format("Unable to retrieve time:%s latitude:%s longitude:%s", time, latitude, longitude));
         }
-
-        ncksSubsetParameters = new NcksSubsetParameters();
-        ncksSubsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
-        ncksSubsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
-        ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
-        return ncksSubsetParameters;
     }
 }

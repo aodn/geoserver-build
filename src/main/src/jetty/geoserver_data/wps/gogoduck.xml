@@ -5,12 +5,16 @@
     <ncksPath>/usr/bin/ncks</ncksPath>
     <ncpdqPath>/usr/bin/ncpdq</ncpdqPath>
     <ncrcatPath>/usr/bin/ncrcat</ncrcatPath>
-    <latitude.start>geospatial_lat_min</latitude.start>
-    <latitude.end>geospatial_lat_max</latitude.end>
-    <longitude.start>geospatial_lon_min</longitude.start>
-    <longitude.end>geospatial_lon_max</longitude.end>
-    <time.start>time_coverage_start</time.start>
-    <time.end>time_coverage_end</time.end>
-    <time.field>time</time.field>
-    <file.url.field>file_url</file.url.field>
+    <timeField>time</timeField>
+    <fileUrlField>file_url</fileUrlField>
+    <unpack>true</unpack>
+    <globalAttributes>
+        <attribute key="title">title</attribute>
+        <attribute key="latitudeStart">geospatial_lat_min</attribute>
+        <attribute key="latitudeEnd">geospatial_lat_max</attribute>
+        <attribute key="longitudeStart">geospatial_lon_min</attribute>
+        <attribute key="longitudeEnd">geospatial_lon_max</attribute>
+        <attribute key="timeStart">time_coverage_start</attribute>
+        <attribute key="timeEnd">time_coverage_end</attribute>
+    </globalAttributes>
 </gogoduck>

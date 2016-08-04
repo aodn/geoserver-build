@@ -39,7 +39,6 @@ public class GoGoDuck {
     private Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
-    private int threadCount = 1;
     private UserLog userLog = null;
     private ProgressListener progressListener = null;
     private String mimeType = "application/x-netcdf";
@@ -57,18 +56,21 @@ public class GoGoDuck {
         this.userLog = new UserLog();
         this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
         this.goGoDuckConfig = goGoDuckConfig;
-        Map<String, String> urlMangling = new HashMap<>();
-        urlMangling.put(goGoDuckConfig.getUrlSubstitutionKey(), goGoDuckConfig.getUrlSubstitutionValue());
-        this.urlMangler = new URLMangler(urlMangling);
+        setUrlMangler(profile, goGoDuckConfig);
+    }
+
+    private void setUrlMangler(String profile, GoGoDuckConfig goGoDuckConfig) {
+        try {
+            Map<String, String> urlMangling = new HashMap<>();
+            urlMangling.putAll(goGoDuckConfig.getUrlSubstitution(profile));
+            this.urlMangler = new URLMangler(urlMangling);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     public void setTmpDir(String tmpDir) {
         this.baseTmpDir = new File(tmpDir).toPath();
-    }
-
-    public void setThreadCount(int threadCount) {
-        logger.info(String.format("Setting thread count to %d", threadCount));
-        this.threadCount = threadCount;
     }
 
     public void setProgressListener(ProgressListener progressListener) {
@@ -102,7 +104,7 @@ public class GoGoDuck {
             if (files != null && files.length > 0) {
                 module.loadFileMetadata(files[0]);
             }
-            applySubsetMultiThread(tmpDir, module, threadCount);
+            applySubsetMultiThread(tmpDir, module, goGoDuckConfig.getThreadCount());
             throwIfCancelled();
             postProcess(tmpDir, module);
             throwIfCancelled();
@@ -292,21 +294,21 @@ public class GoGoDuck {
 
         try {
             File[] directoryListing = tmpDir.toFile().listFiles();
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-
             if (directoryListing != null) {
+                ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+
                 for (File file : directoryListing) {
                     ncksSubsetParameters = module.getNcksSubsetParameters().getNcksParameters();
                     logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
                     userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
                     executorService.submit(new NcksRunnable(file, module, this));
                 }
+
+                executorService.shutdown();
+                executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
             } else {
                 throw new GoGoDuckException("No files available for sub-setting");
             }
-
-            executorService.shutdown();
-            executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         } catch (InterruptedException e) {
             throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         } catch (Exception e) {
@@ -316,6 +318,7 @@ public class GoGoDuck {
 
     private void postProcess(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
         File[] directoryListing = tmpDir.toFile().listFiles();
+
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
@@ -347,19 +350,17 @@ public class GoGoDuck {
     }
 
     private void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
-        aggregateNcrcat(tmpDir, outputFile);
-    }
-
-    private void aggregateNcrcat(Path tmpDir, Path outputFile) throws GoGoDuckException {
-        List<String> command = new ArrayList<>();
-        command.add(goGoDuckConfig.getNcrcatPath());
-        command.add("-D2");
-        command.add("-4");
-        command.add("-h");
-        command.add("-O");
-
         File[] directoryListing = tmpDir.toFile().listFiles();
+
         if (directoryListing != null) {
+
+            List<String> command = new ArrayList<>();
+            command.add(goGoDuckConfig.getNcrcatPath());
+            command.add("-D2");
+            command.add("-4");
+            command.add("-h");
+            command.add("-O");
+
             if (directoryListing.length == 1) {
                 // Special case where we have only 1 file
                 File file = directoryListing[0];

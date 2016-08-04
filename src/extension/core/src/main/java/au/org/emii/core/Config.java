@@ -8,7 +8,6 @@ import org.dom4j.xpath.DefaultXPath;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.config.GeoServerDataDirectory;
-import org.geoserver.platform.GeoServerResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,18 +18,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Config {
+public abstract class Config {
 
     private Map<String, Document> configFilesDocuments = new HashMap<String, Document>();
     private Logger logger = LoggerFactory.getLogger(Config.class);
-    private GeoServerResourceLoader resourceLoader = null;
     private GeoServerDataDirectory dataDirectory;
     protected File resourceDirectory;
     protected Catalog catalog;
+    public abstract String getDefaultConfigFile();
 
     public Config(File resourceDirectory, Catalog catalog) {
         this.resourceDirectory = resourceDirectory;
-        this.resourceLoader = new GeoServerResourceLoader(resourceDirectory);
         this.dataDirectory = new GeoServerDataDirectory(resourceDirectory);
         this.catalog = catalog;
     }
@@ -57,22 +55,6 @@ public class Config {
         return doc;
     }
 
-    public String getConfigVariable(String xpathString, String configFile) {
-        Document doc = getDocument(configFile);
-        DefaultXPath xpath = new DefaultXPath(xpathString);
-        return xpath.selectSingleNode(doc).getText();
-    }
-
-    public String getConfigKey(String xpathString, String configFile) {
-        Map<String, String> returnValue = getConfigMap(xpathString, configFile);
-        return returnValue.keySet().iterator().next();
-    }
-
-    public String getConfigValue(String xpathString, String configFile) {
-        Map<String, String> returnValue = getConfigMap(xpathString, configFile);
-        return returnValue.get(returnValue.keySet().iterator().next());
-    }
-
     /* Sample tiny config file:
 <ncwms>
 <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
@@ -85,17 +67,25 @@ public class Config {
     // Example Parameter: "/ncwms/urlSubstitution"
     public Map<String, String> getConfigMap(String xpathString, String configFile) {
         Map<String, String> returnValue = new HashMap<>();
-        Document doc = getDocument(configFile);
-        DefaultXPath xpath = new DefaultXPath(xpathString);
+        try {
+            Document doc = getDocument(configFile);
+            DefaultXPath xpath = new DefaultXPath(xpathString);
 
-        @SuppressWarnings("unchecked")
-        List<DefaultElement> list = xpath.selectNodes(doc);
+            @SuppressWarnings("unchecked")
+            List<DefaultElement> list = xpath.selectNodes(doc);
 
-        for (final DefaultElement element : list) {
-            returnValue.put(element.attribute("key").getText(), element.getText());
+            for (final DefaultElement element : list) {
+                returnValue.put(element.attribute("key").getText(), element.getText());
+            }
+        } catch (Exception e) {
+            logger.warn(String.format("Could not open config file '%s': '%s'", configFile, e.getMessage()), e);
         }
 
-        return returnValue;
+        if (returnValue.size() == 0 && isLayerConfigFile(configFile)) {
+            return getConfigMap(xpathString, getDefaultConfigFile());
+        } else {
+            return returnValue;
+        }
     }
 
     public String getConfig(String xpathString, String configFile) {
@@ -105,6 +95,10 @@ public class Config {
         } catch (IndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    private boolean isLayerConfigFile(String configFile) {
+        return getDefaultConfigFile() != null && !configFile.equals(getDefaultConfigFile());
     }
 
     // Example Parameter: "/ncwms/collectionsWithTimeMismatch"
@@ -125,7 +119,11 @@ public class Config {
             logger.error(String.format("Error reading configuration file %s: '%s' does not return a list of elements", configFile, xpathString), e);
         }
 
-        return returnValue;
+        if (returnValue.size() == 0 && isLayerConfigFile(configFile)) {
+            return getConfigList(xpathString, getDefaultConfigFile());
+        } else {
+            return returnValue;
+        }
     }
 
     public String getLayerConfigPath(String layer, String configFileName) throws Exception {
@@ -148,7 +146,7 @@ public class Config {
             return storeConfigFilePath.replace(this.resourceDirectory.getAbsolutePath().toString()+"/","");
         }
 
-        // If config file not present in layer or store directory throw exception
-        throw new Exception("Unable to find config file for layer " + layer);
+        // If config file not present in layer or store directory return default config file
+        return getDefaultConfigFile();
     }
 }

@@ -55,7 +55,7 @@ public class GoGoDuckModuleTest {
     @Test
     public void testCarsWeekly() throws Exception {
         String location = "src/test/resources/CARS2009_Australia_weekly.nc";
-        ggdm.setNcksSubsetParameters(location);
+        ggdm.loadFileMetadata(new File(location));
         NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters();
         assertTrue(ncksSubsetParameters.containsKey("DAY_OF_YEAR"));
         assertTrue(ncksSubsetParameters.containsKey("LATITUDE"));
@@ -65,7 +65,7 @@ public class GoGoDuckModuleTest {
     @Test
     public void testAcorn() throws Exception {
         String location = "src/test/resources/IMOS_ACORN_V_20090827T163000Z_CBG_FV00_1-hour-avg.nc";
-        ggdm.setNcksSubsetParameters(location);
+        ggdm.loadFileMetadata(new File(location));
         NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters();
         assertTrue(ncksSubsetParameters.containsKey("TIME"));
         assertTrue(ncksSubsetParameters.containsKey("LATITUDE"));
@@ -75,7 +75,7 @@ public class GoGoDuckModuleTest {
     @Test
     public void testSrs() throws Exception {
         String location = "src/test/resources/20160714152000-ABOM-L3S_GHRSST-SSTskin-AVHRR_D-1d_night.nc";
-        ggdm.setNcksSubsetParameters(location);
+        ggdm.loadFileMetadata(new File(location));
         NcksSubsetParameters ncksSubsetParameters = ggdm.getNcksSubsetParameters();
         assertTrue(ncksSubsetParameters.containsKey("time"));
         assertTrue(ncksSubsetParameters.containsKey("lat"));

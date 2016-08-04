@@ -75,7 +75,6 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, format, goGoDuckConfig);
 
             ggd.setTmpDir(getWorkingDir());
-            ggd.setThreadCount(goGoDuckConfig.getThreadCount());
             ggd.setProgressListener(progressListener);
 
             Path outputPath = ggd.run();
@@ -84,7 +83,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         } catch (GoGoDuckException e) {
             logger.error(e.toString(), e);
             notifyFailure(callbackUrl, callbackParams);
-            throw new ProcessException(e.getMessage());
+            throw new ProcessException(e.getMessage(), e);
         }
     }
 }

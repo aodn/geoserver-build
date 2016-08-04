@@ -1,10 +1,25 @@
 <gogoduck>
-    <variablesToInclude>-v</variablesToInclude>
-    <variablesToInclude>time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime</variablesToInclude>
-    <latitude.start>southernmost_latitude</latitude.start>
-    <latitude.end>northernmost_latitude</latitude.end>
-    <longitude.start>westernmost_longitude</longitude.start>
-    <longitude.end>easternmost_longitude</longitude.end>
-    <time.start>start_time</time.start>
-    <time.end>stop_time</time.end>
+    <globalAttributes>
+        <attribute key="title">title</attribute>
+        <attribute key="latitudeStart">southernmost_latitude</attribute>
+        <attribute key="latitudeEnd">northernmost_latitude</attribute>
+        <attribute key="longitudeStart">westernmost_longitude</attribute>
+        <attribute key="longitudeEnd">easternmost_longitude</attribute>
+        <attribute key="timeStart">start_time</attribute>
+        <attribute key="timeEnd">stop_time</attribute>
+    </globalAttributes>
+    <variablesToInclude>
+        <variable>time</variable>
+        <variable>lat</variable>
+        <variable>lon</variable>
+        <variable>dt_analysis</variable>
+        <variable>l2p_flags</variable>
+        <variable>quality_level</variable>
+        <variable>satellite_zenith_angle</variable>
+        <variable>sea_surface_temperature</variable>
+        <variable>sses_bias</variable>
+        <variable>sses_count</variable>
+        <variable>sses_standard_deviation</variable>
+        <variable>sst_dtime</variable>
+    </variablesToInclude>
 </gogoduck>
