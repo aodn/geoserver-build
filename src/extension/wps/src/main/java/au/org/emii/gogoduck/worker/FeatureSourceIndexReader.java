@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
 import org.geoserver.catalog.Catalog;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class FeatureSourceIndexReader implements IndexReader {
     private static final Logger logger = LoggerFactory.getLogger(FeatureSourceIndexReader.class);
@@ -31,18 +31,6 @@ public class FeatureSourceIndexReader implements IndexReader {
     public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
 
         URIList uriList = new URIList();
-
-        // Setting uri list for config GoGoDuck modules
-        try {
-            String filename = String.format("%s.filename", profile);
-            if (GoGoDuckConfig.properties.containsKey(filename)) {
-                uriList.add(new URI(GoGoDuckConfig.properties.getProperty(filename)));
-                return uriList;
-            }
-        }
-        catch (URISyntaxException e) {
-            throw new GoGoDuckException(String.format("Could not add URI for %s", profile));
-        }
 
         String timeCoverageStart = subset.get("TIME").start;
         String timeCoverageEnd = subset.get("TIME").end;

@@ -1,25 +1,32 @@
 package au.org.emii.gogoduck.worker;
 
-import au.org.emii.netcdf.iterator.IndexRangesBuilder;
-import au.org.emii.netcdf.iterator.IndexValue;
-import au.org.emii.netcdf.iterator.reader.NetcdfReader;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.EnhanceScaleMissing;
-import ucar.nc2.dataset.NetcdfDataset;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.EnhanceScaleMissing;
+import ucar.nc2.dataset.NetcdfDataset;
+import au.org.emii.netcdf.iterator.IndexRangesBuilder;
+import au.org.emii.netcdf.iterator.IndexValue;
+import au.org.emii.netcdf.iterator.reader.NetcdfReader;
 
 public class TextCsvConverter extends Converter {
 

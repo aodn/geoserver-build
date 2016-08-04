@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+
 import java.nio.file.Path;
 
 public class NetCDFConverter extends Converter {

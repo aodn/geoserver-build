@@ -1,7 +1,7 @@
-package au.org.emii.gogoduck.worker;
+package au.org.emii.gogoduck.exception;
 
 public class GoGoDuckException extends RuntimeException {
-    GoGoDuckException(String reason) {
+    public GoGoDuckException(String reason) {
         super(reason);
     }
 

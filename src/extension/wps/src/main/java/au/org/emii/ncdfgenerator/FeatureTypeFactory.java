@@ -1,24 +1,24 @@
 package au.org.emii.ncdfgenerator;
 
-import com.vividsolutions.jts.geom.Geometry;
-import org.geotools.data.Query;
-import org.geotools.data.Transaction;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.jdbc.JDBCDataStore;
-import org.geotools.jdbc.VirtualTable;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.GeometryDescriptor;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.geotools.jdbc.VirtualTable;
+import org.geotools.data.Query;
+import org.geotools.data.Transaction;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.jdbc.JDBCDataStore;
+import org.opengis.feature.type.*;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 public class FeatureTypeFactory {
 

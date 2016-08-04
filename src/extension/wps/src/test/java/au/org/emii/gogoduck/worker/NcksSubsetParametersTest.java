@@ -1,16 +1,16 @@
 package au.org.emii.gogoduck.worker;
 
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class NcksSubsetParametersTest {
 
-    @Test
+     @Test
     public void testGetNcksParameters() {
         NcksSubsetParameters sp = new NcksSubsetParameters();
         sp.put("PARAM1", new Subset("1", "2"));
@@ -28,10 +28,10 @@ public class NcksSubsetParametersTest {
         assertTrue(results.contains(sp.getNcksParameters().get(5)));
     }
 
-    @Test
-    public void testAddTimeSubsetAddsMaxTruncationError() {
-        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
-        ncksSubsetParameters.addTimeSubset("DAY_OF_YEAR", new Subset("2009-01-01T00:00:00.000Z", "2009-12-25T23:04:00.000Z"));
-        assertEquals("2009-12-25T23:04:00.000999Z", ncksSubsetParameters.get("DAY_OF_YEAR").end);
-    }
+     @Test
+     public void testAddTimeSubsetAddsMaxTruncationError() {
+         NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
+         ncksSubsetParameters.addTimeSubset("DAY_OF_YEAR", new Subset("2009-01-01T00:00:00.000Z", "2009-12-25T23:04:00.000Z"));
+         assertEquals("2009-12-25T23:04:00.000999Z", ncksSubsetParameters.get("DAY_OF_YEAR").end);
+     }
 }

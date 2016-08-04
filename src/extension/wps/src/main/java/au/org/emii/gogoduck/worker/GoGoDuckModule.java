@@ -1,114 +1,165 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.utils.GoGoDuckConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 import ucar.nc2.dataset.CoordinateAxis;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridDataset;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
 
-    // TODO Should not be hard coded
-    private static final String TIME_FIELD = "time";
-    private static final String URL_FIELD = "file_url";
+    @Autowired
+    ServletContext context;
 
-    private String profile = null;
-    private GoGoDuckSubsetParameters subset = null;
-    private UserLog userLog = null;
-    private IndexReader indexReader = null;
+    private String profile;
+    private GoGoDuckSubsetParameters subset;
+    private IndexReader indexReader;
+    private GoGoDuckConfig goGoDuckConfig;
 
-    public GoGoDuckModule() { }
+    private Boolean containsPackedVariable = null;
+    private Boolean timeUnlimited = null;
+    private List<String> ncksExtraParameters = null;
+    private NcksSubsetParameters ncksSubsetParameters = null;
+    private CoordinateAxis time = null, latitude = null, longitude = null;
 
-    public GoGoDuckModule(String profile, IndexReader indexReader, String subset, UserLog userLog) {
-        init(profile, indexReader, subset, userLog);
+    public GoGoDuckModule() {
+
     }
 
-    public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
+    public GoGoDuckModule(String profile, IndexReader indexReader, String subset, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
         this.indexReader = indexReader;
         this.subset = new GoGoDuckSubsetParameters(subset);
-        this.userLog = userLog;
+        this.goGoDuckConfig = goGoDuckConfig;
     }
 
     public URIList getUriList() throws GoGoDuckException {
-        return indexReader.getUriList(profile, TIME_FIELD, URL_FIELD, subset);
+        return indexReader.getUriList(profile, goGoDuckConfig.getTimeField(), goGoDuckConfig.getFileUrlField(), subset);
     }
 
-    public void postProcess(File file) {
+    public boolean hasPackedVariables() {
+        return containsPackedVariable;
+    }
+
+    public boolean isTimeUnlimited() {
+        return timeUnlimited;
+    }
+
+    public void loadFileMetadata(File file) {
+        boolean containsPackedVariable = false;
+        GridDataset gridDs = null;
+
         try {
-            Object layerKey = GoGoDuckConfig.getPropertyKeyByValuePart(profile);
-            if (layerKey != null) {
-                String layer = (String) layerKey;
-                String postProcessProperty = String.format("%s.postprocess", layer);
-                if (GoGoDuckConfig.properties.containsKey(postProcessProperty) && GoGoDuckConfig.properties.getProperty(postProcessProperty).equals("true")) {
-                    Method method = this.getClass().getDeclaredMethod(String.format("postProcess_%s", layer), File.class);
-                    method.invoke(this, file);
+            setNcksSubsetParameters(file.getAbsoluteFile().toString());
+            setNcksExtraParameters();
+            this.timeUnlimited = time.isUnlimited();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
+        }
+
+        try {
+            if (goGoDuckConfig.getPackedVariable(profile)) {
+                this.containsPackedVariable = true;
+            } else {
+                String location = file.getAbsolutePath();
+                Set<NetcdfDataset.Enhance> enhanceMode = new HashSet<>();
+                enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
+                gridDs = GridDataset.open(location, enhanceMode);
+                for (Variable var : gridDs.getNetcdfDataset().getVariables()) {
+                    VariableDS vds = new VariableDS(var.getGroup(), var, true);
+                    if (vds.hasScaleOffset()) {
+                        containsPackedVariable = true;
+                        break;
+                    }
                 }
+                this.containsPackedVariable = containsPackedVariable;
             }
         } catch (Exception e) {
-            throw new GoGoDuckException(String.format("Could not post process file '%s'", file.toPath()));
-        }
-    }
-
-    public void postProcess_srs_oc(File file) {
-        postProcess_srs(file);
-    }
-
-    public void postProcess_srs(File file) {
-        try {
-            File tmpFile = File.createTempFile("ncpdq", ".nc");
-
-            List<String> command = new ArrayList<String>();
-            command.add(GoGoDuckConfig.ncpdqPath);
-            command.add("-O");
-            command.add("-U");
-            command.add(file.getAbsolutePath());
-            command.add(tmpFile.getAbsolutePath());
-
-            logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
-            GoGoDuck.execute(command);
-
-            Files.delete(file.toPath());
-            Files.move(tmpFile.toPath(), file.toPath());
-        } catch (Exception e) {
-            throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file.toPath()));
-        }
-    }
-
-    public List<String> ncksExtraParameters() {
-        List<String> ncksExtraParameters = new ArrayList<String>();
-
-        Object layerKey = GoGoDuckConfig.getPropertyKeyByValuePart(profile);
-        if (layerKey != null) {
-            String layer = (String) layerKey;
-            String ncksParametersProperty = String.format("%s.ncks.parameters", layer);
-            String ncksParameters[] = GoGoDuckConfig.properties.getProperty(ncksParametersProperty).split(";", -1);
-            for (String ncksParameter : ncksParameters) {
-                ncksExtraParameters.add(ncksParameter);
+            logger.error(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
+        } finally {
+            try {
+                if (gridDs != null) {
+                    gridDs.close();
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+                throw new GoGoDuckException(e.getMessage(), e);
             }
         }
+    }
+
+    private void setNcksExtraParameters() throws Exception {
+        ncksExtraParameters = new ArrayList<>();
+        for (String ncksParameter : goGoDuckConfig.getNcksParameters(profile)) {
+            ncksExtraParameters.add(ncksParameter);
+        }
+    }
+
+    public List<String> getNcksExtraParameters() {
         return ncksExtraParameters;
     }
 
-    public final void updateMetadata(Path outputFile) {
+    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) throws Exception{
+        List<Attribute> newAttributeList = new ArrayList<>();
+
+        String title = profile;
+        try {
+            title = nc.findGlobalAttribute("title").getStringValue();
+
+            // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
+            title = title.substring(0, title.lastIndexOf(","));
+        }
+        catch (Exception e) {
+            // Don't fail because of this bullshit :)
+            logger.warn("Could not find 'title' attribute in result file");
+        }
+
+        newAttributeList.add(new Attribute("title",
+                String.format("%s, %s, %s",
+                        title,
+                        subset.get("TIME").start,
+                        subset.get("TIME").end)));
+
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeStart(profile), subset.get("LATITUDE").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeEnd(profile), subset.get("LATITUDE").end));
+
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
+
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeStart(profile), subset.get("TIME").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeEnd(profile), subset.get("TIME").end));
+
+        return newAttributeList;
+    }
+
+    public final void updateMetadata(Path outputFile) throws Exception {
         try {
             String location = outputFile.toAbsolutePath().toString();
             NetcdfFileWriter nc = NetcdfFileWriter.openExisting(location);
-            GridDataset gridDs = GridDataset.open(location);
 
             nc.setRedefineMode(true);
-            for (Attribute newAttr : gridDs.getGlobalAttributes()) {
+            for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
                 nc.addGroupAttribute(null, newAttr);
             }
             nc.setRedefineMode(false);
@@ -118,24 +169,19 @@ public class GoGoDuckModule {
         }
     }
 
-    public boolean addTimeSubset() {
-        if (GoGoDuckConfig.properties.containsValue(profile)) {
-            String addTimeSubsetProperty = String.format("%s.addTimeSubset", GoGoDuckConfig.getPropertyKeyByValue(profile));
-            return Boolean.valueOf(addTimeSubsetProperty).booleanValue();
-        }
-        return true;
+    public NcksSubsetParameters getNcksSubsetParameters() {
+        return ncksSubsetParameters;
     }
 
-    public NcksSubsetParameters getNcksSubsetParameters(String location) {
-        CoordinateAxis time = null, latitude = null, longitude = null;
-        GridDataset gridDs = null;
+    public NcksSubsetParameters setNcksSubsetParameters(String location) {
+        GridDataset gridDs;
 
         try {
             gridDs = GridDataset.open(location);
             List grids = gridDs.getGrids();
 
-            for (int i = 0; i < grids.size(); i++) {
-                GeoGrid grid = (GeoGrid) grids.get(i);
+            for (Object grid1 : grids) {
+                GeoGrid grid = (GeoGrid) grid1;
                 if (time == null) {
                     time = grid.getCoordinateSystem().getTimeAxis();
                 }
@@ -152,7 +198,9 @@ public class GoGoDuckModule {
                     break;
                 }
             }
+            gridDs.close();
         } catch (IOException e) {
+            logger.error(e.getMessage(), e);
             throw new GoGoDuckException(e.getMessage());
         }
 
@@ -160,12 +208,10 @@ public class GoGoDuckModule {
             throw new GoGoDuckException(String.format("Unable to retrieve time:%s latitude:%s longitude:%s", time, latitude, longitude));
         }
 
-        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
+        ncksSubsetParameters = new NcksSubsetParameters();
         ncksSubsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
         ncksSubsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
-        if (addTimeSubset()) {
-            ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
-        }
+        ncksSubsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
         return ncksSubsetParameters;
     }
 }

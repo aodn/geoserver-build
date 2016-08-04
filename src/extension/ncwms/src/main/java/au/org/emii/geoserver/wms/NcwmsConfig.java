@@ -7,17 +7,16 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultElement;
 import org.dom4j.xpath.DefaultXPath;
 import org.geoserver.platform.GeoServerResourceLoader;
-import org.geotools.util.logging.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class NcwmsConfig {
-    static Logger LOGGER = Logging.getLogger(NcwmsConfig.class);
+    static Logger logger = LoggerFactory.getLogger(NcwmsConfig.class);
 
     public final static String CONFIG_FILE = "ncwms.xml";
 
@@ -41,7 +40,7 @@ public class NcwmsConfig {
             returnValue = xpath.selectSingleNode(doc).getText();
         }
         catch (DocumentException e) {
-            LOGGER.log(Level.WARNING, String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
+            logger.warn(String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
         }
 
         return returnValue;
@@ -64,7 +63,7 @@ public class NcwmsConfig {
             }
         }
         catch (DocumentException e) {
-            LOGGER.log(Level.WARNING, String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
+            logger.warn(String.format("Could not open config file '%s': '%s'", getConfigFile(), e.getMessage()));
         }
 
         return returnValue;
@@ -86,9 +85,9 @@ public class NcwmsConfig {
                 returnValue.add(element.getText());
             }
         } catch (DocumentException e) {
-            LOGGER.log(Level.WARNING, String.format("Could not read '%s' as an xml document: '%s'", getConfigFile(), e.getMessage()));
+            logger.warn( String.format("Could not read '%s' as an xml document: '%s'", getConfigFile(), e.getMessage()));
         } catch (ClassCastException e) {
-            LOGGER.log(Level.WARNING, String.format("Error reading configuration file %s: '%s' does not return a list of elements", getConfigFile(), xpathString));
+            logger.warn(String.format("Error reading configuration file %s: '%s' does not return a list of elements", getConfigFile(), xpathString));
         }
 
         return returnValue;

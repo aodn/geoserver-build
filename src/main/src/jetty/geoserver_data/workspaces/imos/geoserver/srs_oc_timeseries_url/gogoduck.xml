@@ -1,0 +1,8 @@
+<gogoduck>
+    <latitude.start>geospatial_lat_min</latitude.start>
+    <latitude.end>geospatial_lat_max</latitude.end>
+    <longitude.start>geospatial_lon_min</longitude.start>
+    <longitude.end>geospatial_lon_max</longitude.end>
+    <time.start>time_coverage_start</time.start>
+    <time.end>time_coverage_end</time.end>
+</gogoduck>

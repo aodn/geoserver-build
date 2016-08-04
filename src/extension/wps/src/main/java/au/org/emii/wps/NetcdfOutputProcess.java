@@ -131,5 +131,4 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             IOUtils.closeQuietly(os);
         }
     }
-
 }
