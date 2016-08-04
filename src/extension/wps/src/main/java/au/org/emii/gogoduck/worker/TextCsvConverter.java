@@ -1,6 +1,18 @@
 package au.org.emii.gogoduck.worker;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import au.org.emii.netcdf.iterator.IndexRangesBuilder;
+import au.org.emii.netcdf.iterator.IndexValue;
+import au.org.emii.netcdf.iterator.reader.NetcdfReader;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.EnhanceScaleMissing;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.time.Calendar;
+import ucar.nc2.time.CalendarDateUnit;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -14,19 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import au.org.emii.gogoduck.exception.GoGoDuckException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.EnhanceScaleMissing;
-import ucar.nc2.dataset.NetcdfDataset;
-import au.org.emii.netcdf.iterator.IndexRangesBuilder;
-import au.org.emii.netcdf.iterator.IndexValue;
-import au.org.emii.netcdf.iterator.reader.NetcdfReader;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 public class TextCsvConverter extends Converter {
 
@@ -115,11 +115,20 @@ public class TextCsvConverter extends Converter {
 
         while (variableIterator.hasNext()) {
             Variable ncVariable = variableIterator.next();
-            out.print(ncVariable.getShortName());
-            Attribute unitsAttribute = ncVariable.findAttribute("units");
 
-            if (unitsAttribute != null) {
-                out.format(" (%s)", unitsAttribute.getStringValue());
+            String shortName = ncVariable.getShortName();
+            out.print(shortName);
+
+            Attribute axis = ncVariable.findAttribute("axis");
+            if (axis != null && axis.getStringValue().equals("T")) {
+                out.print(" (UTC)");
+            }
+            else {
+                Attribute unitsAttribute = ncVariable.findAttribute("units");
+
+                if (unitsAttribute != null) {
+                    out.format(" (%s)", unitsAttribute.getStringValue());
+                }
             }
 
             if (variableIterator.hasNext()) {
@@ -155,15 +164,38 @@ public class TextCsvConverter extends Converter {
         Iterator<Variable> variableReaderIterator = variableReaders.keySet().iterator();
 
         while (variableReaderIterator.hasNext()) {
-            Variable variable = variableReaderIterator.next();
-            out.print(getDisplayValue(variable, variableReaders.get(variable), indexTuple));
+            Variable ncVariable = variableReaderIterator.next();
+
+            Attribute axis = ncVariable.findAttribute("axis");
+            if (axis != null && axis.getStringValue().equals("T")) {
+                out.print(getTimeDisplayValue(ncVariable, variableReaders.get(ncVariable), indexTuple));
+            }
+            else {
+                out.print(getDisplayValue(ncVariable, variableReaders.get(ncVariable), indexTuple));
+            }
 
             if (variableReaderIterator.hasNext()) { 
                 out.print(",");
             }
         }
-
         out.println();
+    }
+
+    private String getTimeDisplayValue(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {
+        if (isMissing(variable, variableReader, indexTuple)) {
+            return "";
+        }
+        else {
+            Attribute calendarAttribute = variable.findAttribute("calendar");
+
+            Attribute unitsAttribute = variable.findAttribute("units");
+            Double time = Double.valueOf(getDisplayValue(variable, variableReader, indexTuple));
+
+            String calendarString = calendarAttribute == null ? "gregorian" : calendarAttribute.getStringValue().toLowerCase();
+            Calendar calendar = Calendar.get(calendarString);
+            CalendarDateUnit dateUnit = CalendarDateUnit.withCalendar(calendar, unitsAttribute.getStringValue());
+            return dateUnit.makeCalendarDate(time).toString();
+        }
     }
 
     private String getDisplayValue(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {
