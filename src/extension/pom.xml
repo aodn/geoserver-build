@@ -18,6 +18,7 @@
     </parent>
 
     <modules>
+        <module>core</module>
         <module>csv-with-metadata-header</module>
         <module>layer-filters</module>
         <module>wps</module>

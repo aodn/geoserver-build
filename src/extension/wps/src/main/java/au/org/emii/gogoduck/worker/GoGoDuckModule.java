@@ -1,52 +1,117 @@
 package au.org.emii.gogoduck.worker;
 
-import java.io.*;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.utils.GoGoDuckConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.CoordinateAxis;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.VariableDS;
+import ucar.nc2.dt.grid.GeoGrid;
+import ucar.nc2.dt.grid.GridDataset;
+
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
 
-    // TODO Should not be hard coded
-    private static final String TIME_FIELD = "time";
-    private static final String URL_FIELD = "file_url";
+    @Autowired
+    ServletContext context;
 
-    protected String profile = null;
-    protected GoGoDuckSubsetParameters subset = null;
-    protected UserLog userLog = null;
-    protected IndexReader indexReader = null;
+    private String profile;
+    private GoGoDuckSubsetParameters subset;
+    private IndexReader indexReader;
+    private GoGoDuckConfig goGoDuckConfig;
 
-    public GoGoDuckModule() {}
+    private Boolean unpack = null;
+    private List<String> extraParameters = null;
+    private NcksSubsetParameters subsetParameters = null;
+    private CoordinateAxis time = null, latitude = null, longitude = null;
 
-    public void init(String profile, IndexReader indexReader, String subset, UserLog userLog) {
+    public GoGoDuckModule() {
+
+    }
+
+    public GoGoDuckModule(String profile, IndexReader indexReader, String subset, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
         this.indexReader = indexReader;
         this.subset = new GoGoDuckSubsetParameters(subset);
-        this.userLog = userLog;
+        this.goGoDuckConfig = goGoDuckConfig;
     }
 
     public URIList getUriList() throws GoGoDuckException {
-        return indexReader.getUriList(profile, TIME_FIELD, URL_FIELD, subset);
+        return indexReader.getUriList(profile, goGoDuckConfig.getTimeField(), goGoDuckConfig.getFileUrlField(), subset);
     }
 
-    public void postProcess(File file) {
-        return;
+    public boolean unpackNetcdf() {
+        return unpack;
     }
 
-    public List<String> ncksExtraParameters() {
-        List<String> ncksExtraParameters = new ArrayList<String>();
-        return ncksExtraParameters;
+    public boolean isTimeUnlimited() {
+        return time.isUnlimited();
     }
 
-    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
-        List<Attribute> newAttributeList = new ArrayList<Attribute>();
+    public void loadFileMetadata(File file) {
+        boolean fileContainPackedVariables = false;
+        GridDataset gridDs = null;
+
+        try {
+            setTimeLatLon(file.getAbsoluteFile().toString());
+            String location = file.getAbsolutePath();
+            Set<NetcdfDataset.Enhance> enhanceMode = new HashSet<>();
+            enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
+            gridDs = GridDataset.open(location, enhanceMode);
+            for (Variable var : gridDs.getNetcdfDataset().getVariables()) {
+                VariableDS vds = new VariableDS(var.getGroup(), var, true);
+                if (vds.hasScaleOffset()) {
+                    // File contains packed variables, unpack it
+                    fileContainPackedVariables = true;
+                    break;
+                }
+            }
+
+            // Checking unpack config (Needed for TPAC)
+            boolean unpackPackedVariables = goGoDuckConfig.getUnpack(profile);
+
+            if (fileContainPackedVariables && unpackPackedVariables) {
+                this.unpack = true;
+            } else {
+                this.unpack = false;
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
+        } finally {
+            close(gridDs, GridDataset.class);
+        }
+    }
+
+    public List<String> getExtraParameters() throws Exception {
+        if (extraParameters == null) {
+            extraParameters = new ArrayList<>();
+            for (String ncksParameter : goGoDuckConfig.getVariablesToInclude(profile)) {
+                extraParameters.add(ncksParameter);
+            }
+        }
+        return extraParameters;
+    }
+
+    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) throws Exception{
+        List<Attribute> newAttributeList = new ArrayList<>();
 
         String title = profile;
         try {
@@ -60,81 +125,99 @@ public class GoGoDuckModule {
             logger.warn("Could not find 'title' attribute in result file");
         }
 
-        newAttributeList.add(new Attribute("title",
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTitle(profile),
                 String.format("%s, %s, %s",
                         title,
                         subset.get("TIME").start,
                         subset.get("TIME").end)));
 
-        newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeStart(profile), subset.get("LATITUDE").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeEnd(profile), subset.get("LATITUDE").end));
 
-        newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
-        newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
 
-        newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
-        newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeStart(profile), subset.get("TIME").start));
+        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeEnd(profile), subset.get("TIME").end));
 
         return newAttributeList;
     }
 
-    public final void updateMetadata(Path outputFile) {
+    public final void updateMetadata(Path outputFile) throws Exception {
+        NetcdfFileWriter nc = null;
         try {
-            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
+            String location = outputFile.toAbsolutePath().toString();
+            nc = NetcdfFileWriter.openExisting(location);
 
             nc.setRedefineMode(true);
             for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
                 nc.addGroupAttribute(null, newAttr);
             }
             nc.setRedefineMode(false);
-            nc.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+        } finally {
+            close(nc, NetcdfFileWriter.class);
         }
     }
 
-    public NcksSubsetParameters getNcksSubsetParameters() {
-        NcksSubsetParameters ncksSubsetParameters = new NcksSubsetParameters();
-        ncksSubsetParameters.put("LATITUDE", subset.get("LATITUDE"));
-        ncksSubsetParameters.put("LONGITUDE", subset.get("LONGITUDE"));
-        ncksSubsetParameters.addTimeSubset("TIME", subset.get("TIME"));
-        return ncksSubsetParameters;
+    public NcksSubsetParameters getSubsetParameters() {
+        if (subsetParameters == null) {
+            subsetParameters = new NcksSubsetParameters();
+            subsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
+            subsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
+            subsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+        }
+        return subsetParameters;
     }
 
-    public static GoGoDuckModule newInstance(String profile, IndexReader indexReader, String subset, UserLog userLog) {
-        String thisPackage = GoGoDuckModule.class.getPackage().getName();
-        String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
+    private void setTimeLatLon(String location) {
+        GridDataset gridDs = null;
 
-        GoGoDuckModule module = null;
-        while (null == module && !classToInstantiate.isEmpty()) {
-            logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
-            try {
-                Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
-                module = (GoGoDuckModule) classz.newInstance();
-                module.init(profile, indexReader, subset, userLog);
-                logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
-                return module;
+        try {
+            gridDs = GridDataset.open(location);
+            List grids = gridDs.getGrids();
+
+            for (Object grid1 : grids) {
+                GeoGrid grid = (GeoGrid) grid1;
+                if (time == null) {
+                    time = grid.getCoordinateSystem().getTimeAxis();
+                }
+
+                if (latitude == null) {
+                    latitude = grid.getCoordinateSystem().getYHorizAxis();
+                }
+
+                if (longitude == null) {
+                    longitude = grid.getCoordinateSystem().getXHorizAxis();
+                }
+
+                if (time != null && latitude != null && longitude != null) {
+                    break;
+                }
             }
-            catch (Exception e) {
-                logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
-            }
-            classToInstantiate = nextProfile(classToInstantiate);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(e.getMessage());
+        } finally {
+            close(gridDs, GridDataset.class);
         }
 
-        throw new GoGoDuckException(String.format("Error initializing class for profile '%s'", profile));
+        if (time == null || latitude == null || longitude == null) {
+            throw new GoGoDuckException(String.format("Unable to retrieve time:%s latitude:%s longitude:%s", time, latitude, longitude));
+        }
     }
 
-    /* Finds the correct profile to run for the given layer, starts with:
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries_url
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries
-    GoGoDuckModule_acorn_hourly_avg_sag_nonqc
-    GoGoDuckModule_acorn_hourly_avg_sag
-    GoGoDuckModule_acorn_hourly_avg
-    GoGoDuckModule_acorn_hourly
-    GoGoDuckModule_acorn
-    GoGoDuckModule */
-    private static String nextProfile(String profile) {
-        return profile.substring(0, profile.lastIndexOf("_"));
+    private void close(Object object, Class<?> cls) {
+        try {
+            Class noParams[] = {};
+            if (object != null) {
+                Method method = cls.getDeclaredMethod("close", noParams);
+                method.invoke(object, null);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
+        }
     }
 }

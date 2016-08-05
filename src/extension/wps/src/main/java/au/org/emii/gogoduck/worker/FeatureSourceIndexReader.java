@@ -1,20 +1,20 @@
 package au.org.emii.gogoduck.worker;
 
-import java.io.IOException;
-import java.net.URI;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import au.org.emii.gogoduck.exception.GoGoDuckException;
 import org.geoserver.catalog.Catalog;
-import org.geotools.filter.text.cql2.CQL;
-import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.data.Query;
-import org.opengis.filter.Filter;
+import org.geotools.filter.text.cql2.CQL;
+import org.geotools.filter.text.cql2.CQLException;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
 
 public class FeatureSourceIndexReader implements IndexReader {
     private static final Logger logger = LoggerFactory.getLogger(FeatureSourceIndexReader.class);
@@ -29,10 +29,11 @@ public class FeatureSourceIndexReader implements IndexReader {
 
     @Override
     public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
-        String timeCoverageStart = subset.get("TIME").start;
-        String timeCoverageEnd = subset.get("TIME").end;
 
         URIList uriList = new URIList();
+
+        String timeCoverageStart = subset.get("TIME").start;
+        String timeCoverageEnd = subset.get("TIME").end;
 
         // TODO Should include also workspace, but works also without
         String typeName = profile;
@@ -41,9 +42,9 @@ public class FeatureSourceIndexReader implements IndexReader {
 
         try {
             cqlFilter = CQL.toFilter(
-                String.format("%s >= '%s' AND %s <= '%s'",
-                    timeField, timeCoverageStart,
-                    timeField, timeCoverageEnd)
+                    String.format("%s >= '%s' AND %s <= '%s'",
+                            timeField, timeCoverageStart,
+                            timeField, timeCoverageEnd)
             );
         } catch (CQLException e) {
             throw new GoGoDuckException(e.getMessage());

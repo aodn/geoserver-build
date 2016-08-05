@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -7,13 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class URLMangler {
-    private static Map<String, String> urlManglingMap = new HashMap<String, String>();
+    private Map<String, String> urlManglingMap = new HashMap<String, String>();
 
-    public static void setUrlManglingMap(Map<String, String> urlManglingMap) {
-        URLMangler.urlManglingMap = urlManglingMap;
+    public URLMangler(Map<String, String> urlManglingMap) {
+        this.urlManglingMap = urlManglingMap;
     }
 
-    public static URL mangle(URI uri) {
+    public URL mangle(URI uri) {
         try {
             String uriStr = uri.toString();
             for (String key : urlManglingMap.keySet()) {

@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
