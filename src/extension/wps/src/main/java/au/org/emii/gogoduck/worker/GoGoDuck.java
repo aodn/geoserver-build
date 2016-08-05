@@ -246,13 +246,13 @@ public class GoGoDuck {
                 command.add("time");
             }
 
-            command.addAll(module.getNcksSubsetParameters().getNcksParameters());
-            command.addAll(module.getNcksExtraParameters());
+            command.addAll(module.getSubsetParameters().getNcksParameters());
+            command.addAll(module.getExtraParameters());
 
             command.add(file.getPath());
             command.add(tmpFile.getPath());
 
-            logger.info(String.format("Applying subset '%s' to '%s'", module.getNcksExtraParameters(), file.toPath()));
+            logger.info(String.format("Applying subset '%s' to '%s'", module.getExtraParameters(), file.toPath()));
             execute(command);
 
             Files.delete(file.toPath());
@@ -298,7 +298,7 @@ public class GoGoDuck {
                 ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
                 for (File file : directoryListing) {
-                    ncksSubsetParameters = module.getNcksSubsetParameters().getNcksParameters();
+                    ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
                     logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
                     userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
                     executorService.submit(new NcksRunnable(file, module, this));
@@ -322,7 +322,7 @@ public class GoGoDuck {
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
-                    if (!module.hasPackedVariables()) {
+                    if (!module.unpackNetcdf()) {
                         return;
                     }
 

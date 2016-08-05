@@ -15,7 +15,8 @@ public class GoGoDuckConfig extends Config {
     private final String GOGODUCK_CONFIG_FILE = "gogoduck.xml";
     private final String DEFAULT_CONFIG_FILE = "wps/gogoduck.xml";
     private final String FILE_PREFIX = "/gogoduck/";
-    private final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/attribute";
+    private final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/";
+    private final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
 
     private final String FILE_LIMIT_KEY = FILE_PREFIX + "fileLimit";
     private final String THREAD_COUNT_KEY = FILE_PREFIX + "threadCount";
@@ -25,16 +26,15 @@ public class GoGoDuckConfig extends Config {
     private final String NCPDQ_PATH = FILE_PREFIX + "ncpdqPath";
     private final String NCRCAT_PATH = FILE_PREFIX + "ncrcatPath";
 
-    private final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
-    private final String TITLE = "title";
-    private final String LATITUDE_START = "latitudeStart";
-    private final String LATITUDE_END = "latitudeEnd";
-    private final String LONGITUDE_START = "longitudeStart";
-    private final String LONGITUDE_END = "longitudeEnd";
-    private final String TIME_START = "timeStart";
-    private final String TIME_END = "timeEnd";
+    private final String TITLE = GLOBAL_ATTRIBUTE_PREFIX + "title";
+    private final String LATITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "latitudeStart";
+    private final String LATITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "latitudeEnd";
+    private final String LONGITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "longitudeStart";
+    private final String LONGITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "longitudeEnd";
+    private final String TIME_START = GLOBAL_ATTRIBUTE_PREFIX + "timeStart";
+    private final String TIME_END = GLOBAL_ATTRIBUTE_PREFIX + "timeEnd";
 
-    private final String UNPACK_NETCDF = FILE_PREFIX + "unpack";
+    private final String UNPACK_NETCDF = FILE_PREFIX + "unpackNetcdf";
     private final String TIME_FIELD = FILE_PREFIX + "timeField";
     private final String FILE_URL_FIELD = FILE_PREFIX + "fileUrlField";
 
@@ -79,10 +79,6 @@ public class GoGoDuckConfig extends Config {
         return getConfigMap(URL_SUBSTITUTION, getLayerConfigFilePath(layer));
     }
 
-    public Map<String, String> getGlobalAttributes(String layer) throws Exception {
-        return getConfigMap(GLOBAL_ATTRIBUTE_PREFIX, getLayerConfigFilePath(layer));
-    }
-
     public List<String> getVariablesToInclude(String layer) throws Exception {
         List<String> cmdConfigParameters = new ArrayList<>();
         List<String> configList = getConfigList(VARIABLES_TO_INCLUDE, getLayerConfigFilePath(layer));
@@ -95,34 +91,34 @@ public class GoGoDuckConfig extends Config {
     }
 
     public String getTitle(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(TITLE);
+        return getConfig(TITLE, getLayerConfigFilePath(layer));
     }
 
     public String getLatitudeStart(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(LATITUDE_START);
+        return getConfig(LATITUDE_START, getLayerConfigFilePath(layer));
     }
 
     public String getLatitudeEnd(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(LATITUDE_END);
+        return getConfig(LATITUDE_END, getLayerConfigFilePath(layer));
     }
 
     public String getLongitudeStart(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(LONGITUDE_START);
+        return getConfig(LONGITUDE_START, getLayerConfigFilePath(layer));
     }
 
     public String getLongitudeEnd(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(LONGITUDE_END);
+        return getConfig(LONGITUDE_END, getLayerConfigFilePath(layer));
     }
 
     public String getTimeStart(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(TIME_START);
+        return getConfig(TIME_START, getLayerConfigFilePath(layer));
     }
 
     public String getTimeEnd(String layer) throws Exception {
-        return getGlobalAttributes(layer).get(TIME_END);
+        return getConfig(TIME_END, getLayerConfigFilePath(layer));
     }
 
-    public boolean getUnpackNetcdf(String layer) throws Exception {
+    public boolean getUnpack(String layer) throws Exception {
         return Boolean.valueOf(getConfig(UNPACK_NETCDF, getLayerConfigFilePath(layer)));
     }
 

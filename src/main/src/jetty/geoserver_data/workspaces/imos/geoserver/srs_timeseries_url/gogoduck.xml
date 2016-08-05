@@ -1,12 +1,12 @@
 <gogoduck>
     <globalAttributes>
-        <attribute key="title">title</attribute>
-        <attribute key="latitudeStart">southernmost_latitude</attribute>
-        <attribute key="latitudeEnd">northernmost_latitude</attribute>
-        <attribute key="longitudeStart">westernmost_longitude</attribute>
-        <attribute key="longitudeEnd">easternmost_longitude</attribute>
-        <attribute key="timeStart">start_time</attribute>
-        <attribute key="timeEnd">stop_time</attribute>
+        <title>title</title>
+        <latitudeStart>southernmost_latitude</latitudeStart>
+        <latitudeEnd>northernmost_latitude</latitudeEnd>
+        <longitudeStart>westernmost_longitude</longitudeStart>
+        <longitudeEnd>easternmost_longitude</longitudeEnd>
+        <timeStart>start_time</timeStart>
+        <timeEnd>stop_time</timeEnd>
     </globalAttributes>
     <variablesToInclude>
         <variable>time</variable>
