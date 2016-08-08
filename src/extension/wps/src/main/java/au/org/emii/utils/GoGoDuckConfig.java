@@ -34,7 +34,7 @@ public class GoGoDuckConfig extends Config {
     private final String TIME_START = GLOBAL_ATTRIBUTE_PREFIX + "timeStart";
     private final String TIME_END = GLOBAL_ATTRIBUTE_PREFIX + "timeEnd";
 
-    private final String UNPACK_NETCDF = FILE_PREFIX + "unpackNetcdf";
+    private final String UNPACK_NETCDF = FILE_PREFIX + "unpack";
     private final String TIME_FIELD = FILE_PREFIX + "timeField";
     private final String FILE_URL_FIELD = FILE_PREFIX + "fileUrlField";
 

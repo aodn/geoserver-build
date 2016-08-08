@@ -140,7 +140,7 @@ public abstract class Config {
 
         // Checking config file in store directory
         File storeDirectory = dataDirectory.findStoreDir(layerInfo.getResource().getStore());
-        String storeConfigFilePath = storeDirectory.toString() + "/" + configFileName;
+        String storeConfigFilePath = storeDirectory.getAbsolutePath().toString() + "/" + configFileName;
         if (new File(storeConfigFilePath).exists()) {
             // returning relative path
             return storeConfigFilePath.replace(this.resourceDirectory.getAbsolutePath().toString()+"/","");

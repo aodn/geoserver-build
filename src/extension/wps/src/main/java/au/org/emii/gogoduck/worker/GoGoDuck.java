@@ -322,11 +322,14 @@ public class GoGoDuck {
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
+                    logger.info(String.format("Checking file %s for packed variable", file.getAbsolutePath()));
                     if (!module.unpackNetcdf()) {
+                        logger.info(String.format("No packed variable found in %s", file.getAbsolutePath()));
                         return;
                     }
 
                     File tmpFile = File.createTempFile("ncpdq", ".nc");
+                    logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
 
                     List<String> command = new ArrayList<>();
                     command.add(goGoDuckConfig.getNcpdqPath());
@@ -335,7 +338,6 @@ public class GoGoDuck {
                     command.add(file.getAbsolutePath());
                     command.add(tmpFile.getAbsolutePath());
 
-                    logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
                     GoGoDuck.execute(command);
 
                     Files.delete(file.toPath());
