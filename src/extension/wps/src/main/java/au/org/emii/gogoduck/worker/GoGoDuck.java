@@ -8,6 +8,7 @@ import org.geoserver.catalog.Catalog;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.nc2.Attribute;
 
 import java.io.*;
 import java.net.URI;
@@ -399,7 +400,21 @@ public class GoGoDuck {
     }
 
     private void updateMetadata(GoGoDuckModule module, Path outputFile) throws Exception {
-        module.updateMetadata(outputFile);
+        try {
+            for (Attribute newAttr : module.getGlobalAttributesToUpdate(outputFile)) {
+                List<String> command = new ArrayList<>();
+                command.add(goGoDuckConfig.getNcattedPath());
+                command.add("-O");
+                command.add("-h");
+                command.add("-a");
+                command.add(String.format("%s,global,o,c,'%s'", newAttr.getFullName(), newAttr.getStringValue()));
+                command.add(outputFile.toAbsolutePath().toString());
+                execute(command);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+        }
     }
 
     private static void cleanTmpDir(Path tmpDir) {
