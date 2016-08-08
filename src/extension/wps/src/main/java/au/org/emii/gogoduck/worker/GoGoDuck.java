@@ -322,9 +322,8 @@ public class GoGoDuck {
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
-                    logger.info(String.format("Checking file %s for packed variable", file.getAbsolutePath()));
                     if (!module.unpackNetcdf()) {
-                        logger.info(String.format("No packed variable found in %s", file.getAbsolutePath()));
+                        logger.info(String.format("Not unpacking file %s", file.getAbsolutePath()));
                         return;
                     }
 

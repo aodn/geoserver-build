@@ -67,7 +67,7 @@ public class GoGoDuckModule {
     public void loadFileMetadata(File file) {
         boolean fileContainPackedVariables = false;
         GridDataset gridDs = null;
-
+        logger.info(String.format("Loading file %s metadata", file.getAbsolutePath()));
         try {
             setTimeLatLon(file.getAbsoluteFile().toString());
             String location = file.getAbsolutePath();
@@ -92,6 +92,9 @@ public class GoGoDuckModule {
                 this.unpack = false;
             }
 
+            logger.info(String.format("File %s contain packed variables %s", file.getAbsolutePath(), fileContainPackedVariables));
+            logger.info(String.format("Unpack variables config set to %s", unpackPackedVariables));
+            logger.info(String.format("Unpacking file %s %s", file.getAbsolutePath(), this.unpack.booleanValue()));
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new GoGoDuckException(e.getMessage(), e);
