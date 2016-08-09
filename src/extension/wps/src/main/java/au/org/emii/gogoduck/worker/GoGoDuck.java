@@ -244,7 +244,7 @@ public class GoGoDuck {
             command.add("-O");
             if (!module.isTimeUnlimited()) {
                 command.add("--mk_rec_dmn");
-                command.add("time");
+                command.add(module.getTime().getFullName());
             }
 
             command.addAll(module.getSubsetParameters().getNcksParameters());

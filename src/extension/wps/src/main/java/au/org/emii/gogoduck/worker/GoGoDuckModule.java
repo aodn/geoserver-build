@@ -215,4 +215,8 @@ public class GoGoDuckModule {
             throw new GoGoDuckException(e.getMessage(), e);
         }
     }
+
+    public CoordinateAxis getTime() {
+        return time;
+    }
 }
