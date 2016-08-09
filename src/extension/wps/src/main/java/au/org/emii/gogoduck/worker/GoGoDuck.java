@@ -98,18 +98,14 @@ public class GoGoDuck {
             URIList URIList = module.getUriList();
 
             enforceFileLimit(URIList, limit);
-            downloadFiles(URIList, tmpDir);
+            List<Path> downloadedFiles = downloadFiles(URIList, tmpDir);
             throwIfCancelled();
-            File tempDirFile = new File(tmpDir.toString());
-            File[] files = tempDirFile.listFiles();
-            if (files != null && files.length > 0) {
-                module.loadFileMetadata(files[0]);
-            }
-            applySubsetMultiThread(tmpDir, module, goGoDuckConfig.getThreadCount());
+            module.loadFileMetadata(downloadedFiles.get(0).toFile());
+            applySubsetMultiThread(downloadedFiles, module, goGoDuckConfig.getThreadCount());
             throwIfCancelled();
-            postProcess(tmpDir, module);
+            postProcess(downloadedFiles, module);
             throwIfCancelled();
-            aggregate(tmpDir, outputFile);
+            aggregate(downloadedFiles, outputFile);
             throwIfCancelled();
             updateMetadata(module, outputFile);
             throwIfCancelled();
@@ -180,16 +176,18 @@ public class GoGoDuck {
         }
     }
 
-    private void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
+    private List<Path> downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         logger.info(String.format("Downloading %d file(s)", uriList.size()));
+
+        List<Path> downloadedFiles = new ArrayList<>();
 
         for (URI uri : uriList) {
             if (isCancelled()) {
                 logger.warn("GoGoDuck was cancelled during download.");
-                return;
+                return null;
             }
 
-            File srcFile = new File(uriList.get(0).toString());
+            File srcFile = new File(uriList.first().toString());
             String basename = new File(uri.toString()).getName();
             Path dst = new File(tmpDir + File.separator + basename).toPath();
 
@@ -205,7 +203,11 @@ public class GoGoDuck {
             if (extension.equals("gz")) {
                 gunzipInPlace(dst.toFile());
             }
+
+            downloadedFiles.add(dst);
         }
+
+        return downloadedFiles;
     }
 
     private static void gunzipInPlace(File file) {
@@ -289,27 +291,22 @@ public class GoGoDuck {
         }
     }
 
-    private void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
-        logger.info(String.format("Applying subset on directory '%s'", tmpDir));
+    private void applySubsetMultiThread(List<Path> files, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
+        logger.info(String.format("Applying subset on %d downloaded files", files.size()));
         List<String> ncksSubsetParameters;
 
         try {
-            File[] directoryListing = tmpDir.toFile().listFiles();
-            if (directoryListing != null) {
-                ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
-                for (File file : directoryListing) {
-                    ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
-                    logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
-                    userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
-                    executorService.submit(new NcksRunnable(file, module, this));
-                }
-
-                executorService.shutdown();
-                executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
-            } else {
-                throw new GoGoDuckException("No files available for sub-setting");
+            for (Path file : files) {
+                ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
+                logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
+                userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
+                executorService.submit(new NcksRunnable(file.toFile(), module, this));
             }
+
+            executorService.shutdown();
+            executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         } catch (InterruptedException e) {
             throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         } catch (Exception e) {
@@ -317,85 +314,72 @@ public class GoGoDuck {
         }
     }
 
-    private void postProcess(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
-        File[] directoryListing = tmpDir.toFile().listFiles();
-
-        if (directoryListing != null) {
-            for (File file : directoryListing) {
-                try {
-                    if (!module.unpackNetcdf()) {
-                        logger.info(String.format("Not unpacking file %s", file.getAbsolutePath()));
-                        return;
-                    }
-
-                    File tmpFile = File.createTempFile("ncpdq", ".nc");
-                    logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
-
-                    List<String> command = new ArrayList<>();
-                    command.add(goGoDuckConfig.getNcpdqPath());
-                    command.add("-O");
-                    command.add("-U");
-                    command.add(file.getAbsolutePath());
-                    command.add(tmpFile.getAbsolutePath());
-
-                    GoGoDuck.execute(command);
-
-                    Files.delete(file.toPath());
-                    Files.move(tmpFile.toPath(), file.toPath());
-                } catch (Exception e) {
-                    throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file.toPath()));
+    private void postProcess(List<Path> files, GoGoDuckModule module) throws GoGoDuckException {
+        for (Path file : files) {
+            try {
+                if (!module.unpackNetcdf()) {
+                    logger.info(String.format("Not unpacking file %s", file));
+                    return;
                 }
+
+                File tmpFile = File.createTempFile("ncpdq", ".nc");
+                logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file, tmpFile.toPath()));
+
+                List<String> command = new ArrayList<>();
+                command.add(goGoDuckConfig.getNcpdqPath());
+                command.add("-O");
+                command.add("-U");
+                command.add(file.toAbsolutePath().toString());
+                command.add(tmpFile.getAbsolutePath());
+
+                GoGoDuck.execute(command);
+
+                Files.delete(file);
+                Files.move(tmpFile.toPath(), file);
+            } catch (Exception e) {
+                throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file));
             }
-        } else {
-            throw new GoGoDuckException("No files available for post processing");
         }
     }
 
-    private void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
-        File[] directoryListing = tmpDir.toFile().listFiles();
+    private void aggregate(List<Path> files, Path outputFile) throws GoGoDuckException {
+        List<String> command = new ArrayList<>();
+        command.add(goGoDuckConfig.getNcrcatPath());
+        command.add("-D2");
+        command.add("-4");
+        command.add("-h");
+        command.add("-O");
 
-        if (directoryListing != null) {
-
-            List<String> command = new ArrayList<>();
-            command.add(goGoDuckConfig.getNcrcatPath());
-            command.add("-D2");
-            command.add("-4");
-            command.add("-h");
-            command.add("-O");
-
-            if (directoryListing.length == 1) {
-                // Special case where we have only 1 file
-                File file = directoryListing[0];
-                try {
-                    if (outputFile.toFile().exists() && outputFile.toFile().isFile()) {
-                        logger.info(String.format("Deleting '%s'", outputFile));
-                        Files.delete(outputFile);
-                    }
-                    logger.info(String.format("Renaming '%s' -> '%s'", file, outputFile));
-                    Files.move(file.toPath(), outputFile);
+        if (files.size() == 1) {
+            // Special case where we have only 1 file
+            File file = files.get(0).toFile();
+            try {
+                if (outputFile.toFile().exists() && outputFile.toFile().isFile()) {
+                    logger.info(String.format("Deleting '%s'", outputFile));
+                    Files.delete(outputFile);
                 }
-                catch (IOException e) {
-                    logger.error(e.toString());
-                    throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
-                }
+                logger.info(String.format("Renaming '%s' -> '%s'", file, outputFile));
+                Files.move(file.toPath(), outputFile);
             }
-            else {
-                logger.info(String.format("Concatenating %d files into '%s'", directoryListing.length, outputFile));
-                for (File file : directoryListing) {
-                    command.add(file.getAbsolutePath());
-                }
-                command.add(outputFile.toFile().getAbsolutePath());
-
-                // Running ncrcat
-                try {
-                    execute(command);
-                }
-                catch (Exception e) {
-                    throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
-                }
+            catch (IOException e) {
+                logger.error(e.toString());
+                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
             }
-        } else {
-            throw new GoGoDuckException("No files present for aggregation");
+        }
+        else {
+            logger.info(String.format("Concatenating %d files into '%s'", files.size(), outputFile));
+            for (Path file : files) {
+                command.add(file.toAbsolutePath().toString());
+            }
+            command.add(outputFile.toFile().getAbsolutePath());
+
+            // Running ncrcat
+            try {
+                execute(command);
+            }
+            catch (Exception e) {
+                throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
+            }
         }
     }
 
