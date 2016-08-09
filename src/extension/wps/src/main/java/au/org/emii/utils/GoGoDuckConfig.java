@@ -25,6 +25,7 @@ public class GoGoDuckConfig extends Config {
     private final String NCKS_PATH = FILE_PREFIX + "ncksPath";
     private final String NCPDQ_PATH = FILE_PREFIX + "ncpdqPath";
     private final String NCRCAT_PATH = FILE_PREFIX + "ncrcatPath";
+    private final String NCATTED_PATH = FILE_PREFIX + "ncattedPath";
 
     private final String TITLE = GLOBAL_ATTRIBUTE_PREFIX + "title";
     private final String LATITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "latitudeStart";
@@ -65,6 +66,10 @@ public class GoGoDuckConfig extends Config {
 
     public String getNcrcatPath() {
         return getConfig(NCRCAT_PATH, DEFAULT_CONFIG_FILE);
+    }
+
+    public String getNcattedPath() {
+        return getConfig(NCATTED_PATH, DEFAULT_CONFIG_FILE);
     }
 
     public String getTimeField() {
@@ -110,12 +115,12 @@ public class GoGoDuckConfig extends Config {
         return getConfig(LONGITUDE_END, getLayerConfigFilePath(layer));
     }
 
-    public String getTimeStart(String layer) throws Exception {
-        return getConfig(TIME_START, getLayerConfigFilePath(layer));
+    public Map<String, String> getTimeStart(String layer) throws Exception {
+        return getConfigMap(URL_SUBSTITUTION, getLayerConfigFilePath(layer));
     }
 
-    public String getTimeEnd(String layer) throws Exception {
-        return getConfig(TIME_END, getLayerConfigFilePath(layer));
+    public Map<String, String> getTimeEnd(String layer) throws Exception {
+        return getConfigMap(URL_SUBSTITUTION, getLayerConfigFilePath(layer));
     }
 
     public boolean getUnpack(String layer) throws Exception {

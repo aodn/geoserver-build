@@ -30,29 +30,6 @@ public class GoGoDuckModuleTest {
     }
 
     @Test
-    public void testUpdateMetadata() throws Exception {
-        File sampleNetcdf = new File("src/test/resources/file.nc").getAbsoluteFile();
-        File tmpFile = File.createTempFile("tmp", ".nc");
-        Files.delete(tmpFile.toPath());
-        Files.copy(sampleNetcdf.toPath(), tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-        // preparing test data
-        List<Attribute> newAttributeList = new ArrayList<Attribute>();
-        newAttributeList.add(new Attribute("test_attribute", "test_value"));
-
-        ggdm = mock(GoGoDuckModule.class);
-        when(ggdm.getGlobalAttributesToUpdate(any(NetcdfFile.class))).thenReturn(newAttributeList);
-        ggdm.updateMetadata(tmpFile.toPath());
-
-        // Verify attribute was written to file
-        NetcdfFileWriter ncw = NetcdfFileWriter.openExisting(tmpFile.toPath().toString());
-        NetcdfFile nc = ncw.getNetcdfFile();
-        assertEquals(nc.findGlobalAttribute("test_attribute").getStringValue(), "test_value");
-
-        Files.delete(tmpFile.toPath());
-    }
-
-    @Test
     public void testCarsWeekly() throws Exception {
         String location = "src/test/resources/CARS2009_Australia_weekly.nc";
         ggdm.loadFileMetadata(new File(location));

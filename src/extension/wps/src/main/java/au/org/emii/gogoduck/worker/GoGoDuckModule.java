@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -20,10 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GoGoDuckModule {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
@@ -113,54 +109,53 @@ public class GoGoDuckModule {
         return extraParameters;
     }
 
-    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) throws Exception{
+    protected List<Attribute> getGlobalAttributesToUpdate(Path outputFile) throws Exception{
         List<Attribute> newAttributeList = new ArrayList<>();
-
         String title = profile;
-        try {
-            title = nc.findGlobalAttribute("title").getStringValue();
-
-            // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
-            title = title.substring(0, title.lastIndexOf(","));
-        }
-        catch (Exception e) {
-            // Don't fail because of this bullshit :)
-            logger.warn("Could not find 'title' attribute in result file");
-        }
-
-        newAttributeList.add(new Attribute(goGoDuckConfig.getTitle(profile),
-                String.format("%s, %s, %s",
-                        title,
-                        subset.get("TIME").start,
-                        subset.get("TIME").end)));
-
-        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeStart(profile), subset.get("LATITUDE").start));
-        newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeEnd(profile), subset.get("LATITUDE").end));
-
-        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
-        newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
-
-        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeStart(profile), subset.get("TIME").start));
-        newAttributeList.add(new Attribute(goGoDuckConfig.getTimeEnd(profile), subset.get("TIME").end));
-
-        return newAttributeList;
-    }
-
-    public final void updateMetadata(Path outputFile) throws Exception {
         NetcdfFileWriter nc = null;
+
         try {
             String location = outputFile.toAbsolutePath().toString();
             nc = NetcdfFileWriter.openExisting(location);
 
-            nc.setRedefineMode(true);
-            for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
-                nc.addGroupAttribute(null, newAttr);
+            try {
+                title = nc.getNetcdfFile().findGlobalAttribute("title").getStringValue();
+
+                // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
+                title = title.substring(0, title.lastIndexOf(","));
             }
-            nc.setRedefineMode(false);
+            catch (Exception e) {
+                // Don't fail because of this bullshit :)
+                logger.warn("Could not find 'title' attribute in result file");
+            }
+
+            newAttributeList.add(new Attribute(goGoDuckConfig.getTitle(profile),
+                    String.format("%s, %s, %s",
+                            title,
+                            subset.get("TIME").start,
+                            subset.get("TIME").end)));
+
+            newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeStart(profile), subset.get("LATITUDE").start));
+            newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeEnd(profile), subset.get("LATITUDE").end));
+
+            newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
+            newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
+
+            Map<String, String> timeStart = goGoDuckConfig.getTimeStart(profile);
+            for (String key : timeStart.keySet()) {
+                newAttributeList.add(new Attribute(timeStart.get(key), subset.get("TIME").start));
+            }
+
+            Map<String, String> timeEnd = goGoDuckConfig.getTimeEnd(profile);
+            for (String key : timeStart.keySet()) {
+                newAttributeList.add(new Attribute(timeEnd.get(key), subset.get("TIME").end));
+            }
+
         } catch (IOException e) {
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
         } finally {
             close(nc, NetcdfFileWriter.class);
+            return newAttributeList;
         }
     }
 
@@ -222,5 +217,9 @@ public class GoGoDuckModule {
             logger.error(e.getMessage());
             throw new GoGoDuckException(e.getMessage(), e);
         }
+    }
+
+    public CoordinateAxis getTime() {
+        return time;
     }
 }
