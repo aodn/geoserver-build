@@ -141,14 +141,14 @@ public class GoGoDuckModule {
             newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
             newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
 
-            Map<String, String> timeStart = goGoDuckConfig.getTimeStart(profile);
-            for (String key : timeStart.keySet()) {
-                newAttributeList.add(new Attribute(timeStart.get(key), subset.get("TIME").start));
+            List<String> timeStart = goGoDuckConfig.getTimeStart(profile);
+            for (String timeStartEntry : timeStart) {
+                newAttributeList.add(new Attribute(timeStartEntry, subset.get("TIME").start));
             }
 
-            Map<String, String> timeEnd = goGoDuckConfig.getTimeEnd(profile);
-            for (String key : timeStart.keySet()) {
-                newAttributeList.add(new Attribute(timeEnd.get(key), subset.get("TIME").end));
+            List<String> timeEnd = goGoDuckConfig.getTimeEnd(profile);
+            for (String timeEndEntry : timeEnd) {
+                newAttributeList.add(new Attribute(timeEndEntry, subset.get("TIME").end));
             }
 
         } catch (IOException e) {

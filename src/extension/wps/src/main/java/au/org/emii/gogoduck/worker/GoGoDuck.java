@@ -385,7 +385,8 @@ public class GoGoDuck {
 
     private void updateMetadata(GoGoDuckModule module, Path outputFile) throws Exception {
         try {
-            for (Attribute newAttr : module.getGlobalAttributesToUpdate(outputFile)) {
+            final List<Attribute> globalAttributesToUpdate = module.getGlobalAttributesToUpdate(outputFile);
+            for (Attribute newAttr : globalAttributesToUpdate) {
                 List<String> command = new ArrayList<>();
                 command.add(goGoDuckConfig.getNcattedPath());
                 command.add("-O");

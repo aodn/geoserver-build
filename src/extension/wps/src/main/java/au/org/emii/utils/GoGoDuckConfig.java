@@ -115,12 +115,12 @@ public class GoGoDuckConfig extends Config {
         return getConfig(LONGITUDE_END, getLayerConfigFilePath(layer));
     }
 
-    public Map<String, String> getTimeStart(String layer) throws Exception {
-        return getConfigMap(TIME_START, getLayerConfigFilePath(layer));
+    public List<String> getTimeStart(String layer) throws Exception {
+        return getConfigList(TIME_START, getLayerConfigFilePath(layer));
     }
 
-    public Map<String, String> getTimeEnd(String layer) throws Exception {
-        return getConfigMap(TIME_END, getLayerConfigFilePath(layer));
+    public List<String> getTimeEnd(String layer) throws Exception {
+        return getConfigList(TIME_END, getLayerConfigFilePath(layer));
     }
 
     public boolean getUnpack(String layer) throws Exception {
