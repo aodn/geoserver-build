@@ -6,10 +6,15 @@ import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.factory.GeoTools;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.sort.SortBy;
+import org.opengis.filter.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +56,11 @@ public class FeatureSourceIndexReader implements IndexReader {
         }
 
         Query query = new Query(typeName, cqlFilter, new String[]{urlField});
+
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+        SortBy sortByTimeAscending = ff.sort(timeField, SortOrder.ASCENDING);
+
+        query.setSortBy(new SortBy[]{sortByTimeAscending});
 
         SimpleFeatureIterator iterator = null;
         try {
