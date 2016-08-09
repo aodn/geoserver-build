@@ -407,7 +407,7 @@ public class GoGoDuck {
                 command.add("-O");
                 command.add("-h");
                 command.add("-a");
-                command.add(String.format("%s,global,o,c,'%s'", newAttr.getFullName(), newAttr.getStringValue()));
+                command.add(String.format("%s,global,o,c,%s", newAttr.getFullName(), newAttr.getStringValue()));
                 command.add(outputFile.toAbsolutePath().toString());
                 execute(command);
             }
