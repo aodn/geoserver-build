@@ -110,7 +110,7 @@ public class GoGoDuck {
             updateMetadata(module, outputFile);
             throwIfCancelled();
             Converter converter = Converter.newInstance(format);
-            outputFile = converter.convert(outputFile);
+            outputFile = converter.convert(outputFile, module);
             mimeType = converter.getMimeType();
             extension = converter.getExtension();
             throwIfCancelled();

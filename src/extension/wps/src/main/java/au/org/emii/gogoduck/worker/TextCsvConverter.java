@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.gogoduck.exception.GoGoDuckException;
 import au.org.emii.netcdf.iterator.IndexRangesBuilder;
 import au.org.emii.netcdf.iterator.IndexValue;
 import au.org.emii.netcdf.iterator.reader.NetcdfReader;
@@ -55,20 +56,20 @@ public class TextCsvConverter extends Converter {
     public String getExtension() { return EXTENSION; }
 
     @Override
-    public Path convert(Path inputFile) throws GoGoDuckException {
+    public Path convert(Path inputFile, GoGoDuckModule module) throws GoGoDuckException {
         NetcdfDataset ncDataset = null;
         Path outputFile = getOutputFile(inputFile);
 
         try (PrintStream out = new PrintStream(Files.newOutputStream(outputFile, CREATE_NEW))) {
             ncDataset = openNetcdfDataset(inputFile);
             List<Variable> variables = ncDataset.getVariables();
-            writeHeaderLine(out, variables);
+            writeHeaderLine(out, variables, module);
             Map<Variable, NetcdfReader> variableReaders = createVariableReaders(variables);
             Iterator<Set<IndexValue>> indexTupleIterator = buildIndexTupleIterator(variables);
 
             while (indexTupleIterator.hasNext()) {
                 Set<IndexValue> indexTuple = indexTupleIterator.next();
-                writeCsvLine(out, variableReaders, indexTuple);
+                writeCsvLine(out, variableReaders, indexTuple, module);
             }
 
             return outputFile;
@@ -110,7 +111,7 @@ public class TextCsvConverter extends Converter {
         }
     }
 
-    private void writeHeaderLine(PrintStream out, List<Variable> variables) {
+    private void writeHeaderLine(PrintStream out, List<Variable> variables, GoGoDuckModule module) {
         Iterator<Variable> variableIterator = variables.iterator();
 
         while (variableIterator.hasNext()) {
@@ -119,8 +120,7 @@ public class TextCsvConverter extends Converter {
             String shortName = ncVariable.getShortName();
             out.print(shortName);
 
-            Attribute axis = ncVariable.findAttribute("axis");
-            if (axis != null && axis.getStringValue().equals("T")) {
+            if (shortName.equals(module.getTime().getShortName())) {
                 out.print(" (UTC)");
             }
             else {
@@ -160,14 +160,14 @@ public class TextCsvConverter extends Converter {
         return indexRangesBuilder.getIterator();
     }
 
-    private void writeCsvLine(PrintStream out, Map<Variable, NetcdfReader> variableReaders, Set<IndexValue> indexTuple) {
+    private void writeCsvLine(PrintStream out, Map<Variable, NetcdfReader> variableReaders, Set<IndexValue> indexTuple, GoGoDuckModule module) {
         Iterator<Variable> variableReaderIterator = variableReaders.keySet().iterator();
 
         while (variableReaderIterator.hasNext()) {
             Variable ncVariable = variableReaderIterator.next();
+            String shortName = ncVariable.getShortName();
 
-            Attribute axis = ncVariable.findAttribute("axis");
-            if (axis != null && axis.getStringValue().equals("T")) {
+            if (shortName.equals(module.getTime().getShortName())) {
                 out.print(getTimeDisplayValue(ncVariable, variableReaders.get(ncVariable), indexTuple));
             }
             else {

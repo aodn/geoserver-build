@@ -1,7 +1,9 @@
 package au.org.emii.gogoduck.worker;
 
+import au.org.emii.utils.GoGoDuckConfig;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import ucar.nc2.dataset.CoordinateAxis;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TextCsvConverterTest {
 
@@ -23,7 +27,13 @@ public class TextCsvConverterTest {
         Path outputFile = null;
 
         try {
-            outputFile = converter.convert(TIME_SERIES_INPUT_FILE);
+            CoordinateAxis coordinateAxis = mock(CoordinateAxis.class);
+            when(coordinateAxis.getShortName()).thenReturn("TIME");
+
+            GoGoDuckModule module = mock(GoGoDuckModule.class);
+            when(module.getTime()).thenReturn(coordinateAxis);
+
+            outputFile = converter.convert(TIME_SERIES_INPUT_FILE, module);
             assertTrue("CSV file generated differs from expected file", FileUtils.contentEquals(outputFile.toFile(), TIME_SERIES_OUTPUT_FILE));
         } finally {
             if (outputFile != null) {
