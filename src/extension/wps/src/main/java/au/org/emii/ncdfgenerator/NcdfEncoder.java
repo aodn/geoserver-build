@@ -1,5 +1,16 @@
 package au.org.emii.ncdfgenerator;
 
+import org.geotools.data.postgis.PostGISDialect;
+import org.geotools.data.postgis.PostgisFilterToSQL;
+import org.geotools.filter.text.cql2.CQL;
+import org.geotools.jdbc.JDBCDataStore;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.ma2.Array;
+import ucar.nc2.NetcdfFileWriteable;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,18 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.geotools.data.postgis.PostGISDialect;
-import org.geotools.data.postgis.PostgisFilterToSQL;
-import org.geotools.filter.text.cql2.CQL;
-import org.geotools.jdbc.JDBCDataStore;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ucar.ma2.Array;
-import ucar.nc2.NetcdfFileWriteable;
 
 public class NcdfEncoder {
     private final Connection conn;
@@ -41,12 +40,12 @@ public class NcdfEncoder {
     private IOutputFormatter outputFormatter;
 
     public NcdfEncoder(
-        JDBCDataStore dataStore,
-        String schema,
-        ICreateWritable createWritable,
-        IAttributeValueParser attributeValueParser,
-        NcdfDefinition definition,
-        String filterExpr
+            JDBCDataStore dataStore,
+            String schema,
+            ICreateWritable createWritable,
+            IAttributeValueParser attributeValueParser,
+            NcdfDefinition definition,
+            String filterExpr
     ) throws SQLException {
         this.dataStore = dataStore;
         this.conn = dataStore.getDataSource().getConnection();
@@ -76,8 +75,7 @@ public class NcdfEncoder {
             + " on instance.id = data.instance_id";
     }
 
-    public void prepare(IOutputFormatter outputFormatter) throws Exception
-    {
+    public void prepare(IOutputFormatter outputFormatter) throws Exception {
         this.outputFormatter = outputFormatter;
 
         // do not quote search path!.
@@ -92,10 +90,10 @@ public class NcdfEncoder {
         // or discriminate about which attributes come from which tables.
         // And there's no optimisation penalty since both the initial and instance queries have to hit the big data table
         String instanceQuery =
-            "select distinct data.instance_id"
-            + " from (" + getVirtualDataTable() + ") as data"
-            + " left join (" + getVirtualInstanceTable() + ") instance"
-            + " on instance.id = data.instance_id";
+                "select distinct data.instance_id"
+                        + " from (" + getVirtualDataTable() + ") as data"
+                        + " left join (" + getVirtualInstanceTable() + ") instance"
+                        + " on instance.id = data.instance_id";
 
         instanceQuery = applyFilter(instanceQuery);
 
@@ -124,11 +122,10 @@ public class NcdfEncoder {
         return query;
     }
 
-    public boolean writeNext() throws Exception
-    {
+    public boolean writeNext() throws Exception {
         if (!featureInstancesRS.next()) {
             logger.info("no more instances");
-            if(outputFormatter != null) {
+            if (outputFormatter != null) {
                 logger.info("closing outputFormatter");
                 outputFormatter.close();
                 outputFormatter = null;
@@ -147,11 +144,11 @@ public class NcdfEncoder {
         }
 
         String query =
-            getVirtualTable()
-            + " " + whereClause
-            + " and data.instance_id = " + Long.toString(instanceId)
-            + " order by " + orderClause
-            + ";";
+                getVirtualTable()
+                    + " " + whereClause
+                    + " and data.instance_id = " + Long.toString(instanceId)
+                    + " order by " + orderClause
+                    + ";";
 
         logger.debug("instanceId " + instanceId + ", " + query);
 
@@ -168,7 +165,8 @@ public class NcdfEncoder {
                 value = attributeValueParser.parse(attribute.getValue()).getValue();
             }
             else if (attribute.getSql() != null) {
-                value = evaluateSql(instanceId, whereClause, orderClause, attribute.getSql());
+                String replacedSql = markupSql(instanceId, whereClause, orderClause, attribute.getSql());
+                value = evaluateSql(replacedSql);
             }
             else {
                 throw new NcdfGeneratorException("No value defined for global attribute '" + name + "'");
@@ -178,16 +176,18 @@ public class NcdfEncoder {
                 logger.warn("Null attribute value '" + name + "'");
             }
             else if (value instanceof Number) {
-                writer.addGlobalAttribute(name, (Number)value);
+                writer.addGlobalAttribute(name, (Number) value);
             }
             else if (value instanceof String) {
-                writer.addGlobalAttribute(name, (String)value);
+                writer.addGlobalAttribute(name, (String) value);
             }
             else if (value instanceof Array) {
-                writer.addGlobalAttribute(name, (Array)value);
+                writer.addGlobalAttribute(name, (Array) value);
             }
             else {
-                throw new NcdfGeneratorException("Unrecognized attribute type '" + value.getClass().getName() + "'");
+
+                String errmsg = String.format("XML attribute error: Type:%s Contains:%s", value.getClass().getName(), attribute.getValue());
+                throw new NcdfGeneratorException(errmsg);
             }
         }
 
@@ -212,38 +212,46 @@ public class NcdfEncoder {
         // finish the file
         writer.close();
 
+        String replacedSql = markupSql(instanceId, whereClause, orderClause, definition.getFilenameTemplate().getSql());
         // get filename
-        Object filename = evaluateSql(instanceId, whereClause, orderClause, definition.getFilenameTemplate().getSql());
+        Object filename = evaluateSql(replacedSql);
 
-        // this is awful...
-        // format the file into the output stream
-        InputStream is = createWritable.getStream();
-        outputFormatter.write((String)filename, is);
-        is.close();
+        try (InputStream is = createWritable.getStream()) {
+            outputFormatter.write((String) filename, is);
+            is.close();
+        }
+        catch (Exception e) {
+            String err = String.format("Error writing netCDF filename for <virtualDataTable> instance_id %s \nSQL:\n%s", Long.toString(instanceId), replacedSql);
+            throw new NcdfGeneratorException(err);
+        }
 
-        return true ;
+        return true;
     }
 
+    private String markupSql(long instanceId, String whereClause, String orderClause, String sql) {
 
-    private Object evaluateSql(long instanceId, String whereClause, String orderClause, String sql) throws Exception {
         // we need aliases for the inner select, and to support wrapping the where selection
         sql = sql.replaceAll("\\$instance",
-            "( select *"
-            + " from (" + getVirtualInstanceTable() + ") instance "
-            + " where instance.id = " + Long.toString(instanceId) + ") as instance "
+                "( select *"
+                    + " from (" + getVirtualInstanceTable() + ") instance "
+                    + " where instance.id = " + Long.toString(instanceId) + ") as instance "
         );
 
         // as for vars/dims, but without the order clause, to support aggregate functions like min/max
         sql = sql.replaceAll("\\$data",
-            "( select *"
-            + " from (" + getVirtualDataTable() + ") as data"
-            + " left join (" + getVirtualInstanceTable() + ") instance"
-            + " on instance.id = data.instance_id"
-            + " " + whereClause
-            + " and data.instance_id = " + Long.toString(instanceId)
-            + " order by " + orderClause
-            + " ) as data"
+                "( select *"
+                    + " from (" + getVirtualDataTable() + ") as data"
+                    + " left join (" + getVirtualInstanceTable() + ") instance"
+                    + " on instance.id = data.instance_id"
+                    + " " + whereClause
+                    + " and data.instance_id = " + Long.toString(instanceId)
+                    + " order by " + orderClause
+                    + " ) as data"
         );
+        return sql;
+    }
+
+    private Object evaluateSql(String sql) throws Exception {
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -268,9 +276,9 @@ public class NcdfEncoder {
     }
 
     private void populateValues(
-        String query,
-        List<IDimension> dimensions,
-        List<IVariable> encoders
+            String query,
+            List<IDimension> dimensions,
+            List<IVariable> encoders
     ) throws Exception {
         // prepare buffers
         for (IDimension dimension : definition.getDimensions()) {
@@ -303,7 +311,7 @@ public class NcdfEncoder {
         }
 
         // pre-map the encoders by index according to the column name
-        ArrayList<IAddValue>[] processing = (ArrayList<IAddValue>[])new ArrayList[numColumns + 1];
+        ArrayList<IAddValue>[] processing = (ArrayList<IAddValue>[]) new ArrayList[numColumns + 1];
 
         for (int i = 1; i <= numColumns; ++i) {
 
@@ -333,7 +341,8 @@ public class NcdfEncoder {
     public void closeQuietly() {
         try {
             conn.close();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.info("problem closing transaction");
         }
     }
