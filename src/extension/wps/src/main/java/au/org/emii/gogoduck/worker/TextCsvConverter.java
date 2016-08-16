@@ -1,6 +1,19 @@
 package au.org.emii.gogoduck.worker;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.netcdf.iterator.IndexRangesBuilder;
+import au.org.emii.netcdf.iterator.IndexValue;
+import au.org.emii.netcdf.iterator.reader.NetcdfReader;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.EnhanceScaleMissing;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.time.Calendar;
+import ucar.nc2.time.CalendarDateUnit;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -14,19 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import au.org.emii.gogoduck.exception.GoGoDuckException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.EnhanceScaleMissing;
-import ucar.nc2.dataset.NetcdfDataset;
-import au.org.emii.netcdf.iterator.IndexRangesBuilder;
-import au.org.emii.netcdf.iterator.IndexValue;
-import au.org.emii.netcdf.iterator.reader.NetcdfReader;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 public class TextCsvConverter extends Converter {
 
@@ -55,20 +56,20 @@ public class TextCsvConverter extends Converter {
     public String getExtension() { return EXTENSION; }
 
     @Override
-    public Path convert(Path inputFile) throws GoGoDuckException {
+    public Path convert(Path inputFile, FileMetadata fileMetadata) throws GoGoDuckException {
         NetcdfDataset ncDataset = null;
         Path outputFile = getOutputFile(inputFile);
 
         try (PrintStream out = new PrintStream(Files.newOutputStream(outputFile, CREATE_NEW))) {
             ncDataset = openNetcdfDataset(inputFile);
             List<Variable> variables = ncDataset.getVariables();
-            writeHeaderLine(out, variables);
+            writeHeaderLine(out, variables, fileMetadata);
             Map<Variable, NetcdfReader> variableReaders = createVariableReaders(variables);
             Iterator<Set<IndexValue>> indexTupleIterator = buildIndexTupleIterator(variables);
 
             while (indexTupleIterator.hasNext()) {
                 Set<IndexValue> indexTuple = indexTupleIterator.next();
-                writeCsvLine(out, variableReaders, indexTuple);
+                writeCsvLine(out, variableReaders, indexTuple, fileMetadata);
             }
 
             return outputFile;
@@ -110,16 +111,24 @@ public class TextCsvConverter extends Converter {
         }
     }
 
-    private void writeHeaderLine(PrintStream out, List<Variable> variables) {
+    private void writeHeaderLine(PrintStream out, List<Variable> variables, FileMetadata fileMetadata) {
         Iterator<Variable> variableIterator = variables.iterator();
 
         while (variableIterator.hasNext()) {
             Variable ncVariable = variableIterator.next();
-            out.print(ncVariable.getShortName());
-            Attribute unitsAttribute = ncVariable.findAttribute("units");
 
-            if (unitsAttribute != null) {
-                out.format(" (%s)", unitsAttribute.getStringValue());
+            String shortName = ncVariable.getShortName();
+            out.print(shortName);
+
+            if (shortName.equals(fileMetadata.getTime().getShortName())) {
+                out.print(" (UTC)");
+            }
+            else {
+                Attribute unitsAttribute = ncVariable.findAttribute("units");
+
+                if (unitsAttribute != null) {
+                    out.format(" (%s)", unitsAttribute.getStringValue());
+                }
             }
 
             if (variableIterator.hasNext()) {
@@ -151,19 +160,42 @@ public class TextCsvConverter extends Converter {
         return indexRangesBuilder.getIterator();
     }
 
-    private void writeCsvLine(PrintStream out, Map<Variable, NetcdfReader> variableReaders, Set<IndexValue> indexTuple) {
+    private void writeCsvLine(PrintStream out, Map<Variable, NetcdfReader> variableReaders, Set<IndexValue> indexTuple, FileMetadata fileMetadata) {
         Iterator<Variable> variableReaderIterator = variableReaders.keySet().iterator();
 
         while (variableReaderIterator.hasNext()) {
-            Variable variable = variableReaderIterator.next();
-            out.print(getDisplayValue(variable, variableReaders.get(variable), indexTuple));
+            Variable ncVariable = variableReaderIterator.next();
+            String shortName = ncVariable.getShortName();
+
+            if (shortName.equals(fileMetadata.getTime().getShortName())) {
+                out.print(getTimeDisplayValue(ncVariable, variableReaders.get(ncVariable), indexTuple));
+            }
+            else {
+                out.print(getDisplayValue(ncVariable, variableReaders.get(ncVariable), indexTuple));
+            }
 
             if (variableReaderIterator.hasNext()) { 
                 out.print(",");
             }
         }
-
         out.println();
+    }
+
+    private String getTimeDisplayValue(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {
+        if (isMissing(variable, variableReader, indexTuple)) {
+            return "";
+        }
+        else {
+            Attribute calendarAttribute = variable.findAttribute("calendar");
+
+            Attribute unitsAttribute = variable.findAttribute("units");
+            Double time = Double.valueOf(getDisplayValue(variable, variableReader, indexTuple));
+
+            String calendarString = calendarAttribute == null ? "gregorian" : calendarAttribute.getStringValue().toLowerCase();
+            Calendar calendar = Calendar.get(calendarString);
+            CalendarDateUnit dateUnit = CalendarDateUnit.withCalendar(calendar, unitsAttribute.getStringValue());
+            return dateUnit.makeCalendarDate(time).toString();
+        }
     }
 
     private String getDisplayValue(Variable variable, NetcdfReader variableReader, Set<IndexValue> indexTuple) {

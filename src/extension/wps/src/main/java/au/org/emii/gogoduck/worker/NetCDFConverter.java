@@ -10,7 +10,7 @@ public class NetCDFConverter extends Converter {
     private final static String EXTENSION = "nc";
 
     @Override
-    public Path convert(Path outputFile) throws GoGoDuckException {
+    public Path convert(Path outputFile, FileMetadata fileMetadata) throws GoGoDuckException {
         // No conversion necessary
         return outputFile;
     }

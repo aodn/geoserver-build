@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Converter {
 
-    public abstract Path convert(Path outputFile) throws GoGoDuckException;
+    public abstract Path convert(Path outputFile, FileMetadata fileMetadata) throws GoGoDuckException;
 
     public abstract String getMimeType();
 

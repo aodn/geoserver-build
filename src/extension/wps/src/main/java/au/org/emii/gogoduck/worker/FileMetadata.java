@@ -21,8 +21,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GoGoDuckModule {
-    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
+public class FileMetadata {
+    private static final Logger logger = LoggerFactory.getLogger(FileMetadata.class);
 
     @Autowired
     ServletContext context;
@@ -37,11 +37,7 @@ public class GoGoDuckModule {
     private NcksSubsetParameters subsetParameters = null;
     private CoordinateAxis time = null, latitude = null, longitude = null;
 
-    public GoGoDuckModule() {
-
-    }
-
-    public GoGoDuckModule(String profile, IndexReader indexReader, String subset, GoGoDuckConfig goGoDuckConfig) {
+    public FileMetadata(String profile, IndexReader indexReader, String subset, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
         this.indexReader = indexReader;
         this.subset = new GoGoDuckSubsetParameters(subset);
@@ -60,7 +56,7 @@ public class GoGoDuckModule {
         return time.isUnlimited();
     }
 
-    public void loadFileMetadata(File file) {
+    public void load(File file) {
         boolean fileContainPackedVariables = false;
         GridDataset gridDs = null;
         logger.info(String.format("Loading file %s metadata", file.getAbsolutePath()));
