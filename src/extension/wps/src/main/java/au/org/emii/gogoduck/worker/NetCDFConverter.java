@@ -1,8 +1,6 @@
 package au.org.emii.gogoduck.worker;
 
-import au.org.emii.core.Config;
 import au.org.emii.gogoduck.exception.GoGoDuckException;
-import au.org.emii.utils.GoGoDuckConfig;
 
 import java.nio.file.Path;
 
@@ -12,7 +10,7 @@ public class NetCDFConverter extends Converter {
     private final static String EXTENSION = "nc";
 
     @Override
-    public Path convert(Path outputFile, GoGoDuckModule module) throws GoGoDuckException {
+    public Path convert(Path outputFile, FileMetadata fileMetadata) throws GoGoDuckException {
         // No conversion necessary
         return outputFile;
     }

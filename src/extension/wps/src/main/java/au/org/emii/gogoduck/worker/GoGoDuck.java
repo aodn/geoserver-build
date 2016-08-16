@@ -88,29 +88,29 @@ public class GoGoDuck {
     }
 
     public Path run() {
-        GoGoDuckModule module = new GoGoDuckModule(profile, indexReader, subset, goGoDuckConfig);
+        FileMetadata fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
 
         Path tmpDir = null;
 
         try {
             tmpDir = Files.createTempDirectory(baseTmpDir, "gogoduck");
 
-            URIList URIList = module.getUriList();
+            URIList URIList = fileMetadata.getUriList();
 
             enforceFileLimit(URIList, limit);
             List<Path> downloadedFiles = downloadFiles(URIList, tmpDir);
             throwIfCancelled();
-            module.loadFileMetadata(downloadedFiles.get(0).toFile());
-            applySubsetMultiThread(downloadedFiles, module, goGoDuckConfig.getThreadCount());
+            fileMetadata.load(downloadedFiles.get(0).toFile());
+            applySubsetMultiThread(downloadedFiles, fileMetadata, goGoDuckConfig.getThreadCount());
             throwIfCancelled();
-            postProcess(downloadedFiles, module);
+            postProcess(downloadedFiles, fileMetadata);
             throwIfCancelled();
             aggregate(downloadedFiles, outputFile);
             throwIfCancelled();
-            updateMetadata(module, outputFile);
+            updateMetadata(fileMetadata, outputFile);
             throwIfCancelled();
             Converter converter = Converter.newInstance(format);
-            outputFile = converter.convert(outputFile, module);
+            outputFile = converter.convert(outputFile, fileMetadata);
             mimeType = converter.getMimeType();
             extension = converter.getExtension();
             throwIfCancelled();
@@ -233,7 +233,7 @@ public class GoGoDuck {
         }
     }
 
-    private void applySubsetSingleFileNcks(File file, GoGoDuckModule module) {
+    private void applySubsetSingleFileNcks(File file, FileMetadata fileMetadata) {
         logger.info("Applying Subsetting to single file");
 
         try {
@@ -244,18 +244,18 @@ public class GoGoDuck {
             command.add("-a");
             command.add("-4");
             command.add("-O");
-            if (!module.isTimeUnlimited()) {
+            if (!fileMetadata.isTimeUnlimited()) {
                 command.add("--mk_rec_dmn");
-                command.add(module.getTime().getFullName());
+                command.add(fileMetadata.getTime().getFullName());
             }
 
-            command.addAll(module.getSubsetParameters().getNcksParameters());
-            command.addAll(module.getExtraParameters());
+            command.addAll(fileMetadata.getSubsetParameters().getNcksParameters());
+            command.addAll(fileMetadata.getExtraParameters());
 
             command.add(file.getPath());
             command.add(tmpFile.getPath());
 
-            logger.info(String.format("Applying subset '%s' to '%s'", module.getExtraParameters(), file.toPath()));
+            logger.info(String.format("Applying subset '%s' to '%s'", fileMetadata.getExtraParameters(), file.toPath()));
             execute(command);
 
             Files.delete(file.toPath());
@@ -270,12 +270,12 @@ public class GoGoDuck {
         private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
 
         private File file;
-        private GoGoDuckModule module = null;
+        private FileMetadata fileMetadata = null;
         private GoGoDuck gogoduck = null;
 
-        NcksRunnable(File file, GoGoDuckModule module, GoGoDuck gogoduck) {
+        NcksRunnable(File file, FileMetadata fileMetadata, GoGoDuck gogoduck) {
             this.file = file;
-            this.module = module;
+            this.fileMetadata = fileMetadata;
             this.gogoduck = gogoduck;
         }
 
@@ -287,11 +287,11 @@ public class GoGoDuck {
             }
 
             gogoduck.userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
-            gogoduck.applySubsetSingleFileNcks(file, module);
+            gogoduck.applySubsetSingleFileNcks(file, fileMetadata);
         }
     }
 
-    private void applySubsetMultiThread(List<Path> files, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
+    private void applySubsetMultiThread(List<Path> files, FileMetadata fileMetadata, int threadCount) throws GoGoDuckException {
         logger.info(String.format("Applying subset on %d downloaded files", files.size()));
         List<String> ncksSubsetParameters;
 
@@ -299,10 +299,10 @@ public class GoGoDuck {
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
             for (Path file : files) {
-                ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
+                ncksSubsetParameters = fileMetadata.getSubsetParameters().getNcksParameters();
                 logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
                 userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
-                executorService.submit(new NcksRunnable(file.toFile(), module, this));
+                executorService.submit(new NcksRunnable(file.toFile(), fileMetadata, this));
             }
 
             executorService.shutdown();
@@ -314,10 +314,10 @@ public class GoGoDuck {
         }
     }
 
-    private void postProcess(List<Path> files, GoGoDuckModule module) throws GoGoDuckException {
+    private void postProcess(List<Path> files, FileMetadata fileMetadata) throws GoGoDuckException {
         for (Path file : files) {
             try {
-                if (!module.unpackNetcdf()) {
+                if (!fileMetadata.unpackNetcdf()) {
                     logger.info(String.format("Not unpacking file %s", file));
                     return;
                 }
@@ -383,9 +383,9 @@ public class GoGoDuck {
         }
     }
 
-    private void updateMetadata(GoGoDuckModule module, Path outputFile) throws Exception {
+    private void updateMetadata(FileMetadata fileMetadata, Path outputFile) throws Exception {
         try {
-            final List<Attribute> globalAttributesToUpdate = module.getGlobalAttributesToUpdate(outputFile);
+            final List<Attribute> globalAttributesToUpdate = fileMetadata.getGlobalAttributesToUpdate(outputFile);
             for (Attribute newAttr : globalAttributesToUpdate) {
                 List<String> command = new ArrayList<>();
                 command.add(goGoDuckConfig.getNcattedPath());

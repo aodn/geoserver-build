@@ -1,6 +1,5 @@
 package au.org.emii.gogoduck.worker;
 
-import au.org.emii.utils.GoGoDuckConfig;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -30,10 +29,10 @@ public class TextCsvConverterTest {
             CoordinateAxis coordinateAxis = mock(CoordinateAxis.class);
             when(coordinateAxis.getShortName()).thenReturn("TIME");
 
-            GoGoDuckModule module = mock(GoGoDuckModule.class);
-            when(module.getTime()).thenReturn(coordinateAxis);
+            FileMetadata fileMetadata = mock(FileMetadata.class);
+            when(fileMetadata.getTime()).thenReturn(coordinateAxis);
 
-            outputFile = converter.convert(TIME_SERIES_INPUT_FILE, module);
+            outputFile = converter.convert(TIME_SERIES_INPUT_FILE, fileMetadata);
             assertTrue("CSV file generated differs from expected file", FileUtils.contentEquals(outputFile.toFile(), TIME_SERIES_OUTPUT_FILE));
         } finally {
             if (outputFile != null) {

@@ -2,15 +2,13 @@ package au.org.emii.gogoduck.worker;
 
 import java.nio.file.Path;
 
-import au.org.emii.core.Config;
 import au.org.emii.gogoduck.exception.GoGoDuckException;
-import au.org.emii.utils.GoGoDuckConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Converter {
 
-    public abstract Path convert(Path outputFile, GoGoDuckModule module) throws GoGoDuckException;
+    public abstract Path convert(Path outputFile, FileMetadata fileMetadata) throws GoGoDuckException;
 
     public abstract String getMimeType();
 
