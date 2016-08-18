@@ -19,6 +19,7 @@ class CharValueEncoder implements IValueEncoder {
     }
 
     public final void prepare(Map<String, Object> attributes) throws NcdfGeneratorException {
+
         if (attributes.get("_FillValue") != null) {
             try {
                 String s = (String)attributes.get("_FillValue");
@@ -39,6 +40,7 @@ class CharValueEncoder implements IValueEncoder {
 
     public void encode(Array array, int index, Object value) throws NcdfGeneratorException {
         if (value == null) {
+
             if (haveFill) {
                 array.setChar(index, fill);
             }

@@ -3,53 +3,27 @@
   <!-- soop_sst_trajectory -->
   <source>
     <dataStoreName>soop_sst</dataStoreName>
-    <virtualDataTable>select trajectory_id as instance_id, * from soop_sst.measurements</virtualDataTable>
+    <virtualDataTable>select trajectory_id as instance_id, * from soop_sst.soop_sst_nrt_trajectory_data</virtualDataTable>
     <virtualInstanceTable>
-      select trajectory_id as id,
-        geom as instance_geom,
-        url,
-        platform_code,
-        vessel_name,
-        voyage_number,
-        time_start,
-        time_end,
-        colour,
-        "AIRT_b",
-        "ATMP_b",
-        "CNDC_b",
-        "DEWT_b",
-        "GPS_HEIGHT_b",
-        "PL_CRS_b",
-        "PL_SPD_b",
-        "PL_WDIR_b",
-        "PL_WSPD_b",
-        "PSAL_b",
-        "RELH_b",
-        "TEMP_b",
-        "WDIR_b",
-        "WETT_b",
-        "WSPD_b",
-        size
-      from soop_sst.soop_sst_nrt_trajectory_map</virtualInstanceTable>
+      select id from soop_sst.indexed_file</virtualInstanceTable>
   </source>
   <filename>
     <sql>
-        select
-        'IMOS_SOOP-SST_'
-        ||to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
-        ||'_'
-        ||platform_code
-        ||'_FV01_'
-        ||voyage_number
-        ||'_END-'
-        ||to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
-        ||'_id-'
-        ||instance_id
-        ||'.nc'
-        from $data
-        group by platform_code, voyage_number, instance_id
+      select
+      'IMOS_SOOP-SST_'
+      ||to_char(min("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
+      ||'_'
+      ||coalesce(platform_code,'PLATFORM')
+      ||'_FV01_'
+      ||coalesce(voyage_number,'VOYAGE')
+      ||'_END-'
+      ||to_char(max("TIME" AT TIME ZONE 'UTC'), 'YYYYMMDD"T"HH24MISS"Z"')
+      ||'_id-'
+      ||instance_id
+      ||'.nc'
+      from $data
+      group by platform_code, voyage_number, instance_id
     </sql>
-    <!-- potential issue related to the use of voyage_number cause the var is sometimes emtpy. Might need to modify the harvester to avoid potential problems -->
   </filename>
   <dimensions>
     <dimension name="TIME"/>
@@ -60,7 +34,7 @@
     <attribute name="file_version_quality_control">
       <value>'Data in this file has been through the BOM quality control procedure (Reference Table F). Every data point in this file has an associated quality flag.'</value>
     </attribute>
-    <attribute name="abstract" value="' '"/>  <!-- Soop sst doesn't provide as abstract in its netcdf file. need to come up with something here -->
+    <attribute name="abstract" value="''"/>  <!-- Soop sst doesn't provide as abstract in its netcdf file. need to come up with something here -->
     <attribute name="project" value="'Integrated Marine Observing System (IMOS)'"/>
     <attribute name="Conventions" value="'CF-1.6,IMOS-1.3'"/>
     <attribute name="institution" value="'Australian Bureau of Meteorology'"/>
@@ -69,9 +43,10 @@
       <sql>select to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')</sql>
     </attribute>
     <attribute name="references" value="'http://www.imos.org.au'"/>
-    <attribute name="vessel_name" sql="select vessel_name from $instance"/>
+    <!-- These attributes cannot not be null
+    <attribute name="vessel_name" sql="SELECT vessel_name FROM $instance"/>
     <attribute name="platform_code" sql="select platform_code from $instance"/>
-    <attribute name="voyage_id" sql="select voyage_number from $instance"/>
+    <attribute name="voyage_number" sql="select voyage_number from $instance"/>-->
     <attribute name="featureType" value="'trajectory'"/>
     <attribute name="naming_authority" value="'IMOS'"/>
     <attribute name="geospatial_lat_min">
@@ -204,7 +179,7 @@
       <attributes>
         <attribute name="standard_name" value="'air_temperature'"/>
         <attribute name="long_name" value="'air_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
+        <attribute name="units" value="'degrees_Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="-50.f"/>
         <attribute name="valid_max" value="50.f"/>
@@ -226,7 +201,7 @@
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>ATMP</name>
@@ -369,7 +344,7 @@
       <attributes>
         <attribute name="standard_name" value="'dew_point_temperature'"/>
         <attribute name="long_name" value="'dew_point_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
+        <attribute name="units" value="'degrees_Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="-50.f"/>
         <attribute name="valid_max" value="50.f"/>
@@ -377,7 +352,7 @@
         <attribute name="ancillary_variables" value="'DEWT_quality_control'"/>
       </attributes>
     </variable>
-   <variable>
+    <variable>
       <name>DEWT_quality_control</name>
       <encoder>char</encoder>
       <dimensions>
@@ -424,7 +399,7 @@
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-       </attributes>
+      </attributes>
     </variable>
     <variable>
       <name>PL_SPD</name>
@@ -466,7 +441,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="long_name" value="'Wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="long_name" value="'wind direction relative to moving platform'"/>
         <attribute name="units" value="'degrees (clockwise towards true north)'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="valid_min" value="0.f"/>
@@ -497,7 +472,7 @@
         <dimension name="TIME"/>
       </dimensions>
       <attributes>
-        <attribute name="long_name" value="'Wind speed (relative to moving platform) in the atmosphere'"/>
+        <attribute name="long_name" value="'wind speed relative to moving platform'"/>
         <attribute name="units" value="'m s-1'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
@@ -512,7 +487,7 @@
       </dimensions>
       <attributes>
         <attribute name="_FillValue" value="''"/>
-        <attribute name="long_name" value="'quality flag for wind direction (relative to moving platform) in the atmosphere'"/>
+        <attribute name="long_name" value="'quality flag for wind direction (relative to moving platform)'"/>
         <attribute name="quality_control_set" value="3."/>
         <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
         <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
@@ -651,57 +626,6 @@
         <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
       </attributes>
     </variable>
-    <!-- this is a new variable replacing variable TEMP measured by Fantasea Wonder .The harvester has to be modified to create this new var in the DB -->
-    <!--variable>
-      <name>SST</name>
-      <encoder>float</encoder>
-      <dimensions>
-        <dimension name="TIME"/>
-      </dimensions>
-      <attributes>
-        <attribute name="standard_name" value="'sea_surface_temperature'"/>
-        <attribute name="long_name" value="'sea_surface_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
-        <attribute name="valid_min" value="-2.5f"/>
-        <attribute name="valid_max" value="40.f"/>
-        <attribute name="_FillValue" value="999999.f"/>
-        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-        <attribute name="ancillary_variables" value="'SST_quality_control'"/>
-      </attributes>
-    </variable>
-    <variable>
-      <name>SST_quality_control</name>
-      <encoder>char</encoder>
-      <dimensions>
-        <dimension name="TIME"/>
-      </dimensions>
-      <attributes>
-        <attribute name="_FillValue" value="''"/>
-        <attribute name="standard_name" value="'sea_surface_temperature status_flag'"/>
-        <attribute name="long_name" value="'quality flag for sea_surface_temperature'"/>
-        <attribute name="quality_control_set" value="3."/>
-        <attribute name="quality_control_conventions" value="'BOM (SST and Air-Sea flux) quality control procedure'"/>
-        <attribute name="flag_values" value="'B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z'"/>
-        <attribute name="flag_meaning" value="'Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests'"/>
-      </attributes>
-    </variable-->
-    <variable>
-      <name>TEMP</name>
-      <encoder>float</encoder>
-      <dimensions>
-        <dimension name="TIME"/>
-      </dimensions>
-      <attributes>
-        <attribute name="standard_name" value="'sea_water_temperature'"/>
-        <attribute name="long_name" value="'sea_water_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
-        <attribute name="valid_min" value="-2.5f"/>
-        <attribute name="valid_max" value="40.f"/>
-        <attribute name="_FillValue" value="999999.f"/>
-        <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
-        <attribute name="ancillary_variables" value="'TEMP_quality_control'"/>
-      </attributes>
-    </variable>
     <variable>
       <name>TEMP_quality_control</name>
       <encoder>char</encoder>
@@ -727,7 +651,7 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_temperature'"/>
         <attribute name="long_name" value="'sea_water_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
+        <attribute name="units" value="'degrees_Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
         <attribute name="_FillValue" value="999999.f"/>
@@ -760,7 +684,7 @@
       <attributes>
         <attribute name="standard_name" value="'sea_water_temperature'"/>
         <attribute name="long_name" value="'sea_water_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
+        <attribute name="units" value="'degrees_Celsius'"/>
         <attribute name="valid_min" value="-2.5f"/>
         <attribute name="valid_max" value="40.f"/>
         <attribute name="_FillValue" value="999999.f"/>
@@ -826,7 +750,7 @@
       <attributes>
         <attribute name="standard_name" value="'wet_bulb_temperature'"/>
         <attribute name="long_name" value="'wet_bulb_temperature'"/>
-        <attribute name="units" value="'Celsius'"/>
+        <attribute name="units" value="'degrees Celsius'"/>
         <attribute name="_FillValue" value="-9999.f"/>
         <attribute name="coordinates" value="'TIME LATITUDE LONGITUDE'"/>
         <attribute name="ancillary_variables" value="'WETT_quality_control'"/>

@@ -210,7 +210,6 @@ class AttributeValueParser implements IAttributeValueParser {
 
         int closeChar = peekChar(s, pos2);
         ++pos2;
-
         while (peekChar(s, pos2) != closeChar) {
             ++pos2;
         }

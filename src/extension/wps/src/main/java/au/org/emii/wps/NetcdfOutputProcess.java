@@ -122,7 +122,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
         } catch (Exception e) {
             notifyFailure(callbackUrl, callbackParams);
-            throw new ProcessException(e.getMessage());
+            throw new ProcessException(e);
         } finally {
             if (encoder != null) {
                 encoder.closeQuietly();
