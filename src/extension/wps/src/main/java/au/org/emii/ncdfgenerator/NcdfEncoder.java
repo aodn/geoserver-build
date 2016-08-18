@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NcdfEncoder {
+public class NcdfEncoder implements AutoCloseable {
     private final Connection conn;
     private final JDBCDataStore dataStore;
     private final String schema;
@@ -33,6 +33,7 @@ public class NcdfEncoder {
     private final IAttributeValueParser attributeValueParser;
     private final int fetchSize;
 
+    private PreparedStatement featuresStmt;
     private ResultSet featureInstancesRS;
     private String whereClause;
     private String orderClause;
@@ -57,6 +58,7 @@ public class NcdfEncoder {
 
         fetchSize = 10000;
         outputFormatter = null;
+        featuresStmt = null;
         featureInstancesRS = null;
     }
 
@@ -79,9 +81,9 @@ public class NcdfEncoder {
         this.outputFormatter = outputFormatter;
 
         // do not quote search path!.
-        PreparedStatement pathStmt = conn.prepareStatement("set search_path=" + schema + ", public");
-        pathStmt.execute();
-        pathStmt.close();
+        try (PreparedStatement pathStmt = conn.prepareStatement("set search_path=" + schema + ", public")) {
+            pathStmt.execute();
+        }
 
         // Batch results set
         conn.setAutoCommit(false);
@@ -218,7 +220,6 @@ public class NcdfEncoder {
 
         try (InputStream is = createWritable.getStream()) {
             outputFormatter.write((String) filename, is);
-            is.close();
         }
         catch (Exception e) {
             String err = String.format("Error writing netCDF filename for <virtualDataTable> instance_id %s \nSQL:\n%s", Long.toString(instanceId), replacedSql);
@@ -290,60 +291,70 @@ public class NcdfEncoder {
         }
 
         // sql stuff
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setFetchSize(fetchSize);
-        ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setFetchSize(fetchSize);
 
-        // now we loop the main attributes
-        ResultSetMetaData m = rs.getMetaData();
-        int numColumns = m.getColumnCount();
+            try (ResultSet rs = stmt.executeQuery()) {
 
-        // organize dimensions by name
-        Map<String, IDimension> dimensionsMap = new HashMap<String, IDimension>();
-        for (IDimension dimension : definition.getDimensions()) {
-            dimensionsMap.put(dimension.getName(), dimension);
-        }
+                // now we loop the main attributes
+                ResultSetMetaData m = rs.getMetaData();
+                int numColumns = m.getColumnCount();
 
-        // organize variables by name
-        Map<String, IVariable> variablesMap = new HashMap<String, IVariable>();
-        for (IVariable variable : definition.getVariables()) {
-            variablesMap.put(variable.getName(), variable);
-        }
+                // organize dimensions by name
+                Map<String, IDimension> dimensionsMap = new HashMap<String, IDimension>();
+                for (IDimension dimension : definition.getDimensions()) {
+                    dimensionsMap.put(dimension.getName(), dimension);
+                }
 
-        // pre-map the encoders by index according to the column name
-        ArrayList<IAddValue>[] processing = (ArrayList<IAddValue>[]) new ArrayList[numColumns + 1];
+                // organize variables by name
+                Map<String, IVariable> variablesMap = new HashMap<String, IVariable>();
+                for (IVariable variable : definition.getVariables()) {
+                    variablesMap.put(variable.getName(), variable);
+                }
 
-        for (int i = 1; i <= numColumns; ++i) {
+                // pre-map the encoders by index according to the column name
+                ArrayList<IAddValue>[] processing = (ArrayList<IAddValue>[]) new ArrayList[numColumns + 1];
 
-            processing[i] = new ArrayList<IAddValue>();
+                for (int i = 1; i <= numColumns; ++i) {
 
-            IDimension dimension = dimensionsMap.get(m.getColumnName(i));
-            if (dimension != null) {
-                processing[i].add(dimension);
-            }
+                    processing[i] = new ArrayList<IAddValue>();
 
-            IAddValue variable = variablesMap.get(m.getColumnName(i));
-            if (variable != null) {
-                processing[i].add(variable);
-            }
-        }
+                    IDimension dimension = dimensionsMap.get(m.getColumnName(i));
+                    if (dimension != null) {
+                        processing[i].add(dimension);
+                    }
 
-        // process result set rows
-        while (rs.next()) {
-            for (int i = 1; i <= numColumns; ++i) {
-                for (IAddValue p : processing[i]) {
-                    p.addValueToBuffer(rs.getObject(i));
+                    IAddValue variable = variablesMap.get(m.getColumnName(i));
+                    if (variable != null) {
+                        processing[i].add(variable);
+                    }
+                }
+
+                // process result set rows
+                while (rs.next()) {
+                    for (int i = 1; i <= numColumns; ++i) {
+                        for (IAddValue p : processing[i]) {
+                            p.addValueToBuffer(rs.getObject(i));
+                        }
+                    }
                 }
             }
-        }
+       }
     }
 
-    public void closeQuietly() {
+    public void close() {
+        closeQuietly(featureInstancesRS);
+        closeQuietly(featuresStmt);
+        closeQuietly(conn);
+    }
+
+    private void closeQuietly(AutoCloseable autoCloseable) {
+        if (autoCloseable == null) return;
+
         try {
-            conn.close();
-        }
-        catch (SQLException e) {
-            logger.info("problem closing transaction");
+            autoCloseable.close();
+        } catch (Exception e) {
+            logger.warn(String.format("Problem closing %s", autoCloseable.getClass().getCanonicalName()), e);
         }
     }
 }
