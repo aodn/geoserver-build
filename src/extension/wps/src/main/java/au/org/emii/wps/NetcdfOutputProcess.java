@@ -22,13 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.net.URL;
 
 @DescribeProcess(title="NetCDF download", description="Subset and download collection as NetCDF files")
@@ -64,10 +63,6 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
         logger.info("execute");
 
-        InputStream config = null;
-        FileOutputStream os = null;
-        NcdfEncoder encoder = null;
-
         try {
             // lookup the layer in the catalog
             LayerInfo layerInfo = catalog.getLayerByName(typeName);
@@ -83,15 +78,12 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             String filePath = typeNamePath + "/" + NETCDF_FILENAME;
 
             // decode definition
-            config = new FileInputStream(filePath);
-            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
-            Node node = document.getFirstChild();
-            NcdfDefinition definition = new NcdfDefinitionXMLParser().parse(node);
+            NcdfDefinition definition = decodeDefinition(filePath);
 
             // get store
             String dataStoreName = definition.getDataSource().getDataStoreName();
             DataStoreInfo dsinfo = catalog.getDataStoreByName(dataStoreName);
-            JDBCDataStore store = (JDBCDataStore)dsinfo.getDataStore(null);
+            JDBCDataStore store = (JDBCDataStore) dsinfo.getDataStore(null);
 
             // create the netcdf encoder
             NcdfEncoderBuilder encoderBuilder = new NcdfEncoderBuilder();
@@ -102,17 +94,18 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 .setDataStore(store)
                 .setSchema(store.getDatabaseSchema());
 
-            encoder = encoderBuilder.create();
-
             final File outputFile = getResourceManager().getOutputResource(
-                getResourceManager().getExecutionId(true), typeName + ".zip").file();
+                    getResourceManager().getExecutionId(true), typeName + ".zip").file();
 
-            os = new FileOutputStream(outputFile);
-
-            encoder.prepare(new ZipFormatter(os));
-            while (encoder.writeNext()) {
-                if (progressListener.isCanceled()) {
-                    throw new ProcessDismissedException("The job has been cancelled");
+            try (
+                    NcdfEncoder encoder = encoderBuilder.create();
+                    FileOutputStream os = new FileOutputStream(outputFile))
+            {
+                encoder.prepare(new ZipFormatter(os));
+                while (encoder.writeNext()) {
+                    if (progressListener.isCanceled()) {
+                        throw new ProcessDismissedException("The job has been cancelled");
+                    }
                 }
             }
 
@@ -123,12 +116,14 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
         } catch (Exception e) {
             notifyFailure(callbackUrl, callbackParams);
             throw new ProcessException(e);
-        } finally {
-            if (encoder != null) {
-                encoder.closeQuietly();
-            }
-            IOUtils.closeQuietly(config);
-            IOUtils.closeQuietly(os);
+        }
+    }
+
+    private NcdfDefinition decodeDefinition(String filePath) throws Exception {
+        try (InputStream config = new FileInputStream(filePath)) {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(config);
+            Node node = document.getFirstChild();
+            return new NcdfDefinitionXMLParser().parse(node);
         }
     }
 }

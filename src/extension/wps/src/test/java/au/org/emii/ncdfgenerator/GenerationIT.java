@@ -231,7 +231,7 @@ public class GenerationIT {
 
     private void consumeEncoderOutput(NcdfEncoder encoder) throws Exception {
         while (encoder.writeNext()) ;
-        encoder.closeQuietly();
+        encoder.close();
     }
 
     @BeforeClass
