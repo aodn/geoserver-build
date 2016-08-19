@@ -165,9 +165,11 @@ public class GoGoDuck {
         URL url = urlMangler.mangle(uri);
         logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
-        try {
-            ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+        try (
+            InputStream downloadStream = url.openStream();
+            ReadableByteChannel rbc = Channels.newChannel(downloadStream);
             FileOutputStream fos = new FileOutputStream(dst.toFile());
+        ) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
         catch (IOException e) {
@@ -215,16 +217,17 @@ public class GoGoDuck {
             logger.info(String.format("Gunzipping '%s'", file));
             File gunzipped = File.createTempFile("tmp", ".nc");
 
-            FileInputStream fis = new FileInputStream(file);
-            GZIPInputStream gis = new GZIPInputStream(fis);
-            FileOutputStream fos = new FileOutputStream(gunzipped);
-            byte[] buffer = new byte[8192];
-            int len;
-            while((len = gis.read(buffer)) != -1){
-                fos.write(buffer, 0, len);
+            try (
+                FileInputStream fis = new FileInputStream(file);
+                GZIPInputStream gis = new GZIPInputStream(fis);
+                FileOutputStream fos = new FileOutputStream(gunzipped);
+            ) {
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = gis.read(buffer)) != -1) {
+                    fos.write(buffer, 0, len);
+                }
             }
-            fos.close();
-            gis.close();
 
             Files.delete(file.toPath());
             Files.move(gunzipped.toPath(), file.toPath());
@@ -418,23 +421,25 @@ public class GoGoDuck {
         builder.redirectErrorStream(true);
 
         final Process process = builder.start();
-        InputStream is = process.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-        String line;
-        while ((line = br.readLine()) != null) {
-            logger.info(line);
-        }
 
-        try {
+        try (
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr)
+        ) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                logger.info(line);
+            }
+
             process.waitFor();
+
+            return process.exitValue();
         }
         catch (InterruptedException e) {
             logger.error(String.format("Interrupted: '%s'", e.getMessage()));
             throw e;
         }
-
-        return process.exitValue();
     }
 
     public String getMimeType() { return mimeType; }

@@ -62,14 +62,7 @@ public class FeatureSourceIndexReader implements IndexReader {
 
         query.setSortBy(new SortBy[]{sortByTimeAscending});
 
-        SimpleFeatureIterator iterator = null;
-        try {
-            iterator = getFeatures(typeName, query);
-        } catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
-        }
-
-        try {
+        try (SimpleFeatureIterator iterator = getFeatures(typeName, query)) {
             while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
                 String url = (String) feature.getAttribute(urlField);
@@ -79,8 +72,6 @@ public class FeatureSourceIndexReader implements IndexReader {
         } catch (Exception e) {
             userLog.log("We could not obtain list of URLs, does the collection still exist?");
             throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
-        } finally {
-            iterator.close();
         }
 
         return uriList;
