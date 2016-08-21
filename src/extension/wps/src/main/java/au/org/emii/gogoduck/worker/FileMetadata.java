@@ -147,11 +147,11 @@ public class FileMetadata {
                 newAttributeList.add(new Attribute(timeEndEntry, subset.get("TIME").end));
             }
 
+            return newAttributeList;
         } catch (IOException e) {
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
         } finally {
             close(nc, NetcdfFileWriter.class);
-            return newAttributeList;
         }
     }
 

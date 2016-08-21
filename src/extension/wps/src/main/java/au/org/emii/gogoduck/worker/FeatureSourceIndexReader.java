@@ -25,10 +25,8 @@ public class FeatureSourceIndexReader implements IndexReader {
     private static final Logger logger = LoggerFactory.getLogger(FeatureSourceIndexReader.class);
 
     private Catalog catalog = null;
-    private UserLog userLog = null;
 
-    public FeatureSourceIndexReader(UserLog userLog, Catalog catalog) {
-        this.userLog = userLog;
+    public FeatureSourceIndexReader(Catalog catalog) {
         this.catalog = catalog;
     }
 
@@ -62,14 +60,7 @@ public class FeatureSourceIndexReader implements IndexReader {
 
         query.setSortBy(new SortBy[]{sortByTimeAscending});
 
-        SimpleFeatureIterator iterator = null;
-        try {
-            iterator = getFeatures(typeName, query);
-        } catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
-        }
-
-        try {
+        try (SimpleFeatureIterator iterator = getFeatures(typeName, query)) {
             while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
                 String url = (String) feature.getAttribute(urlField);
@@ -77,10 +68,7 @@ public class FeatureSourceIndexReader implements IndexReader {
                 uriList.add(new URI(url));
             }
         } catch (Exception e) {
-            userLog.log("We could not obtain list of URLs, does the collection still exist?");
             throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
-        } finally {
-            iterator.close();
         }
 
         return uriList;
