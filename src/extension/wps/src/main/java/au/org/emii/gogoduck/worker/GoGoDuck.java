@@ -40,7 +40,6 @@ public class GoGoDuck {
     private Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
-    private UserLog userLog = null;
     private ProgressListener progressListener = null;
     private String mimeType = "application/x-netcdf";
     private String extension = "nc";
@@ -54,8 +53,7 @@ public class GoGoDuck {
         this.format = format;
         this.limit = goGoDuckConfig.getFileLimit();
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
-        this.userLog = new UserLog();
-        this.indexReader = new FeatureSourceIndexReader(this.userLog, catalog);
+        this.indexReader = new FeatureSourceIndexReader(catalog);
         this.goGoDuckConfig = goGoDuckConfig;
         setUrlMangler(profile, goGoDuckConfig);
     }
@@ -88,6 +86,7 @@ public class GoGoDuck {
     }
 
     public Path run() {
+
         FileMetadata fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
 
         Path tmpDir = null;
@@ -114,32 +113,25 @@ public class GoGoDuck {
             mimeType = converter.getMimeType();
             extension = converter.getExtension();
             throwIfCancelled();
-            userLog.log("Your aggregation was successful!");
             return outputFile;
         }
         catch (Exception e) {
             String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
-            userLog.log(errMsg);
             logger.error(errMsg, e);
             throw new GoGoDuckException(e.getMessage());
         }
         finally {
             cleanTmpDir(tmpDir);
-            userLog.close();
         }
     }
 
     private void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
         logger.info("Enforcing file limit...");
         if (URIList.size() > limit) {
-            userLog.log("Sorry we cannot process this request due to the amount of files requiring processing.");
-            userLog.log(String.format("The file limit is '%d' and this aggregation job requires '%d' files.", limit, URIList.size()));
-            userLog.log("Please recreate a download request that will require less files to aggregate.");
             logger.error(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
             throw new GoGoDuckException("Too many files");
         }
         else if (URIList.size() == 0) {
-            userLog.log("The list of URLs obtained was empty, were your subseting parameters OK?");
             logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
         }
@@ -156,7 +148,6 @@ public class GoGoDuck {
             logger.info(String.format("Linking '%s' -> '%s'", srcFile, dst));
             Files.createSymbolicLink(dst, srcFile.toPath());
         } catch (IOException e) {
-            userLog.log(String.format("Failed accessing '%s'", srcFile));
             throw new GoGoDuckException(e.getMessage());
         }
     }
@@ -173,7 +164,6 @@ public class GoGoDuck {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
         catch (IOException e) {
-            userLog.log(String.format("Failed downloading '%s'", url));
             throw new GoGoDuckException(e.getMessage());
         }
     }
@@ -284,12 +274,10 @@ public class GoGoDuck {
 
         public void run() {
             if (gogoduck.isCancelled()) {
-                gogoduck.userLog.log("Job was cancelled");
                 logger.warn("Cancelled by progress listener.");
                 return;
             }
 
-            gogoduck.userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
             gogoduck.applySubsetSingleFileNcks(file, fileMetadata);
         }
     }
@@ -304,7 +292,6 @@ public class GoGoDuck {
             for (Path file : files) {
                 ncksSubsetParameters = fileMetadata.getSubsetParameters().getNcksParameters();
                 logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
-                userLog.log(String.format("Applying subset '%s'", ncksSubsetParameters));
                 executorService.submit(new NcksRunnable(file.toFile(), fileMetadata, this));
             }
 
