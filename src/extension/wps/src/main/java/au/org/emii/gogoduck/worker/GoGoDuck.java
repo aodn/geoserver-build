@@ -284,14 +284,11 @@ public class GoGoDuck {
 
     private void applySubsetMultiThread(List<Path> files, FileMetadata fileMetadata, int threadCount) throws GoGoDuckException {
         logger.info(String.format("Applying subset on %d downloaded files", files.size()));
-        List<String> ncksSubsetParameters;
 
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
             for (Path file : files) {
-                ncksSubsetParameters = fileMetadata.getSubsetParameters().getNcksParameters();
-                logger.info(String.format("Subset for operation is '%s'", ncksSubsetParameters));
                 executorService.submit(new NcksRunnable(file.toFile(), fileMetadata, this));
             }
 
