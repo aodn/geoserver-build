@@ -86,7 +86,6 @@ public class GoGoDuck {
     }
 
     public Path run() {
-
         FileMetadata fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
 
         Path tmpDir = null;
@@ -295,8 +294,10 @@ public class GoGoDuck {
             executorService.shutdown();
             executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         } catch (InterruptedException e) {
+            progressListener.setCanceled(true);
             throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         } catch (Exception e) {
+            progressListener.setCanceled(true);
             throw new GoGoDuckException(e.getMessage(), e);
         }
     }
@@ -324,6 +325,7 @@ public class GoGoDuck {
                 Files.delete(file);
                 Files.move(tmpFile.toPath(), file);
             } catch (Exception e) {
+                progressListener.setCanceled(true);
                 throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file));
             }
         }
@@ -350,6 +352,7 @@ public class GoGoDuck {
             }
             catch (IOException e) {
                 logger.error(e.toString());
+                progressListener.setCanceled(true);
                 throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
             }
         }
@@ -365,6 +368,7 @@ public class GoGoDuck {
                 execute(command);
             }
             catch (Exception e) {
+                progressListener.setCanceled(true);
                 throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
             }
         }
