@@ -1,6 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
 import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.gogoduck.exception.NetCdfProcessingException;
 import au.org.emii.utils.GoGoDuckConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -117,7 +118,7 @@ public class GoGoDuck {
         catch (Exception e) {
             String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
             logger.error(errMsg, e);
-            throw new GoGoDuckException(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
         }
         finally {
             cleanTmpDir(tmpDir);
@@ -147,7 +148,7 @@ public class GoGoDuck {
             logger.info(String.format("Linking '%s' -> '%s'", srcFile, dst));
             Files.createSymbolicLink(dst, srcFile.toPath());
         } catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
         }
     }
 
@@ -163,7 +164,7 @@ public class GoGoDuck {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
         catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
         }
     }
 
@@ -221,7 +222,7 @@ public class GoGoDuck {
             Files.delete(file.toPath());
             Files.move(gunzipped.toPath(), file.toPath());
         } catch (IOException e) {
-            throw new GoGoDuckException(String.format("Failed gunzip on '%s': '%s'", file, e.getMessage()));
+            throw new GoGoDuckException(String.format("Failed gunzip on '%s': '%s'", file, e.getMessage()), e);
         }
     }
 
@@ -254,7 +255,7 @@ public class GoGoDuck {
             Files.move(tmpFile.toPath(), file.toPath());
         }
         catch (Exception e) {
-            throw new GoGoDuckException(String.format("Could not apply subset to file '%s': '%s'", file.getPath(), e.getMessage()));
+            throw new GoGoDuckException(String.format("Could not apply subset to file '%s': '%s'", file.getPath(), e.getMessage()), e);
         }
     }
 
@@ -294,10 +295,8 @@ public class GoGoDuck {
             executorService.shutdown();
             executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         } catch (InterruptedException e) {
-            progressListener.setCanceled(true);
             throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         } catch (Exception e) {
-            progressListener.setCanceled(true);
             throw new GoGoDuckException(e.getMessage(), e);
         }
     }
@@ -325,8 +324,7 @@ public class GoGoDuck {
                 Files.delete(file);
                 Files.move(tmpFile.toPath(), file);
             } catch (Exception e) {
-                progressListener.setCanceled(true);
-                throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file));
+                throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file), e);
             }
         }
     }
@@ -352,8 +350,7 @@ public class GoGoDuck {
             }
             catch (IOException e) {
                 logger.error(e.toString());
-                progressListener.setCanceled(true);
-                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
+                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()), e);
             }
         }
         else {
@@ -368,8 +365,7 @@ public class GoGoDuck {
                 execute(command);
             }
             catch (Exception e) {
-                progressListener.setCanceled(true);
-                throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
+                throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()), e);
             }
         }
     }
@@ -389,7 +385,7 @@ public class GoGoDuck {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()), e);
         }
     }
 
@@ -409,6 +405,7 @@ public class GoGoDuck {
         builder.redirectErrorStream(true);
 
         final Process process = builder.start();
+        StringBuilder bashLog = new StringBuilder();
 
         try (
             InputStream is = process.getInputStream();
@@ -416,16 +413,27 @@ public class GoGoDuck {
             BufferedReader br = new BufferedReader(isr)
         ) {
             String line;
+
             while ((line = br.readLine()) != null) {
                 logger.info(line);
+                bashLog.append(line);
             }
 
             process.waitFor();
+
+            if (process.exitValue() != 0) {
+                bashLog.append(command.toString());
+                throw new NetCdfProcessingException(bashLog.toString());
+            }
 
             return process.exitValue();
         }
         catch (InterruptedException e) {
             logger.error(String.format("Interrupted: '%s'", e.getMessage()));
+            throw e;
+        }
+        catch (NetCdfProcessingException e) {
+            logger.error(String.format("NetCdf Tool Error: '%s'", e.getMessage()));
             throw e;
         }
     }
