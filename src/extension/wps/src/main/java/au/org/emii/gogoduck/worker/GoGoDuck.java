@@ -96,7 +96,7 @@ public class GoGoDuck {
 
             URIList URIList = fileMetadata.getUriList();
 
-            enforceFileLimit(URIList, limit);
+            enforceFileLimits(URIList, limit, goGoDuckConfig.getFileSizeLimit());
             List<Path> downloadedFiles = downloadFiles(URIList, tmpDir);
             throwIfCancelled();
             fileMetadata.load(downloadedFiles.get(0).toFile());
@@ -125,8 +125,8 @@ public class GoGoDuck {
         }
     }
 
-    private void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
-        logger.info("Enforcing file limit...");
+    private void enforceFileLimits(URIList URIList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+        logger.info("Enforcing file limits...");
         if (URIList.size() > limit) {
             logger.error(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
             throw new GoGoDuckException("Too many files");
@@ -134,6 +134,10 @@ public class GoGoDuck {
         else if (URIList.size() == 0) {
             logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
+        }
+
+        if (fileSizeLimit != 0.0 && URIList.getTotalFileSize() != 0.0 && URIList.getTotalFileSize() > fileSizeLimit) {
+            throw new GoGoDuckException(String.format("Total file size %s bytes for %s files, exceeds the limit %s bytes", URIList.getTotalFileSize(), URIList.size(), fileSizeLimit));
         }
 
         // All good - keep going :)

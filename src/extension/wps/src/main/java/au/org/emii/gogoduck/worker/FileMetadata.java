@@ -45,7 +45,7 @@ public class FileMetadata {
     }
 
     public URIList getUriList() throws GoGoDuckException {
-        return indexReader.getUriList(profile, goGoDuckConfig.getTimeField(), goGoDuckConfig.getFileUrlField(), subset);
+        return indexReader.getUriList(profile, goGoDuckConfig.getTimeField(), goGoDuckConfig.getSizeField(), goGoDuckConfig.getFileUrlField(), subset);
     }
 
     public boolean unpackNetcdf() {
