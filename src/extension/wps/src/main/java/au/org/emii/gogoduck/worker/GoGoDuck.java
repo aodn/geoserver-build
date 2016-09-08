@@ -94,10 +94,10 @@ public class GoGoDuck {
         try {
             tmpDir = Files.createTempDirectory(baseTmpDir, "gogoduck");
 
-            URIList URIList = fileMetadata.getUriList();
+            URIList uriList = fileMetadata.getUriList();
 
-            enforceFileLimit(URIList, limit);
-            List<Path> downloadedFiles = downloadFiles(URIList, tmpDir);
+            enforceFileLimits(uriList, limit, goGoDuckConfig.getFileSizeLimit());
+            List<Path> downloadedFiles = downloadFiles(uriList, tmpDir);
             throwIfCancelled();
             fileMetadata.load(downloadedFiles.get(0).toFile());
             applySubsetMultiThread(downloadedFiles, fileMetadata, goGoDuckConfig.getThreadCount());
@@ -125,15 +125,19 @@ public class GoGoDuck {
         }
     }
 
-    private void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
-        logger.info("Enforcing file limit...");
-        if (URIList.size() > limit) {
-            logger.error(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
+    private void enforceFileLimits(URIList uriList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+        logger.info("Enforcing file limits...");
+        if (uriList.size() > limit) {
+            logger.error(String.format("Aggregation asked for %d, we allow only %d", uriList.size(), limit));
             throw new GoGoDuckException("Too many files");
         }
-        else if (URIList.size() == 0) {
+        else if (uriList.size() == 0) {
             logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
+        }
+
+        if (fileSizeLimit != 0.0 && uriList.getTotalFileSize() != 0.0 && uriList.getTotalFileSize() > fileSizeLimit) {
+            throw new GoGoDuckException(String.format("Total file size %s bytes for %s files, exceeds the limit %s bytes", uriList.getTotalFileSize(), uriList.size(), fileSizeLimit));
         }
 
         // All good - keep going :)

@@ -31,7 +31,7 @@ public class FeatureSourceIndexReader implements IndexReader {
     }
 
     @Override
-    public URIList getUriList(String profile, String timeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
+    public URIList getUriList(String profile, String timeField, String sizeField, String urlField, GoGoDuckSubsetParameters subset) throws GoGoDuckException {
 
         URIList uriList = new URIList();
 
@@ -53,12 +53,13 @@ public class FeatureSourceIndexReader implements IndexReader {
             throw new GoGoDuckException(e.getMessage());
         }
 
-        Query query = new Query(typeName, cqlFilter, new String[]{urlField});
+        Query query = new Query(typeName, cqlFilter, new String[]{urlField, sizeField});
 
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
         SortBy sortByTimeAscending = ff.sort(timeField, SortOrder.ASCENDING);
 
         query.setSortBy(new SortBy[]{sortByTimeAscending});
+        double totalFileSize = 0.0;
 
         try (SimpleFeatureIterator iterator = getFeatures(typeName, query)) {
             while (iterator.hasNext()) {
@@ -66,11 +67,19 @@ public class FeatureSourceIndexReader implements IndexReader {
                 String url = (String) feature.getAttribute(urlField);
                 logger.info(String.format("Processing url '%s'", url));
                 uriList.add(new URI(url));
+
+                try {
+                    totalFileSize+= (double) feature.getAttribute(sizeField);
+                    logger.info(String.format("Processing size '%s'", totalFileSize));
+                } catch (NullPointerException e) {
+                    logger.warn(String.format("Unable to get size field for layer %s", profile));
+                }
             }
         } catch (Exception e) {
             throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
         }
 
+        uriList.setTotalFileSize(totalFileSize);
         return uriList;
     }
 

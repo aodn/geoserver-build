@@ -37,6 +37,8 @@ public class GoGoDuckConfig extends Config {
 
     private final String UNPACK_NETCDF = FILE_PREFIX + "unpack";
     private final String TIME_FIELD = FILE_PREFIX + "timeField";
+    private final String SIZE_FIELD = FILE_PREFIX + "sizeField";
+    private final String FILE_SIZE_LIMIT = FILE_PREFIX + "fileSizeLimit";
     private final String FILE_URL_FIELD = FILE_PREFIX + "fileUrlField";
 
     @Override
@@ -74,6 +76,19 @@ public class GoGoDuckConfig extends Config {
 
     public String getTimeField() {
         return getConfig(TIME_FIELD, DEFAULT_CONFIG_FILE);
+    }
+
+    public String getSizeField() {
+        return getConfig(SIZE_FIELD, DEFAULT_CONFIG_FILE);
+    }
+
+    public double getFileSizeLimit() {
+        String limit = getConfig(FILE_SIZE_LIMIT, DEFAULT_CONFIG_FILE);
+        if (StringUtils.isNotEmpty(limit)) {
+            return Double.parseDouble(limit);
+        } else {
+            return 0.0;
+        }
     }
 
     public String getFileUrlField() {
