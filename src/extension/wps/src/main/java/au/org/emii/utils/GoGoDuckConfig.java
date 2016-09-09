@@ -18,7 +18,6 @@ public class GoGoDuckConfig extends Config {
     private final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/";
     private final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
 
-    private final String FILE_LIMIT_KEY = FILE_PREFIX + "fileLimit";
     private final String THREAD_COUNT_KEY = FILE_PREFIX + "threadCount";
     private final String URL_SUBSTITUTION = FILE_PREFIX + "urlSubstitution";
 
@@ -48,10 +47,6 @@ public class GoGoDuckConfig extends Config {
 
     public GoGoDuckConfig(File resourceDirectory, Catalog catalog) {
         super(resourceDirectory, catalog);
-    }
-
-    public int getFileLimit() {
-        return Integer.parseInt(getConfig(FILE_LIMIT_KEY, DEFAULT_CONFIG_FILE));
     }
 
     public int getThreadCount() {
