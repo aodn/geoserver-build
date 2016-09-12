@@ -38,7 +38,6 @@ public class GoGoDuck {
     private final String subset;
     private final String format;
     private Path outputFile;
-    private final Integer limit;
     private Path baseTmpDir;
     private ProgressListener progressListener = null;
     private String mimeType = "application/x-netcdf";
@@ -51,7 +50,6 @@ public class GoGoDuck {
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
         this.format = format;
-        this.limit = goGoDuckConfig.getFileLimit();
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
         this.indexReader = new FeatureSourceIndexReader(catalog);
         this.goGoDuckConfig = goGoDuckConfig;
@@ -76,7 +74,7 @@ public class GoGoDuck {
         this.progressListener = progressListener;
     }
 
-    private synchronized  boolean isCancelled() {
+    private synchronized boolean isCancelled() {
         return null != progressListener && progressListener.isCanceled();
     }
 
@@ -96,7 +94,7 @@ public class GoGoDuck {
 
             URIList uriList = fileMetadata.getUriList();
 
-            enforceFileLimits(uriList, limit, goGoDuckConfig.getFileSizeLimit());
+            enforceFileLimits(uriList, goGoDuckConfig.getFileSizeLimit());
             List<Path> downloadedFiles = downloadFiles(uriList, tmpDir);
             throwIfCancelled();
             fileMetadata.load(downloadedFiles.get(0).toFile());
@@ -125,13 +123,10 @@ public class GoGoDuck {
         }
     }
 
-    private void enforceFileLimits(URIList uriList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
-        logger.info("Enforcing file limits...");
-        if (uriList.size() > limit) {
-            logger.error(String.format("Aggregation asked for %d, we allow only %d", uriList.size(), limit));
-            throw new GoGoDuckException("Too many files");
-        }
-        else if (uriList.size() == 0) {
+    private void enforceFileLimits(URIList uriList, double fileSizeLimit) throws GoGoDuckException {
+        logger.info("Enforcing file size limits...");
+
+        if (uriList.size() == 0) {
             logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
         }
