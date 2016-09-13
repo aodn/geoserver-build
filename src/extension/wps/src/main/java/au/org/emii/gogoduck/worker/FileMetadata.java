@@ -89,7 +89,7 @@ public class FileMetadata {
             logger.info(String.format("Unpacking file %s %s", file.getAbsolutePath(), this.unpack.booleanValue()));
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new GoGoDuckException(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Unable to load file %s", file.toString()), e);
         } finally {
             close(gridDs, GridDataset.class);
         }

@@ -1,9 +1,11 @@
 package au.org.emii.gogoduck.worker;
 
 import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.gogoduck.exception.NetCdfProcessingException;
 import au.org.emii.utils.GoGoDuckConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.geoserver.catalog.Catalog;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
@@ -17,10 +19,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +83,6 @@ public class GoGoDuck {
     }
 
     public Path run() {
-
         FileMetadata fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
 
         Path tmpDir = null;
@@ -116,7 +114,7 @@ public class GoGoDuck {
         catch (Exception e) {
             String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
             logger.error(errMsg, e);
-            throw new GoGoDuckException(e.getMessage());
+            throw new GoGoDuckException(e.getMessage(), e);
         }
         finally {
             cleanTmpDir(tmpDir);
@@ -147,7 +145,8 @@ public class GoGoDuck {
             logger.info(String.format("Linking '%s' -> '%s'", srcFile, dst));
             Files.createSymbolicLink(dst, srcFile.toPath());
         } catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(e.getMessage(), e);
         }
     }
 
@@ -163,7 +162,8 @@ public class GoGoDuck {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
         catch (IOException e) {
-            throw new GoGoDuckException(e.getMessage());
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(e.getMessage(), e);
         }
     }
 
@@ -171,31 +171,37 @@ public class GoGoDuck {
         logger.info(String.format("Downloading %d file(s)", uriList.size()));
 
         List<Path> downloadedFiles = new ArrayList<>();
+        try {
 
-        for (URI uri : uriList) {
-            if (isCancelled()) {
-                logger.warn("GoGoDuck was cancelled during download.");
-                return null;
+            for (URI uri : uriList) {
+                if (isCancelled()) {
+                    logger.warn("GoGoDuck was cancelled during download.");
+                    return null;
+                }
+
+                File srcFile = new File(uriList.first().toString());
+                String basename = new File(uri.toString()).getName();
+                Path dst = new File(tmpDir + File.separator + basename).toPath();
+
+                if (fileExists(srcFile)) {
+                    createSymbolicLink(srcFile, dst);
+                }
+                else {
+                    downloadFile(uri, dst);
+                }
+
+                String extension = FilenameUtils.getExtension(dst.getFileName().toString());
+
+                if (extension.equals("gz")) {
+                    gunzipInPlace(dst.toFile());
+                }
+
+                downloadedFiles.add(dst);
             }
 
-            File srcFile = new File(uriList.first().toString());
-            String basename = new File(uri.toString()).getName();
-            Path dst = new File(tmpDir + File.separator + basename).toPath();
-
-            if (fileExists(srcFile)) {
-                createSymbolicLink(srcFile, dst);
-            }
-            else {
-                downloadFile(uri, dst);
-            }
-
-            String extension = FilenameUtils.getExtension(dst.getFileName().toString());
-
-            if (extension.equals("gz")) {
-                gunzipInPlace(dst.toFile());
-            }
-
-            downloadedFiles.add(dst);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Unable to download files '%s'", uriList.toString()), e);
         }
 
         return downloadedFiles;
@@ -221,7 +227,8 @@ public class GoGoDuck {
             Files.delete(file.toPath());
             Files.move(gunzipped.toPath(), file.toPath());
         } catch (IOException e) {
-            throw new GoGoDuckException(String.format("Failed gunzip on '%s': '%s'", file, e.getMessage()));
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Failed gunzip on '%s': '%s'", file, e.getMessage()), e);
         }
     }
 
@@ -254,7 +261,8 @@ public class GoGoDuck {
             Files.move(tmpFile.toPath(), file.toPath());
         }
         catch (Exception e) {
-            throw new GoGoDuckException(String.format("Could not apply subset to file '%s': '%s'", file.getPath(), e.getMessage()));
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Could not apply subset to file '%s'", file.getPath()), e);
         }
     }
 
@@ -283,20 +291,23 @@ public class GoGoDuck {
 
     private void applySubsetMultiThread(List<Path> files, FileMetadata fileMetadata, int threadCount) throws GoGoDuckException {
         logger.info(String.format("Applying subset on %d downloaded files", files.size()));
-
+        Set<String> fileNames = new HashSet<>();
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
             for (Path file : files) {
                 executorService.submit(new NcksRunnable(file.toFile(), fileMetadata, this));
+                fileNames.add(file.toAbsolutePath().toString());
             }
 
             executorService.shutdown();
             executorService.awaitTermination(MAX_EXECUTION_TIME_DAYS, TimeUnit.DAYS);
         } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
             throw new GoGoDuckException("Task interrupted while waiting to complete", e);
         } catch (Exception e) {
-            throw new GoGoDuckException(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Failed to apply subset for files:%s", Arrays.toString(fileNames.toArray())), e);
         }
     }
 
@@ -323,7 +334,8 @@ public class GoGoDuck {
                 Files.delete(file);
                 Files.move(tmpFile.toPath(), file);
             } catch (Exception e) {
-                throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file));
+                logger.error(e.getMessage(), e);
+                throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file), e);
             }
         }
     }
@@ -348,14 +360,17 @@ public class GoGoDuck {
                 Files.move(file.toPath(), outputFile);
             }
             catch (IOException e) {
-                logger.error(e.toString());
-                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
+                logger.error(e.getMessage(), e);
+                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", file), e);
             }
         }
         else {
             logger.info(String.format("Concatenating %d files into '%s'", files.size(), outputFile));
+            Set<String> fileNames = new HashSet<>();
             for (Path file : files) {
-                command.add(file.toAbsolutePath().toString());
+                String filePath = file.toAbsolutePath().toString();
+                command.add(filePath);
+                fileNames.add(filePath);
             }
             command.add(outputFile.toFile().getAbsolutePath());
 
@@ -364,7 +379,8 @@ public class GoGoDuck {
                 execute(command);
             }
             catch (Exception e) {
-                throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
+                logger.error(e.getMessage(), e);
+                throw new GoGoDuckException(String.format("Could not concatenate files: %s into a single file: '%s'", Arrays.toString(fileNames.toArray()), outputFile), e);
             }
         }
     }
@@ -384,7 +400,10 @@ public class GoGoDuck {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+            if (outputFile != null && StringUtils.isNotEmpty(outputFile.toString()) && outputFile.toFile().length() == 0) {
+                throw new GoGoDuckException(String.format("Failed updating metadata for empty file '%s'", outputFile), e);
+            }
+            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s'", outputFile), e);
         }
     }
 
@@ -393,7 +412,7 @@ public class GoGoDuck {
         try {
             FileUtils.deleteDirectory(tmpDir.toFile());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -404,6 +423,7 @@ public class GoGoDuck {
         builder.redirectErrorStream(true);
 
         final Process process = builder.start();
+        StringBuilder bashLog = new StringBuilder();
 
         try (
             InputStream is = process.getInputStream();
@@ -411,16 +431,27 @@ public class GoGoDuck {
             BufferedReader br = new BufferedReader(isr)
         ) {
             String line;
+
             while ((line = br.readLine()) != null) {
                 logger.info(line);
+                bashLog.append(line);
             }
 
             process.waitFor();
 
+            if (process.exitValue() != 0) {
+                bashLog.append(command.toString());
+                throw new NetCdfProcessingException(bashLog.toString());
+            }
+
             return process.exitValue();
         }
         catch (InterruptedException e) {
-            logger.error(String.format("Interrupted: '%s'", e.getMessage()));
+            logger.error(String.format("Interrupted: '%s'", e.getMessage()), e);
+            throw e;
+        }
+        catch (NetCdfProcessingException e) {
+            logger.error(String.format("NetCdf Tool Error: '%s'", e.getMessage()), e);
             throw e;
         }
     }
