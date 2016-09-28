@@ -33,7 +33,7 @@ public abstract class Config {
         this.catalog = catalog;
     }
 
-    private String getConfigFilePath(String configFile) throws IOException {
+    public String getConfigFilePath(String configFile) throws IOException {
         return FilenameUtils.concat(this.resourceDirectory.getAbsolutePath().toString() + "/", configFile);
     }
 

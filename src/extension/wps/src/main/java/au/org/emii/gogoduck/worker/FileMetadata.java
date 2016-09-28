@@ -48,12 +48,16 @@ public class FileMetadata {
         return indexReader.getUriList(profile, goGoDuckConfig.getTimeField(), goGoDuckConfig.getSizeField(), goGoDuckConfig.getFileUrlField(), subset);
     }
 
+    public GoGoDuckConfig getGoGoDuckConfig() {
+        return goGoDuckConfig;
+    }
+
     public boolean unpackNetcdf() {
         return unpack;
     }
 
     public boolean isTimeUnlimited() {
-        return time.isUnlimited();
+        return getTime().isUnlimited();
     }
 
     public void load(File file) {
@@ -76,7 +80,7 @@ public class FileMetadata {
             }
 
             // Checking unpack config (Needed for TPAC)
-            boolean unpackPackedVariables = goGoDuckConfig.getUnpack(profile);
+            boolean unpackPackedVariables = getGoGoDuckConfig().getUnpack(profile);
 
             if (fileContainPackedVariables && unpackPackedVariables) {
                 this.unpack = true;
@@ -98,7 +102,7 @@ public class FileMetadata {
     public List<String> getExtraParameters() throws Exception {
         if (extraParameters == null) {
             extraParameters = new ArrayList<>();
-            for (String ncksParameter : goGoDuckConfig.getVariablesToInclude(profile)) {
+            for (String ncksParameter : getGoGoDuckConfig().getVariablesToInclude(getProfile())) {
                 extraParameters.add(ncksParameter);
             }
         }
@@ -125,24 +129,24 @@ public class FileMetadata {
                 logger.warn("Could not find 'title' attribute in result file");
             }
 
-            newAttributeList.add(new Attribute(goGoDuckConfig.getTitle(profile),
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getTitle(profile),
                     String.format("%s, %s, %s",
                             title,
                             subset.get("TIME").start,
                             subset.get("TIME").end)));
 
-            newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeStart(profile), subset.get("LATITUDE").start));
-            newAttributeList.add(new Attribute(goGoDuckConfig.getLatitudeEnd(profile), subset.get("LATITUDE").end));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeStart(profile), subset.get("LATITUDE").start));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeEnd(profile), subset.get("LATITUDE").end));
 
-            newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeStart(profile), subset.get("LONGITUDE").start));
-            newAttributeList.add(new Attribute(goGoDuckConfig.getLongitudeEnd(profile), subset.get("LONGITUDE").end));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeStart(profile), subset.get("LONGITUDE").start));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeEnd(profile), subset.get("LONGITUDE").end));
 
-            List<String> timeStart = goGoDuckConfig.getTimeStart(profile);
+            List<String> timeStart = getGoGoDuckConfig().getTimeStart(profile);
             for (String timeStartEntry : timeStart) {
                 newAttributeList.add(new Attribute(timeStartEntry, subset.get("TIME").start));
             }
 
-            List<String> timeEnd = goGoDuckConfig.getTimeEnd(profile);
+            List<String> timeEnd = getGoGoDuckConfig().getTimeEnd(profile);
             for (String timeEndEntry : timeEnd) {
                 newAttributeList.add(new Attribute(timeEndEntry, subset.get("TIME").end));
             }
@@ -158,9 +162,9 @@ public class FileMetadata {
     public NcksSubsetParameters getSubsetParameters() {
         if (subsetParameters == null) {
             subsetParameters = new NcksSubsetParameters();
-            subsetParameters.put(latitude.getFullName(), subset.get("LATITUDE"));
-            subsetParameters.put(longitude.getFullName(), subset.get("LONGITUDE"));
-            subsetParameters.addTimeSubset(time.getFullName(), subset.get("TIME"));
+            subsetParameters.put(getLatitude().getFullName(), getSubset().get("LATITUDE"));
+            subsetParameters.put(getLongitude().getFullName(), getSubset().get("LONGITUDE"));
+            subsetParameters.addTimeSubset(getTime().getFullName(), getSubset().get("TIME"));
         }
         return subsetParameters;
     }
@@ -217,5 +221,21 @@ public class FileMetadata {
 
     public CoordinateAxis getTime() {
         return time;
+    }
+
+    public CoordinateAxis getLatitude() {
+        return latitude;
+    }
+
+    public CoordinateAxis getLongitude() {
+        return longitude;
+    }
+
+    public GoGoDuckSubsetParameters getSubset() {
+        return subset;
+    }
+
+    public String getProfile() {
+        return profile;
     }
 }
