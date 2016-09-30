@@ -1,5 +1,7 @@
 package au.org.emii.ncdfgenerator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
@@ -8,6 +10,8 @@ import java.util.List;
 
 class AttributeValueParser implements IAttributeValueParser {
     // follows ncdf string conventions
+
+    private static final Logger logger = LoggerFactory.getLogger(AttributeValueParser.class);
 
     private int skipWhite(String s, int pos) {
         while (Character.isSpaceChar(peekChar(s, pos))) {
@@ -212,6 +216,11 @@ class AttributeValueParser implements IAttributeValueParser {
         ++pos2;
         while (peekChar(s, pos2) != closeChar) {
             ++pos2;
+            if (pos2 == s.length()) {
+                // Catch case of non terminating netCdf attribute
+                logger.debug(String.format("Looks like string attribute not properly terminated %s", s));
+                return null;
+            }
         }
         ++pos2;
         String value = s.substring(pos + 1, pos2 - 1);
