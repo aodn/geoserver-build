@@ -43,6 +43,7 @@ public class GoGoDuck {
     private String extension = "nc";
     private GoGoDuckConfig goGoDuckConfig;
     private URLMangler urlMangler;
+    private List<Path> downloadedFiles;
 
     public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, String format, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
@@ -65,6 +66,18 @@ public class GoGoDuck {
         }
     }
 
+    public Path getBaseTmpDir() {
+        return this.baseTmpDir;
+    }
+
+    public Path getOutputFile() {
+        return outputFile;
+    }
+
+    public GoGoDuckConfig getGoGoDuckConfig() {
+        return goGoDuckConfig;
+    }
+
     public void setTmpDir(String tmpDir) {
         this.baseTmpDir = new File(tmpDir).toPath();
     }
@@ -83,29 +96,29 @@ public class GoGoDuck {
     }
 
     public Path run() {
-        FileMetadata fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
+        FileMetadata fileMetadata = getFileMetadata();
 
         Path tmpDir = null;
 
         try {
-            tmpDir = Files.createTempDirectory(baseTmpDir, "gogoduck");
+            tmpDir = getGogoduckTempDir();
 
             URIList uriList = fileMetadata.getUriList();
 
-            enforceFileLimits(uriList, goGoDuckConfig.getFileSizeLimit());
-            List<Path> downloadedFiles = downloadFiles(uriList, tmpDir);
+            enforceFileLimits(uriList, getGoGoDuckConfig().getFileSizeLimit());
+            downloadedFiles = downloadFiles(uriList, tmpDir);
             throwIfCancelled();
             fileMetadata.load(downloadedFiles.get(0).toFile());
-            applySubsetMultiThread(downloadedFiles, fileMetadata, goGoDuckConfig.getThreadCount());
+            applySubsetMultiThread(downloadedFiles, fileMetadata, getGoGoDuckConfig().getThreadCount());
             throwIfCancelled();
             postProcess(downloadedFiles, fileMetadata);
             throwIfCancelled();
-            aggregate(downloadedFiles, outputFile);
+            aggregate(downloadedFiles, getOutputFile());
             throwIfCancelled();
-            updateMetadata(fileMetadata, outputFile);
+            updateMetadata(fileMetadata, getOutputFile());
             throwIfCancelled();
             Converter converter = Converter.newInstance(format);
-            outputFile = converter.convert(outputFile, fileMetadata);
+            outputFile = converter.convert(getOutputFile(), fileMetadata);
             mimeType = converter.getMimeType();
             extension = converter.getExtension();
             throwIfCancelled();
@@ -119,6 +132,14 @@ public class GoGoDuck {
         finally {
             cleanTmpDir(tmpDir);
         }
+    }
+
+    protected Path getGogoduckTempDir() throws IOException {
+        return Files.createTempDirectory(getBaseTmpDir(), "gogoduck");
+    }
+
+    protected FileMetadata getFileMetadata() {
+        return new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
     }
 
     private void enforceFileLimits(URIList uriList, double fileSizeLimit) throws GoGoDuckException {
@@ -140,7 +161,7 @@ public class GoGoDuck {
         return file.exists() && ! file.isDirectory();
     }
 
-    private void createSymbolicLink(File srcFile, Path dst) {
+    protected void createSymbolicLink(File srcFile, Path dst) {
         try {
             logger.info(String.format("Linking '%s' -> '%s'", srcFile, dst));
             Files.createSymbolicLink(dst, srcFile.toPath());
@@ -239,7 +260,7 @@ public class GoGoDuck {
             File tmpFile = File.createTempFile("tmp", ".nc");
 
             List<String> command = new ArrayList<>();
-            command.add(goGoDuckConfig.getNcksPath());
+            command.add(getGoGoDuckConfig().getNcksPath());
             command.add("-a");
             command.add("-4");
             command.add("-O");
@@ -264,6 +285,14 @@ public class GoGoDuck {
             logger.error(e.getMessage(), e);
             throw new GoGoDuckException(String.format("Could not apply subset to file '%s'", file.getPath()), e);
         }
+    }
+
+    public List<Path> getDownloadedFiles() {
+        return downloadedFiles;
+    }
+
+    public void setDownloadedFiles(List<Path> downloadedFiles) {
+        this.downloadedFiles = downloadedFiles;
     }
 
     private static class NcksRunnable implements Runnable {
@@ -323,7 +352,7 @@ public class GoGoDuck {
                 logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file, tmpFile.toPath()));
 
                 List<String> command = new ArrayList<>();
-                command.add(goGoDuckConfig.getNcpdqPath());
+                command.add(getGoGoDuckConfig().getNcpdqPath());
                 command.add("-O");
                 command.add("-U");
                 command.add(file.toAbsolutePath().toString());
@@ -342,7 +371,7 @@ public class GoGoDuck {
 
     private void aggregate(List<Path> files, Path outputFile) throws GoGoDuckException {
         List<String> command = new ArrayList<>();
-        command.add(goGoDuckConfig.getNcrcatPath());
+        command.add(getGoGoDuckConfig().getNcrcatPath());
         command.add("-D2");
         command.add("-4");
         command.add("-h");
@@ -390,7 +419,7 @@ public class GoGoDuck {
             final List<Attribute> globalAttributesToUpdate = fileMetadata.getGlobalAttributesToUpdate(outputFile);
             for (Attribute newAttr : globalAttributesToUpdate) {
                 List<String> command = new ArrayList<>();
-                command.add(goGoDuckConfig.getNcattedPath());
+                command.add(getGoGoDuckConfig().getNcattedPath());
                 command.add("-O");
                 command.add("-h");
                 command.add("-a");
@@ -407,7 +436,7 @@ public class GoGoDuck {
         }
     }
 
-    private static void cleanTmpDir(Path tmpDir) {
+    protected void cleanTmpDir(Path tmpDir) {
         logger.debug(String.format("Removing temporary directory '%s'", tmpDir));
         try {
             FileUtils.deleteDirectory(tmpDir.toFile());

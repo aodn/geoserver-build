@@ -41,7 +41,7 @@ public class FeatureSourceIndexReader implements IndexReader {
         // TODO Should include also workspace, but works also without
         String typeName = profile;
 
-        Filter cqlFilter = null;
+        Filter cqlFilter;
 
         try {
             cqlFilter = CQL.toFilter(
@@ -50,6 +50,7 @@ public class FeatureSourceIndexReader implements IndexReader {
                             timeField, timeCoverageEnd)
             );
         } catch (CQLException e) {
+            logger.error(e.getMessage(), e);
             throw new GoGoDuckException(e.getMessage());
         }
 
@@ -76,6 +77,7 @@ public class FeatureSourceIndexReader implements IndexReader {
                 }
             }
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
         }
 
