@@ -151,7 +151,9 @@ public class GoGoDuck {
         }
 
         if (fileSizeLimit != 0.0 && uriList.getTotalFileSize() != 0.0 && uriList.getTotalFileSize() > fileSizeLimit) {
-            throw new GoGoDuckException(String.format("Total file size %s bytes for %s files, exceeds the limit %s bytes", uriList.getTotalFileSize(), uriList.size(), fileSizeLimit));
+            String totalFileSize = FileUtils.byteCountToDisplaySize((long)uriList.getTotalFileSize());
+            String sizeLimit = FileUtils.byteCountToDisplaySize((long)fileSizeLimit);
+            throw new GoGoDuckException(String.format("Total file size %s for %s files, exceeds the limit %s", totalFileSize, uriList.size(), sizeLimit));
         }
 
         // All good - keep going :)
