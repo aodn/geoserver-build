@@ -130,6 +130,10 @@ public abstract class Config {
         // lookup the layer in the catalog
         LayerInfo layerInfo = catalog.getLayerByName(layer);
 
+        if (layerInfo == null) {
+            throw new Exception(String.format("Invalid Layer: %s", layer));
+        }
+
         // Checking config file in layer directory
         String layerDirectory = dataDirectory.get(layerInfo).dir().getAbsolutePath();
         String layerConfigFilePath = layerDirectory + "/" + configFileName;
