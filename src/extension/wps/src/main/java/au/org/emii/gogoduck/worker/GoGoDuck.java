@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
@@ -101,6 +103,7 @@ public class GoGoDuck {
         Path tmpDir = null;
 
         try {
+            validateSubset();
             tmpDir = getGogoduckTempDir();
 
             URIList uriList = fileMetadata.getUriList();
@@ -131,6 +134,34 @@ public class GoGoDuck {
         }
         finally {
             cleanTmpDir(tmpDir);
+        }
+    }
+
+    private void validateSubset() {
+        int timeCount = 0, latLonCount = 0;
+        logger.info(String.format("Validating subset %s", subset));
+        Pattern timePattern = Pattern.compile("((19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])T([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])");
+        Pattern latLonPattern = Pattern.compile("([+-]?\\d+\\.?\\d+)\\s*,\\s*([+-]?\\d+\\.?\\d+)");
+
+        Matcher matcher = timePattern.matcher(subset);
+
+        while (matcher.find()) {
+            logger.info(String.format("Matched Time Pattern: %s", matcher.group()));
+            timeCount++;
+        }
+
+        if (timeCount != 2) {
+            throw new GoGoDuckException(String.format("Invalid time format for subset: %s", subset));
+        }
+
+        matcher = latLonPattern.matcher(subset);
+        while (matcher.find()) {
+            logger.info(String.format("Matched Latitude/Longitude Pattern: %s", matcher.group()));
+            latLonCount++;
+        }
+
+        if (latLonCount != 2) {
+            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s", subset));
         }
     }
 
