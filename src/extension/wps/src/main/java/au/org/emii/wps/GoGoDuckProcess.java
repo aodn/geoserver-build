@@ -1,18 +1,10 @@
 package au.org.emii.wps;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
-import org.dom4j.xpath.DefaultXPath;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
@@ -29,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import au.org.emii.gogoduck.worker.GoGoDuck;
 import au.org.emii.utils.GoGoDuckConfig;
 import au.org.emii.gogoduck.exception.GoGoDuckException;
-import au.org.emii.gogoduck.worker.URLMangler;
 import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
@@ -67,8 +58,13 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 throw new ProcessException("threadCount set to 0 or below, job will not run");
             }
 
-            File outputFile = getResourceManager().getOutputResource(
-                    getResourceManager().getExecutionId(true), layer + ".nc").file();
+            File outputFile;
+
+            try {
+                outputFile = getResourceManager().getTemporaryResource(".nc").file();
+            } catch (IOException e) {
+                throw new GoGoDuckException("Unable to obtain temporary file required for aggregation", e);
+            }
 
             String filePath = outputFile.toPath().toAbsolutePath().toString();
 
