@@ -71,7 +71,7 @@ public class FileMetadata {
             enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
             gridDs = GridDataset.open(location, enhanceMode);
             for (Variable var : gridDs.getNetcdfDataset().getVariables()) {
-                VariableDS vds = new VariableDS(var.getGroup(), var, true);
+                VariableDS vds = (VariableDS) var;
                 if (vds.hasScaleOffset()) {
                     // File contains packed variables, unpack it
                     fileContainPackedVariables = true;

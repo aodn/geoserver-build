@@ -56,13 +56,13 @@
             </dependency>
             <dependency>
                 <groupId>edu.ucar</groupId>
-                <artifactId>netcdf</artifactId>
-                <version>4.3.22</version>
+                <artifactId>netcdf4</artifactId>
+                <version>4.6.6</version>
             </dependency>
             <dependency>
                 <groupId>edu.ucar</groupId>
                 <artifactId>opendap</artifactId>
-                <version>4.3.22</version>
+                <version>4.6.6</version>
             </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
