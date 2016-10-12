@@ -1,0 +1,5 @@
+<wpsS3ArtifactsStore>
+    <artifactStorageDir>s3://imos-test-data.aodn.org.au/wps</artifactStorageDir>
+    <temporaryStorageDir>temp/wps</temporaryStorageDir>
+</wpsS3ArtifactsStore>
+
