@@ -55,6 +55,11 @@
                 <version>${geoserver.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.geoserver.community</groupId>
+                <artifactId>gs-wps-s3-artifacts</artifactId>
+                <version>${geoserver.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>edu.ucar</groupId>
                 <artifactId>netcdf4</artifactId>
                 <version>4.6.6</version>
