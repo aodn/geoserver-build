@@ -62,7 +62,8 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
             try {
                 outputFile = getResourceManager().getTemporaryResource(".nc").file();
-            } catch (IOException e) {
+            } catch (Exception e) {
+                logger.error(e.toString(), e);
                 throw new GoGoDuckException("Unable to obtain temporary file required for aggregation", e);
             }
 
@@ -80,6 +81,10 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             logger.error(e.toString(), e);
             notifyFailure(callbackUrl, callbackParams);
             throw new ProcessException(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.toString(), e);
+            notifyFailure(callbackUrl, callbackParams);
+            throw new ProcessException("Failed to Subset/Download gridded collection(s)");
         }
     }
 }
