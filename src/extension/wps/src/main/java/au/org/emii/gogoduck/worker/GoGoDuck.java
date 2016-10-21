@@ -67,6 +67,7 @@ public class GoGoDuck {
             this.urlMangler = new URLMangler(urlMangling);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(e.getMessage());
         }
     }
 
