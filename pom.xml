@@ -113,8 +113,8 @@
 
      <repositories>
         <repository>
-            <id>imos-binary</id>
-            <url>http://imos-binary.s3-website-ap-southeast-2.amazonaws.com/repo/</url>
+            <id>aodn</id>
+            <url>http://content.aodn.org.au/repo/maven/</url>
         </repository>
         <repository>
             <id>opengeo</id>
@@ -140,7 +140,7 @@
         <repository>
             <id>maven-s3-repo</id>
             <name>AODN Repository</name>
-            <url>s3://imos-binary/repo</url>
+            <url>s3://content.aodn.org.au/repo/maven</url>
         </repository>
     </distributionManagement>
 
