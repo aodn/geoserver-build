@@ -180,8 +180,7 @@ public class GoGoDuck {
         logger.info("Enforcing file size limits...");
 
         if (uriList.size() > limit) {
-            logger.error(String.format("Aggregation asked for %d, we allow only %d", uriList.size(), limit));
-            throw new GoGoDuckException("Too many files");
+            throw new GoGoDuckException(String.format("Aggregation asked for %d, we allow only %d", uriList.size(), limit));
         } else if (uriList.size() == 0) {
             logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
