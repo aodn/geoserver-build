@@ -209,8 +209,7 @@ public class GoGoDuck {
         }
     }
 
-    private void downloadFile(URI uri, Path dst) {
-        URL url = urlMangler.mangle(uri);
+    private void downloadFile(URL url, Path dst) {
         logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
         try (
@@ -222,31 +221,32 @@ public class GoGoDuck {
         }
         catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(e.getMessage(), e);
+            throw new GoGoDuckException(String.format("Unable to download file %s", url.toString()), e);
         }
     }
 
     private List<Path> downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         logger.info(String.format("Downloading %d file(s)", uriList.size()));
-
         List<Path> downloadedFiles = new ArrayList<>();
-        try {
+        URL url;
 
-            for (URI uri : uriList) {
+
+        for (URI uri : uriList) {
+            try {
                 if (isCancelled()) {
                     logger.warn("GoGoDuck was cancelled during download.");
                     return null;
                 }
 
+                url = urlMangler.mangle(uri);
                 File srcFile = new File(uriList.first().toString());
                 String basename = new File(uri.toString()).getName();
                 Path dst = new File(tmpDir + File.separator + basename).toPath();
 
                 if (fileExists(srcFile)) {
                     createSymbolicLink(srcFile, dst);
-                }
-                else {
-                    downloadFile(uri, dst);
+                } else {
+                    downloadFile(url, dst);
                 }
 
                 String extension = FilenameUtils.getExtension(dst.getFileName().toString());
@@ -256,11 +256,14 @@ public class GoGoDuck {
                 }
 
                 downloadedFiles.add(dst);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
+        }
 
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(String.format("Unable to download files '%s'", uriList.toString()), e);
+        logger.info(String.format("Downloaded %s file(s) out of %s file(s)", downloadedFiles.size(), uriList.size()));
+        if (downloadedFiles.size() == 0) {
+            throw new GoGoDuckException(String.format("Unable to download %s files '%s'", uriList.size(), uriList.toString()));
         }
 
         return downloadedFiles;
