@@ -47,6 +47,7 @@ public class GoGoDuck {
     private GoGoDuckConfig goGoDuckConfig;
     private URLMangler urlMangler;
     private List<Path> downloadedFiles;
+    private FileMetadata fileMetadata = null;
 
     public GoGoDuck(Catalog catalog, String profile, String subset, String outputFile, String format, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
@@ -114,7 +115,6 @@ public class GoGoDuck {
             enforceFileLimits(uriList, limit, getGoGoDuckConfig().getFileSizeLimit());
             downloadedFiles = downloadFiles(uriList, tmpDir);
             throwIfCancelled();
-            fileMetadata.load(downloadedFiles.get(0).toFile());
             applySubsetMultiThread(downloadedFiles, fileMetadata, getGoGoDuckConfig().getThreadCount());
             throwIfCancelled();
             postProcess(downloadedFiles, fileMetadata);
@@ -173,7 +173,10 @@ public class GoGoDuck {
     }
 
     protected FileMetadata getFileMetadata() {
-        return new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
+        if (fileMetadata == null) {
+            fileMetadata = new FileMetadata(profile, indexReader, subset, goGoDuckConfig);
+        }
+        return fileMetadata;
     }
 
     private void enforceFileLimits(URIList uriList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
@@ -258,6 +261,12 @@ public class GoGoDuck {
                 downloadedFiles.add(dst);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
+            }
+
+            if (downloadedFiles.size() == 1) {
+                FileMetadata fileMetadata = getFileMetadata();
+                fileMetadata.load(downloadedFiles.get(0).toFile());
+                fileMetadata.validateSpatialSubset();
             }
         }
 
