@@ -458,8 +458,9 @@ public class GoGoDuck {
                 execute(command);
             }
             catch (Exception e) {
+                logger.error(String.format("Could not concatenate files: %s into a single file: '%s'", Arrays.toString(fileNames.toArray()), outputFile));
                 logger.error(e.getMessage(), e);
-                throw new GoGoDuckException(String.format("Could not concatenate files: %s into a single file: '%s'", Arrays.toString(fileNames.toArray()), outputFile), e);
+                throw new GoGoDuckException(String.format("Could not concatenate %s files into a single file: '%s'", files.size(), outputFile), e);
             }
         }
     }
