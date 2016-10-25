@@ -42,6 +42,7 @@ public class GoGoDuck {
     private final Integer limit;
     private Path baseTmpDir;
     private ProgressListener progressListener = null;
+    private String error = null;
     private String mimeType = "application/x-netcdf";
     private String extension = "nc";
     private GoGoDuckConfig goGoDuckConfig;
@@ -71,6 +72,14 @@ public class GoGoDuck {
         }
     }
 
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
     public Path getBaseTmpDir() {
         return this.baseTmpDir;
     }
@@ -96,8 +105,13 @@ public class GoGoDuck {
     }
 
     private void throwIfCancelled() throws GoGoDuckException {
-        if (isCancelled())
-            throw new GoGoDuckException("Job cancelled");
+        if (isCancelled()) {
+            if (getError() != null) {
+                throw new GoGoDuckException(getError());
+            } else {
+                throw new GoGoDuckException("Job cancelled");
+            }
+        }
     }
 
     public Path run() {
@@ -296,9 +310,10 @@ public class GoGoDuck {
 
     private void applySubsetSingleFileNcks(File file, FileMetadata fileMetadata) {
         logger.info("Applying Subsetting to single file");
+        File tmpFile = null;
 
         try {
-            File tmpFile = File.createTempFile("tmp", ".nc");
+            tmpFile = File.createTempFile("tmp", ".nc");
 
             List<String> command = new ArrayList<>();
             command.add(getGoGoDuckConfig().getNcksPath());
@@ -324,7 +339,15 @@ public class GoGoDuck {
         }
         catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(String.format("Could not apply subset to file '%s'", file.getPath()), e);
+            try {
+                Files.delete(file.toPath());
+                Files.delete(tmpFile.toPath());
+            } catch (IOException e1) {
+                logger.error(e.getMessage(), e1);
+            }
+            progressListener.setCanceled(true);
+            setError(String.format("Could not apply subset to file '%s'", file.getName()));
+            throw new GoGoDuckException(getError(), e);
         }
     }
 
