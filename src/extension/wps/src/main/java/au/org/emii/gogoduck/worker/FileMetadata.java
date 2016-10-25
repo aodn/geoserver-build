@@ -167,7 +167,7 @@ public class FileMetadata {
             newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeEnd(profile), Double.toString(intersection.getMaxY())));
 
             newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeStart(profile), Double.toString(intersection.getMinX())));
-            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeEnd(profile), Double.toString(intersection.getMaxY())));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeEnd(profile), Double.toString(intersection.getMaxX())));
 
             List<String> timeStart = getGoGoDuckConfig().getTimeStart(profile);
             for (String timeStartEntry : timeStart) {
