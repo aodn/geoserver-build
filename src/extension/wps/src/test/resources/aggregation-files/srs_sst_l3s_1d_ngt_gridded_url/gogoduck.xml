@@ -1,5 +1,4 @@
 <gogoduck>
-    <fileLimit>10</fileLimit>
     <threadCount>1</threadCount>
     <urlSubstitution key="^">http://data.aodn.org.au/</urlSubstitution>
     <ncksPath>/usr/bin/ncks</ncksPath>
@@ -8,6 +7,7 @@
     <ncattedPath>/usr/bin/ncatted</ncattedPath>
     <timeField>time</timeField>
     <sizeField>size</sizeField>
+    <fileLimit>10</fileLimit>
     <fileSizeLimit></fileSizeLimit>
     <fileUrlField>file_url</fileUrlField>
     <unpack>true</unpack>
@@ -19,6 +19,8 @@
         <longitudeEnd>easternmost_longitude</longitudeEnd>
         <timeStart>start_time</timeStart>
         <timeEnd>stop_time</timeEnd>
+        <timeStart>time_coverage_start</timeStart>
+        <timeEnd>time_coverage_end</timeEnd>
     </globalAttributes>
     <variablesToInclude>
         <variable>time</variable>

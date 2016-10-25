@@ -15,11 +15,15 @@ import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridDataset;
 
 import javax.servlet.ServletContext;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FileMetadata {
     private static final Logger logger = LoggerFactory.getLogger(FileMetadata.class);
@@ -36,6 +40,9 @@ public class FileMetadata {
     private List<String> extraParameters = null;
     private NcksSubsetParameters subsetParameters = null;
     private CoordinateAxis time = null, latitude = null, longitude = null;
+
+    private Rectangle2D.Double spatialExtent, spatialSubset;
+    private Rectangle2D intersection;
 
     public FileMetadata(String profile, IndexReader indexReader, String subset, GoGoDuckConfig goGoDuckConfig) {
         this.profile = profile;
@@ -93,10 +100,32 @@ public class FileMetadata {
             logger.info(String.format("Unpacking file %s %s", file.getAbsolutePath(), this.unpack.booleanValue()));
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new GoGoDuckException(String.format("Unable to load file %s", file.toString()), e);
+            throw new GoGoDuckException(String.format("Unable to load file %s", file.getName()), e);
         } finally {
             close(gridDs, GridDataset.class);
         }
+    }
+
+    public void validateSpatialSubset() {
+        logger.info("Validating Spatial Subset");
+        double latitudeStart = Double.valueOf(subset.get("LATITUDE").start);
+        double latitudeEnd = Double.valueOf(subset.get("LATITUDE").end);
+        double longitudeStart = Double.valueOf(subset.get("LONGITUDE").start);
+        double longitudeEnd = Double.valueOf(subset.get("LONGITUDE").end);
+
+        spatialExtent = new Rectangle2D.Double(longitude.getMinValue(), latitude.getMinValue(), longitude.getMaxValue() - longitude.getMinValue(), latitude.getMaxValue() - latitude.getMinValue());
+        spatialSubset = new Rectangle2D.Double(longitudeStart, latitudeStart, longitudeEnd - longitudeStart, latitudeEnd - latitudeStart);
+        intersection = spatialExtent.createIntersection(spatialSubset);
+
+        logger.info(String.format("Spatial Extent: Latitude %s %s Longitude %s %s", latitude.getMinValue(), latitude.getMaxValue(), longitude.getMinValue(), longitude.getMaxValue()));
+        logger.info(String.format("Spatial Subset: Latitude %s %s Longitude %s %s", latitudeStart, latitudeEnd, longitudeStart, longitudeEnd));
+        logger.info(String.format("Intersection  : Latitude %s %s Longitude %s %s", intersection.getMinX(), intersection.getMaxX(), intersection.getMinY(), intersection.getMaxY()));
+
+        if (intersection.isEmpty())
+            throw new GoGoDuckException(String.format("Your spatial subset (Latitude:%s %s Longitude:%s %s) is out of bounds (Latitude:%s %s Longitude:%s %s)",
+                    subset.get("LATITUDE").start, subset.get("LATITUDE").end, subset.get("LONGITUDE").start, subset.get("LONGITUDE").end, latitude.getMinValue(), latitude.getMaxValue(), longitude.getMinValue(), longitude.getMaxValue()));
+
+        logger.info("Spatial Subset validation completed successfully");
     }
 
     public List<String> getExtraParameters() throws Exception {
@@ -109,7 +138,7 @@ public class FileMetadata {
         return extraParameters;
     }
 
-    protected List<Attribute> getGlobalAttributesToUpdate(Path outputFile) throws Exception{
+    protected List<Attribute> getGlobalAttributesToUpdate(Path outputFile) throws Exception {
         List<Attribute> newAttributeList = new ArrayList<>();
         String title = profile;
         NetcdfFileWriter nc = null;
@@ -123,8 +152,7 @@ public class FileMetadata {
 
                 // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
                 title = title.substring(0, title.lastIndexOf(","));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 // Don't fail because of this bullshit :)
                 logger.warn("Could not find 'title' attribute in result file");
             }
@@ -135,11 +163,11 @@ public class FileMetadata {
                             subset.get("TIME").start,
                             subset.get("TIME").end)));
 
-            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeStart(profile), subset.get("LATITUDE").start));
-            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeEnd(profile), subset.get("LATITUDE").end));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeStart(profile), Double.toString(intersection.getMinY())));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLatitudeEnd(profile), Double.toString(intersection.getMaxY())));
 
-            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeStart(profile), subset.get("LONGITUDE").start));
-            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeEnd(profile), subset.get("LONGITUDE").end));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeStart(profile), Double.toString(intersection.getMinX())));
+            newAttributeList.add(new Attribute(getGoGoDuckConfig().getLongitudeEnd(profile), Double.toString(intersection.getMaxY())));
 
             List<String> timeStart = getGoGoDuckConfig().getTimeStart(profile);
             for (String timeStartEntry : timeStart) {
@@ -152,7 +180,8 @@ public class FileMetadata {
             }
 
             return newAttributeList;
-        } catch (IOException e) {
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
         } finally {
             close(nc, NetcdfFileWriter.class);
