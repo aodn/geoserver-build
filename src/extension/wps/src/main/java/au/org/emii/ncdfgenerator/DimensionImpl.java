@@ -5,12 +5,18 @@ import ucar.nc2.NetcdfFileWriteable;
 
 class DimensionImpl implements IDimension {
     private final String name;
-    private int size;
+    private int length;
     private Dimension dimension;
+
 
     public DimensionImpl(String name) {
         this.name = name; // required to encode dimension
-        this.size = 0;
+        this.length = 0;
+    }
+
+    public DimensionImpl(String name, int length) {
+        this(name);
+        this.length = length;
     }
 
     public Dimension getDimension() { // bad naming
@@ -19,19 +25,19 @@ class DimensionImpl implements IDimension {
     }
 
     public int getLength() {
-        return size;
+        return length;
     }
 
     public void define(NetcdfFileWriteable writer) {
-        dimension = writer.addDimension(name, size);
+        dimension = writer.addDimension(name, length);
     }
 
     public void prepare() {
-        size = 0;
+        length = 0;
     }
 
     public void addValueToBuffer(Object value) {
-        ++size;
+        ++length;
     }
 
     public String getName() {
