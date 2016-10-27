@@ -94,8 +94,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 .setDataStore(store)
                 .setSchema(store.getDatabaseSchema());
 
-            final File outputFile = getResourceManager().getOutputResource(
-                    getResourceManager().getExecutionId(true), typeName + ".zip").file();
+            final File outputFile = getResourceManager().getTemporaryResource(".zip").file();
 
             try (
                     NcdfEncoder encoder = encoderBuilder.create();
