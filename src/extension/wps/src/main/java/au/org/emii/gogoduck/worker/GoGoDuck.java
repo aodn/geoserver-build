@@ -107,8 +107,9 @@ public class GoGoDuck {
         Path tmpDir = null;
 
         try {
-            validateSubset();
             tmpDir = getGogoduckTempDir();
+
+            validateSubset();
 
             URIList uriList = fileMetadata.getUriList();
 
