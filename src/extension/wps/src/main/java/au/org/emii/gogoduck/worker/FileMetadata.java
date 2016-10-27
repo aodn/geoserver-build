@@ -121,7 +121,13 @@ public class FileMetadata {
         logger.info(String.format("Spatial Subset: Latitude %s %s Longitude %s %s", latitudeStart, latitudeEnd, longitudeStart, longitudeEnd));
         logger.info(String.format("Intersection  : Latitude %s %s Longitude %s %s", intersection.getMinX(), intersection.getMaxX(), intersection.getMinY(), intersection.getMaxY()));
 
-        if (intersection.isEmpty())
+        // Point Time Series Validation
+        if (latitudeStart == latitudeEnd && longitudeStart == longitudeEnd) {
+            if (latitudeStart < latitude.getMinValue() || latitudeStart > latitude.getMaxValue() || longitudeStart < longitude.getMinValue() || longitudeStart > longitude.getMaxValue())
+                throw new GoGoDuckException(String.format("Your point timeseries (Latitude:%s Longitude:%s ) is out of bounds (Latitude:%s %s Longitude:%s %s)",
+                        subset.get("LATITUDE").start, subset.get("LONGITUDE").start, latitude.getMinValue(), latitude.getMaxValue(), longitude.getMinValue(), longitude.getMaxValue()));
+
+        } else if (intersection.isEmpty())
             throw new GoGoDuckException(String.format("Your spatial subset (Latitude:%s %s Longitude:%s %s) is out of bounds (Latitude:%s %s Longitude:%s %s)",
                     subset.get("LATITUDE").start, subset.get("LATITUDE").end, subset.get("LONGITUDE").start, subset.get("LONGITUDE").end, latitude.getMinValue(), latitude.getMaxValue(), longitude.getMinValue(), longitude.getMaxValue()));
 
