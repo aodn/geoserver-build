@@ -1,5 +1,10 @@
 package au.org.emii.gogoduck.worker;
 
+import ucar.nc2.time.Calendar;
+import ucar.nc2.time.CalendarDate;
+import ucar.nc2.time.CalendarDateFormatter;
+import ucar.nc2.time.CalendarPeriod;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +16,13 @@ public class NcksSubsetParameters extends HashMap<String, Subset> {
         // ncks works in microseconds and time values passed to gogoduck by the portal
         // are in millisecond precision thanks to java/javascript date usage in harvesting/thredds/
         // portal code.
-        // To ensure the truncated millisecond values passed select the untruncated microsecond values
-        // they were derived from add the maximum possible truncation error to the end time value
-        Subset ncksTimeSubset = new Subset(timeSubset.start, timeSubset.end.replaceAll("(\\.\\d\\d\\d)Z", "$1999Z"));
+        // To ensure the rounded millisecond values passed select the unrounded microsecond values
+        // they were derived from add the possible millisecond rounding or truncation error to the from and to times.
+        CalendarDate start = CalendarDateFormatter.isoStringToCalendarDate(Calendar.gregorian, timeSubset.start);
+        start = start.add(-1, CalendarPeriod.Field.Millisec);
+        CalendarDate end = CalendarDateFormatter.isoStringToCalendarDate(Calendar.gregorian, timeSubset.end);
+        end = end.add(1, CalendarPeriod.Field.Millisec);
+        Subset ncksTimeSubset = new Subset(CalendarDateFormatter.toDateTimeStringISO(start), CalendarDateFormatter.toDateTimeStringISO(end));
         put(netcdfVariableName, ncksTimeSubset);
     }
 
