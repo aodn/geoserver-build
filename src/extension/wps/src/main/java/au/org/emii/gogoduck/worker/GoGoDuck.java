@@ -3,6 +3,11 @@ package au.org.emii.gogoduck.worker;
 import au.org.emii.gogoduck.exception.GoGoDuckException;
 import au.org.emii.gogoduck.exception.NetCdfProcessingException;
 import au.org.emii.utils.GoGoDuckConfig;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.LogOutputStream;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -421,12 +426,11 @@ public class GoGoDuck {
     }
 
     private void aggregate(List<Path> files, Path outputFile) throws GoGoDuckException {
-        List<String> command = new ArrayList<>();
-        command.add(getGoGoDuckConfig().getNcrcatPath());
-        command.add("-D2");
-        command.add("-4");
-        command.add("-h");
-        command.add("-O");
+        CommandLine command = new CommandLine(getGoGoDuckConfig().getNcrcatPath());
+        command.addArgument("-D2");
+        command.addArgument("-4");
+        command.addArgument("-h");
+        command.addArgument("-O");
 
         if (files.size() == 1) {
             // Special case where we have only 1 file
@@ -446,21 +450,22 @@ public class GoGoDuck {
         }
         else {
             logger.info(String.format("Concatenating %d files into '%s'", files.size(), outputFile));
-            Set<String> fileNames = new HashSet<>();
+            command.addArgument(outputFile.toFile().getAbsolutePath());
+
+            Set<String> fileNames = new LinkedHashSet<>();
+
             for (Path file : files) {
                 String filePath = file.toAbsolutePath().toString();
-                command.add(filePath);
                 fileNames.add(filePath);
             }
-            command.add(outputFile.toFile().getAbsolutePath());
+
+            String stdin = StringUtils.join(fileNames, " ");
 
             // Running ncrcat
             try {
-                execute(command);
+                execute(command, stdin);
             }
             catch (Exception e) {
-                logger.error(String.format("Could not concatenate files: %s into a single file: '%s'", Arrays.toString(fileNames.toArray()), outputFile));
-                logger.error(e.getMessage(), e);
                 throw new GoGoDuckException(String.format("Could not concatenate %s files into a single file: '%s'", files.size(), outputFile), e);
             }
         }
@@ -494,6 +499,30 @@ public class GoGoDuck {
             FileUtils.deleteDirectory(tmpDir.toFile());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void execute(CommandLine command, String stdin) {
+        InputStream inputStream = new ByteArrayInputStream(stdin.getBytes());
+
+
+        try (
+            LogOutputStream outputStream = new LogOutputStream() {
+                @Override protected void processLine(String line, int level) {
+                    logger.info(line);
+                }
+            };
+            LogOutputStream errorStream = new LogOutputStream() {
+                @Override protected void processLine(String line, int level) {
+                    logger.error(line);
+                }
+            }
+        ){
+            Executor executor = new DefaultExecutor();
+            executor.setStreamHandler(new PumpStreamHandler(outputStream, errorStream, inputStream));
+            executor.execute(command);
+        } catch (IOException e) {
+            throw new NetCdfProcessingException(String.format("Error running %s", command.toString()), e);
         }
     }
 
@@ -540,4 +569,5 @@ public class GoGoDuck {
     public String getMimeType() { return mimeType; }
 
     public String getExtension() { return extension; }
+
 }
