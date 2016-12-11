@@ -125,7 +125,7 @@ public class GoGoDuck {
             throwIfCancelled();
             postProcess(downloadedFiles, fileMetadata);
             throwIfCancelled();
-            aggregate(downloadedFiles, getOutputFile());
+            aggregate(tmpDir, downloadedFiles, getOutputFile());
             throwIfCancelled();
             updateMetadata(fileMetadata, getOutputFile());
             throwIfCancelled();
@@ -425,7 +425,7 @@ public class GoGoDuck {
         }
     }
 
-    private void aggregate(List<Path> files, Path outputFile) throws GoGoDuckException {
+    private void aggregate(Path workingDir, List<Path> files, Path outputFile) throws GoGoDuckException {
         CommandLine command = new CommandLine(getGoGoDuckConfig().getNcrcatPath());
         command.addArgument("-D2");
         command.addArgument("-4");
@@ -455,7 +455,7 @@ public class GoGoDuck {
             Set<String> fileNames = new LinkedHashSet<>();
 
             for (Path file : files) {
-                String filePath = file.toAbsolutePath().toString();
+                String filePath = file.getFileName().toString();
                 fileNames.add(filePath);
             }
 
@@ -463,7 +463,7 @@ public class GoGoDuck {
 
             // Running ncrcat
             try {
-                execute(command, stdin);
+                execute(command, workingDir, stdin);
             }
             catch (Exception e) {
                 throw new GoGoDuckException(String.format("Could not concatenate %s files into a single file: '%s'", files.size(), outputFile), e);
@@ -502,7 +502,7 @@ public class GoGoDuck {
         }
     }
 
-    private void execute(CommandLine command, String stdin) {
+    private void execute(CommandLine command, Path workingDir, String stdin) {
         InputStream inputStream = new ByteArrayInputStream(stdin.getBytes());
 
         class InfoLogOutputStream extends LogOutputStream {
@@ -516,6 +516,7 @@ public class GoGoDuck {
             LogOutputStream errorStream = new InfoLogOutputStream();
         ) {
             Executor executor = new DefaultExecutor();
+            executor.setWorkingDirectory(workingDir.toFile());
             executor.setStreamHandler(new PumpStreamHandler(outputStream, errorStream, inputStream));
             executor.execute(command);
         } catch (IOException e) {
