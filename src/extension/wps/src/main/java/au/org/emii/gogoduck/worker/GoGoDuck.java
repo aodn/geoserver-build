@@ -505,19 +505,16 @@ public class GoGoDuck {
     private void execute(CommandLine command, String stdin) {
         InputStream inputStream = new ByteArrayInputStream(stdin.getBytes());
 
+        class InfoLogOutputStream extends LogOutputStream {
+            @Override protected void processLine(String line, int level) {
+                logger.info(line);
+            }
+        };
 
         try (
-            LogOutputStream outputStream = new LogOutputStream() {
-                @Override protected void processLine(String line, int level) {
-                    logger.info(line);
-                }
-            };
-            LogOutputStream errorStream = new LogOutputStream() {
-                @Override protected void processLine(String line, int level) {
-                    logger.error(line);
-                }
-            }
-        ){
+            LogOutputStream outputStream = new InfoLogOutputStream();
+            LogOutputStream errorStream = new InfoLogOutputStream();
+        ) {
             Executor executor = new DefaultExecutor();
             executor.setStreamHandler(new PumpStreamHandler(outputStream, errorStream, inputStream));
             executor.execute(command);
