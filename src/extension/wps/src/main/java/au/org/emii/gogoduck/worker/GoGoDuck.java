@@ -431,6 +431,7 @@ public class GoGoDuck {
         command.addArgument("-4");
         command.addArgument("-h");
         command.addArgument("-O");
+        command.addArgument("--no_tmp_fl");
 
         if (files.size() == 1) {
             // Special case where we have only 1 file
