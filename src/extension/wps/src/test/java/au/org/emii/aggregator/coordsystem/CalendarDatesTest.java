@@ -1,6 +1,5 @@
 package au.org.emii.aggregator.coordsystem;
 
-import au.org.emii.aggregator.coordsystem.CalendarDates;
 import au.org.emii.aggregator.exception.AggregationException;
 import org.junit.Test;
 import ucar.ma2.Range;

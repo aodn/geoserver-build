@@ -39,7 +39,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         String timeDimension = dataset.getTimeAxis().getDimensionName();
 
         for (NetcdfVariable variable: dataset.getVariables()) {
-            if (requestedVariables != null && requestedVariables.contains(variable.getShortName())) {
+            if (requestedVariables != null && !requestedVariables.contains(variable.getShortName())) {
                 continue;
             }
 
