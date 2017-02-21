@@ -5,10 +5,15 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
+import ucar.nc2.Dimension;
+import ucar.nc2.constants.AxisType;
 import ucar.nc2.constants.CDM;
+import ucar.nc2.dataset.VariableDS;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class that can be used to unpack a variable/change its type
@@ -17,9 +22,9 @@ import java.io.IOException;
  * converted variable to be overridden as required.
  */
 
-public class VariableUnpacker {
+public class UnpackedVariable extends AbstractVariable {
 
-    private final Variable variable;
+    private final NetcdfVariable variable;
     private final Number scale;
     private final Number offset;
     private final Number[] newValidRange;
@@ -30,15 +35,20 @@ public class VariableUnpacker {
     private final Number newFillerValue;
     private final Number[] newMissingValues;
     private final DataType newDataType;
-    private final boolean conversionRequired;
     private final boolean isUnsigned;
 
-    public VariableUnpacker(Variable variable) {
-        this(variable, new UnpackerOverrides.Builder().build()); // use defaults - no overrides
+    public UnpackedVariable(NetcdfVariable variable) {
+        this(variable, null);
     }
 
-    public VariableUnpacker(Variable variable, UnpackerOverrides overrides) {
+    public UnpackedVariable(NetcdfVariable variable, UnpackerOverrides overrides) {
         this.variable = variable;
+
+        // Use defaults if no overrides specified
+
+        if (overrides == null) {
+            overrides = new UnpackerOverrides.Builder().build();
+        }
 
         // get scale factor to use
 
@@ -136,8 +146,10 @@ public class VariableUnpacker {
             newFillerValue = null;
         } else if (overrides.getNewFillerValue() != null) {
             newFillerValue = NumericTypes.valueOf(overrides.getNewFillerValue(), newDataType);
+        } else if (scale == null && offset == null && newDataType.equals(variable.getDataType())) {
+            newFillerValue = oldFillerValue;
         } else if (NumericTypes.isDefaultFillValue(oldFillerValue, variable.getDataType())) {
-                newFillerValue = NumericTypes.defaultFillValue(newDataType);
+            newFillerValue = NumericTypes.defaultFillValue(newDataType);
         } else {
             newFillerValue = applyScaleOffset(oldFillerValue);
         }
@@ -162,21 +174,72 @@ public class VariableUnpacker {
         } else {
             newMissingValues = applyScaleOffset(oldMissingValues);
         }
-
-        // do we need to convert individual values?
-
-        conversionRequired = scale != null || offset != null || newFillerValue != null || newMissingValues != null
-            || newDataType != null;
     }
 
+    @Override
+    public String getShortName() {
+        return variable.getShortName();
+    }
+
+    @Override
+    public DataType getDataType() {
+        return newDataType;
+    }
+
+    @Override
+    public AxisType getAxisType() {
+        return variable.getAxisType();
+    }
+
+    @Override
+    public boolean isUnlimited() {
+        return false;
+    }
+
+    @Override
     public Array read(int[] origin, int[] slice) throws IOException, InvalidRangeException {
         Array data = variable.read(origin, slice);
 
-        if (conversionRequired) {
+        if (conversionRequired()) {
             return convert(data);
         } else {
             return data;
         }
+    }
+
+    @Override
+    public boolean isUnsigned() {
+        return (scale != null || offset != null) ? false : variable.isUnsigned();
+    }
+
+    @Override
+    public List<Dimension> getDimensions() {
+        return variable.getDimensions();
+    }
+
+    @Override
+    public List<Attribute> getAttributes() {
+        List<Attribute> attributes = new ArrayList<Attribute>();
+
+        for (Attribute attribute: variable.getAttributes()) {
+            if (attribute.getShortName().equals(CDM.SCALE_FACTOR) || attribute.getShortName().equals(CDM.ADD_OFFSET)) {
+                // ignore scale/offset - the variable has been unpacked
+            } else if (attribute.getShortName().equals(CDM.FILL_VALUE)) {
+                attributes.add(new Attribute(CDM.FILL_VALUE, newFillerValue));
+            } else if (attribute.getShortName().equals(CDM.VALID_RANGE)) {
+                attributes.add(new Attribute(CDM.VALID_RANGE, Array.factory(newValidRange)));
+            } else if (attribute.getShortName().equals("valid_min")) {
+                attributes.add(new Attribute("valid_min", newValidMin));
+            } else if (attribute.getShortName().equals("valid_max")) {
+                attributes.add(new Attribute("valid_max", newValidMax));
+            } else if (attribute.getShortName().equals(CDM.MISSING_VALUE)) {
+                attributes.add(new Attribute(CDM.MISSING_VALUE, Array.factory(newMissingValues)));
+            } else {
+                attributes.add(attribute);
+            }
+        }
+
+        return attributes;
     }
 
     // Access to derived metadata for testing purposes
@@ -202,6 +265,23 @@ public class VariableUnpacker {
     }
 
     // Private methods
+
+    private boolean conversionRequired() {
+        return scale != null || offset != null || isFillerModified() || isMissingValuesModified()
+            || isDataTypeModified();
+    }
+
+    private boolean isMissingValuesModified() {
+        return newMissingValues != null && oldMissingValues != null && !Arrays.equals(newMissingValues, oldMissingValues);
+    }
+
+    private boolean isFillerModified() {
+        return newFillerValue != null && newFillerValue !=  null && !oldFillerValue.equals(newFillerValue);
+    }
+
+    private boolean isDataTypeModified() {
+        return newDataType != null && !newDataType.equals(variable.getDataType());
+    }
 
     private Number[] applyScaleOffset(Number[] oldMissingValues) {
         Number[] result = new Number[oldMissingValues.length];
