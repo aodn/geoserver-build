@@ -1,6 +1,6 @@
 package au.org.emii.aggregator.variable;
 
-import au.org.emii.aggregator.variable.datatype.NumericTypes;
+import au.org.emii.aggregator.datatype.NumericTypes;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static au.org.emii.aggregator.attribute.Attributes.VALID_MAX;
+import static au.org.emii.aggregator.attribute.Attributes.VALID_MIN;
 
 /**
  * Class that can be used to unpack a variable/change its type
@@ -103,11 +106,9 @@ public class UnpackedVariable extends AbstractVariable {
 
         // get valid min to use
 
-        Attribute validMinAttribute = variable.findAttribute("valid_min");
+        Attribute validMinAttribute = variable.findAttribute(VALID_MIN);
 
-        if (newValidRange != null) {
-            newValidMin = null;
-        } else if (overrides.getNewValidMin() != null) {
+        if (overrides.getNewValidMin() != null) {
             newValidMin = NumericTypes.valueOf(overrides.getNewValidMin(), newDataType);
         } else if (validMinAttribute == null || validMinAttribute.isString()) {
             newValidMin = null;
@@ -117,11 +118,9 @@ public class UnpackedVariable extends AbstractVariable {
 
         // get valid max to use
 
-        Attribute validMaxAttribute = variable.findAttribute("valid_max");
+        Attribute validMaxAttribute = variable.findAttribute(VALID_MAX);
 
-        if (newValidRange != null) {
-            newValidMax = null;
-        } else if (overrides.getNewValidMax() != null) {
+        if (overrides.getNewValidMax() != null) {
             newValidMax = NumericTypes.valueOf(overrides.getNewValidMax(), newDataType);
         } else if (validMaxAttribute == null || validMaxAttribute.isString()) {
             newValidMax = null;
@@ -223,15 +222,15 @@ public class UnpackedVariable extends AbstractVariable {
         for (Attribute attribute: variable.getAttributes()) {
             if (attribute.getShortName().equals(CDM.SCALE_FACTOR) || attribute.getShortName().equals(CDM.ADD_OFFSET)) {
                 // ignore scale/offset - the variable has been unpacked
-            } else if (attribute.getShortName().equals(CDM.FILL_VALUE)) {
+            } else if (attribute.getShortName().equals(CDM.FILL_VALUE) && newFillerValue != null) {
                 attributes.add(new Attribute(CDM.FILL_VALUE, newFillerValue));
-            } else if (attribute.getShortName().equals(CDM.VALID_RANGE)) {
+            } else if (attribute.getShortName().equals(CDM.VALID_RANGE) && newValidRange != null) {
                 attributes.add(new Attribute(CDM.VALID_RANGE, Array.factory(newValidRange)));
-            } else if (attribute.getShortName().equals("valid_min")) {
-                attributes.add(new Attribute("valid_min", newValidMin));
-            } else if (attribute.getShortName().equals("valid_max")) {
-                attributes.add(new Attribute("valid_max", newValidMax));
-            } else if (attribute.getShortName().equals(CDM.MISSING_VALUE)) {
+            } else if (attribute.getShortName().equals(VALID_MIN) && newValidMin != null) {
+                attributes.add(new Attribute(VALID_MIN, newValidMin));
+            } else if (attribute.getShortName().equals(VALID_MAX) && newValidMax != null) {
+                attributes.add(new Attribute(VALID_MAX, newValidMax));
+            } else if (attribute.getShortName().equals(CDM.MISSING_VALUE) && newMissingValues != null) {
                 attributes.add(new Attribute(CDM.MISSING_VALUE, Array.factory(newMissingValues)));
             } else {
                 attributes.add(attribute);

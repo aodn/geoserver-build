@@ -1,4 +1,4 @@
-package au.org.emii.aggregator.variable.datatype;
+package au.org.emii.aggregator.datatype;
 
 import static ucar.nc2.iosp.netcdf3.N3iosp.NC_FILL_BYTE;
 
@@ -21,4 +21,11 @@ public class ByteDataType implements NumericType {
     public Number defaultFillValue() {
         return NC_FILL_BYTE;
     }
+
+    @Override
+    public Number parse(String value) {
+        return Byte.parseByte(value);
+    }
+
+
 }

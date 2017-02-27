@@ -6,8 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import au.org.emii.aggregator.dataset.NetcdfDatasetAdapter;
-import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
-import au.org.emii.aggregator.variable.datatype.NumericTypes;
+import au.org.emii.aggregator.datatype.NumericTypes;
 import org.junit.Ignore;
 import org.junit.Test;
 import ucar.ma2.Array;
@@ -16,9 +15,6 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.FileWriter2;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dataset.VariableDS;
 
 import java.io.IOException;
 import java.util.Date;

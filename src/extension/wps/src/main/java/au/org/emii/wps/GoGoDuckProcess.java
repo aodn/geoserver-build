@@ -85,11 +85,11 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
                 DownloadConfig downloadConfig = new DownloadConfig.ConfigBuilder()
                     .downloadDirectory(downloadDir)
-                    .localStorageLimit(200 * 1024 * 1024)
+                    .localStorageLimit(config.getStorageLimit())
                     .build();
 
-                Downloader downloader = new Downloader(60 * 1000, 60 * 1000); //TODO: allow settings to be configured
-                ExecutorService pool = Executors.newFixedThreadPool(8); //TODO: and here
+                Downloader downloader = new Downloader(config.getConnectTimeOut(), config.getReadTimeOut());
+                ExecutorService pool = Executors.newFixedThreadPool(config.getThreadCount());
 
                 ParallelDownloadManager downloadManager = new ParallelDownloadManager(downloadConfig, downloader, pool);
 
@@ -97,9 +97,9 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
                 try (
                     NetcdfAggregator aggregator = new NetcdfAggregator(
-                        outputFile, config.getVariablesToInclude(layer),
-                        parameters.getBbox(), parameters.getVerticalRange(), parameters.getTimeRange(),
-                        config.getTemplatedAttributes(layer), null)
+                        outputFile, config.getTemplate(layer),
+                        parameters.getBbox(), parameters.getVerticalRange(), parameters.getTimeRange()
+                    )
                 ){
                     for (Download download : downloadManager.download(downloads)) {
                         aggregator.add(download.getPath());

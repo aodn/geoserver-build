@@ -109,7 +109,7 @@ public abstract class AbstractVariable implements NetcdfVariable {
             Array values = read();
 
             double min = Double.MAX_VALUE;
-            double max = Double.MIN_VALUE;
+            double max = Double.MAX_VALUE * -1;
 
             for (int i=0; i<values.getSize(); i++) {
                 double value = values.getDouble(i);

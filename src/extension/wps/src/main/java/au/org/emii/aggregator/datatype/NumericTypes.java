@@ -1,4 +1,4 @@
-package au.org.emii.aggregator.variable.datatype;
+package au.org.emii.aggregator.datatype;
 
 import ucar.ma2.DataType;
 
@@ -45,5 +45,9 @@ public class NumericTypes {
 
     public static Number defaultFillValue(DataType dataType) {
         return get(dataType).defaultFillValue();
+    }
+
+    public static Number parse(DataType dataType, String value) {
+        return get(dataType).parse(value);
     }
 }
