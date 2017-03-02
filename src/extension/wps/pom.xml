@@ -17,14 +17,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>netcdf4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>opendap</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
