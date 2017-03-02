@@ -1,10 +1,24 @@
 package au.org.emii.wps;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import au.org.emii.aggregator.NetcdfAggregator;
+import au.org.emii.download.Download;
+import au.org.emii.download.DownloadConfig;
+import au.org.emii.download.DownloadRequest;
+import au.org.emii.download.Downloader;
+import au.org.emii.download.ParallelDownloadManager;
+import au.org.emii.wps.gogoduck.converter.Converter;
+import au.org.emii.wps.gogoduck.index.FeatureSourceIndexReader;
+import au.org.emii.wps.gogoduck.index.IndexReader;
+import au.org.emii.wps.gogoduck.parameter.SubsetParameters;
+import org.apache.commons.io.FileUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
@@ -18,27 +32,24 @@ import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.org.emii.gogoduck.worker.GoGoDuck;
-import au.org.emii.utils.GoGoDuckConfig;
-import au.org.emii.gogoduck.exception.GoGoDuckException;
+import au.org.emii.wps.gogoduck.config.GoGoDuckConfig;
+import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
-    static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
     private final Catalog catalog;
-    private final GeoServerResourceLoader resourceLoader;
-    private GoGoDuckConfig goGoDuckConfig;
+    private GoGoDuckConfig config;
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
-            Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
+           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
         super(resourceManager, httpNotifier, geoserver);
         this.catalog = catalog;
-        this.resourceLoader = resourceLoader;
-        this.goGoDuckConfig = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
+        this.config = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
     }
 
-    @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
+    @DescribeResult(description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
             "chosenMimeType=format"})
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
@@ -54,29 +65,65 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             ProgressListener progressListener
     ) throws ProcessException {
         try {
-            if (goGoDuckConfig.getThreadCount() <= 0) {
-                throw new ProcessException("threadCount set to 0 or below, job will not run");
-            }
-
-            File outputFile;
+            Path convertedFile;
+            String mimeType;
+            String extension;
 
             try {
-                outputFile = getResourceManager().getTemporaryResource(".nc").file();
-            } catch (Exception e) {
-                logger.error(e.toString(), e);
-                throw new GoGoDuckException("Unable to obtain temporary file required for aggregation", e);
+                SubsetParameters parameters = SubsetParameters.parse(subset);
+
+                IndexReader indexReader = new FeatureSourceIndexReader(catalog, config.getUrlSubstitution(layer));
+
+                Set<DownloadRequest> downloads = indexReader.getDownloadList(layer, config.getTimeField(),
+                    config.getSizeField(), config.getFileUrlField(), parameters);
+
+                enforceFileLimits(downloads, config.getFileLimit(), config.getFileSizeLimit());
+
+                Path workingDir = Paths.get(getWorkingDir());
+                Path downloadDir = workingDir.resolve("downloads");
+                Files.createDirectories(downloadDir);
+
+                DownloadConfig downloadConfig = new DownloadConfig.ConfigBuilder()
+                    .downloadDirectory(downloadDir)
+                    .localStorageLimit(200 * 1024 * 1024)
+                    .build();
+
+                Downloader downloader = new Downloader(60 * 1000, 60 * 1000); //TODO: allow settings to be configured
+                ExecutorService pool = Executors.newFixedThreadPool(8); //TODO: and here
+
+                ParallelDownloadManager downloadManager = new ParallelDownloadManager(downloadConfig, downloader, pool);
+
+                Path outputFile = workingDir.resolve("aggregation.nc");
+
+                try (
+                    NetcdfAggregator aggregator = new NetcdfAggregator(
+                        outputFile, config.getVariablesToInclude(layer),
+                        parameters.getBbox(), parameters.getVerticalRange(), parameters.getTimeRange(),
+                        config.getTemplatedAttributes(layer), null)
+                ){
+                    for (Download download : downloadManager.download(downloads)) {
+                        aggregator.add(download.getPath());
+                        downloadManager.remove();
+                        throwIfCancelled(progressListener);
+                    }
+                } finally {
+                    pool.shutdownNow();
+                }
+
+                Converter converter = Converter.newInstance(format);
+                convertedFile = workingDir.resolve("converted" + converter.getExtension());
+                converter.convert(outputFile, convertedFile);
+                mimeType = converter.getMimeType();
+                extension = converter.getExtension();
+                throwIfCancelled(progressListener);
             }
-
-            String filePath = outputFile.toPath().toAbsolutePath().toString();
-
-            GoGoDuck ggd = new GoGoDuck(catalog, layer, subset, filePath, format, goGoDuckConfig);
-
-            ggd.setTmpDir(getWorkingDir());
-            ggd.setProgressListener(progressListener);
-
-            Path outputPath = ggd.run();
+            catch (Exception e) {
+                String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
+                logger.error(errMsg, e);
+                throw new GoGoDuckException(e.getMessage(), e);
+            }
             notifySuccess(callbackUrl, callbackParams);
-            return new FileRawData(outputPath.toFile(), ggd.getMimeType(), ggd.getExtension());
+            return new FileRawData(convertedFile.toFile(), mimeType, extension);
         } catch (GoGoDuckException e) {
             logger.error(e.toString(), e);
             notifyFailure(callbackUrl, callbackParams);
@@ -87,4 +134,37 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             throw new ProcessException("Failed to Subset/Download gridded collection(s)");
         }
     }
+
+    private void enforceFileLimits(Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+        logger.info("Enforcing file size limits...");
+
+        if (downloadList.size() > limit) {
+            throw new GoGoDuckException(String.format("Aggregation asked for %d files, we allow only %d", downloadList.size(), limit));
+        } else if (downloadList.size() == 0) {
+            logger.error("No files returned for aggregation");
+            throw new GoGoDuckException("No files returned from geoserver");
+        }
+
+        long totalSize = 0;
+
+        for (DownloadRequest download: downloadList) {
+            totalSize += download.getSize();
+        }
+
+        if (fileSizeLimit != 0.0 && totalSize != 0.0 && totalSize > fileSizeLimit) {
+            String totalFileSize = FileUtils.byteCountToDisplaySize(totalSize);
+            String sizeLimit = FileUtils.byteCountToDisplaySize((long)fileSizeLimit);
+            throw new GoGoDuckException(String.format("Total file size %s for %s files, exceeds the limit %s", totalFileSize, downloadList.size(), sizeLimit));
+        }
+    }
+
+    private synchronized boolean isCancelled(ProgressListener progressListener) {
+        return null != progressListener && progressListener.isCanceled();
+    }
+
+    private void throwIfCancelled(ProgressListener progressListener) throws GoGoDuckException {
+        if (isCancelled(progressListener))
+            throw new GoGoDuckException("Job cancelled");
+    }
+
 }

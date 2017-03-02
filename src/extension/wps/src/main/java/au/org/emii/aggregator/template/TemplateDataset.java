@@ -29,7 +29,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
                            Map<String, ValueTemplate> attributeModifications,
                            CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
 
-        this.globalAttributes = getGlobalAttributes(dataset, attributeModifications, timeRange, verticalSubset, bbox);
+        this.globalAttributes = getGlobalAttributes(dataset, attributeModifications, timeRange);
 
         // Determine variables/dimensions to add
 
@@ -39,7 +39,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         String timeDimension = dataset.getTimeAxis().getDimensionName();
 
         for (NetcdfVariable variable: dataset.getVariables()) {
-            if (requestedVariables != null && requestedVariables.contains(variable.getShortName())) {
+            if (requestedVariables != null && !requestedVariables.contains(variable.getShortName())) {
                 continue;
             }
 
@@ -83,7 +83,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return dimensions;
     }
 
-    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, Map<String, ValueTemplate> attributeModifications, CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
+    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, Map<String, ValueTemplate> attributeModifications, CalendarDateRange timeRange) {
         // Build substitutable values
 
         LatLonRect newBbox = dataset.getBbox();
