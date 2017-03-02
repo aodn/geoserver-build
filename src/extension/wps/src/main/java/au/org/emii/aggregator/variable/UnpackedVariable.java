@@ -159,8 +159,7 @@ public class UnpackedVariable extends AbstractVariable {
         if (missingValueAttribute == null || missingValueAttribute.isString()) {
             oldMissingValues = null;
         } else {
-            Class classType = missingValueAttribute.getDataType().getClassType();
-            oldMissingValues = (Number[]) missingValueAttribute.getValues().get1DJavaArray(classType);
+            oldMissingValues = getNumericValues(missingValueAttribute);
         }
 
         // get new missing value to use
@@ -172,6 +171,16 @@ public class UnpackedVariable extends AbstractVariable {
         } else {
             newMissingValues = applyScaleOffset(oldMissingValues);
         }
+    }
+
+    private Number[] getNumericValues(Attribute attribute) {
+        Number[] result = new Number[attribute.getLength()];
+
+        for (int i=0; i<result.length; i++) {
+            result[i] = attribute.getNumericValue(i);
+        }
+
+        return result;
     }
 
     @Override
@@ -225,13 +234,13 @@ public class UnpackedVariable extends AbstractVariable {
             } else if (attribute.getShortName().equals(CDM.FILL_VALUE) && newFillerValue != null) {
                 attributes.add(new Attribute(CDM.FILL_VALUE, newFillerValue));
             } else if (attribute.getShortName().equals(CDM.VALID_RANGE) && newValidRange != null) {
-                attributes.add(new Attribute(CDM.VALID_RANGE, Array.factory(newValidRange)));
+                attributes.add(new Attribute(CDM.VALID_RANGE, getArray(newValidRange)));
             } else if (attribute.getShortName().equals(VALID_MIN) && newValidMin != null) {
                 attributes.add(new Attribute(VALID_MIN, newValidMin));
             } else if (attribute.getShortName().equals(VALID_MAX) && newValidMax != null) {
                 attributes.add(new Attribute(VALID_MAX, newValidMax));
             } else if (attribute.getShortName().equals(CDM.MISSING_VALUE) && newMissingValues != null) {
-                attributes.add(new Attribute(CDM.MISSING_VALUE, Array.factory(newMissingValues)));
+                attributes.add(new Attribute(CDM.MISSING_VALUE, getArray(newMissingValues)));
             } else {
                 attributes.add(attribute);
             }
@@ -351,6 +360,16 @@ public class UnpackedVariable extends AbstractVariable {
         }
 
         return NumericTypes.valueOf(result, newDataType);
+    }
+
+    private Array getArray(Number[] values) {
+        Array result = Array.factory(newDataType, new int[] {values.length});
+
+        for (int i=0; i<values.length; i++) {
+            result.setObject(i, values[i]);
+        }
+
+        return result;
     }
 
 }
