@@ -122,7 +122,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
 
         if (timeRange != null) {
             result.put("TIME_START", timeRange.getStart().toString());
-            result.put("TIME_END", timeRange.getStart().toString());
+            result.put("TIME_END", timeRange.getEnd().toString());
         }
 
         return result;

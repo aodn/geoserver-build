@@ -26,7 +26,7 @@ public class VariableOverrides {
     }
 
     public VariableOverrides(String name) {
-        this(name, DataType.STRING, new ArrayList<VariableAttributeOverride>());
+        this(name, null, new ArrayList<VariableAttributeOverride>());
     }
 
     public String getName() {
