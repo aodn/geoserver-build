@@ -10,7 +10,6 @@ import ucar.nc2.Dimension;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

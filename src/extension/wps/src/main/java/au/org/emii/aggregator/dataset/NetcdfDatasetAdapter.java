@@ -105,8 +105,4 @@ public class NetcdfDatasetAdapter extends AbstractNetcdfDataset implements AutoC
     public void close() throws IOException {
         dataset.close();
     }
-
-    public Map<String, UnpackerOverrides> getUnpackerOverrides() {
-        return null;
-    }
 }

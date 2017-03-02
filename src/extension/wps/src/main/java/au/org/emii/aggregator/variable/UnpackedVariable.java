@@ -8,7 +8,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.constants.CDM;
-import ucar.nc2.dataset.VariableDS;
 
 import java.io.IOException;
 import java.util.ArrayList;

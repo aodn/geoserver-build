@@ -26,7 +26,6 @@ public class NetcdfAggregatorTest {
     @Before
     public void createOutputFile() throws IOException {
         outputFile = Files.createTempFile("output", "nc");
-        Files.deleteIfExists(outputFile);
     }
 
     @Test

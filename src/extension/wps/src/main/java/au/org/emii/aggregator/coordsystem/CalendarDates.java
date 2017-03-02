@@ -1,19 +1,16 @@
 package au.org.emii.aggregator.coordsystem;
 
 import au.org.emii.aggregator.exception.AggregationException;
-import com.amazonaws.services.kms.model.InvalidKeyUsageException;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 
-import java.util.Date;
 import java.util.List;
 
-import static ucar.nc2.time.CalendarDate.parseISOformat;
 
 /**
- * Created by craigj on 17/02/17.
+ * Operations on a list of calendar dates
  */
 public class CalendarDates {
     private final List<CalendarDate> dates;

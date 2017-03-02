@@ -12,7 +12,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
@@ -62,17 +61,18 @@ public class NetcdfAggregator implements AutoCloseable {
     private final Map<String, ValueTemplate> attributeChanges;
     private final Map<String, UnpackerOverrides> configuredOverrides;
 
-    private Map<String, UnpackerOverrides> unpackerOverrides;
-
     private NetcdfFileWriter writer;
 
     private NetcdfDatasetIF templateDataset;
+    private boolean fileProcessed;
 
     public NetcdfAggregator(Path outputPath, Set<String> requestedVariables,
                             LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange,
                             Map<String, ValueTemplate> attributeChanges,
                             Map<String, UnpackerOverrides> configuredOverrides
     ) {
+        assertOutputPathValid(outputPath);
+
         this.outputPath = outputPath;
         this.requestedVariables = requestedVariables;
         this.bbox = bbox;
@@ -80,18 +80,20 @@ public class NetcdfAggregator implements AutoCloseable {
         this.dateRange = dateRange;
         this.attributeChanges = attributeChanges != null ? attributeChanges : new HashMap<String, ValueTemplate>();
         this.configuredOverrides = configuredOverrides != null ? configuredOverrides : new HashMap<String, UnpackerOverrides>();
+
+        this.fileProcessed = false;
     }
 
     public void add(Path datasetLocation) throws AggregationException {
         try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, getUnpackerOverrides())) {
             NetcdfDatasetIF subsettedDataset = dataset.subset(dateRange, verticalSubset, bbox);
 
-            if (!Files.exists(outputPath)) {
+            if (!fileProcessed) {
                 logger.info("Creating output file {} using {} as a template", outputPath, datasetLocation);
                 templateDataset = new TemplateDataset(subsettedDataset, requestedVariables, attributeChanges,
                     dateRange, verticalSubset, bbox);
                 createFileFromTemplate(templateDataset);
-                unpackerOverrides = dataset.getUnpackerOverrides();
+                fileProcessed = true;
             }
 
             logger.info("Adding {} to output file", datasetLocation);
@@ -106,6 +108,16 @@ public class NetcdfAggregator implements AutoCloseable {
     public void close() throws IOException {
         if (writer != null) {
             writer.close();
+        }
+    }
+
+    private void assertOutputPathValid(Path outputPath) {
+        try {
+            if (Files.exists(outputPath) && Files.size(outputPath) > 0L) {
+                throw new IllegalArgumentException(String.format("Output file %s exists and is not empty", outputPath.toString()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -183,21 +195,33 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
+    // Add time slices (records) from source variable to output variable
     private void append(NetcdfVariable srcVariable) throws AggregationException {
         try {
             Variable destVariable = writer.findVariable(srcVariable.getShortName());
-            int[] shape = srcVariable.getShape();
-            int[] slice = srcVariable.getShape();
-            slice[0] = 1;
-            int[] srcOrigin = new int[shape.length];
-            int[] destShape = destVariable.getShape();
-            int[] destOrigin = new int[destShape.length];
-            destOrigin[0] = destShape[0];
 
-            for (int i = 0; i < shape[0]; i++) {
+            // determine number of time slices in the source variable
+            int timeSlicesCount = srcVariable.getShape()[0]; // assumes time dimension is slowest varying i.e. the first
+
+            // copy one time slice at a time for the moment
+            int[] timeSlice = srcVariable.getShape();
+            timeSlice[0] = 1;
+
+            // start copying from the start of the source variable
+            int[] srcOrigin = new int[srcVariable.getRank()];
+
+            // start adding at the end of the destination variable
+            int[] destOrigin = new int[destVariable.getRank()];
+            destOrigin[0] = destVariable.getShape()[0];
+
+            // add each time slice from the source variable to the output variable
+            for (int i=0; i<timeSlicesCount; i++) {
+                // get timeslice from source variable
                 srcOrigin[0] = i;
-                Array data = srcVariable.read(srcOrigin, slice);
+                Array data = srcVariable.read(srcOrigin, timeSlice);
+                // add it to the destination variable
                 writer.write(destVariable, destOrigin, data);
+                // want to add after this one next time
                 destOrigin[0]++;
             }
         } catch (IOException |InvalidRangeException e) {
@@ -237,7 +261,7 @@ public class NetcdfAggregator implements AutoCloseable {
 
         if (missingValuesAttribute != null) {
             Number[] missingValues = new Number[missingValuesAttribute.getLength()];
-            for (int i=0; i< missingValues.length; i++) {
+            for (int i=0; i<missingValues.length; i++) {
                 missingValues[i] = missingValuesAttribute.getNumericValue(i);
             }
             builder.newMissingValues(missingValues);

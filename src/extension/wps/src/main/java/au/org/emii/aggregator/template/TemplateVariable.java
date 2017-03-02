@@ -1,6 +1,5 @@
 package au.org.emii.aggregator.template;
 
-import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.AbstractVariable;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import ucar.ma2.Array;
