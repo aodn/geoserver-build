@@ -1,43 +1,52 @@
 package au.org.emii.wps.gogoduck.config;
 
 
-import au.org.emii.aggregator.template.ValueTemplate;
+import au.org.emii.aggregator.overrides.AggregationOverrides;
+import au.org.emii.aggregator.overrides.AggregationOverridesReader;
+import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
+import au.org.emii.aggregator.overrides.VariableOverrides;
 import au.org.emii.core.Config;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import org.apache.commons.lang.StringUtils;
 import org.geoserver.catalog.Catalog;
 
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 public class GoGoDuckConfig extends Config {
 
-    private final String GOGODUCK_CONFIG_FILE = "gogoduck.xml";
-    private final String DEFAULT_CONFIG_FILE = "wps/gogoduck.xml";
-    private final String FILE_PREFIX = "/gogoduck/";
-    private final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/";
-    private final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
+    private static final String GOGODUCK_CONFIG_FILE = "gogoduck.xml";
+    private static final String DEFAULT_CONFIG_FILE = "wps/gogoduck.xml";
+    private static final String FILE_PREFIX = "/gogoduck/";
+    private static final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/";
+    private static final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
+    private static final String TEMPLATES = "templates/template";
 
-    private final String FILE_LIMIT_KEY = FILE_PREFIX + "fileLimit";
-    private final String URL_SUBSTITUTION = FILE_PREFIX + "urlSubstitution";
+    private static final String FILE_LIMIT_KEY = FILE_PREFIX + "fileLimit";
+    private static final String URL_SUBSTITUTION = FILE_PREFIX + "urlSubstitution";
 
-    private final String TITLE = GLOBAL_ATTRIBUTE_PREFIX + "title";
-    private final String LATITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "latitudeStart";
-    private final String LATITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "latitudeEnd";
-    private final String LONGITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "longitudeStart";
-    private final String LONGITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "longitudeEnd";
-    private final String TIME_START = GLOBAL_ATTRIBUTE_PREFIX + "timeStart";
-    private final String TIME_END = GLOBAL_ATTRIBUTE_PREFIX + "timeEnd";
+    private static final String TITLE = GLOBAL_ATTRIBUTE_PREFIX + "title";
+    private static final String LATITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "latitudeStart";
+    private static final String LATITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "latitudeEnd";
+    private static final String LONGITUDE_START = GLOBAL_ATTRIBUTE_PREFIX + "longitudeStart";
+    private static final String LONGITUDE_END = GLOBAL_ATTRIBUTE_PREFIX + "longitudeEnd";
+    private static final String TIME_START = GLOBAL_ATTRIBUTE_PREFIX + "timeStart";
+    private static final String TIME_END = GLOBAL_ATTRIBUTE_PREFIX + "timeEnd";
 
-    private final String TIME_FIELD = FILE_PREFIX + "timeField";
-    private final String SIZE_FIELD = FILE_PREFIX + "sizeField";
-    private final String FILE_SIZE_LIMIT = FILE_PREFIX + "fileSizeLimit";
-    private final String FILE_URL_FIELD = FILE_PREFIX + "fileUrlField";
+    private static final String TIME_FIELD = FILE_PREFIX + "timeField";
+    private static final String SIZE_FIELD = FILE_PREFIX + "sizeField";
+    private static final String FILE_SIZE_LIMIT = FILE_PREFIX + "fileSizeLimit";
+    private static final String FILE_URL_FIELD = FILE_PREFIX + "fileUrlField";
+
+    private static final String STORAGE_LIMIT_KEY = "storageLimit";
+    private static final String CONNECT_TIMEOUT_KEY = "connectTimeOut";
+    private static final String READ_TIMEOUT_KEY = "readTimeOut";
+    private static final String THREAD_COUNT_KEY = "poolSize";
 
     @Override
     public String getDefaultConfigFile() {
@@ -81,9 +90,15 @@ public class GoGoDuckConfig extends Config {
         }
     }
 
-    public Set<String> getVariablesToInclude(String layer)  {
+    public List<VariableOverrides> getVariables(String layer)  {
         try {
-            return new LinkedHashSet<>(getConfigList(VARIABLES_TO_INCLUDE, getLayerConfigFilePath(layer)));
+            List<VariableOverrides> result = new ArrayList<>();
+
+            for (String variableName: getConfigList(VARIABLES_TO_INCLUDE, getLayerConfigFilePath(layer))) {
+                result.add(new VariableOverrides(variableName));
+            }
+
+            return result;
         } catch (Exception e) {
             throw new GoGoDuckException(String.format("Error reading variables to include from config for %s", layer), e);
         }
@@ -145,37 +160,110 @@ public class GoGoDuckConfig extends Config {
         }
     }
 
-    public Map<String, ValueTemplate> getTemplatedAttributes(String featureTypeName) {
-        Map<String, ValueTemplate> result = new LinkedHashMap<>();
+    public List<GlobalAttributeOverride> getGlobalAttributes(String featureTypeName) {
+        List<GlobalAttributeOverride> result = new ArrayList<>();
 
         // Support current method of specifying attributes to add or replace
 
-        result.put(
-            getTitle(featureTypeName),
-            new ValueTemplate(Pattern.compile("(.*?)(,[^,]*)?"), "${1}, ${TIME_START}, ${TIME_END}")
+        result.add(
+            new GlobalAttributeOverride(getTitle(featureTypeName), "(.*?)(,[^,]*)?",
+                "${1}, ${TIME_START}, ${TIME_END}")
         );
 
-        result.put(getLatitudeStart(featureTypeName), new ValueTemplate("${LAT_MIN}"));
-        result.put(getLatitudeEnd(featureTypeName), new ValueTemplate("${LAT_MAX}"));
+        result.add(new GlobalAttributeOverride(getLatitudeStart(featureTypeName), "${LAT_MIN}"));
+        result.add(new GlobalAttributeOverride(getLatitudeEnd(featureTypeName), "${LAT_MAX}"));
 
-        result.put(getLongitudeStart(featureTypeName), new ValueTemplate("${LON_MIN}"));
-        result.put(getLongitudeEnd(featureTypeName), new ValueTemplate("${LON_MAX}"));
+        result.add(new GlobalAttributeOverride(getLongitudeStart(featureTypeName), "${LON_MIN}"));
+        result.add(new GlobalAttributeOverride(getLongitudeEnd(featureTypeName), "${LON_MAX}"));
 
         for (String timeStartEntry : getTimeStart(featureTypeName)) {
-            result.put(timeStartEntry, new ValueTemplate("${TIME_START}"));
+            result.add(new GlobalAttributeOverride(timeStartEntry, "${TIME_START}"));
         }
 
         for (String timeEndEntry : getTimeEnd(featureTypeName)) {
-            result.put(timeEndEntry, new ValueTemplate("${TIME_END}"));
+            result.add(new GlobalAttributeOverride(timeEndEntry, "${TIME_END}"));
         }
-
-        //TODO: Support more generic way of specifying changes to attributes
 
         return result;
     }
 
+    public AggregationOverrides getTemplate(String layer) {
+        try {
+            AggregationOverrides aggregationOverrides = loadTemplate(layer);
+
+            // For the moment default to creating template from old config until replaced
+            if (aggregationOverrides.getAttributes().size() == 0 && aggregationOverrides.getVariableOverridesList().size() == 0) {
+                return new AggregationOverrides(getGlobalAttributes(layer), getVariables(layer));
+            }
+
+            return aggregationOverrides;
+        } catch (Exception e) {
+            throw new GoGoDuckException(String.format("Error reading aggregation overrides for layer %s", layer), e);
+        }
+
+    }
+
+    private AggregationOverrides loadTemplate(String layer) throws Exception {
+        Map<String, String> templates = getConfigMap(TEMPLATES, "match", getLayerConfigFilePath(layer));
+
+        String templateName = null;
+
+        for (Entry<String, String> entry: templates.entrySet()) {
+            if (Pattern.matches(entry.getKey(), layer)) {
+                templateName = entry.getValue();
+                break;
+            }
+        }
+
+        if (templateName == null) {
+            // Default overrides (none)
+            return new AggregationOverrides();
+        }
+
+        return AggregationOverridesReader.load(Paths.get(getConfigFilePath("wps/" + templateName + ".xml")));
+    }
 
     private String getLayerConfigFilePath(String layer) throws Exception {
         return getLayerConfigPath(layer, GOGODUCK_CONFIG_FILE);
+    }
+
+    public long getStorageLimit() {
+        String storageLimit = getConfig(STORAGE_LIMIT_KEY, DEFAULT_CONFIG_FILE);
+        
+        if (storageLimit == null) {
+            return 200 * 1024 * 1024; // default is 200 MiB
+        } else {
+            return Long.parseLong(storageLimit);
+        }
+    }
+
+    public int getConnectTimeOut() {
+        String connectTimeOut = getConfig(CONNECT_TIMEOUT_KEY, DEFAULT_CONFIG_FILE);
+
+        if (connectTimeOut == null) {
+            return 60 * 1000; // default is 60 seconds
+        } else {
+            return Integer.parseInt(connectTimeOut);
+        }
+    }
+
+    public int getReadTimeOut() {
+        String readTimeOut = getConfig(READ_TIMEOUT_KEY, DEFAULT_CONFIG_FILE);
+
+        if (readTimeOut == null) {
+            return 60 * 1000; // default is 60 seconds
+        } else {
+            return Integer.parseInt(readTimeOut);
+        }
+    }
+
+    public int getThreadCount() {
+        String threadCount = getConfig(THREAD_COUNT_KEY, DEFAULT_CONFIG_FILE);
+
+        if (threadCount == null) {
+            return 8; // default is 8 threads
+        } else {
+            return Integer.parseInt(threadCount);
+        }
     }
 }

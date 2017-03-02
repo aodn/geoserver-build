@@ -1,4 +1,4 @@
-package au.org.emii.aggregator.variable.datatype;
+package au.org.emii.aggregator.datatype;
 
 import static ucar.nc2.iosp.netcdf3.N3iosp.NC_FILL_FLOAT;
 
@@ -20,5 +20,10 @@ public class FloatDataType implements NumericType {
     @Override
     public Number defaultFillValue() {
         return NC_FILL_FLOAT;
+    }
+
+    @Override
+    public Number parse(String value) {
+        return Float.parseFloat(value);
     }
 }

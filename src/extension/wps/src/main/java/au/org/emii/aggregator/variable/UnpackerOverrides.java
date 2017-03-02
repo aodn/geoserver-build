@@ -64,7 +64,7 @@ public class UnpackerOverrides {
         }
 
         public Builder newValidRange(Number[] newValidRange) {
-            if (newValidRange.length != 2) {
+            if (newValidRange != null && newValidRange.length != 2) {
                 throw new IllegalArgumentException("Expected two values - minimum/maximum");
             }
 
@@ -98,7 +98,7 @@ public class UnpackerOverrides {
         }
 
         public Builder newDataType(DataType newDataType) {
-            if (!newDataType.isNumeric()) {
+            if (newDataType != null && !newDataType.isNumeric()) {
                 throw new UnsupportedOperationException(String.format("Only conversion between numeric data types is supported"));
             }
 

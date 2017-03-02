@@ -1,4 +1,4 @@
-package au.org.emii.aggregator.variable.datatype;
+package au.org.emii.aggregator.datatype;
 
 /**
  * Numeric DataType helper interface
@@ -9,4 +9,6 @@ public interface NumericType {
     boolean isDefaultFillValue(Number value);
 
     Number defaultFillValue();
+
+    Number parse(String value);
 }
