@@ -61,6 +61,7 @@ public class NetcdfAggregator implements AutoCloseable {
 
     private NetcdfDatasetIF templateDataset;
     private boolean fileProcessed;
+    private Map<String, UnpackerOverrides> unpackerOverrides;
 
     public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides,
                             LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange
@@ -73,18 +74,22 @@ public class NetcdfAggregator implements AutoCloseable {
         this.verticalSubset = verticalSubset;
         this.dateRange = dateRange;
 
-        this.fileProcessed = false;
+        fileProcessed = false;
+
+        // use overrides specified in config if any when unpacking the first dataset
+        unpackerOverrides = getUnpackerOverrides(aggregationOverrides.getVariableOverridesList());
     }
 
     public void add(Path datasetLocation) throws AggregationException {
-        try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, getUnpackerOverrides())) {
+        try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, unpackerOverrides)) {
             NetcdfDatasetIF subsettedDataset = dataset.subset(dateRange, verticalSubset, bbox);
 
             if (!fileProcessed) {
+                unpackerOverrides = getOverridesApplied(dataset); // ensure same changes applied to all other datasets
                 logger.info("Creating output file {} using {} as a template", outputPath, datasetLocation);
                 templateDataset = new TemplateDataset(subsettedDataset, aggregationOverrides,
                     dateRange, verticalSubset, bbox);
-                createFileFromTemplate(templateDataset);
+                copyToOutputFile(templateDataset);
                 fileProcessed = true;
             }
 
@@ -113,7 +118,7 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
-    private void createFileFromTemplate(NetcdfDatasetIF template) throws AggregationException {
+    private void copyToOutputFile(NetcdfDatasetIF template) throws AggregationException {
         try {
             writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4,
                 outputPath.toString(), null);
@@ -221,14 +226,10 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
-    private Map<String, UnpackerOverrides> getUnpackerOverrides() {
-        if (templateDataset == null) {
-            return getUnpackerOverrides(aggregationOverrides.getVariableOverridesList());
-        }
-
+    private Map<String, UnpackerOverrides> getOverridesApplied(NetcdfDatasetIF dataset) {
         Map<String, UnpackerOverrides> result = new LinkedHashMap<>();
 
-        for (NetcdfVariable variable: templateDataset.getVariables()) {
+        for (NetcdfVariable variable: dataset.getVariables()) {
             result.put(variable.getShortName(), getUnpackerOverrides(variable));
         }
 
