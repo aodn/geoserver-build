@@ -38,20 +38,18 @@ import au.org.emii.notifier.HttpNotifier;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
-    static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
     private final Catalog catalog;
-    private final GeoServerResourceLoader resourceLoader;
     private GoGoDuckConfig config;
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
            Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
         super(resourceManager, httpNotifier, geoserver);
         this.catalog = catalog;
-        this.resourceLoader = resourceLoader;
         this.config = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
     }
 
-    @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
+    @DescribeResult(description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
             "chosenMimeType=format"})
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")

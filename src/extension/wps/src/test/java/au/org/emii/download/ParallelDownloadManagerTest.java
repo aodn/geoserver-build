@@ -49,7 +49,7 @@ public class ParallelDownloadManagerTest {
             new DownloadRequest(new URL("http://s3-ap-southeast-2.amazonaws.com/imos-data/IMOS/ACORN/gridded_1h-avg-current-map_QC/ROT/2016/08/20/IMOS_ACORN_V_20160820T213000Z_ROT_FV01_1-hour-avg.nc"), 128654L)
         };
 
-        List<Download> downloadResults = new ArrayList<Download>();
+        List<Download> downloadResults = new ArrayList<>();
 
         DownloadConfig config = new DownloadConfig.ConfigBuilder()
             .downloadDirectory(downloadDir)
@@ -81,7 +81,7 @@ public class ParallelDownloadManagerTest {
             new DownloadRequest(new URL("http://s3-ap-southeast-2.amazonaws.com/imos-data/IMOS/ACORN/gridded_1h-avg-current-map_QC/ROT/2016/08/20/IMOS_ACORN_V_20160820T213000Z_ROT_FV01_1-hour-avg.nc"), 128654L)
         };
 
-        List<Download> downloadResults = new ArrayList<Download>();
+        List<Download> downloadResults = new ArrayList<>();
 
         DownloadConfig config = new DownloadConfig.ConfigBuilder()
             .downloadDirectory(downloadDir)
@@ -110,7 +110,7 @@ public class ParallelDownloadManagerTest {
             new DownloadRequest(new URL("http://s3-ap-southeast-2.amazonaws.com/imos-data/IMOS/ACORN/gridded_1h-avg-current-map_QC/ROT/2016/08/20/IMOS_ACORN_V_20160820T213000Z_ROT_FV01_1-hour-avg.nc"), 128654L)
         };
 
-        List<Download> downloadResults = new ArrayList<Download>();
+        List<Download> downloadResults = new ArrayList<>();
 
         DownloadConfig config = new DownloadConfig.ConfigBuilder()
             .downloadDirectory(downloadDir)
@@ -137,7 +137,7 @@ public class ParallelDownloadManagerTest {
             new DownloadRequest(new URL("http://s3-ap-southeast-2.amazonaws.com/imos-data/IMOS/ACORN/gridded_1h-avg-current-map_QC/ROT/2016/08/20/IMOS_ACORN_V_20160820T213000Z_ROT_FV01_1-hour-avg.nc"), 128654L)
         };
 
-        List<Download> downloadResults = new ArrayList<Download>();
+        List<Download> downloadResults = new ArrayList<>();
 
         DownloadConfig config = new DownloadConfig.ConfigBuilder()
             .downloadDirectory(downloadDir)
@@ -194,7 +194,7 @@ public class ParallelDownloadManagerTest {
             new DownloadRequest(new URL("http://s3-ap-southeast-2.amazonaws.com/imos-data/IMOS/ACORN/gridded_1h-avg-current-map_QC/ROT/2016/08/20/IMOS_ACORN_V_20160820T213000Z_ROT_FV01_1-hour-avg.nc"), 128654L)
         };
 
-        List<Download> downloadResults = new ArrayList<Download>();
+        List<Download> downloadResults = new ArrayList<>();
 
         DownloadConfig config = new DownloadConfig.ConfigBuilder()
             .downloadDirectory(downloadDir)
@@ -231,13 +231,7 @@ public class ParallelDownloadManagerTest {
     }
 
     private Set<DownloadRequest> toSet(DownloadRequest[] testRequests) {
-        Set<DownloadRequest> result = new LinkedHashSet<>();
-
-        for (DownloadRequest request: testRequests) {
-            result.add(request);
-        }
-
-        return result;
+        return new LinkedHashSet<>(Arrays.asList(testRequests));
     }
 
 }

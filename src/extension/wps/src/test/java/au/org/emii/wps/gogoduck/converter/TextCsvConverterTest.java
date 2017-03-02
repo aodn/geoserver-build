@@ -1,4 +1,4 @@
-package au.org.emii.wps.gogoduck.parameter;
+package au.org.emii.wps.gogoduck.converter;
 
 import au.org.emii.wps.gogoduck.converter.TextCsvConverter;
 import org.apache.commons.io.FileUtils;
@@ -34,9 +34,7 @@ public class TextCsvConverterTest {
             converter.convert(TIME_SERIES_INPUT_FILE, outputFile);
             assertTrue("CSV file generated differs from expected file", FileUtils.contentEquals(outputFile.toFile(), TIME_SERIES_OUTPUT_FILE));
         } finally {
-            if (outputFile != null) {
-                Files.delete(outputFile);
-            }
+            Files.delete(outputFile);
         }
     }
 }

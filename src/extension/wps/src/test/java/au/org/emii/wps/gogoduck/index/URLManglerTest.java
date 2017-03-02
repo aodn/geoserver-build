@@ -1,4 +1,4 @@
-package au.org.emii.wps.gogoduck.parameter;
+package au.org.emii.wps.gogoduck.index;
 
 import au.org.emii.wps.gogoduck.index.URLMangler;
 import org.junit.Test;

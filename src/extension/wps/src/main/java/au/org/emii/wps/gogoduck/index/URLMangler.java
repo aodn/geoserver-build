@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class URLMangler {
-    private Map<String, String> urlManglingMap = new HashMap<String, String>();
+    private Map<String, String> urlManglingMap = new HashMap<>();
 
     public URLMangler(Map<String, String> urlManglingMap) {
         this.urlManglingMap = urlManglingMap;

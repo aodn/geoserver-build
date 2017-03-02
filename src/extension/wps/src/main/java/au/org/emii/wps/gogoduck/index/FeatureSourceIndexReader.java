@@ -38,14 +38,11 @@ public class FeatureSourceIndexReader implements IndexReader {
     }
 
     @Override
-    public Set<DownloadRequest> getDownloadList(String profile, String timeField, String sizeField, String urlField, SubsetParameters subset) throws GoGoDuckException {
+    public Set<DownloadRequest> getDownloadList(String typeName, String timeField, String sizeField, String urlField, SubsetParameters subset) throws GoGoDuckException {
         Set<DownloadRequest> result = new LinkedHashSet<>();
 
         String timeCoverageStart = subset.getTimeRange().getStart().toString();
         String timeCoverageEnd = subset.getTimeRange().getEnd().toString();
-
-        // TODO Should include also workspace, but works also without
-        String typeName = profile;
 
         Filter cqlFilter;
 

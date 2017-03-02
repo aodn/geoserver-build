@@ -44,7 +44,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
         this.workingDir = getWorkingDir();
     }
 
-    @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
+    @DescribeResult(description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
 
     public FileRawData execute(
         @DescribeParameter(name="typeName", description="Collection to download")

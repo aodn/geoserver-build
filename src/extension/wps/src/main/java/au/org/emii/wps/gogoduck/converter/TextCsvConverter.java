@@ -45,7 +45,7 @@ public class TextCsvConverter extends Converter {
     private static final Logger logger = LoggerFactory.getLogger(TextCsvConverter.class);
 
     public TextCsvConverter() {
-        enhanceMode = new HashSet<NetcdfDataset.Enhance>();
+        enhanceMode = new HashSet<>();
         enhanceMode.add(NetcdfDataset.Enhance.ScaleMissing);
         enhanceMode.add(NetcdfDataset.Enhance.ConvertEnums);
         enhanceMode.add(NetcdfDataset.Enhance.CoordSystems);
@@ -98,11 +98,6 @@ public class TextCsvConverter extends Converter {
 
     private Variable getTimeVariable(NetcdfDataset ncDataset) {
         return ncDataset.findCoordinateAxis(AxisType.Time);
-    }
-
-    private Path getOutputFile(Path inputFile) {
-        String outputFile = String.format("%s.%s", FilenameUtils.removeExtension(inputFile.toString()), EXTENSION);
-        return Paths.get(outputFile);
     }
 
     private NetcdfDataset openNetcdfDataset(Path inputFile) throws IOException {
@@ -159,7 +154,7 @@ public class TextCsvConverter extends Converter {
 
     private Map<Variable, NetcdfReader> createVariableReaders(Set<Variable> variables)
             throws IOException {
-        Map<Variable, NetcdfReader> variableReaders = new LinkedHashMap<Variable, NetcdfReader>();
+        Map<Variable, NetcdfReader> variableReaders = new LinkedHashMap<>();
 
         for (Variable ncVariable: variables) {
             variableReaders.put(ncVariable, new NetcdfReader(ncVariable));
