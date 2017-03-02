@@ -37,8 +37,6 @@ import static au.org.emii.wps.gogoduck.util.IntegerHelper.suffix;
  *                          .build();
  *     Downloader downloader = new Downloader(60 * 1000, 60 * 1000);
  *
- *     ParallelDownloadManager downloadManager = new ParallelDownloadManager(config, downloader, pool);
- *
  *     try (ParallelDownloadManager downloadManager = new ParallelDownloadManager(config, downloader, pool) {
  *         for (Download download : downloadManager.download(requests)) {
  *             // do something with the download
@@ -64,8 +62,7 @@ public class ParallelDownloadManager implements Iterable<Download>, Iterator<Dow
         this.unactionedQueue = new LinkedList<>();
         this.inProgressQueue = new LinkedList<>();
         this.downloader = downloader;
-
-        pool = Executors.newFixedThreadPool(config.getPoolSize());
+        this.pool = Executors.newFixedThreadPool(config.getPoolSize());
     }
 
     public Iterable<Download> download(Set<DownloadRequest> downloadRequests) {
