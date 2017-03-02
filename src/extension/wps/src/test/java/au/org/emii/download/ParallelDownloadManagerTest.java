@@ -18,8 +18,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,13 +28,11 @@ public class ParallelDownloadManagerTest {
 
     private Path downloadDir;
     private Downloader downloader;
-    private ExecutorService pool;
 
     @Before
     public void setup() throws IOException {
         downloadDir = Files.createTempDirectory("download.");
         downloader = new Downloader(60*MILLISECONDS_IN_A_SECOND, 60*MILLISECONDS_IN_A_SECOND);
-        pool = Executors.newFixedThreadPool(8);
     }
 
     @Test
@@ -55,17 +51,17 @@ public class ParallelDownloadManagerTest {
             .downloadDirectory(downloadDir)
             .build();
 
-        ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
+            int i = 0;
 
-        int i = 0;
-
-        for (Download download: manager.download(toSet(testRequests))) {
-            downloadResults.add(download);
-            assertEquals(true, Files.exists(download.getPath()));
-            assertEquals(testRequests[i].getUrl(), download.getURL());
-            assertEquals(testRequests[i].getSize(), Files.size(download.getPath()));
-            manager.remove();
-            i++;
+            for (Download download : manager.download(toSet(testRequests))) {
+                downloadResults.add(download);
+                assertEquals(true, Files.exists(download.getPath()));
+                assertEquals(testRequests[i].getUrl(), download.getURL());
+                assertEquals(testRequests[i].getSize(), Files.size(download.getPath()));
+                manager.remove();
+                i++;
+            }
         }
 
         assertEquals(5, downloadResults.size());
@@ -88,13 +84,13 @@ public class ParallelDownloadManagerTest {
             .localStorageLimit(150 * KiB)
             .build();
 
-        ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
-
-        for (Download download: manager.download(toSet(testRequests))) {
-            downloadResults.add(download);
-            assertEquals(1, downloadDir.toFile().list().length);
-            Thread.sleep(100);
-            manager.remove();
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
+            for (Download download : manager.download(toSet(testRequests))) {
+                downloadResults.add(download);
+                assertEquals(1, downloadDir.toFile().list().length);
+                Thread.sleep(100);
+                manager.remove();
+            }
         }
 
         assertEquals(5, downloadResults.size());
@@ -117,11 +113,11 @@ public class ParallelDownloadManagerTest {
             .localStorageLimit(1 * KiB)
             .build();
 
-        ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
-
-        for (Download download: manager.download(toSet(testRequests))) {
-            downloadResults.add(download);
-            manager.remove();
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
+            for (Download download : manager.download(toSet(testRequests))) {
+                downloadResults.add(download);
+                manager.remove();
+            }
         }
 
         assertEquals(5, downloadResults.size());
@@ -145,11 +141,11 @@ public class ParallelDownloadManagerTest {
             .retryInterval(1)
             .build();
 
-        ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
-
-        for (Download download: manager.download(toSet(testRequests))) {
-            downloadResults.add(download);
-            manager.remove();
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
+            for (Download download : manager.download(toSet(testRequests))) {
+                downloadResults.add(download);
+                manager.remove();
+            }
         }
 
         assertEquals(5, downloadResults.size());
@@ -171,9 +167,7 @@ public class ParallelDownloadManagerTest {
                                     .retryInterval(1)
                                     .build();
 
-        try {
-            ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
-
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
             for (Download download : manager.download(toSet(testRequests))) {
                 manager.remove();
             }
@@ -200,12 +194,12 @@ public class ParallelDownloadManagerTest {
             .downloadDirectory(downloadDir)
             .build();
 
-        ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader, pool);
-
-        for (Download download: manager.download(toSet(testRequests))) {
-            downloadResults.add(download);
-            assertEquals(true, Files.exists(download.getPath()));
-            manager.remove();
+        try (ParallelDownloadManager manager = new ParallelDownloadManager(config, downloader)) {
+            for (Download download : manager.download(toSet(testRequests))) {
+                downloadResults.add(download);
+                assertEquals(true, Files.exists(download.getPath()));
+                manager.remove();
+            }
         }
 
         assertEquals(5, downloadResults.size());
@@ -215,7 +209,6 @@ public class ParallelDownloadManagerTest {
     @After
     public void deleteDownloadDir() throws IOException {
         delete(downloadDir.toFile());
-        pool.shutdownNow();
     }
 
     private void delete(File path){

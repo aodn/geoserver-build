@@ -86,16 +86,15 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 DownloadConfig downloadConfig = new DownloadConfig.ConfigBuilder()
                     .downloadDirectory(downloadDir)
                     .localStorageLimit(config.getStorageLimit())
+                    .poolSize(config.getThreadCount())
                     .build();
 
                 Downloader downloader = new Downloader(config.getConnectTimeOut(), config.getReadTimeOut());
-                ExecutorService pool = Executors.newFixedThreadPool(config.getThreadCount());
-
-                ParallelDownloadManager downloadManager = new ParallelDownloadManager(downloadConfig, downloader, pool);
 
                 Path outputFile = workingDir.resolve("aggregation.nc");
 
                 try (
+                    ParallelDownloadManager downloadManager = new ParallelDownloadManager(downloadConfig, downloader);
                     NetcdfAggregator aggregator = new NetcdfAggregator(
                         outputFile, config.getTemplate(layer),
                         parameters.getBbox(), parameters.getVerticalRange(), parameters.getTimeRange()
@@ -106,8 +105,6 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                         downloadManager.remove();
                         throwIfCancelled(progressListener);
                     }
-                } finally {
-                    pool.shutdownNow();
                 }
 
                 Converter converter = Converter.newInstance(format);

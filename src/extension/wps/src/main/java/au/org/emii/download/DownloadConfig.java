@@ -11,12 +11,14 @@ public class DownloadConfig {
     private final long localStorageLimit;
     private final int downloadAttempts;
     private final int retryInterval;
+    private final int poolSize;
 
     private DownloadConfig(ConfigBuilder builder) {
         downloadDirectory = builder.downloadDirectory;
         localStorageLimit = builder.localStorageLimit;
         downloadAttempts = builder.downloadAttempts;
         retryInterval = builder.retryInterval;
+        poolSize = builder.poolSize;
     }
 
     public Path getDownloadDirectory() {
@@ -35,11 +37,16 @@ public class DownloadConfig {
         return retryInterval;
     }
 
+    public int getPoolSize() {
+        return poolSize;
+    }
+
     public static class ConfigBuilder {
         private Path downloadDirectory;
         private long localStorageLimit;
         private int downloadAttempts;
         private int retryInterval;
+        private int poolSize;
 
         public ConfigBuilder() {
             // defaults
@@ -47,6 +54,7 @@ public class DownloadConfig {
             localStorageLimit = 100 * 1024 * 1024; // 100MiB
             downloadAttempts = 3;
             retryInterval = 60 * 1000; // 60 seconds
+            poolSize = 8;
         }
 
         public ConfigBuilder downloadDirectory(Path downloadDirectory) {
@@ -69,8 +77,14 @@ public class DownloadConfig {
             return this;
         }
 
+        public ConfigBuilder poolSize(int poolSize) {
+            this.poolSize = poolSize;
+            return this;
+        }
+
         public DownloadConfig build() {
             return new DownloadConfig(this);
         }
+
     }
 }
