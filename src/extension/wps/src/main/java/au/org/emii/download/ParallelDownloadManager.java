@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static au.org.emii.wps.gogoduck.util.IntegerHelper.suffix;
@@ -32,40 +33,36 @@ import static au.org.emii.wps.gogoduck.util.IntegerHelper.suffix;
  *     DownloadConfig config = new DownloadConfig.ConfigBuilder()
  *                          .downloadDirectory(Paths.get("/tmp"))
  *                          .localStorageLimit(200 * 1024 * 1024)
+ *                          .poolSize(8)
  *                          .build();
  *     Downloader downloader = new Downloader(60 * 1000, 60 * 1000);
- *     ExecutorService pool = Executors.newFixedThreadPool(8);
  *
- *     ParallelDownloadManager downloadManager = new ParallelDownloadManager(config, downloader, pool);
- *
- *     try {
+ *     try (ParallelDownloadManager downloadManager = new ParallelDownloadManager(config, downloader, pool) {
  *         for (Download download : downloadManager.download(requests)) {
  *             // do something with the download
  *             downloadManager.remove();  // removes current download freeing up space for more downloads
  *         }
  *     } catch (DownloadException e) {
  *         // handle download exception
- *     } finally {
- *         pool.shutdownNow();
  *     }
  */
 
-public class ParallelDownloadManager implements Iterable<Download>, Iterator<Download> {
+public class ParallelDownloadManager implements Iterable<Download>, Iterator<Download>, AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(ParallelDownloadManager.class);
-    private final ExecutorService pool;
     private final DownloadConfig config;
     private final LinkedList<DownloadRequest> unactionedQueue;
     private final LinkedList<Future<Download>> inProgressQueue;
     private final Downloader downloader;
+    private final ExecutorService pool;
     private Download previous = null;
     private long localStorageAllocated = 0L;
 
-    public ParallelDownloadManager(DownloadConfig config, Downloader downloader, ExecutorService pool) {
-        this.pool = pool;
+    public ParallelDownloadManager(DownloadConfig config, Downloader downloader) {
         this.config = config;
         this.unactionedQueue = new LinkedList<>();
         this.inProgressQueue = new LinkedList<>();
         this.downloader = downloader;
+        this.pool = Executors.newFixedThreadPool(config.getPoolSize());
     }
 
     public Iterable<Download> download(Set<DownloadRequest> downloadRequests) {
@@ -117,6 +114,13 @@ public class ParallelDownloadManager implements Iterable<Download>, Iterator<Dow
             throw new RuntimeException(
                 String.format("Unexpected system error: unable to delete downloaded file %s", previous.getPath()), e);
         }
+    }
+
+    // AutoCloseable methods
+
+    @Override
+    public void close() {
+        pool.shutdownNow();
     }
 
     private void downloadUpToStorageLimit() {
