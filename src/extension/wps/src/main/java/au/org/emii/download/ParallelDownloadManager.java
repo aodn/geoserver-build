@@ -1,5 +1,6 @@
 package au.org.emii.download;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,8 @@ public class ParallelDownloadManager implements Iterable<Download>, Iterator<Dow
         }
 
         private Download download() {
-            Path path = config.getDownloadDirectory().resolve(UUID.randomUUID().toString());
+            String fileName = FilenameUtils.getName(request.getUrl().getPath());
+            Path path = config.getDownloadDirectory().resolve(UUID.randomUUID().toString() + fileName);
 
             try {
                 downloader.download(request.getUrl(), path);

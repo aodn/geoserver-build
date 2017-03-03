@@ -200,6 +200,20 @@ public class NetcdfAggregatorTest {
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/overrides-expected.nc"), outputFile);
     }
 
+    @Test
+    public void testGsla() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-41.5, 83.7), new LatLonPointImmutable(-41.1, 84.1));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, new AggregationOverrides(), bbox, null, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/gsla0.nc"));
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/gsla1.nc"));
+        }
+
+        assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/gsla-expected.nc"), outputFile);
+    }
+
     @After
     public void deleteOutputFile() throws IOException {
         Files.deleteIfExists(outputFile);
