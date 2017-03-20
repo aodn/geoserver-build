@@ -10,10 +10,13 @@ import ucar.ma2.DataType;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
+import ucar.nc2.time.CalendarPeriod.Field;
 import ucar.unidata.geoloc.LatLonRect;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +127,10 @@ public class TemplateDataset extends AbstractNetcdfDataset {
             result.put("TIME_START", timeRange.getStart().toString());
             result.put("TIME_END", timeRange.getEnd().toString());
         }
+
+        CalendarDate aggregationTime = CalendarDate.of(new Date()).truncate(Field.Minute); // ignore seconds/milliseconds
+
+        result.put("AGGREGATION_TIME", aggregationTime.toString());
 
         return result;
     }
