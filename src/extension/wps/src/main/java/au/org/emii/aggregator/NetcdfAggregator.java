@@ -3,10 +3,13 @@ package au.org.emii.aggregator;
 import au.org.emii.aggregator.dataset.NetcdfDatasetAdapter;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.exception.AggregationException;
-import au.org.emii.aggregator.template.ValueTemplate;
+import au.org.emii.aggregator.overrides.AggregationOverridesReader;
 import au.org.emii.aggregator.template.TemplateDataset;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.UnpackerOverrides;
+import au.org.emii.aggregator.variable.UnpackerOverrides.Builder;
+import au.org.emii.aggregator.overrides.AggregationOverrides;
+import au.org.emii.aggregator.overrides.VariableOverrides;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -35,14 +38,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * NetCDF Aggregator
@@ -54,45 +52,44 @@ public class NetcdfAggregator implements AutoCloseable {
     private static final Group GLOBAL = null;
 
     private final Path outputPath;
-    private final Set<String> requestedVariables;
+    private final AggregationOverrides aggregationOverrides;
     private final LatLonRect bbox;
     private final Range verticalSubset;
     private final CalendarDateRange dateRange;
-    private final Map<String, ValueTemplate> attributeChanges;
-    private final Map<String, UnpackerOverrides> configuredOverrides;
 
     private NetcdfFileWriter writer;
 
     private NetcdfDatasetIF templateDataset;
     private boolean fileProcessed;
+    private Map<String, UnpackerOverrides> unpackerOverrides;
 
-    public NetcdfAggregator(Path outputPath, Set<String> requestedVariables,
-                            LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange,
-                            Map<String, ValueTemplate> attributeChanges,
-                            Map<String, UnpackerOverrides> configuredOverrides
+    public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides,
+                            LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange
     ) {
         assertOutputPathValid(outputPath);
 
         this.outputPath = outputPath;
-        this.requestedVariables = requestedVariables;
+        this.aggregationOverrides = aggregationOverrides;
         this.bbox = bbox;
         this.verticalSubset = verticalSubset;
         this.dateRange = dateRange;
-        this.attributeChanges = attributeChanges != null ? attributeChanges : new HashMap<String, ValueTemplate>();
-        this.configuredOverrides = configuredOverrides != null ? configuredOverrides : new HashMap<String, UnpackerOverrides>();
 
-        this.fileProcessed = false;
+        fileProcessed = false;
+
+        // use overrides specified in config if any when unpacking the first dataset
+        unpackerOverrides = getUnpackerOverrides(aggregationOverrides.getVariableOverridesList());
     }
 
     public void add(Path datasetLocation) throws AggregationException {
-        try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, getUnpackerOverrides())) {
+        try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, unpackerOverrides)) {
             NetcdfDatasetIF subsettedDataset = dataset.subset(dateRange, verticalSubset, bbox);
 
             if (!fileProcessed) {
+                unpackerOverrides = getOverridesApplied(dataset); // ensure same changes applied to all other datasets
                 logger.info("Creating output file {} using {} as a template", outputPath, datasetLocation);
-                templateDataset = new TemplateDataset(subsettedDataset, requestedVariables, attributeChanges,
+                templateDataset = new TemplateDataset(subsettedDataset, aggregationOverrides,
                     dateRange, verticalSubset, bbox);
-                createFileFromTemplate(templateDataset);
+                copyToOutputFile(templateDataset);
                 fileProcessed = true;
             }
 
@@ -121,7 +118,7 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
-    private void createFileFromTemplate(NetcdfDatasetIF template) throws AggregationException {
+    private void copyToOutputFile(NetcdfDatasetIF template) throws AggregationException {
         try {
             writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4,
                 outputPath.toString(), null);
@@ -134,7 +131,7 @@ public class NetcdfAggregator implements AutoCloseable {
 
             // Copy dimensions to output file
 
-            List<Dimension> fileDimensions = new ArrayList<Dimension>();
+            List<Dimension> fileDimensions = new ArrayList<>();
 
             for (Dimension dimension: template.getDimensions()) {
                 Dimension fileDimension = writer.addDimension(GLOBAL, dimension.getShortName(), dimension.getLength(), true, dimension.isUnlimited(), dimension.isVariableLength());
@@ -144,7 +141,7 @@ public class NetcdfAggregator implements AutoCloseable {
             // Copy variables to output file
 
             for (NetcdfVariable variable: template.getVariables()) {
-                List<Dimension> variableDimensions = new ArrayList<Dimension>();
+                List<Dimension> variableDimensions = new ArrayList<>();
 
                 for (Dimension dimension: variable.getDimensions()) {
                     for (Dimension fileDimension: fileDimensions) {
@@ -229,15 +226,28 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
-    private Map<String, UnpackerOverrides> getUnpackerOverrides() {
-        if (templateDataset == null) {
-            return configuredOverrides;
-        }
-
+    private Map<String, UnpackerOverrides> getOverridesApplied(NetcdfDatasetIF dataset) {
         Map<String, UnpackerOverrides> result = new LinkedHashMap<>();
 
-        for (NetcdfVariable variable: templateDataset.getVariables()) {
+        for (NetcdfVariable variable: dataset.getVariables()) {
             result.put(variable.getShortName(), getUnpackerOverrides(variable));
+        }
+
+        return result;
+    }
+
+    private Map<String, UnpackerOverrides> getUnpackerOverrides(List<VariableOverrides> variableOverridesList) {
+        Map<String, UnpackerOverrides> result = new LinkedHashMap<>();
+
+        for (VariableOverrides overrides: variableOverridesList) {
+            Builder builder = new UnpackerOverrides.Builder();
+            builder.newDataType(overrides.getType());
+            builder.newFillerValue(overrides.getFillerValue());
+            builder.newValidMin(overrides.getValidMin());
+            builder.newValidMax(overrides.getValidMax());
+            builder.newValidRange(overrides.getValidRange());
+            builder.newMissingValues(overrides.getMissingValues());
+            result.put(overrides.getName(), builder.build());
         }
 
         return result;
@@ -270,14 +280,16 @@ public class NetcdfAggregator implements AutoCloseable {
         return builder.build();
     }
 
+    // Usage: java -jar {classpath} au.org.emii.aggregator.NetcdfAggregator [-b bbox] [-z zsubset] [-t timeRange] [-o overridesConfigFile] fileList
+    // fileList should contain a list of files to be included in the aggregation
+
     public static void main(String[] args) throws ParseException, AggregationException, IOException, InvalidRangeException {
         Options options = new Options();
 
         options.addOption("b", true, "restrict to bounding box specified by left lower/right upper coordinates e.g. -b 120,-32,130,-29");
-        options.addOption("v", true, "restrict aggregation to specified variables only e.g. -v TEMP,PSAL");
         options.addOption("z", true, "restrict data to specified z index range e.g. -z 2,4");
         options.addOption("t", true, "restrict data to specified date/time range in ISO 8601 format e.g. -t 2017-01-12T21:58:02Z,2017-01-12T22:58:02Z");
-        options.addOption("a", true, "add or replace attribute with value e.g. -a \"creator=J.A.Bloggs\"");
+        options.addOption("o", true, "xml file containing aggregation overrides to be applied");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine line = parser.parse( options, args );
@@ -285,17 +297,10 @@ public class NetcdfAggregator implements AutoCloseable {
         List<String> inputFiles = Files.readAllLines(Paths.get(line.getArgs()[0]), Charset.forName("utf-8"));
         Path outputFile = Paths.get(line.getArgs()[1]);
 
-        String varArg = line.getOptionValue("v");
         String bboxArg = line.getOptionValue("b");
         String zSubsetArg = line.getOptionValue("z");
         String timeArg = line.getOptionValue("t");
-        String[] attributeTemplateArgs = line.getOptionValues("a");
-
-        Set<String> requestedVariables = null;
-
-        if (varArg != null) {
-            requestedVariables = new LinkedHashSet<>(Arrays.asList(varArg.split(",")));
-        }
+        String overridesArg = line.getOptionValue("o");
 
         LatLonRect bbox = null;
 
@@ -321,29 +326,24 @@ public class NetcdfAggregator implements AutoCloseable {
 
         CalendarDateRange timeRange = null;
 
-        if (timeRange != null) {
+        if (timeArg != null) {
             String[] timeRangeComponents = timeArg.split(",");
             CalendarDate startTime = CalendarDate.parseISOformat("Gregorian", timeRangeComponents[0]);
             CalendarDate endTime = CalendarDate.parseISOformat("Gregorian", timeRangeComponents[1]);
             timeRange = CalendarDateRange.of(startTime, endTime);
         }
 
-        Map<String, ValueTemplate> templatedAttributes = new LinkedHashMap<>();
+        AggregationOverrides overrides;
 
-        if (attributeTemplateArgs != null && attributeTemplateArgs.length > 0) {
-            for (String attributeTemplateArg: attributeTemplateArgs) {
-                String[] parts = attributeTemplateArg.split("::");
-                if (parts.length == 3) {
-                    templatedAttributes.put(parts[0], new ValueTemplate(Pattern.compile(parts[1]), parts[2]));
-                } else {
-                    templatedAttributes.put(parts[0], new ValueTemplate(parts[1]));
-                }
-            }
+        if (overridesArg != null) {
+            overrides = AggregationOverridesReader.load(Paths.get(overridesArg));
+        } else {
+            overrides = new AggregationOverrides(); // Use default (i.e. no overrides)
         }
 
         try (
             NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-                outputFile, requestedVariables, bbox, zSubset, timeRange, templatedAttributes, null)
+                outputFile, overrides, bbox, zSubset, timeRange)
         ) {
             for (String file:inputFiles) {
                 if (file.trim().length() == 0) continue;

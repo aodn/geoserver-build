@@ -2,7 +2,6 @@ package au.org.emii.wps;
 
 import au.org.emii.ncdfgenerator.*;
 import au.org.emii.notifier.HttpNotifier;
-import org.apache.commons.io.IOUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
@@ -22,11 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URL;
 
@@ -47,7 +44,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
         this.workingDir = getWorkingDir();
     }
 
-    @DescribeResult(name="result", description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
+    @DescribeResult(description="Zipped netcdf files", meta={"mimeTypes=application/zip"})
 
     public FileRawData execute(
         @DescribeParameter(name="typeName", description="Collection to download")

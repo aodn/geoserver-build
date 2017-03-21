@@ -66,6 +66,10 @@ public abstract class Config {
 
     // Example Parameter: "/ncwms/urlSubstitution"
     public Map<String, String> getConfigMap(String xpathString, String configFile) {
+        return getConfigMap(xpathString, "key", configFile);
+    }
+
+    public Map<String, String> getConfigMap(String xpathString, String attributeName, String configFile) {
         Map<String, String> returnValue = new HashMap<>();
         try {
             Document doc = getDocument(configFile);
@@ -75,7 +79,7 @@ public abstract class Config {
             List<DefaultElement> list = xpath.selectNodes(doc);
 
             for (final DefaultElement element : list) {
-                returnValue.put(element.attribute("key").getText(), element.getText());
+                returnValue.put(element.attribute(attributeName).getText(), element.getText());
             }
         } catch (Exception e) {
             logger.warn(String.format("Could not open config file '%s': '%s'", configFile, e.getMessage()), e);

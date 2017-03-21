@@ -3,6 +3,10 @@ package au.org.emii.aggregator.template;
 import au.org.emii.aggregator.dataset.AbstractNetcdfDataset;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.variable.NetcdfVariable;
+import au.org.emii.aggregator.datatype.NumericTypes;
+import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
+import au.org.emii.aggregator.overrides.AggregationOverrides;
+import ucar.ma2.DataType;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -13,8 +17,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Template output dataset definition - contains all non-time varying information to be
@@ -25,11 +27,10 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     private final List<Dimension> dimensions;
     private final List<NetcdfVariable> variables;
 
-    public TemplateDataset(NetcdfDatasetIF dataset, Set<String> requestedVariables,
-                           Map<String, ValueTemplate> attributeModifications,
+    public TemplateDataset(NetcdfDatasetIF dataset, AggregationOverrides aggregationOverrides,
                            CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
 
-        this.globalAttributes = getGlobalAttributes(dataset, attributeModifications, timeRange, verticalSubset, bbox);
+        this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributes(), timeRange);
 
         // Determine variables/dimensions to add
 
@@ -39,7 +40,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         String timeDimension = dataset.getTimeAxis().getDimensionName();
 
         for (NetcdfVariable variable: dataset.getVariables()) {
-            if (requestedVariables != null && requestedVariables.contains(variable.getShortName())) {
+            if (!aggregationOverrides.includeVariable(variable.getShortName())) {
                 continue;
             }
 
@@ -83,24 +84,9 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return dimensions;
     }
 
-    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, Map<String, ValueTemplate> attributeModifications, CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
-        // Build substitutable values
-
-        LatLonRect newBbox = dataset.getBbox();
-
-        Map<String, String> substitutableValues = new LinkedHashMap<>();
-
-        substitutableValues.put("LAT_MIN", Double.toString(newBbox.getLatMin()));
-        substitutableValues.put("LAT_MAX", Double.toString(newBbox.getLatMax()));
-        substitutableValues.put("LON_MIN", Double.toString(newBbox.getLonMin()));
-        substitutableValues.put("LON_MAX", Double.toString(newBbox.getLonMax()));
-
-        if (timeRange != null) {
-            substitutableValues.put("TIME_START", timeRange.getStart().toString());
-            substitutableValues.put("TIME_END", timeRange.getStart().toString());
-        }
-
-        // Build modified attribute list
+    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, List<GlobalAttributeOverride> attributeOverrides,
+                                                CalendarDateRange timeRange) {
+        // Copy existing attributes
 
         Map<String, Attribute> result = new LinkedHashMap<>();
 
@@ -108,31 +94,58 @@ public class TemplateDataset extends AbstractNetcdfDataset {
             result.put(attribute.getShortName(), attribute);
         }
 
-        // Make requested modifications
+        // Apply attribute overrides
 
-        for (Entry<String, ValueTemplate> modification : attributeModifications.entrySet()) {
-            String attributeName = modification.getKey();
-            ValueTemplate valueTemplate = modification.getValue();
+        for (GlobalAttributeOverride override: attributeOverrides) {
+            String attributeName = override.getName();
 
             if (result.containsKey(attributeName)) {
-                // modify existing attribute
-                Attribute currentAttribute = result.get(attributeName);
-
-                if (currentAttribute.isArray()) {
-                    throw new UnsupportedOperationException("Update of array attributes not supported");
-                }
-
-                String currentValue = currentAttribute.isString() ? currentAttribute.getStringValue() : currentAttribute.getNumericValue().toString();
-                String newValue = valueTemplate.getValue(currentValue, substitutableValues);
-                final Attribute modifiedAttribute = new Attribute(currentAttribute.getShortName(), valueTemplate.getValue(currentValue, substitutableValues));
-                result.put(modifiedAttribute.getShortName(), modifiedAttribute);
+                Map<String, String> substitutableValues = getSubstitutableValues(dataset, timeRange);
+                result.put(attributeName, applyOverride(result.get(attributeName), override, substitutableValues));
             } else {
-                // add new attribute
-                result.put(attributeName, new Attribute(attributeName, valueTemplate.getValue(substitutableValues)));
+                result.put(attributeName, createAttribute(override.getName(), override.getType(), override.getValue()));
             }
         }
 
         return new ArrayList<>(result.values());
     }
 
+    private Map<String, String> getSubstitutableValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange) {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        LatLonRect newBbox = dataset.getBbox();
+
+        result.put("LAT_MIN", Double.toString(newBbox.getLatMin()));
+        result.put("LAT_MAX", Double.toString(newBbox.getLatMax()));
+        result.put("LON_MIN", Double.toString(newBbox.getLonMin()));
+        result.put("LON_MAX", Double.toString(newBbox.getLonMax()));
+
+        if (timeRange != null) {
+            result.put("TIME_START", timeRange.getStart().toString());
+            result.put("TIME_END", timeRange.getEnd().toString());
+        }
+
+        return result;
+    }
+
+    private Attribute applyOverride(Attribute attribute, GlobalAttributeOverride override,
+                                    Map<String, String> substitutableValues) {
+        if (attribute.isArray()) {
+            throw new UnsupportedOperationException("Update of array attributes not supported");
+        }
+
+        String currentValue = attribute.isString() ? attribute.getStringValue() : attribute.getNumericValue().toString();
+        ValueTemplate valueTemplate = new ValueTemplate(override.getPattern(), override.getValue());
+        String newValue = valueTemplate.getValue(currentValue, substitutableValues);
+
+        return createAttribute(override.getName(), override.getType(), newValue);
+    }
+
+    private Attribute createAttribute(String name, DataType type, String value) {
+        if (type.isNumeric()) {
+            return new Attribute(name, NumericTypes.parse(type, value));
+        } else {
+            return new Attribute(name, value);
+        }
+    }
 }

@@ -9,6 +9,11 @@ Configures a GeoServer war file with the following;
 
 Check out the [extensions' readme](https://github.com/aodn/geoserver-build/blob/master/src/extension/wps/README.md) for more information.
 
+### Prerequisites
+
+To perform aggregation of gridded netcdf files/run unit tests, this project requires the installation of the netcdf c library
+version 4.3.1 or above (see [NetCDF-4 C Library Loading](https://www.unidata.ucar.edu/software/thredds/current/netcdf-java/reference/netcdf4Clibrary.html)).
+
 ### To build
 
 ```
