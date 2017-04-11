@@ -3,9 +3,11 @@ package au.org.emii.wps.gogoduck.parameter;
 import org.junit.Test;
 import ucar.nc2.time.CalendarDate;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-public class RangeParametersTest {
+public class SubsetParametersTest {
 
     @Test
     public void testParameterParsing() {
@@ -19,6 +21,18 @@ public class RangeParametersTest {
 
         assertEquals(sp.getBbox().getLonMin(), 114.15197, 0.000001);
         assertEquals(sp.getBbox().getLonMax(), 115.741219, 0.000001);
+    }
+
+    @Test
+    public void testIsPointSubset() {
+        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-33.433849;LONGITUDE,114.15197,114.15197");
+        assertTrue(sp.isPointSubset());
+    }
+
+    @Test
+    public void testIsNotPointSubset() {
+        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
+        assertFalse(sp.isPointSubset());
     }
 
 }
