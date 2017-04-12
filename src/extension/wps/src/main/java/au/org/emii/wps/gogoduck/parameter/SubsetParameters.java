@@ -25,6 +25,10 @@ public class SubsetParameters {
         return bbox;
     }
 
+    public boolean isPointSubset() {
+        return bbox.getLowerLeftPoint().equals(bbox.getUpperRightPoint());
+    }
+
     public CalendarDateRange getTimeRange() {
         return timeRange;
     }

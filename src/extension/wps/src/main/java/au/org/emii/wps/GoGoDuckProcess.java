@@ -5,8 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import au.org.emii.aggregator.NetcdfAggregator;
 import au.org.emii.download.Download;
@@ -77,7 +75,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 Set<DownloadRequest> downloads = indexReader.getDownloadList(layer, config.getTimeField(),
                     config.getSizeField(), config.getFileUrlField(), parameters);
 
-                enforceFileLimits(downloads, config.getFileLimit(), config.getFileSizeLimit());
+                enforceFileLimits(parameters, downloads, config.getFileLimit(), config.getFileSizeLimit());
 
                 Path workingDir = Paths.get(getWorkingDir());
                 Path downloadDir = workingDir.resolve("downloads");
@@ -132,7 +130,12 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         }
     }
 
-    private void enforceFileLimits(Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+    private void enforceFileLimits(SubsetParameters parameters, Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+        if (parameters.isPointSubset()) {
+            logger.info("Not applying limits to point subset");
+            return;
+        }
+
         logger.info("Enforcing file size limits...");
 
         if (downloadList.size() > limit) {
