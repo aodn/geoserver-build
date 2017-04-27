@@ -25,7 +25,7 @@ public class GoGoDuckConfig extends Config {
     private static final String FILE_PREFIX = "/gogoduck/";
     private static final String GLOBAL_ATTRIBUTE_PREFIX = FILE_PREFIX + "globalAttributes/";
     private static final String VARIABLES_TO_INCLUDE = FILE_PREFIX + "variablesToInclude/variable";
-    private static final String TEMPLATES = "templates/template";
+    private static final String TEMPLATES = FILE_PREFIX + "templates/template";
 
     private static final String FILE_LIMIT_KEY = FILE_PREFIX + "fileLimit";
     private static final String URL_SUBSTITUTION = FILE_PREFIX + "urlSubstitution";
