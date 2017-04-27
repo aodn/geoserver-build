@@ -98,10 +98,6 @@ public class UnpackerOverrides {
         }
 
         public Builder newDataType(DataType newDataType) {
-            if (newDataType != null && !newDataType.isNumeric()) {
-                throw new UnsupportedOperationException(String.format("Only conversion between numeric data types is supported"));
-            }
-
             this.newDataType = newDataType;
             return this;
         }

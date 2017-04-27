@@ -90,7 +90,13 @@ public class TemplateVariable extends AbstractVariable {
 
     @Override
     public Array read(int[] origin, int[] shape) throws InvalidRangeException {
-        return Array.factory(data.sectionNoReduce(origin, shape, null).copyToNDJavaArray());
+        Array section = data.sectionNoReduce(origin, shape, null);
+
+        if (section.getRank() != 0) {
+            return Array.factory(section.copyToNDJavaArray());
+        } else {
+            return Array.factory(section.getDataType(), shape);
+        }
     }
 
     @Override
