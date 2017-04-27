@@ -214,6 +214,18 @@ public class NetcdfAggregatorTest {
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/gsla-expected.nc"), outputFile);
     }
 
+    @Test
+    public void testSrsOcJohnson() throws IOException, AggregationException {
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, new AggregationOverrides(), null, null, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-oc-1.nc"));
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-oc-2.nc"));
+        }
+
+        assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/srs-oc-expected.nc"), outputFile);
+    }
+
     @After
     public void deleteOutputFile() throws IOException {
         Files.deleteIfExists(outputFile);
