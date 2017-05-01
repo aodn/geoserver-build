@@ -24,10 +24,13 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.NetcdfFileWriter.Version;
 import ucar.nc2.Variable;
 import ucar.nc2.constants.CDM;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingDefault;
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImmutable;
 import ucar.unidata.geoloc.LatLonRect;
@@ -120,8 +123,9 @@ public class NetcdfAggregator implements AutoCloseable {
 
     private void copyToOutputFile(NetcdfDatasetIF template) throws AggregationException {
         try {
-            writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4,
-                outputPath.toString(), null);
+            Nc4Chunking chunking = new Nc4ChunkingDefault(3, false);
+            writer = NetcdfFileWriter.createNew(Version.netcdf4,
+                outputPath.toString(), chunking);
 
             // Copy global attributes to output file
 
