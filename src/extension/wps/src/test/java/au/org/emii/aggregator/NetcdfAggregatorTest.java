@@ -6,9 +6,14 @@ import static au.org.emii.test.util.Assert.assertNetcdfFilesEqual;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
 import au.org.emii.aggregator.overrides.AggregationOverridesReader;
+import com.sun.jna.Native;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.nc2.jni.netcdf.Nc4prototypes;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonPointImmutable;
@@ -22,7 +27,21 @@ import java.nio.file.Path;
  * NetcdfAggregator tests for different types of collections
  */
 public class NetcdfAggregatorTest {
+    private static final Logger logger = LoggerFactory.getLogger(NetcdfAggregatorTest.class);
     private Path outputFile;
+    private static String libraryVersion;
+
+    @BeforeClass
+    public static void getLibNetcdfVersion() {
+        // The netcdf C library can change the order of variable attributes when writing them to disk
+        // and the order it uses can be different between different versions of the library.
+        // Get the version of the library being used so we can adjust expectations accordingly.
+        // Note: The beta version of netcdf java includes a method on Nc4Iosp which can do this
+        // but we can't use that yet.
+        Nc4prototypes nc4 = (Nc4prototypes) Native.loadLibrary("netcdf", Nc4prototypes.class);
+        libraryVersion = nc4.nc_inq_libvers();
+        logger.info("Using netcdf C library version {}", libraryVersion);
+    }
 
     @Before
     public void createOutputFile() throws IOException {
@@ -67,7 +86,12 @@ public class NetcdfAggregatorTest {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-2.nc"));
         }
 
-        assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/unpack-expected.nc"), outputFile);
+        if (libraryVersion.startsWith("4.1.3")) {
+            // sses_standard_deviation attribute ordering slightly different with this version - result is still OK.
+            assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/unpack-expected-4.1.3.nc"), outputFile);
+        } else {
+            assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/unpack-expected.nc"), outputFile);
+        }
     }
 
     @Test(expected = AggregationException.class)
