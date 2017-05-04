@@ -1,10 +1,11 @@
+dist: trusty
+sudo: false
 language: java
-sudo: required
 
 addons:
   apt:
     packages:
-      - libnetcdf-dev
+      - libnetcdfc7
       - libgsl0ldbl
       - libudunits2-0
 
@@ -12,6 +13,3 @@ cache:
   directories:
     - $HOME/.m2
 
-before_install:
-  - wget http://imos-binary.s3-website-ap-southeast-2.amazonaws.com/jobs/nco/nco-latest.deb
-  - sudo dpkg -i nco-latest.deb
