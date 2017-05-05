@@ -1,11 +1,9 @@
 package au.org.emii.aggregator.overrides;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import ucar.ma2.DataType;
 
 import java.util.ArrayList;
@@ -14,12 +12,7 @@ import java.util.List;
 /**
  * Created by craigj on 28/02/17.
  */
-public class VariableAttributeOverrideConverter implements Converter {
-    @Override
-    public void marshal(Object o, HierarchicalStreamWriter hierarchicalStreamWriter, MarshallingContext marshallingContext) {
-        throw new UnsupportedOperationException("Marshalling attributes not supported");
-    }
-
+public class VariableAttributeOverrideConverter extends DeserialisingOnlyConverter {
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext unmarshallingContext) {
         String name = null;

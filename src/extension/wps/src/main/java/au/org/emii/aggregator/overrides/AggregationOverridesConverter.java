@@ -1,33 +1,28 @@
 package au.org.emii.aggregator.overrides;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Deserialise a Template xml configuration element into a Template object
  */
-public class AggregationOverridesConverter implements Converter {
-    @Override
-    public void marshal(Object o, HierarchicalStreamWriter hierarchicalStreamWriter, MarshallingContext marshallingContext) {
-        throw new UnsupportedOperationException("Serialising templates is not supported");
-    }
-
+public class AggregationOverridesConverter extends DeserialisingOnlyConverter {
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        List<GlobalAttributeOverride> attributes = new ArrayList<>();
+        GlobalAttributeOverrides attributeOverrides = new GlobalAttributeOverrides();
         List<VariableOverrides> variableOverrides = new ArrayList<>();
 
         while (reader.hasMoreChildren()) {
             reader.moveDown();
 
             if (reader.getNodeName().equals("attributes")) {
-                attributes = CollectionReader.readCollection(reader, context, "attribute", GlobalAttributeOverride.class);
+                attributeOverrides = (GlobalAttributeOverrides)context.convertAnother(null, GlobalAttributeOverrides.class);
             }
 
             if (reader.getNodeName().equals("variables")) {
@@ -37,8 +32,7 @@ public class AggregationOverridesConverter implements Converter {
             reader.moveUp();
         }
 
-
-        return new AggregationOverrides(attributes, variableOverrides);
+        return new AggregationOverrides(attributeOverrides, variableOverrides);
     }
 
     @Override

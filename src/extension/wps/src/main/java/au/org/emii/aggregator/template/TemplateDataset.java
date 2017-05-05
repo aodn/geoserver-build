@@ -2,10 +2,12 @@ package au.org.emii.aggregator.template;
 
 import au.org.emii.aggregator.dataset.AbstractNetcdfDataset;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
+import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.datatype.NumericTypes;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
+import org.apache.commons.lang.text.StrSubstitutor;
 import ucar.ma2.DataType;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
@@ -20,6 +22,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Template output dataset definition - contains all non-time varying information to be
@@ -33,7 +37,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     public TemplateDataset(NetcdfDatasetIF dataset, AggregationOverrides aggregationOverrides,
                            CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
 
-        this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributes(), timeRange);
+        this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributeOverrides(), timeRange);
 
         // Determine variables/dimensions to add
 
@@ -87,33 +91,59 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return dimensions;
     }
 
-    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, List<GlobalAttributeOverride> attributeOverrides,
+    private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, GlobalAttributeOverrides attributeOverrides,
                                                 CalendarDateRange timeRange) {
         // Copy existing attributes
 
         Map<String, Attribute> result = new LinkedHashMap<>();
 
         for (Attribute attribute : dataset.getGlobalAttributes()) {
-            result.put(attribute.getShortName(), attribute);
+            if (!attributeOverrides.getRemoveAttributes().contains(attribute.getShortName())) {
+                result.put(attribute.getShortName(), attribute);
+            }
         }
 
         // Apply attribute overrides
 
-        for (GlobalAttributeOverride override: attributeOverrides) {
-            String attributeName = override.getName();
+        Map<String, String> commonSubstitutionValues = getSubstitutionValues(dataset, timeRange);
 
-            if (result.containsKey(attributeName)) {
-                Map<String, String> substitutableValues = getSubstitutableValues(dataset, timeRange);
-                result.put(attributeName, applyOverride(result.get(attributeName), override, substitutableValues));
-            } else {
-                result.put(attributeName, createAttribute(override.getName(), override.getType(), override.getValue()));
+        for (GlobalAttributeOverride override: attributeOverrides.getAddOrReplaceAttributes()) {
+            String attributeName = override.getName();
+            Pattern capturingPattern = override.getPattern();
+            String templateValue = override.getValue();
+
+            Map<String, String> attributeSubstitutionValues = new LinkedHashMap<>(commonSubstitutionValues);
+
+            if (capturingPattern != null && result.containsKey(attributeName)) {
+                Attribute attribute = result.get(attributeName);
+
+                if (attribute.isArray()) {
+                    throw new UnsupportedOperationException("Applying capturing patterns to array attributes not supported");
+                }
+
+                String currentValue = attribute.isString() ? attribute.getStringValue() :
+                    attribute.getNumericValue().toString();
+
+                Matcher matcher = capturingPattern.matcher(currentValue);
+
+                if (matcher.matches()) {
+                    for (int i = 0; i <= matcher.groupCount(); i++) {
+                        attributeSubstitutionValues.put(Integer.toString(i), matcher.group(i));
+                    }
+                }
+
             }
+
+            StrSubstitutor sub = new StrSubstitutor(attributeSubstitutionValues);
+            String value = sub.replace(templateValue);
+
+            result.put(attributeName, createNewAttribute(attributeName, override.getType(), value));
         }
 
         return new ArrayList<>(result.values());
     }
 
-    private Map<String, String> getSubstitutableValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange) {
+    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange) {
         Map<String, String> result = new LinkedHashMap<>();
 
         LatLonRect newBbox = dataset.getBbox();
@@ -135,20 +165,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return result;
     }
 
-    private Attribute applyOverride(Attribute attribute, GlobalAttributeOverride override,
-                                    Map<String, String> substitutableValues) {
-        if (attribute.isArray()) {
-            throw new UnsupportedOperationException("Update of array attributes not supported");
-        }
-
-        String currentValue = attribute.isString() ? attribute.getStringValue() : attribute.getNumericValue().toString();
-        ValueTemplate valueTemplate = new ValueTemplate(override.getPattern(), override.getValue());
-        String newValue = valueTemplate.getValue(currentValue, substitutableValues);
-
-        return createAttribute(override.getName(), override.getType(), newValue);
-    }
-
-    private Attribute createAttribute(String name, DataType type, String value) {
+    private Attribute createNewAttribute(String name, DataType type, String value) {
         if (type.isNumeric()) {
             return new Attribute(name, NumericTypes.parse(type, value));
         } else {

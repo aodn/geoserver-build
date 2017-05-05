@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
 public class GlobalAttributeOverride {
     private String name;
     private DataType type;
-    private final Pattern pattern;
+    private Pattern pattern;
     private String value;
 
     public GlobalAttributeOverride(String name, DataType type, String match, String value) {
         this.name = name;
         this.type = type;
-        this.pattern = match == null ? Pattern.compile(".*") : Pattern.compile(match);
+        this.pattern = match == null ? null : Pattern.compile(match);
         this.value = value;
     }
 
@@ -35,7 +35,6 @@ public class GlobalAttributeOverride {
     public String getName() {
         return name;
     }
-
     public DataType getType() {
         return type;
     }

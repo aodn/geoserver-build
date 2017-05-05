@@ -13,21 +13,22 @@ import java.util.List;
 @XStreamAlias("template")
 @XStreamConverter(AggregationOverridesConverter.class)
 public class AggregationOverrides {
-    private List<GlobalAttributeOverride> attributes;
+    private GlobalAttributeOverrides attributeOverrides;
     private List<VariableOverrides> variableOverridesList;
 
-    public AggregationOverrides(List<GlobalAttributeOverride> attributes, List<VariableOverrides> variableOverridesList) {
-        this.attributes = attributes;
+    public AggregationOverrides(GlobalAttributeOverrides attributeOverrides,
+                                List<VariableOverrides> variableOverridesList) {
+        this.attributeOverrides = attributeOverrides;
         this.variableOverridesList = variableOverridesList;
     }
 
     public AggregationOverrides() {
-        this.attributes = new ArrayList<>();
+        this.attributeOverrides = new GlobalAttributeOverrides();
         this.variableOverridesList = new ArrayList<>();
     }
 
-    public List<GlobalAttributeOverride> getAttributes() {
-        return attributes;
+    public GlobalAttributeOverrides getAttributeOverrides() {
+        return attributeOverrides;
     }
 
     public List<VariableOverrides> getVariableOverridesList() {
@@ -39,15 +40,16 @@ public class AggregationOverrides {
             || hasVariableOverride(name); // variable overrides specified and the variable is included
     }
 
+    public boolean isEmpty() {
+        return attributeOverrides.isEmpty() && variableOverridesList.isEmpty();
+    }
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("attributes=");
 
-        for (GlobalAttributeOverride attribute: attributes) {
-            builder.append(attribute.getName());
-            builder.append(" ");
-        }
+        builder.append(attributeOverrides.toString());
 
         builder.append("variables=");
 
