@@ -4,6 +4,7 @@ package au.org.emii.wps.gogoduck.config;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
 import au.org.emii.aggregator.overrides.AggregationOverridesReader;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
+import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
 import au.org.emii.aggregator.overrides.VariableOverrides;
 import au.org.emii.core.Config;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
@@ -192,8 +193,9 @@ public class GoGoDuckConfig extends Config {
             AggregationOverrides aggregationOverrides = loadTemplate(layer);
 
             // For the moment default to creating template from old config until replaced
-            if (aggregationOverrides.getAttributes().size() == 0 && aggregationOverrides.getVariableOverridesList().size() == 0) {
-                return new AggregationOverrides(getGlobalAttributes(layer), getVariables(layer));
+            if (aggregationOverrides.isEmpty()) {
+                GlobalAttributeOverrides attributeOverrides = new GlobalAttributeOverrides(new ArrayList<String>(), getGlobalAttributes(layer));
+                return new AggregationOverrides(attributeOverrides, getVariables(layer));
             }
 
             return aggregationOverrides;

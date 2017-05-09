@@ -9,6 +9,7 @@ import org.junit.Test;
 import ucar.ma2.DataType;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static au.org.emii.test.util.Resource.resourcePath;
 import static org.junit.Assert.assertArrayEquals;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class AggregationOverridesReaderTest {
     Object[][] expectedAttributes = {
-        {"start_time", DataType.STRING, ".*", "${TIME_START}"},
+        {"start_time", DataType.STRING, null, "${TIME_START}"},
         {"title", DataType.STRING, ".*", "${0}, ${TIME_START}, ${TIME_END}"}
     };
 
@@ -39,7 +40,7 @@ public class AggregationOverridesReaderTest {
     public void testLoad() {
         AggregationOverrides result = AggregationOverridesReader.load(resourcePath("au/org/emii/wps/gogoduck/config/template/template.xml"));
 
-        List<GlobalAttributeOverride> attributes = result.getAttributes();
+        List<GlobalAttributeOverride> attributes = result.getAttributeOverrides().getAddOrReplaceAttributes();
 
         assertEquals(2, attributes.size());
 
@@ -47,7 +48,7 @@ public class AggregationOverridesReaderTest {
             GlobalAttributeOverride attribute = attributes.get(i);
             assertEquals(expectedAttributes[i][0], attribute.getName());
             assertEquals(expectedAttributes[i][1], attribute.getType());
-            assertEquals(expectedAttributes[i][2], attribute.getPattern().pattern());
+            assertEquals(expectedAttributes[i][2], toString(attribute.getPattern()));
             assertEquals(expectedAttributes[i][3], attribute.getValue());
         }
 
@@ -73,5 +74,9 @@ public class AggregationOverridesReaderTest {
 
             assertArrayEquals(expectedVAttributes, actualVAttributes);
         }
+    }
+
+    private String toString(Pattern pattern) {
+        return pattern!=null?pattern.pattern():null;
     }
 }

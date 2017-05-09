@@ -206,8 +206,8 @@ An example aggregation overrides (template) file is as follows:
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
   <attributes>
-    <attribute name="start_time" type="String" value="${TIME_START}"/>
-    <attribute name="stop_time" type="String" value="${TIME_END}"/>
+    <remove name="start_time"/>
+    <remove name="stop_time"/>
     <attribute name="time_coverage_start" type="String" value="${TIME_START}"/>
     <attribute name="time_coverage_end" type="String" value="${TIME_END}"/>
     <attribute name="title" match=".*" type="String" value="${0}, ${TIME_START}, ${TIME_END}"/>
@@ -246,7 +246,11 @@ An example aggregation overrides (template) file is as follows:
 </template>
 ```
 
-##### Attributes element
+##### Remove element
+
+A remove element is used to remove a global attribute when copying attributes from the first aggregation file
+
+##### Attribute element
 
 Attribute elements specify an attribute to be added or whose value should be replaced when copying 
 attributes from the first aggregation file.
