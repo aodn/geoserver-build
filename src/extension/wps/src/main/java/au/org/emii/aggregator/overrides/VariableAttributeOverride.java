@@ -46,7 +46,11 @@ public class VariableAttributeOverride {
         return NumericTypes.parse(type, values.get(0));
     }
 
-    public Number[] getAttributeNumericValues(String name) {
+    public Number getAttributeNumericValue(DataType variableDataType) {
+        return NumericTypes.parse(variableDataType, values.get(0));
+    }
+
+    public Number[] getAttributeNumericValues() {
         Number[] result = new Number[values.size()];
 
         for (int i=0; i<values.size(); i++) {
@@ -55,7 +59,6 @@ public class VariableAttributeOverride {
 
         return result;
     }
-
 }
 
 
