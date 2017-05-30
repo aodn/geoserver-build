@@ -52,81 +52,101 @@ public class Ncwms {
     public void getMetadata(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LOGGER.log(Level.INFO, "GetMetadata");
-        final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName"));
-        final String item = request.getParameter("item");
 
-        if (item != null && item.compareTo("timesteps") == 0) {
-            String day = request.getParameter("day");
+        try {
+            final LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter("layerName"));
 
-            JSONObject resultJson = new JSONObject();
-            resultJson.put("timesteps", geoserverUrlIndex.getTimesForDay(layerDescriptor, day));
-            response.getOutputStream().write(resultJson.toString().getBytes());
-        } else if (item != null && item.compareTo("layerDetails") == 0) {
+            final String item = request.getParameter("item");
 
-            JSONObject getMetadataJson = getMetadataJson(layerDescriptor);
-            getMetadataJson.put("datesWithData", geoserverUrlIndex.getUniqueDates(layerDescriptor));
-            LOGGER.log(Level.INFO, "Returning getMetadataJson");
-            response.getOutputStream().write(getMetadataJson.toString().getBytes());
+            if (item != null && item.compareTo("timesteps") == 0) {
+                String day = request.getParameter("day");
+
+                JSONObject resultJson = new JSONObject();
+                resultJson.put("timesteps", geoserverUrlIndex.getTimesForDay(layerDescriptor, day));
+                response.getOutputStream().write(resultJson.toString().getBytes());
+            } else if (item != null && item.compareTo("layerDetails") == 0) {
+
+                JSONObject getMetadataJson = getMetadataJson(layerDescriptor);
+                getMetadataJson.put("datesWithData", geoserverUrlIndex.getUniqueDates(layerDescriptor));
+                LOGGER.log(Level.INFO, "Returning getMetadataJson");
+                response.getOutputStream().write(getMetadataJson.toString().getBytes());
+            }
+        }
+        catch (Exception e) {
+            sendErrorMessage(request, response, e);
+
         }
     }
 
-    public void getMap(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        proxyWmsRequest(request, response);
+    public void getMap(HttpServletRequest request, HttpServletResponse response) throws IOException {
+         try {
+             proxyWmsRequest(request, response);
+         }
+         catch (Exception e) {
+             sendErrorMessage(request, response, e);
+         }
     }
 
-    public void getLegendGraphic(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        proxyWmsRequest(request, response, "LAYER");
+    public void getLegendGraphic(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            proxyWmsRequest(request, response, "LAYER");
+        }
+        catch (Exception e) {
+            sendErrorMessage(request, response, e);
+        }
     }
 
-    public void getFeatureInfo(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        proxyWmsRequest(request, response);
+    public void getFeatureInfo(HttpServletRequest request, HttpServletResponse response) throws IOException{
+         try {
+             proxyWmsRequest(request, response);
+         }
+         catch (Exception e) {
+             sendErrorMessage(request, response, e);
+         }
     }
 
-    private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        proxyWmsRequest(request, response, "LAYERS");
+    private void sendErrorMessage(HttpServletRequest request, HttpServletResponse response, Exception e) throws IOException {
+        String msg =  String.format("ERROR serving request: '%s':  %s", request.getQueryString(), e.getMessage());
+        LOGGER.log(Level.SEVERE, msg);
+        response.sendError(500, msg);
     }
 
-    private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response, String layerParameter)
-            throws ServletException, IOException {
+    private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+            proxyWmsRequest(request, response, "LAYERS");
+    }
+
+    private void proxyWmsRequest(HttpServletRequest request, HttpServletResponse response, String layerParameter) throws Exception {
+
         LayerDescriptor layerDescriptor = new LayerDescriptor(request.getParameter(layerParameter));
 
         String time = request.getParameter("TIME");
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
+        //@SuppressWarnings("unchecked")
+        Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
 
-            // Some collections such as SRS are indexed with a timestamp which doesn't match
-            // the timestamp thredds calculates but only have one timestamp per file meaning its
-            // not actually required
-            // For the moment just don't include the time parameter for these collections
-            if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
-                wmsParameters.remove("TIME");
-            }
-
-            wmsParameters.put("VERSION", new String[] { wmsVersion });
-            wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
-
-            // Needed for GetFeatureInfo
-            if (wmsParameters.containsKey("QUERY_LAYERS")) {
-                wmsParameters.put("QUERY_LAYERS", new String[]{layerDescriptor.getNetCDFVariableName() });
-            }
-
-            String queryString = encodeMapForRequest(wmsParameters);
-
-            URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
-
-            IOUtils.copy(wmsUrl.openConnection().getInputStream(), response.getOutputStream());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", wmsUrlStr));
-            e.printStackTrace();
+        // Some collections such as SRS are indexed with a timestamp which doesn't match
+        // the timestamp thredds calculates but only have one timestamp per file meaning its
+        // not actually required
+        // For the moment just don't include the time parameter for these collections
+        if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
+            wmsParameters.remove("TIME");
         }
+
+        wmsParameters.put("VERSION", new String[] { wmsVersion });
+        wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
+
+        // Needed for GetFeatureInfo
+        if (wmsParameters.containsKey("QUERY_LAYERS")) {
+            wmsParameters.put("QUERY_LAYERS", new String[]{layerDescriptor.getNetCDFVariableName() });
+        }
+
+        String queryString = encodeMapForRequest(wmsParameters);
+
+        URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
+
+        IOUtils.copy(wmsUrl.openConnection().getInputStream(), response.getOutputStream());
     }
 
     private boolean isCollectionWithTimeMismatch(String layerName) {
@@ -176,7 +196,7 @@ public class Ncwms {
         try {
             return (JSONObject) parser.parse(readUrl(metadataUrl));
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Error retreiving metadataUrl: '%s'", e.getMessage()));
+            LOGGER.log(Level.SEVERE, String.format("Error retrieving metadataUrl: '%s'", e.getMessage()));
             return null;
         }
     }

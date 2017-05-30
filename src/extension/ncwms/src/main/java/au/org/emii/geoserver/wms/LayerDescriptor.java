@@ -16,9 +16,9 @@ public class LayerDescriptor {
     public static final String defaultTimeField = "time";
     public static final String defaultUrlField = "file_url";
 
-    LayerDescriptor(String layerString) {
+    LayerDescriptor(String layerString) throws Exception {
         if (!layerString.contains("/")) {
-            throw new RuntimeException(String.format("Layer descriptor '%s' does not contain a '/'", layerString));
+            throw new Exception(String.format("Layer descriptor '%s' does not contain a '/'", layerString));
         }
 
         String layerAndWorkspace = layerString.split("/")[0];
