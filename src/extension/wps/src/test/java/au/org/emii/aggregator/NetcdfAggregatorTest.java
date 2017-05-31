@@ -206,32 +206,22 @@ public class NetcdfAggregatorTest {
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/projection-point-outside-expected.nc"), outputFile);
     }
 
-    private void testAggregationOverrides(String resourcePath) throws IOException, AggregationException {
+    @Test
+    public void testAggregationOverrides() throws IOException, AggregationException {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-30.68, 97.82), new LatLonPointImmutable(-30.64, 97.86));
         CalendarDateRange timeRange = CalendarDateRange.of(CalendarDate.parseISOformat("gregorian", "2017-02-01T03:19:60"),
-                CalendarDate.parseISOformat("gregorian", "2017-02-02T03:19:60"));
+            CalendarDate.parseISOformat("gregorian", "2017-02-02T03:19:60"));
         AggregationOverrides overrides = AggregationOverridesReader.load(
-                resourcePath(resourcePath));
+            resourcePath("au/org/emii/aggregator/template.xml"));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-                outputFile, overrides, bbox, null, timeRange
+            outputFile, overrides, bbox, null, timeRange
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-2.nc"));
         }
 
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/overrides-expected.nc"), outputFile);
-
-    }
-
-    @Test
-    public void testAggregationOverridesWithAttributeDataType() throws IOException, AggregationException {
-        testAggregationOverrides("au/org/emii/aggregator/template.xml");
-    }
-
-    @Test
-    public void testAggregationOverridesWithoutAttributeDataType() throws IOException, AggregationException {
-        testAggregationOverrides("au/org/emii/aggregator/templateWithoutAttributeDataType.xml");
     }
 
     @Test
