@@ -11,6 +11,9 @@ import ucar.unidata.geoloc.LatLonRect;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static ucar.unidata.geoloc.LatLonPointImpl.latNormal;
+import static ucar.unidata.geoloc.LatLonPointImpl.lonNormal;
+
 /**
  * Operations on latitude/longitude coordinates
  */
@@ -39,9 +42,7 @@ public class LatLonCoords {
             if (pointSubset) {
                 return getNearestXYPoint(longitude, latitude, bbox.getLonMin(), bbox.getLatMin());
             } else {
-                Range xRange = getRange(longitude, bbox.getLonMin(), bbox.getLonMax());
-                Range yRange = getRange(latitude, bbox.getLatMin(), bbox.getLatMax());
-                return new XYRanges(xRange, yRange);
+                return getXYRanges1D(bbox, longitude, latitude);
             }
 
         } else if (longitude.getRank() == 2 && latitude.getRank() == 2) {
@@ -133,7 +134,7 @@ public class LatLonCoords {
                     double longitude = lonValues.getDouble(x * lonValues.getShape()[1] + y);
                     double latitude = latValues.getDouble(x * latValues.getShape()[1] + y);
 
-                    if (bbox.contains(latitude, longitude)) {
+                    if (bbox.contains(new LatLonPointImpl(latitude, longitude))) {
                         if (x < minX) minX = x;
                         if (y < minY) minY = y;
                         if (x > maxX) maxX = x;
@@ -185,31 +186,41 @@ public class LatLonCoords {
         }
     }
 
-    private Range getRange(NetcdfVariable axis, double minValue, double maxValue) throws AggregationException {
+    private XYRanges getXYRanges1D(LatLonRect bbox, NetcdfVariable lonAxis1D, NetcdfVariable latAxis1D) throws AggregationException {
         try {
-            Array values = axis.read();
+            Array lonValues = lonAxis1D.read();
+            Array latValues = latAxis1D.read();
 
-            int firstI = -1; // index of first value found within range
-            int lastI = -1; // index of last value found within range
+            CoordRange longitudeRange = new LongitudeRange(bbox.getLonMin(), bbox.getLonMax());
+            CoordRange latitudeRange = new LatitudeRange(bbox.getLatMin(), bbox.getLatMax());
 
-            for (int i=0; i<values.getSize(); i++) {
-                if (minValue <= values.getDouble(i) && values.getDouble(i) <= maxValue) {
-                    if (firstI == -1) {
-                        firstI = i;
-                    }
+            Range xRange = getIndexRange(lonValues, longitudeRange);
+            Range yRange = getIndexRange(latValues, latitudeRange);
 
-                    lastI = i;
-                }
+            if (xRange == null || yRange == null) {
+                throw new AggregationException("Bounding box selected no data");
             }
 
-            if (firstI == -1) {
-                throw new AggregationException("Bounding box does not include any data");
-            }
-
-            return new Range(firstI, lastI);
+            return new XYRanges(xRange, yRange);
         } catch (IOException|InvalidRangeException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Range getIndexRange(Array values, CoordRange range) throws InvalidRangeException {
+        int minIdx = Integer.MAX_VALUE; // minimum index within coordinate range
+        int maxIdx = Integer.MIN_VALUE; // maximum index within coordinate range
+
+        for (int idx=0; idx<values.getSize(); idx++) {
+            double value = values.getDouble(idx);
+
+            if (range.contains(value)) {
+                if (idx < minIdx) minIdx = idx;
+                if (idx > maxIdx) maxIdx = idx;
+            }
+        }
+
+        return minIdx == Integer.MAX_VALUE ? null : new Range(minIdx, maxIdx);
     }
 
     /**
