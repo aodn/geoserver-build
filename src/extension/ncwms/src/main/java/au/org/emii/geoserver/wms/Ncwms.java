@@ -1,4 +1,5 @@
 package au.org.emii.geoserver.wms;
+
 import org.apache.commons.io.IOUtils;
 import org.geotools.util.logging.Logging;
 import org.json.simple.JSONObject;
@@ -9,7 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -122,9 +125,24 @@ public class Ncwms {
 
             URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
 
-            IOUtils.copy(wmsUrl.openConnection().getInputStream(), response.getOutputStream());
+            HttpURLConnection connection = (HttpURLConnection)wmsUrl.openConnection();
+            if (connection.getResponseCode() != 200 ) {
+                String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
+                response.sendError(connection.getResponseCode(), ret);
+                LOGGER.log(Level.SEVERE, ret);
+            }
+            else {
+                response.setStatus(connection.getResponseCode());
+                response.setContentType(connection.getContentType());
+                response.setContentLength(connection.getContentLength());
+                try (InputStream is = connection.getInputStream()) {
+                    IOUtils.copy(is, response.getOutputStream());
+                }
+            }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Problem proxying url '%s'", wmsUrlStr));
+            String ret = String.format("Problem while proxying URL '%s' - %s", wmsUrlStr, e.getMessage());
+            response.sendError(500, e.getMessage());
+            LOGGER.log(Level.SEVERE, ret);
             e.printStackTrace();
         }
     }
