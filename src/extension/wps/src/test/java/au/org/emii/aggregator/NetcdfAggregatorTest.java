@@ -1,5 +1,6 @@
 package au.org.emii.aggregator;
 
+import static au.org.emii.test.util.Assert.assertNetcdfFileEqualsCdl;
 import static au.org.emii.test.util.Resource.resourcePath;
 import static au.org.emii.test.util.Assert.assertNetcdfFilesEqual;
 
@@ -248,6 +249,19 @@ public class NetcdfAggregatorTest {
         }
 
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/srs-oc-expected.nc"), outputFile);
+    }
+
+    @Test
+    public void testCarsMonthly() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-90.0, 179.5), new LatLonPointImmutable(90, -179.5));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, new AggregationOverrides(), bbox, null, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/cars-monthly.nc"));
+        }
+
+        assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/cars-monthly-expected.cdl"), outputFile);
     }
 
     @After
