@@ -23,8 +23,32 @@ public class Assert {
         NetcdfFile expectedFile = NetcdfFile.open(netcdfFile.toAbsolutePath().toString());
         StringWriter outputWriter = new StringWriter();
         NCdumpW.print(expectedFile, outputWriter, NCdumpW.WantValues.all, false, false, null, null);
-        return outputWriter.toString().replaceFirst("netcdf .* ", "netcdf "); // return cdl minus filename
+        String cdl = outputWriter.toString().replaceFirst("netcdf .* ", "netcdf "); // return cdl minus filename
+        return removeNCPropertiesGlobalAttribute(cdl);
     }
 
+    /**
+     * NetCDF Library version 4.4.1 has added provenance information
+     * to files created.This information consists of a persistent attribute
+     * named _NCProperties plus two computed attributes, _IsNetcdf4 and
+     * _SuperblockVersion. We are removing the _NCProperties global variable
+     * to keep the tests running on 4.4.1 or later versions of NetCDF Library.
+     *
+     * @param cdl
+     * @return
+     */
+    private static String removeNCPropertiesGlobalAttribute(String cdl) {
+        int startIndex, endIndex;
 
+        startIndex = cdl.indexOf(":_NCProperties");
+        if (startIndex != -1) {
+            endIndex = cdl.substring(startIndex, cdl.length()).indexOf("\n");
+            if (endIndex != -1) {
+                String ncPropertiesLine = cdl.substring(startIndex, startIndex + endIndex + 3);
+                return cdl.replace(ncPropertiesLine, "");
+            }
+        }
+
+        return cdl;
+    }
 }

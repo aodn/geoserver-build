@@ -80,12 +80,24 @@ public class VariableOverrides {
 
     private Number[] getAttributeNumericValues(String name) {
         VariableAttributeOverride attributeOverride = findAttribute(name);
-        return attributeOverride == null ? null : attributeOverride.getAttributeNumericValues(name);
+
+        if (attributeOverride == null)
+            return null;
+        else if (attributeOverride.getType() == null)
+            return attributeOverride.getAttributeNumericValues(type);
+        else
+            return attributeOverride.getAttributeNumericValues();
     }
 
     private Number getAttributeNumericValue(String name) {
         VariableAttributeOverride attributeOverride = findAttribute(name);
-        return attributeOverride == null ? null : attributeOverride.getAttributeNumericValue();
+
+        if (attributeOverride == null)
+            return null;
+        else if (attributeOverride.getType() == null)
+            return attributeOverride.getAttributeNumericValue(type);
+        else
+            return attributeOverride.getAttributeNumericValue();
     }
 
     private VariableAttributeOverride findAttribute(String name) {
