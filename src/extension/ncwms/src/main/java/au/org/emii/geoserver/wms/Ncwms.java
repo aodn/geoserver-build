@@ -112,8 +112,9 @@ public class Ncwms {
             if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
                 wmsParameters.remove("TIME");
             }
-
+            wmsParameters.remove("version");
             wmsParameters.put("VERSION", new String[] { wmsVersion });
+
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
 
             // Needed for GetFeatureInfo

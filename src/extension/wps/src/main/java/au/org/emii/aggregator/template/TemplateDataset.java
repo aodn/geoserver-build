@@ -44,7 +44,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         List<NetcdfVariable> templateVariables = new ArrayList<>();
         Map<String, Dimension> templateDimensions = new LinkedHashMap<>();
 
-        String timeDimension = dataset.getTimeAxis().getDimensionName();
+        String timeDimension = dataset.getTimeDimension();
 
         for (NetcdfVariable variable: dataset.getVariables()) {
             if (!aggregationOverrides.includeVariable(variable.getShortName())) {

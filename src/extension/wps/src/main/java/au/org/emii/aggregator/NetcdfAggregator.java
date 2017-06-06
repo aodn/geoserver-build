@@ -98,7 +98,9 @@ public class NetcdfAggregator implements AutoCloseable {
 
             logger.info("Adding {} to output file", datasetLocation);
 
-            appendRecordVariables(subsettedDataset);
+            if (dataset.hasRecordVariables()) {
+                appendRecordVariables(subsettedDataset);
+            }
         } catch (IOException e) {
             throw new AggregationException(e);
         }

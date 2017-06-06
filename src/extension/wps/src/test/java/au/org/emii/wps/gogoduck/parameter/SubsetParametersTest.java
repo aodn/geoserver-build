@@ -33,6 +33,23 @@ public class SubsetParametersTest {
     public void testIsNotPointSubset() {
         SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
         assertFalse(sp.isPointSubset());
+        assertTrue(sp.getTimeRange() != null);
+    }
+
+    @Test
+    public void testAllowsMissingTimeSubset() {
+        SubsetParameters sp = SubsetParameters.parse("LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
+        assertTrue(sp.getTimeRange() == null);
+    }
+
+    @Test
+    public void testCatchesInvalidTimeSubset() {
+        try {
+            SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,totally-munted-000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
+        }
+        catch (Exception e) {
+            assertTrue(e.getMessage().contains("Invalid time format for subset:"));
+        }
     }
 
 }

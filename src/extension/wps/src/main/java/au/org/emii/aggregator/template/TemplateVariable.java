@@ -42,7 +42,7 @@ public class TemplateVariable extends AbstractVariable {
 
             this.dimensions = dimensions;
 
-            if (variable.findDimension(timeDimension) != null) {
+            if (timeDimension != null && variable.findDimension(timeDimension) != null) {
                 // time varying data - don't copy to template
                 this.data = Array.factory(variable.getDataType(), getShape());
             } else {

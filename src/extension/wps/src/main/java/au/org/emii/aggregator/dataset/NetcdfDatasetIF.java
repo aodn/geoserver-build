@@ -28,6 +28,8 @@ public interface NetcdfDatasetIF {
 
     TimeAxis getTimeAxis();
 
+    String getTimeDimension();
+
     boolean hasVerticalAxis();
 
     NetcdfVariable getVerticalAxis();
@@ -36,4 +38,6 @@ public interface NetcdfDatasetIF {
 
     NetcdfDatasetIF subset(CalendarDateRange timeRange, Range verticalSubset,
                            LatLonRect bbox) throws AggregationException;
+
+    boolean hasRecordVariables();
 }

@@ -264,6 +264,19 @@ public class NetcdfAggregatorTest {
         assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/cars-monthly-expected.cdl"), outputFile);
     }
 
+    @Test
+    public void testBathymetry() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-90.0, -125.862299280124), new LatLonPointImmutable(90, -125.862292710516));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, new AggregationOverrides(), bbox, null, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/bathymetry.nc"));
+        }
+
+        assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/bathymetry-expected.cdl"), outputFile);
+    }
+
     @After
     public void deleteOutputFile() throws IOException {
         Files.deleteIfExists(outputFile);
