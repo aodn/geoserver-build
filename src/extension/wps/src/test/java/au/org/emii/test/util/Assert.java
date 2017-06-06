@@ -1,5 +1,6 @@
 package au.org.emii.test.util;
 
+import org.apache.commons.io.FileUtils;
 import ucar.nc2.NCdumpW;
 import ucar.nc2.NetcdfFile;
 
@@ -15,6 +16,12 @@ import static org.junit.Assert.assertEquals;
 public class Assert {
     public static void assertNetcdfFilesEqual(Path expected, Path actual) throws IOException {
         String expectedCdl = getAsCdl(expected);
+        String actualCdl = getAsCdl(actual);
+        assertEquals(expectedCdl, actualCdl);
+    }
+
+    public static void assertNetcdfFileEqualsCdl(Path expected, Path actual) throws IOException {
+        String expectedCdl = FileUtils.readFileToString(expected.toFile());
         String actualCdl = getAsCdl(actual);
         assertEquals(expectedCdl, actualCdl);
     }
