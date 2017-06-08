@@ -281,6 +281,14 @@ public class GenerationIT {
     }
 
     @Test
+    public void testNoCql() throws Exception {
+        MockOutputterCounter outputter = new MockOutputterCounter();
+        NcdfEncoder encoder = getEncoder(getAnmnConfig(), null, "anmn_ts", outputter);
+        consumeEncoderOutput(encoder);
+        assertEquals(11, outputter.getCount());
+    }
+
+    @Test
     public void testCqlWithValidSpatialTemporalSubset() throws Exception {
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z'";
         MockOutputterCounter outputter = new MockOutputterCounter();

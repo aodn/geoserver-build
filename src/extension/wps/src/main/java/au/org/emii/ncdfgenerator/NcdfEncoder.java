@@ -149,8 +149,8 @@ public class NcdfEncoder implements AutoCloseable {
 
         String query =
                 getVirtualTable()
-                    + (whereClause != null ? " " + whereClause : "")
                     + " and instance.id = " + Long.toString(instanceId)
+                    + (whereClause != null ? " " + whereClause : "")
                     + " order by " + orderClause
                     + ";";
 
@@ -246,8 +246,8 @@ public class NcdfEncoder implements AutoCloseable {
                     + " from (" + getVirtualDataTable() + ") as data"
                     + " join (" + getVirtualInstanceTable() + ") instance"
                     + " on instance.id = data.instance_id"
-                    + " " + whereClause
                     + " and instance.id = " + Long.toString(instanceId)
+                    + (whereClause != null ? " " + whereClause : "")
                     + " order by " + orderClause
                     + " ) as data"
         );
