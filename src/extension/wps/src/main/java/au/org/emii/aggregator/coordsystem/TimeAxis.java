@@ -68,4 +68,8 @@ public class TimeAxis {
     public String getDimensionName() {
         return variable.getDimensions().get(0).getShortName();
     }
+
+    public int getSize() {
+        return variable.getShape()[0];
+    }
 }
