@@ -180,51 +180,48 @@ public class NetcdfAggregator implements AutoCloseable {
     }
 
     private void appendRecordVariables(NetcdfDatasetIF dataset) throws AggregationException {
-        try {
-            for (NetcdfVariable templateVariable: templateDataset.getVariables()) {
-                if (!templateVariable.isUnlimited()) {
-                    continue;
-                }
+        for (int timeIndex=0; timeIndex<dataset.getTimeAxis().getSize(); timeIndex++) {
+            appendTimeSlice(dataset, timeIndex);
+        }
+    }
 
-                NetcdfVariable datasetVariable = dataset.findVariable(templateVariable.getShortName());
-                append(datasetVariable);
+    private void appendTimeSlice(NetcdfDatasetIF dataset, int timeIndex) throws AggregationException {
+        for (NetcdfVariable templateVariable: templateDataset.getVariables()) {
+            if (!templateVariable.isUnlimited()) {
+                continue;
             }
 
+            NetcdfVariable datasetVariable = dataset.findVariable(templateVariable.getShortName());
+            appendTimeSlice(datasetVariable, timeIndex);
+        }
+
+        try {
             writer.flush();
         } catch (IOException e) {
             throw new AggregationException(e);
         }
     }
 
-    // Add time slices (records) from source variable to output variable
-    private void append(NetcdfVariable srcVariable) throws AggregationException {
+    // Append source variable time slice to output variable
+    private void appendTimeSlice(NetcdfVariable srcVariable, int timeSliceIndex) throws AggregationException {
         try {
             Variable destVariable = writer.findVariable(srcVariable.getShortName());
 
-            // determine number of time slices in the source variable
-            int timeSlicesCount = srcVariable.getShape()[0]; // assumes time dimension is slowest varying i.e. the first
+            // get shape of time slice to copy
+            int[] timeSliceShape = srcVariable.getShape();
+            timeSliceShape[0] = 1;
 
-            // copy one time slice at a time for the moment
-            int[] timeSlice = srcVariable.getShape();
-            timeSlice[0] = 1;
-
-            // start copying from the start of the source variable
+            // read timeslice from source variable
             int[] srcOrigin = new int[srcVariable.getRank()];
+            srcOrigin[0] = timeSliceIndex;
 
-            // start adding at the end of the destination variable
+            Array data = srcVariable.read(srcOrigin, timeSliceShape);
+
+            // add to end of destination variable
             int[] destOrigin = new int[destVariable.getRank()];
             destOrigin[0] = destVariable.getShape()[0];
 
-            // add each time slice from the source variable to the output variable
-            for (int i=0; i<timeSlicesCount; i++) {
-                // get timeslice from source variable
-                srcOrigin[0] = i;
-                Array data = srcVariable.read(srcOrigin, timeSlice);
-                // add it to the destination variable
-                writer.write(destVariable, destOrigin, data);
-                // want to add after this one next time
-                destOrigin[0]++;
-            }
+            writer.write(destVariable, destOrigin, data);
         } catch (IOException |InvalidRangeException e) {
             throw new AggregationException(e);
         }
