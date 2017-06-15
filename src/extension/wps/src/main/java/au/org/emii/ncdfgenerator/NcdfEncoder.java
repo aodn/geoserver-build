@@ -73,7 +73,7 @@ public class NcdfEncoder implements AutoCloseable {
     private String getVirtualTable() {
         return "select *"
             + " from (" + getVirtualDataTable() + ") as data"
-            + " left join (" + getVirtualInstanceTable() + ") instance"
+            + " join (" + getVirtualInstanceTable() + ") instance"
             + " on instance.id = data.instance_id";
     }
 
@@ -94,7 +94,7 @@ public class NcdfEncoder implements AutoCloseable {
         String instanceQuery =
                 "select distinct data.instance_id"
                         + " from (" + getVirtualDataTable() + ") as data"
-                        + " left join (" + getVirtualInstanceTable() + ") instance"
+                        + " join (" + getVirtualInstanceTable() + ") instance"
                         + " on instance.id = data.instance_id";
 
         instanceQuery = applyFilter(instanceQuery);
@@ -118,7 +118,9 @@ public class NcdfEncoder implements AutoCloseable {
             sqlEncoder.setFeatureType(featureType);
 
             whereClause = sqlEncoder.encodeToString(filter);
-            query += " " + whereClause;
+            if(whereClause != null) {
+                query += " " + whereClause;
+            }
         }
 
         return query;
@@ -147,12 +149,12 @@ public class NcdfEncoder implements AutoCloseable {
 
         String query =
                 getVirtualTable()
-                    + " " + whereClause
-                    + " and data.instance_id = " + Long.toString(instanceId)
+                    + " and instance.id = " + Long.toString(instanceId)
+                    + (whereClause != null ? " " + whereClause : "")
                     + " order by " + orderClause
                     + ";";
 
-        logger.debug("instanceId " + instanceId + ", " + query);
+        logger.info("instanceId " + instanceId + ", " + query);
 
         populateValues(query, definition.getDimensions(), definition.getVariables());
 
@@ -242,10 +244,10 @@ public class NcdfEncoder implements AutoCloseable {
         sql = sql.replaceAll("\\$data",
                 "( select *"
                     + " from (" + getVirtualDataTable() + ") as data"
-                    + " left join (" + getVirtualInstanceTable() + ") instance"
+                    + " join (" + getVirtualInstanceTable() + ") instance"
                     + " on instance.id = data.instance_id"
-                    + " " + whereClause
-                    + " and data.instance_id = " + Long.toString(instanceId)
+                    + " and instance.id = " + Long.toString(instanceId)
+                    + (whereClause != null ? " " + whereClause : "")
                     + " order by " + orderClause
                     + " ) as data"
         );
