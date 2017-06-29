@@ -7,56 +7,68 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet author="talend" id="add_sample_timeseries_data_acorn">
+    <changeSet author="talend" id="add_sample_timeseries_data_acorn" runOnChange="true">
         <sql>
+            DROP TABLE IF EXISTS acorn_hourly_avg_nonqc_timeseries_url;
+
             CREATE TABLE acorn_hourly_avg_nonqc_timeseries_url (
             file_url character varying(512) NOT NULL,
-            "time" timestamp with time zone
+            "time" timestamp with time zone,
+            size double precision
             );
-        </sql>
 
-        <sqlFile path="acorn.sql" relativeToChangelogFile="true"/>
+            INSERT INTO acorn_hourly_avg_nonqc_timeseries_url VALUES ('IMOS/ACORN/gridded_1h-avg-current-map_non-QC/ROT/2016/07/18/IMOS_ACORN_V_20160718T003000Z_ROT_FV00_1-hour-avg.nc','2016-07-18 00:30:00+00', 107293);
+            INSERT INTO acorn_hourly_avg_nonqc_timeseries_url VALUES ('IMOS/ACORN/gridded_1h-avg-current-map_non-QC/ROT/2014/10/03/IMOS_ACORN_V_20141003T003000Z_ROT_FV00_1-hour-avg.nc','2014-10-03 00:30:00+00', 105576);
+            INSERT INTO acorn_hourly_avg_nonqc_timeseries_url VALUES ('IMOS/ACORN/gridded_1h-avg-current-map_non-QC/ROT/2016/07/18/IMOS_ACORN_V_20160718T013000Z_ROT_FV00_1-hour-avg.nc','2016-07-18 01:30:00+00', 108186);
+        </sql>
     </changeSet>
 
-    <changeSet author="talend" id="add_sample_srs_oc">
+    <changeSet author="talend" id="add_sample_srs_oc" runOnChange="true">
         <sql>
+            DROP TABLE IF EXISTS srs_oc_timeseries_url;
+
             CREATE TABLE srs_oc_timeseries_url (
             file_url character varying(512) NOT NULL,
-            "time" timestamp with time zone
+            "time" timestamp with time zone,
+            size double precision
             );
-        </sql>
 
-        <sqlFile path="srs_oc.sql" relativeToChangelogFile="true"/>
+            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103452010352.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-12-11 00:00:00+00', 263236);
+            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103372010344.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-12-03 00:00:00+00', 2553235);
+            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103292010336.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-11-25 00:00:00+00', 2763521);
+        </sql>
     </changeSet>
 
-    <changeSet author="talend" id="add_sample_srs">
+    <changeSet author="talend" id="add_sample_srs" runOnChange="true">
         <sql>
+            DROP TABLE IF EXISTS srs_timeseries_url;
+
             CREATE TABLE srs_timeseries_url (
             file_url character varying(512) NOT NULL,
-            "time" timestamp with time zone
+            "time" timestamp with time zone,
+            size double precision
             );
-        </sql>
 
-        <sqlFile path="srs.sql" relativeToChangelogFile="true"/>
+            INSERT INTO srs_timeseries_url VALUES ('IMOS/SRS/SST/ghrsst/L3S-1d/day/2016/20160804032000-ABOM-L3S_GHRSST-SSTskin-AVHRR_D-1d_day.nc','2016-08-04 03:20:00+00', 41163481);
+            INSERT INTO srs_timeseries_url VALUES ('IMOS/SRS/SST/ghrsst/L3S-1d/day/2016/20160805032000-ABOM-L3S_GHRSST-SSTskin-AVHRR_D-1d_day.nc','2016-08-05 03:20:00+00', 29399182);
+            INSERT INTO srs_timeseries_url VALUES ('IMOS/SRS/SST/ghrsst/L3S-1d/day/2016/20160806032000-ABOM-L3S_GHRSST-SSTskin-AVHRR_D-1d_day.nc','2016-08-06 03:20:00+00', 37372989);
+        </sql>
     </changeSet>
 
-    <changeSet author="talend" id="add_sample_cars">
+    <changeSet author="talend" id="add_sample_cars" runOnChange="true">
         <sql>
+            DROP TABLE IF EXISTS cars_timeseries_url;
+
             CREATE TABLE cars_timeseries_url (
             file_url character varying(512) NOT NULL,
-            "time" timestamp with time zone
+            "time" timestamp with time zone,
+            size double precision
             );
-        </sql>
 
-        <sqlFile path="cars.sql" relativeToChangelogFile="true"/>
-    </changeSet>
-
-    <changeSet author="talend" id="update_srs_oc_time_prod_data">
-        <sql>
-            DELETE FROM srs_oc_timeseries_url;
-            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103452010352.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-12-11 00:00:00+00');
-            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103372010344.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-12-03 00:00:00+00');
-            INSERT INTO srs_oc_timeseries_url VALUES ('IMOS/SRS/OC/gridded/contributed/SO-Johnson/chl/8d/seawifs/S20103292010336.L3m_8D_SO_Chl_9km.Johnson_SO_Chl.nc','2010-11-25 00:00:00+00');
+            INSERT INTO cars_timeseries_url VALUES ('CSIRO/Climatology/CARS/2009/AODN-product/CARS2009_Australia_weekly.nc','2009-01-01 00:00:00+00', 106463753);
+            INSERT INTO cars_timeseries_url VALUES ('CSIRO/Climatology/CARS/2009/AODN-product/CARS2009_Australia_weekly.nc','2009-01-08 00:55:23+00', 106463753);
+            INSERT INTO cars_timeseries_url VALUES ('CSIRO/Climatology/CARS/2009/AODN-product/CARS2009_Australia_weekly.nc','2009-01-15 01:50:46+00', 106463753);
         </sql>
     </changeSet>
+
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import ucar.ma2.Range;
+import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
@@ -29,10 +30,21 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
         NetcdfVariable time = findVariable(AxisType.Time);
 
         if (time == null) {
-            throw new UnsupportedOperationException("No variable with axis type time found in dataset");
+            return null;
         }
 
         return new TimeAxis(time);
+    }
+
+    @Override
+    public String getTimeDimension() {
+        TimeAxis time = getTimeAxis();
+
+        if (time == null) {
+            return null;
+        }
+
+        return time.getDimensionName();
     }
 
     @Override
@@ -61,6 +73,11 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
     public SubsettedDataset subset(CalendarDateRange timeRange, Range verticalSubset,
                                          LatLonRect bbox) throws AggregationException {
         return new SubsettedDataset(this, timeRange, verticalSubset, bbox);
+    }
+
+    @Override
+    public boolean hasRecordVariables() {
+        return getTimeAxis() != null;
     }
 
     @Override

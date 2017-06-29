@@ -19,6 +19,7 @@ import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.nc2.time.CalendarDateRange;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,21 +42,7 @@ public class FeatureSourceIndexReader implements IndexReader {
     public Set<DownloadRequest> getDownloadList(String typeName, String timeField, String sizeField, String urlField, SubsetParameters subset) throws GoGoDuckException {
         Set<DownloadRequest> result = new LinkedHashSet<>();
 
-        String timeCoverageStart = subset.getTimeRange().getStart().toString();
-        String timeCoverageEnd = subset.getTimeRange().getEnd().toString();
-
-        Filter cqlFilter;
-
-        try {
-            cqlFilter = CQL.toFilter(
-                    String.format("%s >= '%s' AND %s <= '%s'",
-                            timeField, timeCoverageStart,
-                            timeField, timeCoverageEnd)
-            );
-        } catch (CQLException e) {
-            logger.error(e.getMessage(), e);
-            throw new GoGoDuckException(e.getMessage());
-        }
+        Filter cqlFilter = getFilter(timeField, subset.getTimeRange());
 
         Query query = new Query(typeName, cqlFilter, new String[]{urlField, sizeField});
 
@@ -78,6 +65,26 @@ public class FeatureSourceIndexReader implements IndexReader {
         }
 
         return result;
+    }
+
+    private Filter getFilter(String timeField, CalendarDateRange timeRange) {
+        if (timeRange == null) {
+            return Filter.INCLUDE;
+        }
+
+        String timeCoverageStart = timeRange.getStart().toString();
+        String timeCoverageEnd = timeRange.getEnd().toString();
+
+        try {
+            return CQL.toFilter(
+                    String.format("%s >= '%s' AND %s <= '%s'",
+                            timeField, timeCoverageStart,
+                            timeField, timeCoverageEnd)
+            );
+        } catch (CQLException e) {
+            logger.error(e.getMessage(), e);
+            throw new GoGoDuckException(e.getMessage());
+        }
     }
 
     private SimpleFeatureIterator getFeatures(String typeName, Query query) throws IOException {
