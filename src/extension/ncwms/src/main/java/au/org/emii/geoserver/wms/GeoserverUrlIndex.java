@@ -104,6 +104,9 @@ public class GeoserverUrlIndex implements UriIndex {
                 SimpleFeature feature = iterator.next();
 
                 Date timestamp = (Date) feature.getAttribute(layerDescriptor.getTimeFieldName());
+
+                if (timestamp == null) continue;
+
                 LOGGER.log(Level.INFO, String.format("Processing timestamp '%s'", timestamp));
                 DateTime date = new DateTime(timestamp.getTime());
 
