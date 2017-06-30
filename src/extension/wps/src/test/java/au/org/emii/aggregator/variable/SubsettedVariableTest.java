@@ -1,6 +1,5 @@
 package au.org.emii.aggregator.variable;
 
-import au.org.emii.aggregator.template.TemplateVariable;
 import org.junit.Before;
 import org.junit.Test;
 import ucar.ma2.Array;
@@ -9,6 +8,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.constants.AxisType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class SubsettedVariableTest {
 
     @Before
     public void createTestVariable() {
-        List<Dimension> dimensons = Arrays.asList(
+        List<Dimension> dimensions = Arrays.asList(
             new Dimension("time", 10),
             new Dimension("lat", 5),
             new Dimension("lon", 10)
@@ -42,7 +42,7 @@ public class SubsettedVariableTest {
 
         Array data = Array.factory(DataType.INT, new int[] {10, 5, 10}, storage);
 
-        variable = new TemplateVariable("temp", new ArrayList<Attribute>(), dimensons, null, data);
+        variable = new TestVariable("temp", dimensions, data);
     }
 
     @Test

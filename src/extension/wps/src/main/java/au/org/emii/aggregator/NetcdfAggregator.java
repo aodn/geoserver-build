@@ -18,10 +18,12 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.FileWriter2.ChunkingIndex;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.NetcdfFileWriter.Version;
@@ -53,20 +55,23 @@ public class NetcdfAggregator implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(NetcdfAggregator.class);
     private static final Group GLOBAL = null;
+    private static final long DEFAULT_MAX_CHUNK_SIZE = 10 * 1000 * 1000; // 10 MB
 
     private final Path outputPath;
     private final AggregationOverrides aggregationOverrides;
     private final LatLonRect bbox;
     private final Range verticalSubset;
     private final CalendarDateRange dateRange;
+    private final long maxChunkSize;
 
     private NetcdfFileWriter writer;
 
     private NetcdfDatasetIF templateDataset;
-    private boolean fileProcessed;
+    private boolean outputFileCreated;
     private Map<String, UnpackerOverrides> unpackerOverrides;
+    private int slicesWritten = 0;
 
-    public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides,
+    public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides, Long maxChunkSize,
                             LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange
     ) {
         assertOutputPathValid(outputPath);
@@ -76,8 +81,9 @@ public class NetcdfAggregator implements AutoCloseable {
         this.bbox = bbox;
         this.verticalSubset = verticalSubset;
         this.dateRange = dateRange;
+        this.maxChunkSize = maxChunkSize != null ? maxChunkSize : DEFAULT_MAX_CHUNK_SIZE;
 
-        fileProcessed = false;
+        outputFileCreated = false;
 
         // use overrides specified in config if any when unpacking the first dataset
         unpackerOverrides = getUnpackerOverrides(aggregationOverrides.getVariableOverridesList());
@@ -87,20 +93,21 @@ public class NetcdfAggregator implements AutoCloseable {
         try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, unpackerOverrides)) {
             NetcdfDatasetIF subsettedDataset = dataset.subset(dateRange, verticalSubset, bbox);
 
-            if (!fileProcessed) {
+            if (!outputFileCreated) {
                 unpackerOverrides = getOverridesApplied(dataset); // ensure same changes applied to all other datasets
                 logger.info("Creating output file {} using {} as a template", outputPath, datasetLocation);
                 templateDataset = new TemplateDataset(subsettedDataset, aggregationOverrides,
                     dateRange, verticalSubset, bbox);
-                copyToOutputFile(templateDataset);
-                fileProcessed = true;
+                // create empty dataset from template
+                createOutputFile(templateDataset);
+                // copy subsetted coordinate axes and other static (non-record) data to output file
+                copyStaticData(subsettedDataset);
+                outputFileCreated = true;
             }
 
             logger.info("Adding {} to output file", datasetLocation);
 
-            if (dataset.hasRecordVariables()) {
-                appendRecordVariables(subsettedDataset);
-            }
+            appendTimeSlices(subsettedDataset);
         } catch (IOException e) {
             throw new AggregationException(e);
         }
@@ -123,7 +130,7 @@ public class NetcdfAggregator implements AutoCloseable {
         }
     }
 
-    private void copyToOutputFile(NetcdfDatasetIF template) throws AggregationException {
+    private void createOutputFile(NetcdfDatasetIF template) throws AggregationException {
         try {
             Nc4Chunking chunking = new Nc4ChunkingDefault(3, false);
             writer = NetcdfFileWriter.createNew(Version.netcdf4,
@@ -164,67 +171,85 @@ public class NetcdfAggregator implements AutoCloseable {
                 }
             }
 
-            // Finished defining file contents
+            // Create file
 
             writer.create();
-
-            // Copy static data (coordinate axes, etc) to output file
-
-            for (NetcdfVariable variable: template.getVariables()) {
-                if (!variable.isUnlimited()) {
-                    Variable fileVariable = writer.findVariable(variable.getShortName());
-                    writer.write(fileVariable, variable.read());
-                }
-            }
-        } catch (IOException|InvalidRangeException e) {
+        } catch (IOException e) {
             throw new AggregationException("Could not create output file", e);
         }
     }
 
-    private void appendRecordVariables(NetcdfDatasetIF dataset) throws AggregationException {
-        for (int timeIndex=0; timeIndex<dataset.getTimeAxis().getSize(); timeIndex++) {
-            appendTimeSlice(dataset, timeIndex);
+    private void copyStaticData(NetcdfDatasetIF subsettedDataset) throws AggregationException {
+        for (NetcdfVariable variable: templateDataset.getVariables()) {
+            if (variable.isUnlimited()) {
+                continue;
+            }
+
+            NetcdfVariable subsettedVariable = subsettedDataset.findVariable(variable.getShortName());
+            Variable outputVariable = writer.findVariable(variable.getShortName());
+            copy(subsettedVariable, outputVariable);
         }
     }
 
-    private void appendTimeSlice(NetcdfDatasetIF dataset, int timeIndex) throws AggregationException {
+    private void copy(NetcdfVariable oldVar, Variable newVar) throws AggregationException {
+        try {
+            if (oldVar.getRank() == 0) {
+                // not an array - just copy the data - it can't be chunked
+                writer.write(newVar, oldVar.read());
+                writer.flush();
+            } else {
+                chunkedCopy(oldVar, newVar, 0);
+            }
+        } catch (InvalidRangeException|IOException e) {
+            throw new AggregationException(e);
+        }
+    }
+
+    private void appendTimeSlices(NetcdfDatasetIF dataset) throws AggregationException {
+        if (dataset.getTimeAxis() == null) {
+            return; // no time varying data
+        }
+
         for (NetcdfVariable templateVariable: templateDataset.getVariables()) {
             if (!templateVariable.isUnlimited()) {
                 continue;
             }
 
-            NetcdfVariable datasetVariable = dataset.findVariable(templateVariable.getShortName());
-            appendTimeSlice(datasetVariable, timeIndex);
+            NetcdfVariable subsettedVariable = dataset.findVariable(templateVariable.getShortName());
+            Variable outputVariable = writer.findVariable(subsettedVariable.getShortName());
+            chunkedCopy(subsettedVariable, outputVariable, slicesWritten);
         }
 
-        try {
-            writer.flush();
-        } catch (IOException e) {
-            throw new AggregationException(e);
-        }
+        slicesWritten += dataset.getTimeAxis().getSize();
     }
 
-    // Append source variable time slice to output variable
-    private void appendTimeSlice(NetcdfVariable srcVariable, int timeSliceIndex) throws AggregationException {
+    private void chunkedCopy(NetcdfVariable subsettedVariable, Variable outputVariable, int offset) throws AggregationException {
         try {
-            Variable destVariable = writer.findVariable(srcVariable.getShortName());
+            // copy data in maxChunkSize chunks
+            long maxChunkElems = maxChunkSize / subsettedVariable.getDataType().getSize();
 
-            // get shape of time slice to copy
-            int[] timeSliceShape = srcVariable.getShape();
-            timeSliceShape[0] = 1;
+            ChunkingIndex index = new ChunkingIndex(subsettedVariable.getShape());
+            while (index.currentElement() < index.getSize()) {
+                // read next chunk of data from source variable
 
-            // read timeslice from source variable
-            int[] srcOrigin = new int[srcVariable.getRank()];
-            srcOrigin[0] = timeSliceIndex;
+                int[] startingPosition = index.getCurrentCounter();
+                int[] chunkShape = index.computeChunkShape(maxChunkElems);
 
-            Array data = srcVariable.read(srcOrigin, timeSliceShape);
+                Array data = subsettedVariable.read(startingPosition, chunkShape);
 
-            // add to end of destination variable
-            int[] destOrigin = new int[destVariable.getRank()];
-            destOrigin[0] = destVariable.getShape()[0];
+                // determine where chunk should be copied to in output variable taking into account existing data
+                // copied from other files (offset in first dimension)
+                int[] outputPosition = index.getCurrentCounter();
+                outputPosition[0] += offset;
 
-            writer.write(destVariable, destOrigin, data);
-        } catch (IOException |InvalidRangeException e) {
+                if (data.getSize() > 0) {// zero when record dimension = 0
+                    writer.write(outputVariable, outputPosition, data);
+                    writer.flush();
+                }
+
+                index.setCurrentCounter(index.currentElement() + (int) Index.computeSize(chunkShape));
+            }
+        } catch (InvalidRangeException|IOException e) {
             throw new AggregationException(e);
         }
     }
@@ -293,9 +318,10 @@ public class NetcdfAggregator implements AutoCloseable {
         options.addOption("z", true, "restrict data to specified z index range e.g. -z 2,4");
         options.addOption("t", true, "restrict data to specified date/time range in ISO 8601 format e.g. -t 2017-01-12T21:58:02Z,2017-01-12T22:58:02Z");
         options.addOption("o", true, "xml file containing aggregation overrides to be applied");
+        options.addOption("c", true, "maximum number of variable bytes to copy at a time");
 
         CommandLineParser parser = new DefaultParser();
-        CommandLine line = parser.parse( options, args );
+        CommandLine line = parser.parse(options, args);
 
         List<String> inputFiles = Files.readAllLines(Paths.get(line.getArgs()[0]), Charset.forName("utf-8"));
         Path outputFile = Paths.get(line.getArgs()[1]);
@@ -304,6 +330,7 @@ public class NetcdfAggregator implements AutoCloseable {
         String zSubsetArg = line.getOptionValue("z");
         String timeArg = line.getOptionValue("t");
         String overridesArg = line.getOptionValue("o");
+        String maxChunkSizeArg = line.getOptionValue("c");
 
         LatLonRect bbox = null;
 
@@ -344,9 +371,15 @@ public class NetcdfAggregator implements AutoCloseable {
             overrides = new AggregationOverrides(); // Use default (i.e. no overrides)
         }
 
+        Long maxChunkSize = null;
+
+        if (maxChunkSizeArg != null) {
+            maxChunkSize = new Long(maxChunkSizeArg);
+        }
+
         try (
             NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-                outputFile, overrides, bbox, zSubset, timeRange)
+                outputFile, overrides, maxChunkSize, bbox, zSubset, timeRange)
         ) {
             for (String file:inputFiles) {
                 if (file.trim().length() == 0) continue;
