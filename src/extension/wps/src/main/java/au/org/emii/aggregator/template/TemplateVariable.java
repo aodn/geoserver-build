@@ -9,7 +9,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,48 +18,30 @@ public class TemplateVariable extends AbstractVariable {
     private final String shortName;
     private final List<Attribute> attributes;
     private final List<Dimension> dimensions;
-    private final Array data;
     private final AxisType axisType;
+    private final DataType dataType;
+    private final boolean isUnsigned;
 
     public TemplateVariable(NetcdfVariable variable, String timeDimension) {
-        try {
-            this.shortName = variable.getShortName();
-            this.attributes = variable.getAttributes();
-            this.axisType = variable.getAxisType();
+        this.shortName = variable.getShortName();
+        this.attributes = variable.getAttributes();
+        this.axisType = variable.getAxisType();
+        this.dataType = variable.getDataType();
+        this.isUnsigned = variable.isUnsigned();
 
-            // Copy dimensions setting any time dimension to zero length/unlimited
+        // Copy dimensions setting any time dimension to zero length/unlimited
 
-            List<Dimension> dimensions = new ArrayList<>();
+        List<Dimension> dimensions = new ArrayList<>();
 
-            for (Dimension dimension : variable.getDimensions()) {
-                if (dimension.getShortName().equals(timeDimension)) {
-                    dimensions.add(new Dimension(dimension.getShortName(), 0, true, true, false));
-                } else {
-                    dimensions.add(new Dimension(dimension.getShortName(), dimension.getLength(), true));
-                }
-            }
-
-            this.dimensions = dimensions;
-
-            if (timeDimension != null && variable.findDimension(timeDimension) != null) {
-                // time varying data - don't copy to template
-                this.data = Array.factory(variable.getDataType(), getShape());
+        for (Dimension dimension : variable.getDimensions()) {
+            if (dimension.getShortName().equals(timeDimension)) {
+                dimensions.add(new Dimension(dimension.getShortName(), 0, true, true, false));
             } else {
-                // static data (coordinate variables) - copy to template
-                this.data = variable.read().copy();
+                dimensions.add(new Dimension(dimension.getShortName(), dimension.getLength(), true));
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
-    }
 
-    public TemplateVariable(String temp, ArrayList<Attribute> attributes, List<Dimension> dimensons, AxisType type,
-                            Array data) {
-        this.shortName = temp;
-        this.attributes = attributes;
-        this.dimensions = dimensons;
-        this.axisType = type;
-        this.data = data;
+        this.dimensions = dimensions;
     }
 
     @Override
@@ -70,7 +51,7 @@ public class TemplateVariable extends AbstractVariable {
 
     @Override
     public DataType getDataType() {
-        return data.getDataType();
+        return dataType;
     }
 
     @Override
@@ -90,18 +71,12 @@ public class TemplateVariable extends AbstractVariable {
 
     @Override
     public Array read(int[] origin, int[] shape) throws InvalidRangeException {
-        Array section = data.sectionNoReduce(origin, shape, null);
-
-        if (section.getRank() != 0) {
-            return Array.factory(section.copyToNDJavaArray());
-        } else {
-            return Array.factory(section.getDataType(), shape);
-        }
+        throw new UnsupportedOperationException("Template variable contains no data");
     }
 
     @Override
     public boolean isUnsigned() {
-        return data.isUnsigned();
+        return isUnsigned;
     }
 
 }

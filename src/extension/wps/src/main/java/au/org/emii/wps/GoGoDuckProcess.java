@@ -94,7 +94,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 try (
                     ParallelDownloadManager downloadManager = new ParallelDownloadManager(downloadConfig, downloader);
                     NetcdfAggregator aggregator = new NetcdfAggregator(
-                        outputFile, config.getTemplate(layer),
+                        outputFile, config.getTemplate(layer), config.getMaxChunkSize(),
                         parameters.getBbox(), parameters.getVerticalRange(), parameters.getTimeRange()
                     )
                 ){
