@@ -38,21 +38,12 @@ public class SubsetParameters {
     }
 
     public static SubsetParameters parse(String subset) {
-        //Validation
 
         int timeCount = 0, latLonCount = 0;
-        Pattern timePattern = Pattern.compile("((1[7-9]|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])T([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])");
+        Pattern timePattern = Pattern.compile("((1[7-9]|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])T([0-9]+):([0-5]?[0-9]):([0-5]?[0-9]).([0-9]?[0-9]?[0-9]Z)");
         Pattern latLonPattern = Pattern.compile("([+-]?\\d+\\.?\\d+)\\s*,\\s*([+-]?\\d+\\.?\\d+)");
         Map<String, ParameterRange> subsets = new HashMap<>();
-
-        Matcher matcher = latLonPattern.matcher(subset);
-        while (matcher.find()) {
-            latLonCount++;
-        }
-
-        if (latLonCount != 2) {
-            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s", subset));
-        }
+        Matcher matcher;
 
         // Parse
         for (String part : subset.split(";")) {
@@ -73,6 +64,7 @@ public class SubsetParameters {
         ParameterRange timeRange = subsets.get("TIME");
         CalendarDateRange calendarDateRange = null;
 
+        //Validation
         if (timeRange != null) {
             matcher = timePattern.matcher(subset);
 
@@ -86,6 +78,15 @@ public class SubsetParameters {
             CalendarDate startTime = CalendarDate.parseISOformat("gregorian", timeRange.start);
             CalendarDate endTime = CalendarDate.parseISOformat("gregorian", timeRange.end);
             calendarDateRange = CalendarDateRange.of(startTime, endTime);
+        }
+
+        matcher = latLonPattern.matcher(subset);
+        while (matcher.find()) {
+            latLonCount++;
+        }
+
+        if (latLonCount != 2) {
+            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s", subset));
         }
 
         return new SubsetParameters(bbox, calendarDateRange);

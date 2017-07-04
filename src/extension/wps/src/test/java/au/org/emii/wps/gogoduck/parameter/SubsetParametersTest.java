@@ -46,10 +46,17 @@ public class SubsetParametersTest {
     public void testCatchesInvalidTimeSubset() {
         try {
             SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,totally-munted-000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("Invalid time format for subset:"));
         }
     }
 
+    @Test
+    public void testCatchesInvalidFormatTimeSubset() {
+        try {
+            SubsetParameters sp = SubsetParameters.parse("TIME,2014-10-10T00:00:00,2014-10-12T00:00:00;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Invalid time format for subset:"));
+        }
+    }
 }
