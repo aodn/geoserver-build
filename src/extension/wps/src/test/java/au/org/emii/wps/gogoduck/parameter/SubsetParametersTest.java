@@ -59,4 +59,13 @@ public class SubsetParametersTest {
             assertTrue(e.getMessage().contains("Invalid time format for subset:"));
         }
     }
+
+    @Test
+    public void testCatchesInvalidFormatSubset() {
+        try {
+            SubsetParameters sp = SubsetParameters.parse("TIME,2014-10-10T00:00:00,2014-10-12T00:00:00;LATITUDE,-33.433849,-32.150743;LONGITUDEX,114.15197,115.741219");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Invalid latitude/longitude format for subset:"));
+        }
+    }
 }
