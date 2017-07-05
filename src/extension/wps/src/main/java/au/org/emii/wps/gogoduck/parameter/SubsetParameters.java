@@ -38,21 +38,13 @@ public class SubsetParameters {
     }
 
     public static SubsetParameters parse(String subset) {
-        //Validation
 
         int timeCount = 0, latLonCount = 0;
-        Pattern timePattern = Pattern.compile("((1[7-9]|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])T([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])");
+        Pattern timePattern = Pattern.compile("((1[7-9]|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])T([0-9]+):([0-5]?[0-9]):([0-5]?[0-9]).([0-9]?[0-9]?[0-9]Z)");
         Pattern latLonPattern = Pattern.compile("([+-]?\\d+\\.?\\d+)\\s*,\\s*([+-]?\\d+\\.?\\d+)");
         Map<String, ParameterRange> subsets = new HashMap<>();
+        Matcher matcher;
 
-        Matcher matcher = latLonPattern.matcher(subset);
-        while (matcher.find()) {
-            latLonCount++;
-        }
-
-        if (latLonCount != 2) {
-            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s", subset));
-        }
 
         // Parse
         for (String part : subset.split(";")) {
@@ -62,6 +54,10 @@ public class SubsetParameters {
 
         ParameterRange latitudeRange = subsets.get("LATITUDE");
         ParameterRange longitudeRange = subsets.get("LONGITUDE");
+
+        if (latitudeRange == null || longitudeRange == null) {
+            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset));
+        }
 
         Double latMin = Double.parseDouble(latitudeRange.start);
         Double latMax = Double.parseDouble(latitudeRange.end);
@@ -73,6 +69,7 @@ public class SubsetParameters {
         ParameterRange timeRange = subsets.get("TIME");
         CalendarDateRange calendarDateRange = null;
 
+        //Validation
         if (timeRange != null) {
             matcher = timePattern.matcher(subset);
 
@@ -81,11 +78,20 @@ public class SubsetParameters {
             }
 
             if (timeCount != 2) {
-                throw new GoGoDuckException(String.format("Invalid time format for subset: %s", subset));
+                throw new GoGoDuckException(String.format("Invalid time format for subset: %s Valid time format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z", subset));
             }
             CalendarDate startTime = CalendarDate.parseISOformat("gregorian", timeRange.start);
             CalendarDate endTime = CalendarDate.parseISOformat("gregorian", timeRange.end);
             calendarDateRange = CalendarDateRange.of(startTime, endTime);
+        }
+
+        matcher = latLonPattern.matcher(subset);
+        while (matcher.find()) {
+            latLonCount++;
+        }
+
+        if (latLonCount != 2) {
+            throw new GoGoDuckException(String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset));
         }
 
         return new SubsetParameters(bbox, calendarDateRange);

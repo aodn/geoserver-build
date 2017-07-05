@@ -52,7 +52,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     public FileRawData execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
-            @DescribeParameter(name="subset", description="Subset, semi-colon separated")
+            @DescribeParameter(name="subset", description="Subset, semi-colon separated. Example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219")
             String subset,
             @DescribeParameter(name="callbackUrl", description="Callback URL", min=0)
             URL callbackUrl,
