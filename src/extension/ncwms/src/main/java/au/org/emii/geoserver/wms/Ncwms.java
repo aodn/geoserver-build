@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -25,8 +26,6 @@ import java.util.regex.Pattern;
 
 public class Ncwms {
     static Logger LOGGER = Logging.getLogger(Ncwms.class);
-
-    public static String wmsVersion = "1.3.0";
 
     /* Sample tiny config file:
        <ncwms>
@@ -112,8 +111,6 @@ public class Ncwms {
             if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
                 wmsParameters.remove("TIME");
             }
-            wmsParameters.remove("version");
-            wmsParameters.put("VERSION", new String[] { wmsVersion });
 
             wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
 
@@ -126,7 +123,7 @@ public class Ncwms {
 
             URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
 
-            HttpURLConnection connection = (HttpURLConnection)wmsUrl.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) wmsUrl.openConnection();
             if (connection.getResponseCode() != 200 ) {
                 String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
                 response.sendError(connection.getResponseCode(), ret);
