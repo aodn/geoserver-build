@@ -187,6 +187,7 @@ public class LayerFiltersService {
     }
 
     private void respondWithDocument(HttpServletResponse response, Document document) throws TransformerException, IOException {
+        response.addHeader("Content-Type", "text/xml");
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(document);
