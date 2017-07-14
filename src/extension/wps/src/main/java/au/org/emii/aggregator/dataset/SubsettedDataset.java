@@ -1,8 +1,8 @@
 package au.org.emii.aggregator.dataset;
 
 import au.org.emii.aggregator.coordsystem.LatLonCoords;
-import au.org.emii.aggregator.coordsystem.LatLonCoords.XYRanges;
 import au.org.emii.aggregator.coordsystem.TimeAxis;
+import au.org.emii.aggregator.coordsystem.XYRanges;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.SubsettedVariable;
@@ -58,7 +58,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
 
         if (bbox != null) {
             LatLonCoords coords = dataset.getLatLonCoords();
-            XYRanges xyRanges = coords.getXYRanges(bbox);
+            XYRanges xyRanges = coords.subset(bbox);
             subsettedDimensions.put(coords.getXDimensionName(), xyRanges.getXRange());
             subsettedDimensions.put(coords.getYDimensionName(), xyRanges.getYRange());
         }

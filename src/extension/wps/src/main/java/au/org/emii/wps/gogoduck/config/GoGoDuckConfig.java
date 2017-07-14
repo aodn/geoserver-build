@@ -48,6 +48,7 @@ public class GoGoDuckConfig extends Config {
     private static final String CONNECT_TIMEOUT_KEY = "connectTimeOut";
     private static final String READ_TIMEOUT_KEY = "readTimeOut";
     private static final String THREAD_COUNT_KEY = "poolSize";
+    private static final String MAX_CHUNK_SIZE_KEY = "maxChunkSize";
 
     @Override
     public String getDefaultConfigFile() {
@@ -266,6 +267,16 @@ public class GoGoDuckConfig extends Config {
             return 8; // default is 8 threads
         } else {
             return Integer.parseInt(threadCount);
+        }
+    }
+
+    public Long getMaxChunkSize() {
+        String maxChunkSize = getConfig(MAX_CHUNK_SIZE_KEY, DEFAULT_CONFIG_FILE);
+
+        if (maxChunkSize == null) {
+            return null;
+        } else {
+            return new Long(maxChunkSize);
         }
     }
 }

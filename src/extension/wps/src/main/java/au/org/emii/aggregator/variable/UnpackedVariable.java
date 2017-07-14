@@ -249,6 +249,11 @@ public class UnpackedVariable extends AbstractVariable {
         return attributes;
     }
 
+    @Override
+    public long getMaxChunkSize() {
+        return variable.getMaxChunkSize();
+    }
+
     // Access to derived metadata for testing purposes
 
     public Number getFillerValue() {

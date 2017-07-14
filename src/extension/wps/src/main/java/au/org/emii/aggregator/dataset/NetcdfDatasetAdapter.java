@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static au.org.emii.aggregator.variable.NetcdfVariable.DEFAULT_MAX_CHUNK_SIZE;
+
 /**
  * Create NetcdfDatasetIF instances
  */
@@ -36,14 +38,21 @@ public class NetcdfDatasetAdapter extends AbstractNetcdfDataset implements AutoC
     private final List<Attribute> globalAttributes;
     private final ArrayList<NetcdfVariable> variables;
 
-    public static NetcdfDatasetAdapter open(Path location, Map<String, UnpackerOverrides> unpackerOverrides) throws IOException {
+    public static NetcdfDatasetAdapter open(Path location, Map<String, UnpackerOverrides> unpackerOverrides,
+                                            long maxChunkSize) throws IOException {
         NetcdfDataset dataset = NetcdfDataset.openDataset(
             location.toAbsolutePath().toString(), ADD_COORD_SYSTEMS, -1, null, null);
 
-        return new NetcdfDatasetAdapter(dataset, unpackerOverrides);
+        return new NetcdfDatasetAdapter(dataset, unpackerOverrides, maxChunkSize);
     }
 
-    protected NetcdfDatasetAdapter(NetcdfDataset dataset, Map<String, UnpackerOverrides> unpackerOverrides) {
+    public static NetcdfDatasetAdapter open(Path location, Map<String, UnpackerOverrides> unpackerOverrides)
+        throws IOException {
+        return open(location, unpackerOverrides, DEFAULT_MAX_CHUNK_SIZE);
+    }
+
+    protected NetcdfDatasetAdapter(NetcdfDataset dataset, Map<String, UnpackerOverrides> unpackerOverrides,
+                                   long maxChunkSize) {
         // Ensure coordinate systems and coordinate systems enhancements only have been applied
 
         EnumSet<Enhance> enhancements = dataset.getEnhanceMode();
@@ -78,7 +87,7 @@ public class NetcdfDatasetAdapter extends AbstractNetcdfDataset implements AutoC
 
         for (Variable variable : dataset.getReferencedFile().getVariables()) {
             VariableDS variableDS = (VariableDS) dataset.findVariable(variable.getFullNameEscaped());
-            NetcdfVariable unpackedVariable = new UnpackedVariable(new NetcdfVariableAdapter(variableDS),
+            NetcdfVariable unpackedVariable = new UnpackedVariable(new NetcdfVariableAdapter(variableDS, maxChunkSize),
                 unpackerOverrides.get(variableDS.getShortName()));
             variables.put(unpackedVariable.getShortName(), unpackedVariable);
         }
