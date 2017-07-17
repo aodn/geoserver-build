@@ -1,13 +1,14 @@
 package au.org.emii.aggregator.dataset;
 
+import au.org.emii.aggregator.variable.Bounds;
 import au.org.emii.aggregator.coordsystem.LatLonCoords;
 import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import ucar.ma2.Range;
-import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.time.CalendarDateRange;
+import ucar.unidata.geoloc.LatLonPointImpl;
 import ucar.unidata.geoloc.LatLonRect;
 
 /**
@@ -66,7 +67,7 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
             throw new UnsupportedOperationException("One or both of longitude/latitude axes not found");
         }
 
-        return new LatLonCoords(latitudeVariable, longitudeVariable);
+        return LatLonCoords.getInstance(latitudeVariable, longitudeVariable);
     }
 
     @Override
@@ -82,8 +83,20 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
 
     @Override
     public LatLonRect getBbox() {
-        return getLatLonCoords().getBbox();
+        NetcdfVariable latitude = findVariable(AxisType.Lat);
+        NetcdfVariable longitude = findVariable(AxisType.Lon);
+
+        if (latitude == null || longitude == null) {
+            throw new UnsupportedOperationException("Dataset has no latitude and/or longitude axes/axis");
+        }
+
+        Bounds longitudeBounds = longitude.getBounds();
+        Bounds latitudeBounds = latitude.getBounds();
+
+        return new LatLonRect(new LatLonPointImpl(latitudeBounds.getMin(), longitudeBounds.getMin()),
+            new LatLonPointImpl(latitudeBounds.getMax(), longitudeBounds.getMax()));
     }
+
 
     private NetcdfVariable findVariable(AxisType type) {
         for (NetcdfVariable variable: getVariables()) {

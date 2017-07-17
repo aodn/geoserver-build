@@ -19,7 +19,8 @@ public class NetcdfVariableAdapter extends AbstractVariable {
 
     private final VariableDS variable;
 
-    public NetcdfVariableAdapter(VariableDS variable) {
+    public NetcdfVariableAdapter(VariableDS variable, long maxChunkSize) {
+        super(maxChunkSize);
         this.variable = variable;
     }
 

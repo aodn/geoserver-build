@@ -1,5 +1,6 @@
 package au.org.emii.aggregator.variable;
 
+import au.org.emii.aggregator.variable.AbstractVariable.NumericValue;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -14,6 +15,8 @@ import java.util.List;
  * NetCDF variable api used in this library
  */
 public interface NetcdfVariable {
+    long DEFAULT_MAX_CHUNK_SIZE = 10 * 1000 * 1000; // 10 MB
+
     String getShortName();
 
     boolean isUnlimited();
@@ -27,8 +30,6 @@ public interface NetcdfVariable {
     int[] getShape();
 
     List<Dimension> getDimensions();
-    int findDimensionIndex(String shortName);
-    Dimension findDimension(String shortName);
 
     java.util.List<Attribute> getAttributes();
     Attribute findAttribute(String attName);
@@ -36,6 +37,9 @@ public interface NetcdfVariable {
     Array read(int[] origin, int[] shape) throws InvalidRangeException, IOException;
     Array read() throws IOException;
 
-    double getMin();
-    double getMax();
+    Iterable<NumericValue> getNumericValues();
+
+    Bounds getBounds();
+
+    long getMaxChunkSize();
 }
