@@ -134,8 +134,9 @@ public class LayerFiltersService {
         String layer = request.getParameter("layer");
 
         if(workspace==null) {
-            workspace = splitLayerName(layer)[0];
-            layer = splitLayerName(layer)[1];
+            String[] splitLayerArray = splitLayerName(layer);
+            workspace = splitLayerArray[0];
+            layer = splitLayerArray[1];
         }
 
         try {
@@ -154,8 +155,9 @@ public class LayerFiltersService {
         String propertyName = request.getParameter("propertyName");
 
         if(workspace==null) {
-            workspace = splitLayerName(layer)[0];
-            layer = splitLayerName(layer)[1];
+            String[] splitLayerArray = splitLayerName(layer);
+            workspace = splitLayerArray[0];
+            layer = splitLayerArray[1];
         }
 
         if (! uniqueValuesAllowed(workspace, layer, propertyName)) {
@@ -175,8 +177,7 @@ public class LayerFiltersService {
         String[] splitArray = new String[2];
 
         if(layerName.contains(":") ) {
-            splitArray[0] = layerName.split(":", 2)[0];
-            splitArray[1] = layerName.split(":", 2)[1];
+            splitArray = layerName.split(":", 2);
         } else {
             splitArray = new String[] {null,layerName};
         }
