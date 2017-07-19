@@ -133,6 +133,11 @@ public class LayerFiltersService {
         String workspace = request.getParameter("workspace");
         String layer = request.getParameter("layer");
 
+        if(workspace==null) {
+            workspace = splitLayerName(layer)[0];
+            layer = splitLayerName(layer)[1];
+        }
+
         try {
             respondWithDocument(response, getEnabledFiltersDocument(workspace, layer));
         }
@@ -148,6 +153,11 @@ public class LayerFiltersService {
         String layer = request.getParameter("layer");
         String propertyName = request.getParameter("propertyName");
 
+        if(workspace==null) {
+            workspace = splitLayerName(layer)[0];
+            layer = splitLayerName(layer)[1];
+        }
+
         if (! uniqueValuesAllowed(workspace, layer, propertyName)) {
             throw new RuntimeException(String.format("uniqueValues not allowed for '%s:%s/%s'",
                 workspace, layer, propertyName));
@@ -159,6 +169,19 @@ public class LayerFiltersService {
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String[] splitLayerName (String layerName) {
+        String[] splitArray = new String[2];
+
+        if(layerName.contains(":") ) {
+            splitArray[0] = layerName.split(":", 2)[0];
+            splitArray[1] = layerName.split(":", 2)[1];
+        } else {
+            splitArray = new String[] {null,layerName};
+        }
+
+        return splitArray;
     }
 
     private Document getEnabledFiltersDocument(String workspace, String layer)
