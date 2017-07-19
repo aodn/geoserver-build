@@ -109,6 +109,11 @@ public class SubsettedVariable extends AbstractVariable {
         return variable.read(mappedOrigin, shape);
     }
 
+    @Override
+    public long getMaxChunkSize() {
+        return variable.getMaxChunkSize();
+    }
+
     private List<Dimension> subsetDimensions(List<Dimension> dimensions) {
         List<Dimension> result = new ArrayList<>();
 
