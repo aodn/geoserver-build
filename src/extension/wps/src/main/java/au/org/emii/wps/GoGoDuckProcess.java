@@ -1,22 +1,20 @@
 package au.org.emii.wps;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
-
 import au.org.emii.aggregator.NetcdfAggregator;
 import au.org.emii.download.Download;
 import au.org.emii.download.DownloadConfig;
 import au.org.emii.download.DownloadRequest;
 import au.org.emii.download.Downloader;
 import au.org.emii.download.ParallelDownloadManager;
+import au.org.emii.notifier.HttpNotifier;
+import au.org.emii.wps.gogoduck.config.GoGoDuckConfig;
 import au.org.emii.wps.gogoduck.converter.Converter;
+import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.wps.gogoduck.index.FeatureSourceIndexReader;
 import au.org.emii.wps.gogoduck.index.IndexReader;
 import au.org.emii.wps.gogoduck.parameter.SubsetParameters;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
@@ -26,13 +24,21 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
+import org.geotools.process.factory.DescribeResults;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.org.emii.wps.gogoduck.config.GoGoDuckConfig;
-import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
-import au.org.emii.notifier.HttpNotifier;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @DescribeProcess(title="GoGoDuck", description="Subset and download gridded collection as NetCDF files")
 public class GoGoDuckProcess extends AbstractNotifierProcess {
@@ -47,9 +53,13 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         this.config = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
     }
 
-    @DescribeResult(description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
-            "chosenMimeType=format"})
-    public FileRawData execute(
+    @DescribeResults({
+            @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
+                    "chosenMimeType=format"}, type=org.geoserver.wps.process.FileRawData.class),
+            @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=text/xml"}, type=org.geoserver.wps.process.FileRawData.class)
+
+    })
+    public Map<String,Object> execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
             @DescribeParameter(name="subset", description="Subset, semi-colon separated. Example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219")
@@ -64,6 +74,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     ) throws ProcessException {
         try {
             Path convertedFile;
+            File provenanceFile;
             String mimeType;
             String extension;
 
@@ -111,6 +122,18 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 mimeType = converter.getMimeType();
                 extension = converter.getExtension();
                 throwIfCancelled(progressListener);
+
+                ProvenanceWriter prov = new ProvenanceWriter();
+                Writer writer = null;
+                try {
+                    writer = new FileWriter("/tmp/proc.xml");
+                    prov.write(writer);
+                }
+                finally {
+                    provenanceFile = new File("/tmp/proc.xml");
+                    IOUtils.closeQuietly(writer);
+                }
+
             }
             catch (Exception e) {
                 String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
@@ -118,7 +141,12 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 throw new GoGoDuckException(e.getMessage(), e);
             }
             notifySuccess(callbackUrl, callbackParams);
-            return new FileRawData(convertedFile.toFile(), mimeType, extension);
+
+            HashMap result = new HashMap();
+            result.put("result", new  FileRawData(convertedFile.toFile(), mimeType, extension));
+            result.put("provenance", new  FileRawData(provenanceFile, "text.xml", "xml"));
+
+            return result;
         } catch (GoGoDuckException e) {
             logger.error(e.toString(), e);
             notifyFailure(callbackUrl, callbackParams);
