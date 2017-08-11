@@ -13,12 +13,13 @@ import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.wps.gogoduck.index.FeatureSourceIndexReader;
 import au.org.emii.wps.gogoduck.index.IndexReader;
 import au.org.emii.wps.gogoduck.parameter.SubsetParameters;
+import au.org.emii.wps.provenance.ProvenanceWriter;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.process.FileRawData;
+import org.geoserver.wps.process.StringRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
@@ -29,9 +30,6 @@ import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,20 +42,21 @@ import java.util.Set;
 public class GoGoDuckProcess extends AbstractNotifierProcess {
     private static final Logger logger = LoggerFactory.getLogger(GoGoDuckProcess.class);
     private final Catalog catalog;
+    private final ProvenanceWriter provenanceWriter;
     private GoGoDuckConfig config;
 
-    public GoGoDuckProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier,
-           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
+    public GoGoDuckProcess(WPSResourceManager resourceManager, ProvenanceWriter provenanceWriter, HttpNotifier httpNotifier,
+                           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
         super(resourceManager, httpNotifier, geoserver);
         this.catalog = catalog;
         this.config = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
+        this.provenanceWriter = provenanceWriter;
     }
 
     @DescribeResults({
-            @DescribeResult(name="result", description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
+            @DescribeResult(description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
                     "chosenMimeType=format"}, type=org.geoserver.wps.process.FileRawData.class),
-            @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=text/xml"}, type=org.geoserver.wps.process.FileRawData.class)
-
+            @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=text/xml"}, type=org.geoserver.wps.process.StringRawData.class)
     })
     public Map<String,Object> execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
@@ -74,9 +73,9 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     ) throws ProcessException {
         try {
             Path convertedFile;
-            File provenanceFile;
             String mimeType;
             String extension;
+            String provenanceDocument;
 
             try {
                 SubsetParameters parameters = SubsetParameters.parse(subset);
@@ -123,28 +122,34 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 extension = converter.getExtension();
                 throwIfCancelled(progressListener);
 
-                ProvenanceWriter prov = new ProvenanceWriter();
-                Writer writer = null;
-                try {
-                    writer = new FileWriter("/tmp/proc.xml");
-                    prov.write(writer);
-                }
-                finally {
-                    provenanceFile = new File("/tmp/proc.xml");
-                    IOUtils.closeQuietly(writer);
-                }
-
+                // Create provenance document
+                Map<String, Object> params = new HashMap<>();
+                params.put("downloadUrl", "");
+                params.put("startTime", "");
+                params.put("endTime", "");
+                params.put("temporalStart", "");
+                params.put("temporalEnd", "");
+                params.put("westBL", "");
+                params.put("eastBL", "");
+                params.put("northBL", "");
+                params.put("southBL", "");
+                params.put("layer", layer);
+                params.put("sourceMetadataUrl", ""); // if accessible in layer config
+                params.put("creationTime", "");
+                provenanceDocument = provenanceWriter.write("provenance_template_gridded.ftl", params);
             }
             catch (Exception e) {
                 String errMsg = String.format("Your aggregation failed! Reason for failure is: '%s'", e.getMessage());
                 logger.error(errMsg, e);
                 throw new GoGoDuckException(e.getMessage(), e);
             }
-            notifySuccess(callbackUrl, callbackParams);
 
-            HashMap result = new HashMap();
+            Map result = new HashMap();
+
             result.put("result", new  FileRawData(convertedFile.toFile(), mimeType, extension));
-            result.put("provenance", new  FileRawData(provenanceFile, "text.xml", "xml"));
+            result.put("provenance", new StringRawData(provenanceDocument, "text/xml"));
+
+            notifySuccess(callbackUrl, callbackParams);
 
             return result;
         } catch (GoGoDuckException e) {

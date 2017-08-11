@@ -16,13 +16,10 @@
         xsi:schemaLocation="http://www.w3.org/ns/prov# http://www.w3.org/ns/prov.xsd http://purl.org/dc/elements/1.1/ http://dublincore.org/schemas/xmls/qdc/2008/02/11/dc.xsd http://purl.org/dc/terms/ http://dublincore.org/schemas/xmls/qdc/2008/02/11/dcterms.xsd http://standards.iso.org/iso/19115/-3/gex/1.0 http://standards.iso.org/iso/19115/-3/gex/1.0/gex.xsd http://standards.iso.org/iso/19115/-3/msr/1.0 http://standards.iso.org/iso/19115/-3/msr/1.0/msr.xsd http://standards.iso.org/iso/19115/-3/cit/1.0 http://standards.iso.org/iso/19115/-3/cit/1.0/cit.xsd  http://standards.iso.org/iso/19115/-3/gco/1.0 http://standards.iso.org/iso/19115/-3/gco/1.0/gco.xsd http://geonetwork-opensource.org/prov-xml http://geonetwork-opensource.org/prov-xml/gnprov.xsd http://geonetwork-opensource.org/aodn/prov-xml http://geonetwork-opensource.org/aodn/prov-xml/aodnprov.xsd">
 
 
-    <!-- ${test} -->
-
-
     <prov:entity prov:id="WPS-Aggregator Dataset UID">
         <!-- location is the (UID) URL for this output file. Note entities such as this and others
              below must persist for the provenance to be of value -->
-        <prov:location>http://www.imos.org/location on amazon S3</prov:location>
+        <prov:location>${downloadUrl}</prov:location>
         <!-- prov:type is Mandatory -->
         <prov:type codeList="codeListLocation#type" codeListValue="output">output</prov:type>
     </prov:entity>
@@ -32,9 +29,9 @@
 
     <prov:activity prov:id="WPS-Gridded-Aggregator-Service-Job:e532d1ef-516c-4664-a3af-a184f9f27">
         <!-- startTime is the time the service was initiated -->
-        <prov:startTime>2016-08-31T09:15:00</prov:startTime>
+        <prov:startTime>${startTime}</prov:startTime>
         <!-- endTime is the time the service was completed -->
-        <prov:endTime>2016-08-31T15:15:00</prov:endTime>
+        <prov:endTime>${endTime}</prov:endTime>
         <dc:description>A general description of the service</dc:description>
     </prov:activity>
 
@@ -50,8 +47,8 @@
                                  quite sophisticated - see for example
                                  https://geo-ide.noaa.gov/wiki/index.php?title=TimePeriod -->
                             <gml:TimePeriod gml:id="A1234">
-                                <gml:beginPosition>2012-03-31T09:21:00</gml:beginPosition>
-                                <gml:endPosition>2012-04-01T15:21:00</gml:endPosition>
+                                <gml:beginPosition>${temporalStart}</gml:beginPosition>
+                                <gml:endPosition>${temporalEnd}</gml:endPosition>
                             </gml:TimePeriod>
                         </gex:extent>
                     </gex:EX_TemporalExtent>
@@ -70,16 +67,16 @@
                 <gex:geographicElement>
                     <gex:EX_GeographicBoundingBox>
                         <gex:westBoundLongitude>
-                            <gco:Decimal>112</gco:Decimal>
+                            <gco:Decimal>${westBL}</gco:Decimal>
                         </gex:westBoundLongitude>
                         <gex:eastBoundLongitude>
-                            <gco:Decimal>154</gco:Decimal>
+                            <gco:Decimal>${eastBL}</gco:Decimal>
                         </gex:eastBoundLongitude>
                         <gex:southBoundLatitude>
-                            <gco:Decimal>-44</gco:Decimal>
+                            <gco:Decimal>${southBL}</gco:Decimal>
                         </gex:southBoundLatitude>
                         <gex:northBoundLatitude>
-                            <gco:Decimal>-9</gco:Decimal>
+                            <gco:Decimal>${northBL}</gco:Decimal>
                         </gex:northBoundLatitude>
                     </gex:EX_GeographicBoundingBox>
                 </gex:geographicElement>
@@ -92,7 +89,7 @@
     <!-- Layer name used to query database for list of files included in temporal range -->
     <prov:entity prov:id="layerName">
         <!-- location is the name/URL of the selected Layer -->
-        <prov:location>srs_sst_13s_14d_dn_gridded_url</prov:location>
+        <prov:location>${layer}</prov:location>
         <!-- prov:type is Mandatory -->
         <prov:type codeList="codeListLocation#type" codeListValue="inputParameter">inputParameter</prov:type>
     </prov:entity>
@@ -106,23 +103,25 @@
 
     <prov:entity prov:id="sourceData">
         <!-- location is the URL of the metadata record for the data collection operated on by this WPS job-->
-        <prov:location>https://catalogue-imos.aodn.org.au/geonetwork/srv/eng/metadata.show?uuid=ae86e2f5-eaaf-459e-a405-e654d85adb9c</prov:location>
+        <prov:location>${sourceMetadataUrl}</prov:location>
         <!-- prov:type is Mandatory -->
         <prov:type codeList="codeListLocation#type" codeListValue="inputData">inputData</prov:type>
     </prov:entity>
 
-    <prov:entity prov:id="processingStatistics">
-        <!-- location is the URL of the file generated by this WPS job that records: names of files included in the aggregation; file sizes; overall output size etc-->
-        <prov:location>http://www.imos.org/location on amazon S3 ?</prov:location>
-        <!-- prov:type is Mandatory -->
-        <prov:type codeList="codeListLocation#type" codeListValue="processingStatistics">processingStatistics</prov:type>
-    </prov:entity>
+    <!-- not applicable -->
+    <#--<prov:entity prov:id="processingStatistics">-->
+        <#--<!-- location is the URL of the file generated by this WPS job that records: names of files included in the aggregation; file sizes; overall output size etc&ndash;&gt;-->
+        <#--<prov:location>http://www.imos.org/location on amazon S3 ?</prov:location>-->
+        <#--<!-- prov:type is Mandatory &ndash;&gt;-->
+        <#--<prov:type codeList="codeListLocation#type" codeListValue="processingStatistics">processingStatistics</prov:type>-->
+    <#--</prov:entity>-->
+
 
     <!-- Agents & Actors - the people, organization and software involved in WPS execution  -->
 
     <prov:softwareAgent prov:id="JavaCode">
         <!-- location is a metadata record describing the Java Code -->
-        <prov:location>https://catalogue-imos.aodn.org.au/geonetwork/srv/eng/metadata.show?uuid=ae99e2f5-eaaf-344e-a405-e654d85adb9d</prov:location>
+        <prov:location>https://github.com/aodn/geoserver-build/blob/master/src/extension/wps/doc/GOGODUCK_README.md</prov:location>
         <dct:hasVersion>1.0</dct:hasVersion>
     </prov:softwareAgent>
 
@@ -180,7 +179,7 @@
     <prov:wasDerivedFrom>
         <prov:generatedEntity prov:ref="WPS-Aggregator Dataset UID"/>
         <prov:usedEntity prov:ref="sourceData"/>
-        <prov:time>2016-08-31T15:15:00</prov:time>
+        <prov:time>${creationTime}</prov:time>
     </prov:wasDerivedFrom>
 
     <!-- Document metadata: id, title, description, coverage, keywords (subject), date created -->
@@ -189,9 +188,9 @@
         <dc:identifier>39ee0ae6-b1ae-472f-a5f2-435e342267ea</dc:identifier>
         <dc:title>Provenance document describing a gridded WPS result</dc:title>
         <dc:description>This gridded WPS used time, space and a layer definition to produce an aggregated NetCDF gridded output file</dc:description>
-        <dc:coverage>northlimit=-9;southlimit=-44;eastlimit=154;westlimit=112</dc:coverage>
+        <dc:coverage>northlimit=${northBL};southlimit=${southBL};eastlimit=${eastBL};westlimit=${westBL}</dc:coverage>
         <dc:subject>WPS</dc:subject>
-        <dct:created>2016-08-31T15:15:00</dct:created>
+        <dct:created>${creationTime}</dct:created>
     </prov:other>
 
 </prov:document>

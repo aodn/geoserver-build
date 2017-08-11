@@ -1,0 +1,4 @@
+<wps executionId="${executionId}">
+    <layer>${layer}</layer>
+    <subset>${subset}</subset>
+</wps>

@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
+    <bean id="provenanceWriterFactory" class="au.org.emii.wps.provenance.ProvenanceWriterFactory">
+        <constructor-arg index="0" ref="resourceLoader"/>
+    </bean>
+
     <bean id="goGoDuckProcess" class="au.org.emii.wps.GoGoDuckProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1" ref="retryingHttpNotifier"/>
-        <constructor-arg index="2" ref="catalog"/>
-        <constructor-arg index="3" ref="resourceLoader"/>
-        <constructor-arg index="4" ref="geoServer"/>
+        <constructor-arg index="1">
+            <bean factory-bean="provenanceWriterFactory" factory-method="getWriter"/>
+        </constructor-arg>
+        <constructor-arg index="2" ref="retryingHttpNotifier"/>
+        <constructor-arg index="3" ref="catalog"/>
+        <constructor-arg index="4" ref="resourceLoader"/>
+        <constructor-arg index="5" ref="geoServer"/>
     </bean>
 
     <bean id="retryingHttpNotifier" class="au.org.emii.notifier.RetryingHttpNotifier">
