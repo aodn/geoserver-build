@@ -26,6 +26,8 @@ import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
 import org.geotools.process.factory.DescribeResult;
 import org.geotools.process.factory.DescribeResults;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                     "chosenMimeType=format"}, type=org.geoserver.wps.process.FileRawData.class),
             @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=text/xml"}, type=org.geoserver.wps.process.StringRawData.class)
     })
+
     public Map<String,Object> execute(
             @DescribeParameter(name="layer", description="WFS layer to query")
             String layer,
@@ -122,20 +125,25 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 extension = converter.getExtension();
                 throwIfCancelled(progressListener);
 
+                String downloadUrl = String.format("%s?service=WPS&amp;version=1.0.0&amp;request=GetExecutionResult&amp;executionId=%s&amp;outputId=result.nc&amp;mimetype=application%%2Fx-netcdf", getWpsUrl().toString(), getId());
+                String gogoduckXmlUrl = String.format("https://github.com/aodn/geoserver-build/blob/master/src/main/src/jetty/geoserver_data/%s", config.getLayerConfigFilePath(layer));
+
                 // Create provenance document
                 Map<String, Object> params = new HashMap<>();
-                params.put("downloadUrl", "");
-                params.put("startTime", "");
+                params.put("jobId", getId());
+                params.put("downloadUrl", downloadUrl);
+                params.put("gogoduckXml", gogoduckXmlUrl);
+                params.put("startTime", new DateTime(DateTimeZone.UTC));
                 params.put("endTime", "");
-                params.put("temporalStart", "");
-                params.put("temporalEnd", "");
-                params.put("westBL", "");
-                params.put("eastBL", "");
-                params.put("northBL", "");
-                params.put("southBL", "");
+                params.put("temporalStart", parameters.getTimeRange().getStart());
+                params.put("temporalEnd", parameters.getTimeRange().getEnd());
+                params.put("westBL", parameters.getBbox().getLonMin());
+                params.put("eastBL", parameters.getBbox().getLonMax());
+                params.put("northBL", parameters.getBbox().getLatMax());
+                params.put("southBL", parameters.getBbox().getLatMin());
                 params.put("layer", layer);
-                params.put("sourceMetadataUrl", ""); // if accessible in layer config
-                params.put("creationTime", "");
+                params.put("sourceMetadataUrl", getMetadataUrl(layer));
+                params.put("creationTime",  new DateTime(DateTimeZone.UTC));
                 provenanceDocument = provenanceWriter.write("provenance_template_gridded.ftl", params);
             }
             catch (Exception e) {
@@ -152,6 +160,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             notifySuccess(callbackUrl, callbackParams);
 
             return result;
+
         } catch (GoGoDuckException e) {
             logger.error(e.toString(), e);
             notifyFailure(callbackUrl, callbackParams);
@@ -163,7 +172,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         }
     }
 
-    private void enforceFileLimits(SubsetParameters parameters, Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+    private void enforceFileLimits (SubsetParameters parameters, Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
         if (parameters.isPointSubset()) {
             logger.info("Not applying limits to point subset");
             return;

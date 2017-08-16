@@ -226,7 +226,7 @@ public class GoGoDuckConfig extends Config {
         return AggregationOverridesReader.load(Paths.get(getConfigFilePath("wps/" + templateName + ".xml")));
     }
 
-    private String getLayerConfigFilePath(String layer) throws Exception {
+    public String getLayerConfigFilePath(String layer) throws Exception {
         return getLayerConfigPath(layer, GOGODUCK_CONFIG_FILE);
     }
 

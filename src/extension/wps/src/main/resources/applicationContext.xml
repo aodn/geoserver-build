@@ -28,9 +28,12 @@
 
     <bean id="netcdfOutputProcess" class="au.org.emii.wps.NetcdfOutputProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1" ref="retryingHttpNotifier"/>
-        <constructor-arg index="2" ref="catalog"/>
-        <constructor-arg index="3" ref="servletContext"/>
-        <constructor-arg index="4" ref="geoServer"/>
+        <constructor-arg index="1">
+            <bean factory-bean="provenanceWriterFactory" factory-method="getWriter"/>
+        </constructor-arg>
+        <constructor-arg index="2" ref="retryingHttpNotifier"/>
+        <constructor-arg index="3" ref="catalog"/>
+        <constructor-arg index="4" ref="servletContext"/>
+        <constructor-arg index="5" ref="geoServer"/>
     </bean>
  </beans>
