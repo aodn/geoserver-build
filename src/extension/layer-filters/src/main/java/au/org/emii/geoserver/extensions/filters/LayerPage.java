@@ -24,7 +24,6 @@ public class LayerPage extends GeoServerSecuredPage {
     WmsLayerFilterProvider provider = new WmsLayerFilterProvider();
     GeoServerTablePanel<LayerInfo> table;
     GeoServerDialog dialog;
-    SelectionRemovalLink removal;
 
     public LayerPage() {
         table = new GeoServerTablePanel<LayerInfo>("table", provider, true) {
@@ -36,12 +35,6 @@ public class LayerPage extends GeoServerSecuredPage {
                 GeoServerDataProvider.Property<LayerInfo> property)
             {
                 return LayerPageLink.create(property.getName(), id, new LayerInfoModels(itemModel)).getLink();
-            }
-
-            @Override
-            protected void onSelectionUpdate(AjaxRequestTarget target) {
-                removal.setEnabled(table.getSelection().size() > 0);
-                target.addComponent(removal);
             }
 
         };

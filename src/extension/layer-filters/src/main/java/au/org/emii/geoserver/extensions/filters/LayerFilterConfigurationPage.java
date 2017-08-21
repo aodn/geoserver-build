@@ -63,16 +63,16 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
             add(CSSPackageResource.getHeaderContribution(LayerFilterConfigurationPage.class, "layer_filters.css"));
         }
         catch (NamingException e) {
-            LOGGER.log(Level.SEVERE, "Error getting DataSource from JNDI reference", e);
+            throw new FilterConfigurationException("Error getting DataSource from JNDI reference", e);
         }
         catch (ParserConfigurationException pce) {
-            LOGGER.log(Level.SEVERE, "Could not parse saved filter configuration", pce);
+            throw new FilterConfigurationException("Could not parse saved filter configuration", pce);
         }
         catch (SAXException se) {
-            LOGGER.log(Level.SEVERE, "Could not parse saved filter configuration", se);
+            throw new FilterConfigurationException("Could not parse saved filter configuration", se);
         }
         catch (IOException ioe) {
-            LOGGER.log(Level.SEVERE, "Error reading filters", ioe);
+            throw new FilterConfigurationException("Error reading filters", ioe);
         }
     }
 
