@@ -84,7 +84,7 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.ncdfgenerator.Main \
 In order to run as a WPS request, you can run the following:
 
 ```
-$ curl --data @doc/wps-ts_timeseries.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/wps
+$ curl --data @wps-netcdf-output.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/wps
 ```
 
 ----

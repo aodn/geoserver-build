@@ -7,19 +7,20 @@ import au.org.emii.download.DownloadRequest;
 import au.org.emii.download.Downloader;
 import au.org.emii.download.ParallelDownloadManager;
 import au.org.emii.notifier.HttpNotifier;
+import au.org.emii.wps.catalogue.CatalogueReader;
 import au.org.emii.wps.gogoduck.config.GoGoDuckConfig;
 import au.org.emii.wps.gogoduck.converter.Converter;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.wps.gogoduck.index.FeatureSourceIndexReader;
 import au.org.emii.wps.gogoduck.index.IndexReader;
 import au.org.emii.wps.gogoduck.parameter.SubsetParameters;
+import au.org.emii.wps.process.StringRawData;
 import au.org.emii.wps.provenance.ProvenanceWriter;
 import org.apache.commons.io.FileUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServer;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.process.StringRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
@@ -48,8 +49,9 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
     private GoGoDuckConfig config;
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, ProvenanceWriter provenanceWriter, HttpNotifier httpNotifier,
-                           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver) {
-        super(resourceManager, httpNotifier, geoserver);
+                           Catalog catalog, GeoServerResourceLoader resourceLoader, GeoServer geoserver,
+                           CatalogueReader metadataCatalogue) {
+        super(resourceManager, httpNotifier, geoserver, metadataCatalogue);
         this.catalog = catalog;
         this.config = new GoGoDuckConfig(resourceLoader.getBaseDirectory(), catalog);
         this.provenanceWriter = provenanceWriter;
@@ -57,8 +59,8 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
 
     @DescribeResults({
             @DescribeResult(description="Aggregation result file", meta={"mimeTypes=application/x-netcdf,text/csv",
-                    "chosenMimeType=format"}, type=org.geoserver.wps.process.FileRawData.class),
-            @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=text/xml"}, type=org.geoserver.wps.process.StringRawData.class)
+                    "chosenMimeType=format"}, type=FileRawData.class),
+            @DescribeResult(name="provenance", description="Provenance document", meta={"mimeTypes=application/xml"}, type=StringRawData.class)
     })
 
     public Map<String,Object> execute(
@@ -81,6 +83,8 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             String provenanceDocument;
 
             try {
+                DateTime startTime = new DateTime(DateTimeZone.UTC);
+
                 SubsetParameters parameters = SubsetParameters.parse(subset);
 
                 IndexReader indexReader = new FeatureSourceIndexReader(catalog, config.getUrlSubstitution(layer));
@@ -125,25 +129,16 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
                 extension = converter.getExtension();
                 throwIfCancelled(progressListener);
 
-                String downloadUrl = String.format("%s?service=WPS&amp;version=1.0.0&amp;request=GetExecutionResult&amp;executionId=%s&amp;outputId=result.nc&amp;mimetype=application%%2Fx-netcdf", getWpsUrl().toString(), getId());
-                String gogoduckXmlUrl = String.format("https://github.com/aodn/geoserver-build/blob/master/src/main/src/jetty/geoserver_data/%s", config.getLayerConfigFilePath(layer));
-
                 // Create provenance document
                 Map<String, Object> params = new HashMap<>();
                 params.put("jobId", getId());
-                params.put("downloadUrl", downloadUrl);
-                params.put("gogoduckXml", gogoduckXmlUrl);
-                params.put("startTime", new DateTime(DateTimeZone.UTC));
-                params.put("endTime", "");
-                params.put("temporalStart", parameters.getTimeRange().getStart());
-                params.put("temporalEnd", parameters.getTimeRange().getEnd());
-                params.put("westBL", parameters.getBbox().getLonMin());
-                params.put("eastBL", parameters.getBbox().getLonMax());
-                params.put("northBL", parameters.getBbox().getLatMax());
-                params.put("southBL", parameters.getBbox().getLatMin());
+                params.put("downloadUrl", getOutputResourceUrl("result", extension, mimeType));
+                params.put("settingsPath", config.getTemplatePath(layer));
+                params.put("startTime", startTime);
+                params.put("endTime", new DateTime(DateTimeZone.UTC));
                 params.put("layer", layer);
+                params.put("parameters", parameters);
                 params.put("sourceMetadataUrl", getMetadataUrl(layer));
-                params.put("creationTime",  new DateTime(DateTimeZone.UTC));
                 provenanceDocument = provenanceWriter.write("provenance_template_gridded.ftl", params);
             }
             catch (Exception e) {
@@ -155,7 +150,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
             Map result = new HashMap();
 
             result.put("result", new  FileRawData(convertedFile.toFile(), mimeType, extension));
-            result.put("provenance", new StringRawData(provenanceDocument, "text/xml"));
+            result.put("provenance", new StringRawData(provenanceDocument, "application/xml", "xml"));
 
             notifySuccess(callbackUrl, callbackParams);
 
@@ -172,7 +167,7 @@ public class GoGoDuckProcess extends AbstractNotifierProcess {
         }
     }
 
-    private void enforceFileLimits (SubsetParameters parameters, Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
+    private void enforceFileLimits(SubsetParameters parameters, Set<DownloadRequest> downloadList, Integer limit, double fileSizeLimit) throws GoGoDuckException {
         if (parameters.isPointSubset()) {
             logger.info("Not applying limits to point subset");
             return;

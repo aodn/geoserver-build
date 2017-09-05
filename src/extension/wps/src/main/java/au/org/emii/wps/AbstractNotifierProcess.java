@@ -1,25 +1,17 @@
 package au.org.emii.wps;
 
 import au.org.emii.notifier.HttpNotifier;
+import au.org.emii.wps.catalogue.CatalogueReader;
 import net.opengis.wps10.ExecuteType;
-
 import org.geoserver.config.GeoServer;
 import org.geoserver.ows.Dispatcher;
 import org.geoserver.ows.util.ResponseUtils;
 import org.geoserver.platform.Operation;
 import org.geoserver.wps.gs.GeoServerProcess;
 import org.geoserver.wps.resource.WPSResourceManager;
-import org.geotools.process.ProcessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,18 +21,14 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
     private final HttpNotifier httpNotifier;
     private static final Logger logger = LoggerFactory.getLogger(AbstractNotifierProcess.class);
     private final GeoServer geoserver;
-    private final String metadataProtocol;
-    private final String geonetworkSearchString;
+    private final CatalogueReader metadataCatalogue;
 
-
-    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, GeoServer geoserver) {
+    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, GeoServer geoserver,
+                                      CatalogueReader metadataCatalogue) {
         this.resourceManager = resourceManager;
         this.httpNotifier = httpNotifier;
         this.geoserver = geoserver;
-        this.metadataProtocol = "WWW:LINK-1.0-http--metadata-URL";
-
-        // todo load from config
-        this.geonetworkSearchString = "https://catalogue-portal.aodn.org.au/geonetwork/srv/eng/xml.search.summary?any=%s&sortBy=relevance&hitsPerPage=1&fast=index";
+        this.metadataCatalogue = metadataCatalogue;
     }
 
     protected void notifySuccess(URL callbackUrl, String callbackParams) {
@@ -79,33 +67,8 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
         return url;
     }
 
-    protected String getMetadataUrl(String layer) throws ProcessException {
-
-        String url = String.format(geonetworkSearchString, layer);
-
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            Document doc = factory.newDocumentBuilder().parse(new URL(url).openStream());
-
-            XPathFactory xPathfactory = XPathFactory.newInstance();
-            XPath xpath = xPathfactory.newXPath();
-            XPathExpression expr = xpath.compile("//metadata/link");
-            NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-            for (int i = 0; i < nl.getLength(); i++) {
-                String nodeValue = nl.item(i).getTextContent();
-                if (nodeValue.contains(metadataProtocol)) {
-                    return nodeValue.split("\\|")[2];
-                }
-            }
-        }
-        catch (Exception e) {
-            throw new ProcessException("Unable to get metadata Url");
-        }
-
-        throw new ProcessException("Unable to parse metadata Url");
-
+    protected String getOutputResourceUrl(String outputId, String extension, String mimeType) {
+        return resourceManager.getOutputResourceUrl(outputId + "." + extension, mimeType);
     }
 
     protected String getId() {
@@ -125,6 +88,10 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
              logger.info("Exception accessing working directory: \n" + e);
              return System.getProperty("java.io.tmpdir");
         }
+    }
+
+    protected String getMetadataUrl(String layer) {
+        return metadataCatalogue.getMetadataUrl(layer);
     }
 
 }

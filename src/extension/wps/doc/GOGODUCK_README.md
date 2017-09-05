@@ -16,7 +16,7 @@ $ mvn clean install -DskipITs
 
 Submitting a request using Geoserver:
 ```
-1. Navigate to http://localhost:9091/web/?wicket:bookmarkablePage=:org.geoserver.wps.web.WPSRequestBuilder after [running using jetty] (https://github.com/aodn/geoserver-build#running-using-jetty)
+1. Navigate to http://localhost:8080/web/?wicket:bookmarkablePage=:org.geoserver.wps.web.WPSRequestBuilder after [running using jetty] (https://github.com/aodn/geoserver-build#running-using-jetty)
 2. Choose process: gs:GoGoDuck
 3. Choose format: application/x-netcdf
 ```
@@ -26,62 +26,7 @@ Submitting a request using Geoserver:
    In order to run as a WPS request, you can run the following:
    
    ```
-   $ curl --data @doc/wps-acorn.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-   $ curl --data @doc/wps-gsla.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-   $ curl --data @doc/wps-srs.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-   ```
-
-
-## Direct calls (using IMOS Data)
-
-### ACORN - WPS request builder
-
-Running on some ACORN data (rot qc):
-
-```
-WFS layer to query: acorn_hourly_avg_rot_qc_timeseries_url
-Subset, semi-colon separated: TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219
-```
-
-### GSLA - WPS request builder
-
-Running on GSLA data:
-
-```
-WFS layer to query: gsla_nrt00_timeseries_url
-Subset, semi-colon separated: TIME,2011-10-10T00:00:00.000Z,2011-10-20T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219
-```
-
-### CARS - WPS request builder
-
-When running on CARS data, it handles one big NetCDF file. 
-On a development machine - it'll be slow! However
-Running on CARS data:
-
-```
-WFS layer to query: cars_world_monthly
-Subset, semi-colon separated: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219
-```
-
-Running on CARS data with depth (notice the floating point for the depth parameter):
-
-```
-WFS layer to query: cars_world_monthly
-Subset, semi-colon separated: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0
-```
-
-### SRS - WPS request builder
-
-WFS layer to query: srs_sst_l3s_1d_dn_gridded_url
-Subset, semi-colon separated: TIME,2014-10-10T00:00:00.000Z,2014-10-12T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219
-
-### Running as a WPS service. (simulating a portal)
-   In order to run as a WPS request, you can run the following:
-
-   ```
-   $ curl --data @doc/wps-acorn.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-   $ curl --data @doc/wps-gsla.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-   $ curl --data @doc/wps-srs.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+   $ curl --data @wps-gogoduck.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/wps
    ```
 
 ## Unit Tests

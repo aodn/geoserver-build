@@ -10,13 +10,13 @@
     <wps:Input>
       <ows:Identifier>layer</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>srs_sst_l3s_1d_dn_gridded_url</wps:LiteralData>
+        <wps:LiteralData>srs_ghrsst_l3s_1d_day_url</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
       <ows:Identifier>subset</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>TIME,2014-10-10T00:00:00.000Z,2014-10-12T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219</wps:LiteralData>
+        <wps:LiteralData>TIME,2016-08-05T00:00:00.000Z,2016-08-07T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219</wps:LiteralData>
       </wps:Data>
     </wps:Input>
   </wps:DataInputs>
@@ -26,6 +26,9 @@
       lineage="false" status="true">
       <wps:Output asReference="true" mimeType="application/x-netcdf">
         <ows:Identifier>result</ows:Identifier>
+      </wps:Output>
+      <wps:Output asReference="true">
+        <ows:Identifier>provenance</ows:Identifier>
       </wps:Output>
     </wps:ResponseDocument>
   </wps:ResponseForm>

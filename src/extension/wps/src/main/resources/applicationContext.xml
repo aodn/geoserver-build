@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-    <bean id="provenanceWriterFactory" class="au.org.emii.wps.provenance.ProvenanceWriterFactory">
+    <bean id="provenanceWriter" class="au.org.emii.wps.provenance.ProvenanceWriter">
         <constructor-arg index="0" ref="resourceLoader"/>
+    </bean>
+
+    <bean id="catalogueReaderConfigLoader" class="au.org.emii.wps.catalogue.CatalogueReaderConfigLoader">
+        <constructor-arg index="0" ref="resourceLoader"/>
+    </bean>
+
+    <bean id="metadataCatalogue" class="au.org.emii.wps.catalogue.CatalogueReader">
+        <constructor-arg index="0">
+            <bean factory-bean="catalogueReaderConfigLoader" factory-method="load"/>
+        </constructor-arg>
     </bean>
 
     <bean id="goGoDuckProcess" class="au.org.emii.wps.GoGoDuckProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1">
-            <bean factory-bean="provenanceWriterFactory" factory-method="getWriter"/>
-        </constructor-arg>
+        <constructor-arg index="1" ref="provenanceWriter"/>
         <constructor-arg index="2" ref="retryingHttpNotifier"/>
         <constructor-arg index="3" ref="catalog"/>
         <constructor-arg index="4" ref="resourceLoader"/>
         <constructor-arg index="5" ref="geoServer"/>
+        <constructor-arg index="6" ref="metadataCatalogue"/>
     </bean>
 
     <bean id="retryingHttpNotifier" class="au.org.emii.notifier.RetryingHttpNotifier">
@@ -28,12 +37,11 @@
 
     <bean id="netcdfOutputProcess" class="au.org.emii.wps.NetcdfOutputProcess">
         <constructor-arg index="0" ref="wpsResourceManager"/>
-        <constructor-arg index="1">
-            <bean factory-bean="provenanceWriterFactory" factory-method="getWriter"/>
-        </constructor-arg>
+        <constructor-arg index="1" ref="provenanceWriter"/>
         <constructor-arg index="2" ref="retryingHttpNotifier"/>
         <constructor-arg index="3" ref="catalog"/>
         <constructor-arg index="4" ref="servletContext"/>
         <constructor-arg index="5" ref="geoServer"/>
+        <constructor-arg index="6" ref="metadataCatalogue"/>
     </bean>
  </beans>

@@ -2,6 +2,8 @@ package au.org.emii.wps;
 
 import au.org.emii.ncdfgenerator.*;
 import au.org.emii.notifier.HttpNotifier;
+import au.org.emii.wps.catalogue.CatalogueReader;
+import au.org.emii.wps.process.StringRawData;
 import au.org.emii.wps.provenance.ProvenanceWriter;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.DataStoreInfo;
@@ -11,7 +13,6 @@ import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.wps.ProcessDismissedException;
 import org.geoserver.wps.process.FileRawData;
-import org.geoserver.wps.process.StringRawData;
 import org.geoserver.wps.resource.WPSResourceManager;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.process.ProcessException;
@@ -45,8 +46,8 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
     private final ProvenanceWriter provenanceWriter;
 
     public NetcdfOutputProcess(WPSResourceManager resourceManager, ProvenanceWriter provenanceWriter, HttpNotifier httpNotifier,
-            Catalog catalog, ServletContext context, GeoServer geoserver) {
-        super(resourceManager, httpNotifier, geoserver);
+                               Catalog catalog, ServletContext context, GeoServer geoserver, CatalogueReader metadataCatalogue) {
+        super(resourceManager, httpNotifier, geoserver, metadataCatalogue);
         this.catalog = catalog;
         this.context = context;
         this.workingDir = getWorkingDir();
@@ -54,8 +55,8 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
     }
 
     @DescribeResults({
-            @DescribeResult(description = "Zipped netcdf files", meta = {"mimeTypes=application/zip"}, type=org.geoserver.wps.process.FileRawData.class),
-            @DescribeResult(name = "provenance", description = "Provenance document", meta = {"mimeTypes=text/xml"}, type = org.geoserver.wps.process.StringRawData.class)
+            @DescribeResult(description = "Zipped netcdf files", meta = {"mimeTypes=application/zip"}, type=FileRawData.class),
+            @DescribeResult(name = "provenance", description = "Provenance document", meta = {"mimeTypes=application/xml"}, type = StringRawData.class)
     })
 
     public Map<String,Object> execute(
@@ -71,6 +72,9 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
     ) throws ProcessException {
 
         logger.info("execute");
+
+        DateTime startTime = new DateTime(DateTimeZone.UTC);
+
         String provenanceDocument;
 
         try {
@@ -86,7 +90,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
             GeoServerDataDirectory dataDirectory = new GeoServerDataDirectory(new File(dataPath));
             String typeNamePath = dataDirectory.get(layerInfo).dir().getAbsolutePath();
             String filePath = typeNamePath + "/" + NETCDF_FILENAME;
-            String settingsFile = dataDirectory.get(layerInfo).dir() + "/" + NETCDF_FILENAME;
+            String settingsPath = dataDirectory.get(layerInfo).path() + "/" + NETCDF_FILENAME;
 
             // decode definition
             NcdfDefinition definition = decodeDefinition(filePath);
@@ -106,8 +110,6 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 .setSchema(store.getDatabaseSchema());
 
             final File outputFile = getResourceManager().getTemporaryResource(".zip").file();
-            String aggregatedDataUrl = String.format("%s?service=WPS&amp;version=1.0.0&amp;request=GetExecutionResult&amp;executionId=%s&amp;outputId=result.zip&amp;mimetype=application%%2Fzip",
-                    getWpsUrl().toString(), getId());
 
             try (
                     NcdfEncoder encoder = encoderBuilder.create();
@@ -116,20 +118,13 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
                 // Create provenance document
                 Map<String, Object> params = new HashMap<>();
                 params.put("jobId", getId());
-                params.put("aggregatedDataUrl", aggregatedDataUrl);
-                params.put("outputAggregationSettingsXml", settingsFile);
+                params.put("aggregatedDataUrl", getOutputResourceUrl("result", "zip", "application/zip"));
+                params.put("settingsPath", settingsPath);
                 params.put("wpsQuery", cqlFilter);
-                params.put("startTime", new DateTime(DateTimeZone.UTC));
-                params.put("endTime", "");
-/*                params.put("temporalStart", parameters.getTimeRange().getStart());
-                params.put("temporalEnd", parameters.getTimeRange().getEnd());
-                params.put("westBL", parameters.getBbox().getLonMin());
-                params.put("eastBL", parameters.getBbox().getLonMax());
-                params.put("northBL", parameters.getBbox().getLatMax());
-                params.put("southBL", parameters.getBbox().getLatMin());*/
+                params.put("startTime", startTime);
+                params.put("endTime", new DateTime(DateTimeZone.UTC));
                 params.put("layerName", layerInfo.getResource().getName());
                 params.put("sourceMetadataUrl", getMetadataUrl(layerInfo.getName()));
-                params.put("creationTime",  new DateTime(DateTimeZone.UTC));
                 provenanceDocument = provenanceWriter.write("provenance_template_non_gridded.ftl", params);
 
                 encoder.prepare(new ZipFormatter(os));
@@ -144,7 +139,7 @@ public class NetcdfOutputProcess extends AbstractNotifierProcess {
 
             Map result = new HashMap();
             result.put("result", new  FileRawData(outputFile, "application/zip", "zip"));
-            result.put("provenance", new StringRawData(provenanceDocument, "text/xml"));
+            result.put("provenance", new StringRawData(provenanceDocument, "application/xml", "xml"));
 
             return result;
 

@@ -1,7 +1,5 @@
 package au.org.emii.wps.provenance;
 
-import au.org.emii.wps.provenance.ProvenanceWriter;
-import au.org.emii.wps.provenance.ProvenanceWriterImpl;
 import com.google.common.io.Files;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -15,14 +13,14 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ProvenanceWriterTest {
     @Test
     public void testWrite() throws IOException, TemplateException, URISyntaxException {
         Configuration config = new Configuration();
         config.setClassForTemplateLoading(ProvenanceWriter.class, "");
-        ProvenanceWriter writer = new ProvenanceWriterImpl(config);
+        ProvenanceWriter writer = new ProvenanceWriter(config);
         Map<String, Object> params = new HashMap<>();
         params.put("layer", "acorn");
         params.put("subset", "LAT;10;20");

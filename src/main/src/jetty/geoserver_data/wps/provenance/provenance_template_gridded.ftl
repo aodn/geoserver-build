@@ -19,7 +19,7 @@
     <prov:entity prov:id="WPS-Aggregator Dataset UID">
         <!-- location is the (UID) URL for this output file. Note entities such as this and others
              below must persist for the provenance to be of value -->
-        <prov:location>${downloadUrl}</prov:location>
+        <prov:location>${downloadUrl?xml}</prov:location>
         <!-- prov:type is Mandatory -->
         <prov:type codeList="codeListLocation#type" codeListValue="output">output</prov:type>
     </prov:entity>
@@ -44,8 +44,8 @@
                                  quite sophisticated - see for example
                                  https://geo-ide.noaa.gov/wiki/index.php?title=TimePeriod &ndash;&gt;-->
                             <gml:TimePeriod gml:id="A1234">
-                                <gml:beginPosition>${temporalStart}</gml:beginPosition>
-                                <gml:endPosition>${temporalEnd}</gml:endPosition>
+                                <gml:beginPosition>${parameters.timeRange.start}</gml:beginPosition>
+                                <gml:endPosition>${parameters.timeRange.end}</gml:endPosition>
                             </gml:TimePeriod>
                         </gex:extent>
                     </gex:EX_TemporalExtent>
@@ -58,6 +58,12 @@
 
     <!-- spatialExtent is prov:entity with a gex:EX_GeographicBoundingBox element. A user provides this entity to constrain
          the spatial extents of the WPS -->
+
+<#assign eastBL = parameters.bbox.lonMin>
+<#assign westBL = parameters.bbox.lonMax>
+<#assign southBL = parameters.bbox.latMin>
+<#assign northBL = parameters.bbox.latMax>
+
     <prov:entity prov:id="spatialExtent">
         <aodnprov:boundingBox>
             <gex:EX_Extent>
@@ -93,7 +99,10 @@
 
     <prov:entity prov:id="outputAggregationSettings">
         <!-- location is the URL of the gridded NetCDF Aggregation settings (index reader, download and aggregation templates) file for this WPS job-->
-        <prov:location>${gogoduckXml}</prov:location>
+        <prov:location>https://github.com/aodn/geoserver-config/tree/production/wps/gogoduck.xml</prov:location>
+        <#if settingsPath?has_content>
+        <prov:location>https://github.com/aodn/geoserver-config/tree/production/${settingsPath}</prov:location>
+        </#if>
         <!-- prov:type is Mandatory -->
         <prov:type codeList="codeListLocation#type" codeListValue="outputConfiguration">outputConfiguration</prov:type>
     </prov:entity>
@@ -110,7 +119,6 @@
     <prov:softwareAgent prov:id="JavaCode">
         <!-- location is a metadata record describing the Java Code -->
         <prov:location>https://github.com/aodn/geoserver-build/blob/master/src/extension/wps/doc/GOGODUCK_README.md</prov:location>
-        <dct:hasVersion>1.0</dct:hasVersion>
     </prov:softwareAgent>
 
     <!-- Associations and softwareSystem used  -->
@@ -147,19 +155,13 @@
     <prov:wasGeneratedBy>
         <prov:entity prov:ref="WPS-Aggregator Dataset UID"/>
         <prov:activity prov:ref="WPS-Gridded-Aggregator-Service-Job:${jobId}"/>
-        <prov:time>${creationTime}</prov:time>
-    </prov:wasGeneratedBy>
-
-    <prov:wasGeneratedBy>
-        <prov:entity prov:ref="processingStatistics"/>
-        <prov:activity prov:ref="WPS-Gridded-Aggregator-Service-Job:${jobId}"/>
-        <prov:time>${creationTime}</prov:time>
+        <prov:time>${endTime}</prov:time>
     </prov:wasGeneratedBy>
 
     <prov:wasDerivedFrom>
         <prov:generatedEntity prov:ref="WPS-Aggregator Dataset UID"/>
         <prov:usedEntity prov:ref="sourceData"/>
-        <prov:time>${creationTime}</prov:time>
+        <prov:time>${endTime}</prov:time>
     </prov:wasDerivedFrom>
 
     <!-- Document metadata: id, title, description, coverage, keywords (subject), date created -->x
@@ -169,7 +171,7 @@
         <dc:description>This gridded WPS used time, space and a layer definition to produce an aggregated NetCDF gridded output file</dc:description>
         <dc:coverage>northlimit=${northBL};southlimit=${southBL};eastlimit=${eastBL};westlimit=${westBL}</dc:coverage>
         <dc:subject>WPS</dc:subject>
-        <dct:created>${creationTime}</dct:created>
+        <dct:created>${.now?iso_utc}</dct:created>
     </prov:other>
 
 </prov:document>
