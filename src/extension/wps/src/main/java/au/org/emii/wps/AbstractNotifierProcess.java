@@ -1,8 +1,8 @@
 package au.org.emii.wps;
 
 import au.org.emii.notifier.HttpNotifier;
+import au.org.emii.wps.catalogue.CatalogueReader;
 import net.opengis.wps10.ExecuteType;
-
 import org.geoserver.config.GeoServer;
 import org.geoserver.ows.Dispatcher;
 import org.geoserver.ows.util.ResponseUtils;
@@ -21,11 +21,14 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
     private final HttpNotifier httpNotifier;
     private static final Logger logger = LoggerFactory.getLogger(AbstractNotifierProcess.class);
     private final GeoServer geoserver;
+    private final CatalogueReader metadataCatalogue;
 
-    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, GeoServer geoserver) {
+    protected AbstractNotifierProcess(WPSResourceManager resourceManager, HttpNotifier httpNotifier, GeoServer geoserver,
+                                      CatalogueReader metadataCatalogue) {
         this.resourceManager = resourceManager;
         this.httpNotifier = httpNotifier;
         this.geoserver = geoserver;
+        this.metadataCatalogue = metadataCatalogue;
     }
 
     protected void notifySuccess(URL callbackUrl, String callbackParams) {
@@ -64,6 +67,10 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
         return url;
     }
 
+    protected String getOutputResourceUrl(String outputId, String extension, String mimeType) {
+        return resourceManager.getOutputResourceUrl(outputId + "." + extension, mimeType);
+    }
+
     protected String getId() {
         return resourceManager.getExecutionId(true);
     }
@@ -81,6 +88,10 @@ public abstract class AbstractNotifierProcess implements GeoServerProcess {
              logger.info("Exception accessing working directory: \n" + e);
              return System.getProperty("java.io.tmpdir");
         }
+    }
+
+    protected String getMetadataUrl(String layer) {
+        return metadataCatalogue.getMetadataUrl(layer);
     }
 
 }

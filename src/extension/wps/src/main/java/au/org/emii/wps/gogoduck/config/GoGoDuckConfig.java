@@ -206,7 +206,18 @@ public class GoGoDuckConfig extends Config {
 
     }
 
-    private AggregationOverrides loadTemplate(String layer) throws Exception {
+    public AggregationOverrides loadTemplate(String layer) throws Exception {
+        String templatePath = getTemplatePath(layer);
+
+        if (templatePath == null) {
+            // Default overrides (none)
+            return new AggregationOverrides();
+        }
+
+        return AggregationOverridesReader.load(Paths.get(getConfigFilePath(templatePath)));
+    }
+
+    public String getTemplatePath(String layer) throws Exception {
         Map<String, String> templates = getConfigMap(TEMPLATES, "match", getLayerConfigFilePath(layer));
 
         String templateName = null;
@@ -218,15 +229,10 @@ public class GoGoDuckConfig extends Config {
             }
         }
 
-        if (templateName == null) {
-            // Default overrides (none)
-            return new AggregationOverrides();
-        }
-
-        return AggregationOverridesReader.load(Paths.get(getConfigFilePath("wps/" + templateName + ".xml")));
+        return templateName == null ? null : "wps/" + templateName + ".xml";
     }
 
-    private String getLayerConfigFilePath(String layer) throws Exception {
+    public String getLayerConfigFilePath(String layer) throws Exception {
         return getLayerConfigPath(layer, GOGODUCK_CONFIG_FILE);
     }
 

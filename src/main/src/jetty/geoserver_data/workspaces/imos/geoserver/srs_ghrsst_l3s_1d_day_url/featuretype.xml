@@ -1,11 +1,11 @@
 <featureType>
   <id>FeatureTypeInfoImpl-2a9710dc:155fc228c9e:-7ffa</id>
-  <name>srs_timeseries_url</name>
+  <name>srs_ghrsst_l3s_1d_day_url</name>
   <nativeName>srs_timeseries_url</nativeName>
   <namespace>
     <id>NamespaceInfoImpl--7f665eac:150d9d01f4d:-7ffd</id>
   </namespace>
-  <title>srs_timeseries_url</title>
+  <title>srs_ghrsst_l3s_1d_day_url</title>
   <keywords>
     <string>features</string>
     <string>srs_timeseries_url</string>
