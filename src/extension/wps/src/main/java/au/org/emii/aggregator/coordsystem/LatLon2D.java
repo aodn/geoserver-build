@@ -1,12 +1,13 @@
 package au.org.emii.aggregator.coordsystem;
 
 import au.org.emii.aggregator.exception.AggregationException;
+import au.org.emii.aggregator.index.IndexChunkIterator;
+import au.org.emii.aggregator.index.IndexChunk;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
-import ucar.nc2.FileWriter2.ChunkingIndex;
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImpl;
 import ucar.unidata.geoloc.LatLonRect;
@@ -92,25 +93,24 @@ class LatLon2D extends LatLonCoords {
     private class LatLonValue2DIterator implements Iterator<LatLonValue> {
 
         private final long maxChunkElems;
-        private final ChunkingIndex variableIndex;
+        private final IndexChunkIterator variableIndex;
 
-        private int[] chunkShape;
-        private Array latChunkValues;
-        private Array lonChunkValues;
-        private Index chunkIndex;
+        private Array latitudeValues;
+        private Array longitudeValues;
+        private Index valueIndex;
+        private IndexChunk currentChunk;
 
         LatLonValue2DIterator() {
             long maxChunkSize = latitude.getMaxChunkSize() > longitude.getMaxChunkSize() ? longitude.getMaxChunkSize() :
                 latitude.getMaxChunkSize();
 
             maxChunkElems = maxChunkSize / latitude.getDataType().getSize();
-
-            variableIndex = new ChunkingIndex(latitude.getShape());
+            variableIndex = new IndexChunkIterator(latitude.getShape(), maxChunkElems);
         }
 
         @Override
         public boolean hasNext() {
-            return variableIndex.currentElement() < variableIndex.getSize();
+            return variableIndex.hasNext() || latitudeValues != null ;
         }
 
         @Override
@@ -120,26 +120,25 @@ class LatLon2D extends LatLonCoords {
                     throw new NoSuchElementException();
                 }
 
-                if (latChunkValues == null) {
-                    int[] startingPosition = variableIndex.getCurrentCounter();
-                    chunkShape = variableIndex.computeChunkShape(maxChunkElems);
-                    latChunkValues = latitude.read(startingPosition, chunkShape);
-                    lonChunkValues = longitude.read(startingPosition, chunkShape);
-                    chunkIndex = latChunkValues.getIndex();
+                if (latitudeValues == null) {
+                    currentChunk = variableIndex.next();
+                    latitudeValues = latitude.read(currentChunk.getOffset(), currentChunk.getShape());
+                    longitudeValues = longitude.read(currentChunk.getOffset(), currentChunk.getShape());
+                    valueIndex = latitudeValues.getIndex();
                 }
 
-                int currentX = variableIndex.getCurrentCounter()[0] + chunkIndex.getCurrentCounter()[0];
-                int currentY = variableIndex.getCurrentCounter()[1] + chunkIndex.getCurrentCounter()[1];
+                int[] valueOffset = valueIndex.getCurrentCounter();
+                int currentX = currentChunk.getOffset()[0] + valueOffset[0];
+                int currentY = currentChunk.getOffset()[1] + valueOffset[1];
 
-                double latitude = latChunkValues.getDouble(chunkIndex);
-                double longitude = lonChunkValues.getDouble(chunkIndex);
+                double latitude = latitudeValues.getDouble(valueIndex);
+                double longitude = longitudeValues.getDouble(valueIndex);
 
-                if (chunkIndex.currentElement() + 1 < latChunkValues.getSize()) {
-                    chunkIndex.incr();
+                if (valueIndex.currentElement() + 1 < latitudeValues.getSize()) {
+                    valueIndex.incr();
                 } else {
-                    variableIndex.setCurrentCounter(variableIndex.currentElement() + (int) Index.computeSize(chunkShape));
-                    latChunkValues = null;
-                    lonChunkValues = null;
+                    latitudeValues = null;
+                    longitudeValues = null;
                 }
 
                 return new LatLonValue(currentX, currentY, latitude, longitude);

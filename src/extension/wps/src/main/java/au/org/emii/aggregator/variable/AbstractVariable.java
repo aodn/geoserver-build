@@ -1,11 +1,12 @@
 package au.org.emii.aggregator.variable;
 
+import au.org.emii.aggregator.index.IndexChunkIterator;
+import au.org.emii.aggregator.index.IndexChunk;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.FileWriter2.ChunkingIndex;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -134,22 +135,21 @@ public abstract class AbstractVariable implements NetcdfVariable {
     private class NumericValueIterator implements Iterator<NumericValue> {
 
         private final NetcdfVariable variable;
-        private final long maxChunkElems;
-        private final ChunkingIndex variableIndex;
+        private final IndexChunkIterator variableIndex;
 
-        private int[] chunkShape;
         private Array values;
         private Index chunkIndex;
+        private IndexChunk currentChunk;
 
         NumericValueIterator(NetcdfVariable variable) {
             this.variable = variable;
-            maxChunkElems = variable.getMaxChunkSize() / variable.getDataType().getSize();
-            variableIndex = new ChunkingIndex(variable.getShape());
+            long maxChunkElems = variable.getMaxChunkSize() / variable.getDataType().getSize();
+            variableIndex = new IndexChunkIterator(variable.getShape(), maxChunkElems);
         }
 
         @Override
         public boolean hasNext() {
-            return variableIndex.currentElement() < variableIndex.getSize();
+            return variableIndex.hasNext() || values != null;
         }
 
         @Override
@@ -160,19 +160,17 @@ public abstract class AbstractVariable implements NetcdfVariable {
                 }
 
                 if (values == null) {
-                    int[] startingPosition = variableIndex.getCurrentCounter();
-                    chunkShape = variableIndex.computeChunkShape(maxChunkElems);
-                    values = variable.read(startingPosition, chunkShape);
+                    currentChunk = variableIndex.next();
+                    values = variable.read(currentChunk.getOffset(), currentChunk.getShape());
                     chunkIndex = values.getIndex();
                 }
 
-                int[] index = getCurrentIndex(variableIndex, chunkIndex);
+                int[] index = getCurrentIndex(currentChunk, chunkIndex);
                 Number value = (Number) values.getObject(chunkIndex);
 
                 if (chunkIndex.currentElement() + 1 < values.getSize()) {
                     chunkIndex.incr();
                 } else {
-                    variableIndex.setCurrentCounter(variableIndex.currentElement() + (int) Index.computeSize(chunkShape));
                     values = null;
                 }
 
@@ -182,13 +180,12 @@ public abstract class AbstractVariable implements NetcdfVariable {
             }
         }
 
-        private int[] getCurrentIndex(Index variableIndex, Index chunkIndex) {
-            int[] variableCounter = variableIndex.getCurrentCounter();
-            int[] chunkCounter = chunkIndex.getCurrentCounter();
-            int[] index = new int[variableIndex.getRank()];
+        private int[] getCurrentIndex(IndexChunk chunk, Index chunkIndex) {
+            int[] index = chunk.getOffset();
+            int[] chunkPosition = chunkIndex.getCurrentCounter();
 
             for (int i = 0; i < index.length; i++) {
-                index[i] = variableCounter[i] + chunkCounter[i];
+                index[i] += chunkPosition[i];
             }
 
             return index;
