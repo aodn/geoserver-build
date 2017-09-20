@@ -1,8 +1,10 @@
 package au.org.emii.aggregator;
 
+import au.org.emii.aggregator.index.IndexChunkIterator;
 import au.org.emii.aggregator.dataset.NetcdfDatasetAdapter;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.exception.AggregationException;
+import au.org.emii.aggregator.index.IndexChunk;
 import au.org.emii.aggregator.overrides.AggregationOverridesReader;
 import au.org.emii.aggregator.template.TemplateDataset;
 import au.org.emii.aggregator.variable.NetcdfVariable;
@@ -18,12 +20,10 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.FileWriter2.ChunkingIndex;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.NetcdfFileWriter.Version;
@@ -229,26 +229,21 @@ public class NetcdfAggregator implements AutoCloseable {
             // copy data in maxChunkSize chunks (perhaps some of this should go into AbstractVariable)
             long maxChunkElems = subsettedVariable.getMaxChunkSize() / subsettedVariable.getDataType().getSize();
 
-            ChunkingIndex index = new ChunkingIndex(subsettedVariable.getShape());
-            while (index.currentElement() < index.getSize()) {
+            IndexChunkIterator index = new IndexChunkIterator(subsettedVariable.getShape(), maxChunkElems);
+            while (index.hasNext()) {
                 // read next chunk of data from source variable
-
-                int[] startingPosition = index.getCurrentCounter();
-                int[] chunkShape = index.computeChunkShape(maxChunkElems);
-
-                Array data = subsettedVariable.read(startingPosition, chunkShape);
+                IndexChunk chunk = index.next();
+                Array data = subsettedVariable.read(chunk.getOffset(), chunk.getShape());
 
                 // determine where chunk should be copied to in output variable taking into account existing data
                 // copied from other files (offset in first dimension)
-                int[] outputPosition = index.getCurrentCounter();
+                int[] outputPosition = chunk.getOffset();
                 outputPosition[0] += offset;
 
                 if (data.getSize() > 0) {// zero when record dimension = 0
                     writer.write(outputVariable, outputPosition, data);
                     writer.flush();
                 }
-
-                index.setCurrentCounter(index.currentElement() + (int) Index.computeSize(chunkShape));
             }
         } catch (InvalidRangeException|IOException e) {
             throw new AggregationException(e);
