@@ -2,7 +2,7 @@ package au.org.emii.wps.gogoduck.config;
 
 
 import au.org.emii.aggregator.overrides.AggregationOverrides;
-import au.org.emii.aggregator.overrides.AggregationOverridesReader;
+import au.org.emii.aggregator.overrides.xstream.AggregationOverridesReader;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
 import au.org.emii.aggregator.overrides.VariableOverrides;
