@@ -9,7 +9,7 @@ import au.org.emii.download.ParallelDownloadManager;
 import au.org.emii.notifier.HttpNotifier;
 import au.org.emii.wps.catalogue.CatalogueReader;
 import au.org.emii.wps.gogoduck.config.GoGoDuckConfig;
-import au.org.emii.wps.gogoduck.converter.Converter;
+import au.org.emii.converter.Converter;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.wps.gogoduck.index.FeatureSourceIndexReader;
 import au.org.emii.wps.gogoduck.index.IndexReader;

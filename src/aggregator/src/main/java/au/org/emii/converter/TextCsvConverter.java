@@ -1,6 +1,5 @@
-package au.org.emii.wps.gogoduck.converter;
+package au.org.emii.converter;
 
-import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import au.org.emii.netcdf.iterator.IndexRangesBuilder;
 import au.org.emii.netcdf.iterator.IndexValue;
 import au.org.emii.netcdf.iterator.reader.NetcdfReader;
@@ -58,7 +57,7 @@ public class TextCsvConverter extends Converter {
     public String getExtension() { return EXTENSION; }
 
     @Override
-    public void convert(Path inputFile, Path outputFile) throws GoGoDuckException {
+    public void convert(Path inputFile, Path outputFile) throws Exception {
         NetcdfDataset ncDataset = null;
 
         try (PrintStream out = new PrintStream(Files.newOutputStream(outputFile, CREATE_NEW))) {
@@ -76,7 +75,7 @@ public class TextCsvConverter extends Converter {
         } catch (Exception e) {
             FileUtils.deleteQuietly(outputFile.toFile());
             logger.error("Error converting output to csv", e);
-            throw new GoGoDuckException(String.format("Could not convert output to csv: '%s'", e.getMessage()));
+            throw new RuntimeException(String.format("Could not convert output to csv: '%s'", e.getMessage()));
         } finally {
             closeQuietly(ncDataset);
         }

@@ -1,14 +1,13 @@
-package au.org.emii.wps.gogoduck.converter;
+package au.org.emii.converter;
 
 import java.nio.file.Path;
 
-import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Converter {
 
-    public abstract void convert(Path outputFile, Path convertedFile) throws GoGoDuckException;
+    public abstract void convert(Path outputFile, Path convertedFile) throws Exception;
 
     public abstract String getMimeType();
 
@@ -26,7 +25,7 @@ public abstract class Converter {
         } else {
             String message = String.format("Invalid output format requested: %s", format);
             logger.error(message);
-            throw new GoGoDuckException(message);
+            throw new RuntimeException(message);
         }
     }
 

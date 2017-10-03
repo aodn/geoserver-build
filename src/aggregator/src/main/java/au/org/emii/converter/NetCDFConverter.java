@@ -1,6 +1,5 @@
-package au.org.emii.wps.gogoduck.converter;
+package au.org.emii.converter;
 
-import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,12 +11,12 @@ public class NetCDFConverter extends Converter {
     private final static String EXTENSION = "nc";
 
     @Override
-    public void convert(Path outputFile, Path convertedFile) throws GoGoDuckException {
+    public void convert(Path outputFile, Path convertedFile) throws Exception {
         try {
             // No conversion necessary
             Files.move(outputFile, convertedFile);
         } catch (IOException e) {
-            throw new GoGoDuckException("Could create output file", e);
+            throw new Exception("Could create output file", e);
         }
     }
 

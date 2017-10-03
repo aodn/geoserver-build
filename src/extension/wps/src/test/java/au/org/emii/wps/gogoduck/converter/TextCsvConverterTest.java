@@ -1,6 +1,6 @@
 package au.org.emii.wps.gogoduck.converter;
 
-import au.org.emii.wps.gogoduck.converter.TextCsvConverter;
+import au.org.emii.converter.TextCsvConverter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -33,7 +33,12 @@ public class TextCsvConverterTest {
 
             converter.convert(TIME_SERIES_INPUT_FILE, outputFile);
             assertTrue("CSV file generated differs from expected file", FileUtils.contentEquals(outputFile.toFile(), TIME_SERIES_OUTPUT_FILE));
-        } finally {
+        }
+        catch(Exception ex)
+        {
+            throw new IOException(ex);
+        }
+        finally {
             Files.delete(outputFile);
         }
     }
