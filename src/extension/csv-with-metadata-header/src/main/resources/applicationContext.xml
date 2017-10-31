@@ -5,7 +5,5 @@
     <bean id="CSVWithMetadataHeaderOutputFormat" class="au.org.emii.geoserver.wfs.response.CSVWithMetadataHeaderOutputFormat">
         <constructor-arg index="0" ref="geoServer"/>
         <constructor-arg index="1" ref="catalog"/>
-        <!-- TODO: can this be done using autowiring? -->
-        <constructor-arg index="2" ref="CSVOutputFormat"/>
     </bean>
 </beans>
