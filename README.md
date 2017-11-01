@@ -53,7 +53,7 @@ prior to running this command or add this command to you startup scripts
 
 Then to run jetty on port 9090 you can use:
 ```
-mvn jetty:run -Djetty.port=9090
+mvn jetty:run -Djetty.port=9090 -Duser.timezone=UTC
 ```
 
 GeoServer will then be available at:
