@@ -68,13 +68,27 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-33.0, 113.9), new LatLonPointImmutable(-32.0, 114.9));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-                outputFile, new AggregationOverrides(), null, bbox, null, null
+            outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-2.nc"));
         }
 
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/multiple-expected.nc"), outputFile);
+    }
+
+    @Test
+    public void testAggregateOverHttp() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-33.0, 113.9), new LatLonPointImmutable(-32.0, 114.9));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, new AggregationOverrides(), null, bbox, null, null
+        )) {
+            netcdfAggregator.add("http://data.aodn.org.au/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/ROT/2017/12/06/IMOS_ACORN_V_20171206T173000Z_ROT_FV00_1-hour-avg.nc");
+            netcdfAggregator.add("http://data.aodn.org.au/IMOS/ACORN/gridded_1h-avg-current-map_non-QC/ROT/2017/12/06/IMOS_ACORN_V_20171206T183000Z_ROT_FV00_1-hour-avg.nc");
+        }
+
+        assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/over-http-expected.cdl"), outputFile);
     }
 
     @Test

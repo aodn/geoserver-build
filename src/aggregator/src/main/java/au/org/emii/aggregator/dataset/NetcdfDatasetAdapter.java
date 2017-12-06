@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static au.org.emii.aggregator.variable.NetcdfVariable.DEFAULT_MAX_CHUNK_SIZE;
 
@@ -38,15 +40,17 @@ public class NetcdfDatasetAdapter extends AbstractNetcdfDataset implements AutoC
     private final List<Attribute> globalAttributes;
     private final ArrayList<NetcdfVariable> variables;
 
-    public static NetcdfDatasetAdapter open(Path location, Map<String, UnpackerOverrides> unpackerOverrides,
+    private static final Pattern SIZE_REGEXP = Pattern.compile("size= ([0-9]+)");
+
+    public static NetcdfDatasetAdapter open(String location, Map<String, UnpackerOverrides> unpackerOverrides,
                                             long maxChunkSize) throws IOException {
         NetcdfDataset dataset = NetcdfDataset.openDataset(
-            location.toAbsolutePath().toString(), ADD_COORD_SYSTEMS, -1, null, null);
+            location, ADD_COORD_SYSTEMS, -1, null, null);
 
         return new NetcdfDatasetAdapter(dataset, unpackerOverrides, maxChunkSize);
     }
 
-    public static NetcdfDatasetAdapter open(Path location, Map<String, UnpackerOverrides> unpackerOverrides)
+    public static NetcdfDatasetAdapter open(String location, Map<String, UnpackerOverrides> unpackerOverrides)
         throws IOException {
         return open(location, unpackerOverrides, DEFAULT_MAX_CHUNK_SIZE);
     }
@@ -93,6 +97,16 @@ public class NetcdfDatasetAdapter extends AbstractNetcdfDataset implements AutoC
         }
 
         this.variables = new ArrayList<>(variables.values());
+    }
+
+    public long getSize() {
+        Matcher m = SIZE_REGEXP.matcher(dataset.getDetailInfo());
+
+        if (m.find()) {
+            return Long.parseLong(m.group(1));
+        } else {
+            return 0L;
+        }
     }
 
     @Override
