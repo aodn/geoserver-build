@@ -103,12 +103,16 @@ public class NetcdfAggregator implements AutoCloseable {
                 createOutputFile(templateDataset);
                 // copy subsetted coordinate axes and other static (non-record) data to output file
                 copyStaticData(subsettedDataset);
+
                 outputFileCreated = true;
             }
 
             logger.info("Adding {} to output file. Size {} bytes", datasetLocation, Files.size(datasetLocation));
 
             appendTimeSlices(subsettedDataset);
+
+            logger.info("Cumulative output file size. Size {} bytes", Files.size(outputPath));
+
         } catch (IOException e) {
             throw new AggregationException(e);
         }
