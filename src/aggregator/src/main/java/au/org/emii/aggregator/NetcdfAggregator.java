@@ -106,7 +106,7 @@ public class NetcdfAggregator implements AutoCloseable {
                 outputFileCreated = true;
             }
 
-            logger.info("Adding {} to output file", datasetLocation);
+            logger.info("Adding {} to output file. Size {} bytes", datasetLocation, Files.size(datasetLocation));
 
             appendTimeSlices(subsettedDataset);
         } catch (IOException e) {
