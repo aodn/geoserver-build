@@ -37,7 +37,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     public TemplateDataset(NetcdfDatasetIF dataset, AggregationOverrides aggregationOverrides,
                            CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
 
-        this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributeOverrides(), timeRange);
+        this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributeOverrides(), timeRange, verticalSubset);
 
         // Determine variables/dimensions to add
 
@@ -92,7 +92,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     }
 
     private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, GlobalAttributeOverrides attributeOverrides,
-                                                CalendarDateRange timeRange) {
+                                                CalendarDateRange timeRange, Range verticalSubset) {
         // Copy existing attributes
 
         Map<String, Attribute> result = new LinkedHashMap<>();
@@ -105,7 +105,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
 
         // Apply attribute overrides
 
-        Map<String, String> commonSubstitutionValues = getSubstitutionValues(dataset, timeRange);
+        Map<String, String> commonSubstitutionValues = getSubstitutionValues(dataset, timeRange, verticalSubset);
 
         for (GlobalAttributeOverride override: attributeOverrides.getAddOrReplaceAttributes()) {
             String attributeName = override.getName();
@@ -143,7 +143,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return new ArrayList<>(result.values());
     }
 
-    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange) {
+    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange, Range verticalRange) {
         Map<String, String> result = new LinkedHashMap<>();
 
         LatLonRect newBbox = dataset.getBbox();
@@ -156,6 +156,11 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         if (timeRange != null) {
             result.put("TIME_START", timeRange.getStart().toString());
             result.put("TIME_END", timeRange.getEnd().toString());
+        }
+
+        if (verticalRange != null) {
+            result.put("Z_MIN", Integer.toString(verticalRange.first()));
+            result.put("Z_MAX", Integer.toString(verticalRange.last()));
         }
 
         CalendarDate aggregationTime = CalendarDate.of(new Date()).truncate(Field.Minute); // ignore seconds/milliseconds

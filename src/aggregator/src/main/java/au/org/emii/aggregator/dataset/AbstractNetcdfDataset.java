@@ -55,7 +55,7 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
 
     @Override
     public NetcdfVariable getVerticalAxis() {
-        return findVariable(AxisType.GeoZ);
+        return findVariable(AxisType.Height);
     }
 
     @Override
