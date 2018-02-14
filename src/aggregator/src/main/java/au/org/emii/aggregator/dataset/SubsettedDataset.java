@@ -4,18 +4,25 @@ import au.org.emii.aggregator.coordsystem.LatLonCoords;
 import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.coordsystem.XYRanges;
 import au.org.emii.aggregator.exception.AggregationException;
+import au.org.emii.aggregator.variable.AbstractVariable.*;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.SubsettedVariable;
+import ucar.ma2.Array;
+import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Subsetted dataset
@@ -24,6 +31,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
     private final List<Attribute> globalAttributes;
     private final List<Dimension> dimensions;
     private final List<NetcdfVariable> variables;
+    private static final Logger logger = LoggerFactory.getLogger(SubsettedDataset.class);
 
     public SubsettedDataset(NetcdfDatasetIF dataset, CalendarDateRange timeRange, Range verticalSubset,
                             LatLonRect bbox) throws AggregationException {
@@ -45,13 +53,19 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
 
         if (verticalSubset != null && dataset.hasVerticalAxis()) {
             NetcdfVariable verticalAxis = dataset.getVerticalAxis();
-
-            if (verticalAxis.getShape()[0] <= verticalSubset.last()) {
-                throw new AggregationException(
-                    String.format("Vertical subset outside of Z axis %s range", verticalAxis.getShortName()));
+            int startIndex = 0, endIndex = 0, i = 0;
+            for (NumericValue value: verticalAxis.getNumericValues()) {
+                if (value.getValue().intValue() == verticalSubset.first()) { startIndex = i; }
+                if (value.getValue().intValue() == verticalSubset.last()) { endIndex = i; }
+                i++;
             }
 
-            subsettedDimensions.put(verticalAxis.getDimensions().get(0).getShortName(), verticalSubset);
+            try {
+                Range indexedSubset = new Range(startIndex, endIndex);
+                subsettedDimensions.put(verticalAxis.getDimensions().get(0).getShortName(), indexedSubset);
+            } catch (InvalidRangeException e) {
+                logger.error("Invalid vertical subset " + e.getMessage() + " . Continuing with null vertical subset.");
+            }
         }
 
         // Add x/y dimension subsets for this coordinate system as applicable
