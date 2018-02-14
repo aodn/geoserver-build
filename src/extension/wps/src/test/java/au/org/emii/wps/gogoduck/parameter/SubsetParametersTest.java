@@ -11,7 +11,7 @@ public class SubsetParametersTest {
 
     @Test
     public void testParameterParsing() {
-        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0");
+        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;ZAXIS,0.0,100.0");
 
         assertEquals(sp.getTimeRange().getStart(), CalendarDate.parseISOformat("gregorian", "2009-01-01T00:00:00.000Z"));
         assertEquals(sp.getTimeRange().getEnd(), CalendarDate.parseISOformat("gregorian","2009-12-25T23:04:00.000Z"));
@@ -36,7 +36,7 @@ public class SubsetParametersTest {
 
     @Test
     public void testValidDepth() {
-        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0");
+        SubsetParameters sp = SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;ZAXIS,0.0,100.0");
 
         assertEquals(sp.getVerticalRange().first(), 0);
         assertEquals(sp.getVerticalRange().last(), 100);
@@ -71,7 +71,7 @@ public class SubsetParametersTest {
 
     @Test
     public void testAllowsMissingTimeSubsetWithZ() {
-        SubsetParameters sp = SubsetParameters.parse("LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0");
+        SubsetParameters sp = SubsetParameters.parse("LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;ZAXIS,0.0,100.0");
         assertTrue(sp.getTimeRange() == null);
         assertTrue(sp.getVerticalRange() != null);
     }
@@ -104,7 +104,7 @@ public class SubsetParametersTest {
     @Test
     public void testCatchesInvalidFormatVerticalSubset() {
         try {
-            SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,FAIL100.0");
+            SubsetParameters.parse("TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;ZAXIS,0.0,FAIL100.0");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("Invalid vertical subset format for subset:"));
         }

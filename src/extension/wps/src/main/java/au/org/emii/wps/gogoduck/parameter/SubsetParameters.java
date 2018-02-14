@@ -15,7 +15,7 @@ public class SubsetParameters {
     public static final String LATITUDE = "LATITUDE";
     public static final String LONGITUDE = "LONGITUDE";
     public static final String TIME = "TIME";
-    public static final String DEPTH = "DEPTH";
+    public static final String ZAXIS = "ZAXIS";
     private final LatLonRect bbox;
     private final CalendarDateRange timeRange;
     private final Range verticalRange;
@@ -47,9 +47,9 @@ public class SubsetParameters {
         Range depthRange = null;
         Map<String, ParameterRange> subsets = new HashMap<>();
         String latLonErrorMsg = String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
-        String timeErrorMsg = String.format("Invalid time format for subset: %s Valid time format example: DEPTH,0.0,100.0", subset);
-        String verticalSubsetErrorMsg = String.format("Invalid vertical subset format for subset: %s Valid vertical format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z", subset);
-        String subsetErrorMsg = String.format("Invalid format for subset: %s Valid format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
+        String timeErrorMsg = String.format("Invalid time format for subset: %s Valid time format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z", subset);
+        String verticalSubsetErrorMsg = String.format("Invalid vertical subset format for subset: %s Valid vertical subset format example: ZAXIS,0,100", subset);
+        String subsetErrorMsg = String.format("Invalid format for subset: %s Valid format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;ZAXIS,0,100", subset);
 
         // Parse
         for (String part : subset.split(";")) {
@@ -62,7 +62,7 @@ public class SubsetParameters {
         }
 
         for (String key: subsets.keySet()) {
-            if (!key.equals(LATITUDE) && !key.equals(LONGITUDE) && !key.equals(TIME) && !key.equals(DEPTH)) {
+            if (!key.equals(LATITUDE) && !key.equals(LONGITUDE) && !key.equals(TIME) && !key.equals(ZAXIS)) {
                 throw new GoGoDuckException(String.format("%s error: Invalid subset parameter '%s'", subsetErrorMsg, key));
             }
         }
@@ -100,7 +100,7 @@ public class SubsetParameters {
         }
 
         // Vertical range validation
-        ParameterRange verticalRange = subsets.get(DEPTH);
+        ParameterRange verticalRange = subsets.get(ZAXIS);
 
         try {
             if (verticalRange != null) {

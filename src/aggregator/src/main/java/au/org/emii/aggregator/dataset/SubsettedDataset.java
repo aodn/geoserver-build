@@ -64,7 +64,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
                 Range indexedSubset = new Range(startIndex, endIndex);
                 subsettedDimensions.put(verticalAxis.getDimensions().get(0).getShortName(), indexedSubset);
             } catch (InvalidRangeException e) {
-                logger.error("Invalid vertical subset " + e.getMessage() + " . Continuing with null vertical subset.");
+                logger.error("Invalid vertical subset " + e.getMessage() + " . Aggregating with full z-dimension range.");
             }
         }
 
