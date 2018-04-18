@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.jdbc.JDBCDataStore;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,20 +15,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import ucar.nc2.NCdumpW;
+import ucar.nc2.NetcdfFile;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.net.URISyntaxException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 class MockOutputterCounter implements IOutputFormatter {
     int count;
@@ -54,6 +68,7 @@ public class GenerationIT {
     private static final Logger logger = LoggerFactory.getLogger(GenerationIT.class);
 
     private static boolean dbIsPrepared = false;
+    private Path outputDir;
 
     public GenerationIT() throws Exception {
         if (!dbIsPrepared) {
@@ -148,21 +163,25 @@ public class GenerationIT {
                 logger.debug("Copying data");
                 is.read(); // \n
 
-                // the copyManager reads to eof and doesn't respect the \n\\. terminating sequence. so we have
-                // to scan ourselves
-                CopyIn copyIn = copyManager.copyIn(sql);
                 byte[] b = new byte[3];
 
                 is.mark(3);
                 is.read(b, 0, 3);
-                while (!(b[0] == '\n' && b[1] == '\\' && b[2] == '.')) {
-                    copyIn.writeToCopy(b, 0, 1);
-                    is.reset();
-                    is.read(); // advance one byte
-                    is.mark(3);
-                    is.read(b, 0, 3);
+
+                if (!(b[0] == '\\' && b[1] == '.' && b[2] == '\n')) {
+                    // non-empty copy statement - use copyManager to transfer content
+                    // Note: the copyManager reads to eof and doesn't respect the \n\\. terminating sequence. so we have
+                    // to scan ourselves
+                    CopyIn copyIn = copyManager.copyIn(sql);
+                    while (!(b[0] == '\n' && b[1] == '\\' && b[2] == '.')) {
+                        copyIn.writeToCopy(b, 0, 1);
+                        is.reset();
+                        is.read(); // advance one byte
+                        is.mark(3);
+                        is.read(b, 0, 3);
+                    }
+                    copyIn.endCopy();
                 }
-                copyIn.endCopy();
             }
             else {
                 throw new RuntimeException("Unknown SQL token during import '" + firstTok + "'");
@@ -245,6 +264,14 @@ public class GenerationIT {
         File file = new File(TMPDIR);
         FileUtils.deleteDirectory(file);
         file.mkdirs();
+        logger.info("creating output dir");
+        outputDir = Files.createTempDirectory("netcdfoutput-it-");
+    }
+
+    @After
+    public void teardown() throws IOException {
+        logger.info("removing output directory");
+        deleteDirectory(outputDir);
     }
 
     @Test
@@ -257,27 +284,38 @@ public class GenerationIT {
     public void testAnmnNrsCtdProfiles() throws Exception {
         URL config = this.getClass().getResource("/anmn_nrs_ctd_profiles.xml");
         String cql = "TIME < '2013-6-29T00:40:01Z' ";
-        MockOutputterCounter outputter = new MockOutputterCounter();
-        NcdfEncoder encoder = getEncoder(config, cql, "anmn_nrs_ctd_profiles", outputter);
-        consumeEncoderOutput(encoder);
-    }
 
+        try (CdlOutputFormatter outputter = new CdlOutputFormatter(outputDir)) {
+            NcdfEncoder encoder = getEncoder(config, cql, "anmn_nrs_ctd_profiles", outputter);
+            consumeEncoderOutput(encoder);
+        }
+
+        assertDirsAreEqual(getPath("anmnnrsctdprofiles"), outputDir);
+    }
 
     @Test
     public void testSoopSSTTrajectory() throws Exception {
         URL config = getClass().getResource("/soop_sst_trajectory.xml");
-        String cql = "TIME >= '2015-01-13T23:00:00Z'AND TIME <= '2015-01-14T00:00:00Z'";
-        MockOutputterCounter outputter = new MockOutputterCounter();
-        NcdfEncoder encoder = getEncoder(config, cql, "soop_sst_trajectory", outputter);
-        consumeEncoderOutput(encoder);
+        String cql = "TIME >= '2013-06-25T09:00:00Z'AND TIME <= '2013-06-26T10:00:00Z'";
+
+        try (CdlOutputFormatter outputter = new CdlOutputFormatter(outputDir)) {
+            NcdfEncoder encoder = getEncoder(config, cql, "soop_sst_trajectory", outputter);
+            consumeEncoderOutput(encoder);
+        }
+
+        assertDirsAreEqual(getPath("soopssttrajectory"), outputDir);
     }
 
     @Test
     public void testAnmnTs() throws Exception {
         String cql = "INTERSECTS(geom,POLYGON((113.3349609375 -33.091796875,113.3349609375 -30.982421875,117.1142578125 -30.982421875,117.1142578125 -33.091796875,113.3349609375 -33.091796875))) AND TIME >= '2015-01-13T23:00:00Z' AND TIME <= '2015-04-14T00:00:00Z' ";
-        MockOutputterCounter outputter = new MockOutputterCounter();
-        NcdfEncoder encoder = getEncoder(getAnmnConfig(), cql, "anmn_ts", outputter);
-        consumeEncoderOutput(encoder);
+
+        try (CdlOutputFormatter outputter = new CdlOutputFormatter(outputDir)) {
+            NcdfEncoder encoder = getEncoder(getAnmnConfig(), cql, "anmn_ts", outputter);
+            consumeEncoderOutput(encoder);
+        }
+
+        assertDirsAreEqual(getPath("anmnts"), outputDir);
     }
 
     @Test
@@ -364,4 +402,101 @@ public class GenerationIT {
         assertEquals(10, outputter.getCount());
         // TODO, should check that we only include obs with temp_qc = 4 etc, not just that instances are constrained.
     }
+
+    class CdlOutputFormatter implements IOutputFormatter, AutoCloseable {
+        private final Path outputDir;
+
+        public CdlOutputFormatter(Path outputDir) {
+            this.outputDir = outputDir;
+        }
+
+        public final void write(String filename, InputStream is) throws IOException {
+            Path netcdfOutputFile = outputDir.resolve(filename);
+            Path cdlOutputFile = outputDir.resolve(filename.replaceFirst(".nc$", ".cdl"));
+
+            try {
+                Files.copy(is, netcdfOutputFile);
+
+                try (NetcdfFile expectedFile = NetcdfFile.open(netcdfOutputFile.toString())) {
+                    StringWriter outputWriter = new StringWriter();
+                    NCdumpW.print(expectedFile, outputWriter, NCdumpW.WantValues.all, false, false, null, null);
+                    String cdl = outputWriter.toString().replaceFirst("netcdf .*/([^/]*) ", "netcdf $1 "); // remove temporary directory details
+                    Files.write(cdlOutputFile, cdl.getBytes());
+                }
+            } finally {
+                Files.deleteIfExists(netcdfOutputFile);
+            }
+        }
+
+        public final void close() throws IOException {
+        }
+
+    }
+
+    private void deleteDirectory(Path directory) throws IOException {
+        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private static void assertDirsAreEqual(final Path expected, final Path generated)
+        throws IOException {
+
+        // Checks parameters
+        assertTrue("Generated Folder doesn't exist: " + generated, Files.exists(generated));
+        assertTrue("Generated is not a folder?!?!: " + generated, Files.isDirectory(generated));
+
+        assertTrue("Expected Folder doesn't exist: " + expected, Files.exists(expected));
+        assertTrue("Expected is not a folder?!?!: " + expected, Files.isDirectory(expected));
+
+        Files.walkFileTree(expected, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir,
+                                                     BasicFileAttributes attrs)
+                throws IOException {
+                FileVisitResult result = super.preVisitDirectory(dir, attrs);
+
+                // get the relative file name from path "expected"
+                Path relativize = expected.relativize(dir);
+                // construct the path for the counterpart file in "generated"
+                File otherDir = generated.resolve(relativize).toFile();
+                logger.info("=== preVisitDirectory === compare " + dir + " to " + otherDir);
+                assertEquals("Folders doesn't contain same file!?!?",
+                    Arrays.toString(dir.toFile().list()),
+                    Arrays.toString(otherDir.list()));
+                return result;
+            }
+            @Override
+            public FileVisitResult visitFile(Path file,
+                                             BasicFileAttributes attrs)
+                throws IOException {
+                FileVisitResult result = super.visitFile(file, attrs);
+
+                // get the relative file name from path "expected"
+                Path relativize = expected.relativize(file);
+                // construct the path for the counterpart file in "generated"
+                File fileInOther = generated.resolve(relativize).toFile();
+                logger.info("=== comparing: " + file + " to " + fileInOther);
+                String expectedContents = FileUtils.readFileToString(file.toFile());
+                String generatedContents = FileUtils.readFileToString(fileInOther);
+                assertEquals("("+fileInOther+")  csv standard doesn't match expected ("+file+")!", expectedContents, generatedContents);
+                return result;
+            }
+        });
+    }
+
+    private Path getPath(String resource) throws URISyntaxException {
+        return Paths.get(this.getClass().getResource(resource).toURI());
+    }
+
 }
