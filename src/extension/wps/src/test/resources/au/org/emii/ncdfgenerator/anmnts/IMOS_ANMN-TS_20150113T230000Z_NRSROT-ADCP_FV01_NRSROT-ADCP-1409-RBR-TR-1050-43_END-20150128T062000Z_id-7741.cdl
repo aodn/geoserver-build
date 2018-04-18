@@ -1,6 +1,6 @@
 netcdf IMOS_ANMN-TS_20150113T230000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1409-RBR-TR-1050-43_END-20150128T062000Z_id-7741.nc {
   dimensions:
-    TIME = 4121;
+    TIME = UNLIMITED;   // (4121 currently)
   variables:
     double TIME(TIME=4121);
       :standard_name = "time";

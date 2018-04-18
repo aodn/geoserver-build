@@ -8,8 +8,11 @@ public class NcdfEncoderBuilder {
     private String filterExpr;
     private JDBCDataStore dataStore;
     private String schema;
+    private int fetchSize;
 
     public NcdfEncoderBuilder() {
+        // defaults
+        fetchSize = 1000;
     }
 
     public final NcdfEncoder create() throws Exception {
@@ -24,10 +27,10 @@ public class NcdfEncoderBuilder {
            throw new IllegalArgumentException("dataStore not set");
         }
 
-        ICreateWritable createWritable = new CreateWritable(tmpCreationDir);
+        ICreateWriter createWritable = new CreateWriter(tmpCreationDir);
         IAttributeValueParser attributeValueParser = new AttributeValueParser();
 
-        return new NcdfEncoder(dataStore, schema, createWritable, attributeValueParser, definition, filterExpr);
+        return new NcdfEncoder(dataStore, schema, createWritable, attributeValueParser, definition, filterExpr, fetchSize);
     }
 
     public final NcdfEncoderBuilder setTmpCreationDir(String tmpCreationDir) {
@@ -52,6 +55,11 @@ public class NcdfEncoderBuilder {
 
     public final NcdfEncoderBuilder setSchema(String schema) {
         this.schema = schema;
+        return this;
+    }
+
+    public NcdfEncoderBuilder setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
         return this;
     }
 }

@@ -237,7 +237,8 @@ public class GenerationIT {
                 .setTmpCreationDir(TMPDIR)
                 .setDefinition(definition)
                 .setFilterExpr(cqlFilter)
-                .setSchema(schema);
+                .setSchema(schema)
+                .setFetchSize(10);
 
         NcdfEncoder encoder = encoderBuilder.create();
         encoder.prepare(outputGenerator);

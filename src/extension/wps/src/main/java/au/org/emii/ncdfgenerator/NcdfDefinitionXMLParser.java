@@ -197,7 +197,7 @@ public class NcdfDefinitionXMLParser {
                 }
             }
 
-            return new DimensionImpl(name);
+            return new DimensionImpl(name, true); // Only supporting a single unlimited dimension at the moment
         }
     }
 

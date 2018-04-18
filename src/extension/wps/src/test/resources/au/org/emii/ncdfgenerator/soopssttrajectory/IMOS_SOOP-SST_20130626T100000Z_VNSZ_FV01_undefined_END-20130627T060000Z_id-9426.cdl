@@ -1,6 +1,6 @@
 netcdf IMOS_SOOP-SST_20130626T100000Z_VNSZ_FV01_undefined_END-20130627T060000Z_id-9426.nc {
   dimensions:
-    TIME = 21;
+    TIME = UNLIMITED;   // (21 currently)
   variables:
     double TIME(TIME=21);
       :standard_name = "time";

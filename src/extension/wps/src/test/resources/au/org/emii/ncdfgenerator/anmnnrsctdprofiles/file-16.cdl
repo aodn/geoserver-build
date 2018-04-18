@@ -1,6 +1,6 @@
 netcdf file-16.nc {
   dimensions:
-    DEPTH = 49;
+    DEPTH = UNLIMITED;   // (49 currently)
   variables:
     float LATITUDE(DEPTH=49);
       :_FillValue = 99999.0f; // float

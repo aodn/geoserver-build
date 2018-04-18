@@ -9,7 +9,7 @@ import org.opengis.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -26,12 +26,13 @@ public class NcdfEncoder implements AutoCloseable {
     private final Connection conn;
     private final JDBCDataStore dataStore;
     private final String schema;
-    private final ICreateWritable createWritable;
+    private final ICreateWriter createWriter;
     private final NcdfDefinition definition;
     private final String filterExpr;
     private static final Logger logger = LoggerFactory.getLogger(NcdfEncoder.class);
     private final IAttributeValueParser attributeValueParser;
-    private final int fetchSize;
+
+    private int fetchSize;
 
     private PreparedStatement featuresStmt;
     private ResultSet featureInstancesRS;
@@ -43,20 +44,21 @@ public class NcdfEncoder implements AutoCloseable {
     public NcdfEncoder(
             JDBCDataStore dataStore,
             String schema,
-            ICreateWritable createWritable,
+            ICreateWriter createWriter,
             IAttributeValueParser attributeValueParser,
             NcdfDefinition definition,
-            String filterExpr
+            String filterExpr,
+            int fetchSize
     ) throws SQLException {
         this.dataStore = dataStore;
         this.conn = dataStore.getDataSource().getConnection();
         this.schema = schema;
-        this.createWritable = createWritable;
+        this.createWriter = createWriter;
         this.attributeValueParser = attributeValueParser;
         this.definition = definition;
         this.filterExpr = filterExpr;
+        this.fetchSize = fetchSize;
 
-        fetchSize = 10000;
         outputFormatter = null;
         featuresStmt = null;
         featureInstancesRS = null;
@@ -156,9 +158,16 @@ public class NcdfEncoder implements AutoCloseable {
 
         logger.info("instanceId " + instanceId + ", " + query);
 
-        populateValues(query, definition.getDimensions(), definition.getVariables());
+        // prepare buffers
+        for (IDimension dimension : definition.getDimensions()) {
+            dimension.prepare();
+        }
 
-        NetcdfFileWriteable writer = createWritable.create();
+        for (IVariable variable : definition.getVariables()) {
+            variable.prepare();
+        }
+
+        NetcdfFileWriter writer = createWriter.create();
 
         // Write the global attributes
         for (Attribute attribute : definition.getGlobalAttributes()) {
@@ -180,13 +189,13 @@ public class NcdfEncoder implements AutoCloseable {
                 logger.warn("Null attribute value '" + name + "'");
             }
             else if (value instanceof Number) {
-                writer.addGlobalAttribute(name, (Number) value);
+                writer.addGroupAttribute(null, new ucar.nc2.Attribute(name, (Number) value));
             }
             else if (value instanceof String) {
-                writer.addGlobalAttribute(name, (String) value);
+                writer.addGroupAttribute(null, new ucar.nc2.Attribute(name, (String) value));
             }
             else if (value instanceof Array) {
-                writer.addGlobalAttribute(name, (Array) value);
+                writer.addGroupAttribute(null, new ucar.nc2.Attribute(name, (Array) value));
             }
             else {
 
@@ -208,11 +217,8 @@ public class NcdfEncoder implements AutoCloseable {
         // finish netcdf definition
         writer.create();
 
-        // write values
-        for (IVariable variable : definition.getVariables()) {
-            // maybe change name writeValues
-            variable.finish(writer);
-        }
+        copyData(query, definition.getDimensions(), definition.getVariables(), writer);
+
         // finish the file
         writer.close();
 
@@ -220,7 +226,7 @@ public class NcdfEncoder implements AutoCloseable {
         // get filename
         Object filename = evaluateSql(replacedSql);
 
-        try (InputStream is = createWritable.getStream()) {
+        try (InputStream is = createWriter.getStream()) {
             outputFormatter.write((String) filename, is);
         }
         catch (Exception e) {
@@ -278,20 +284,11 @@ public class NcdfEncoder implements AutoCloseable {
         }
     }
 
-    private void populateValues(
-            String query,
-            List<IDimension> dimensions,
-            List<IVariable> encoders
-    ) throws Exception {
-        // prepare buffers
-        for (IDimension dimension : definition.getDimensions()) {
-            dimension.prepare();
-        }
-
-        for (IVariable variable : definition.getVariables()) {
-            variable.prepare();
-        }
-
+    private void copyData(
+        String query,
+        List<IDimension> dimensions,
+        List<IVariable> variables,
+        NetcdfFileWriter writer) throws Exception {
         // sql stuff
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setFetchSize(fetchSize);
@@ -303,14 +300,14 @@ public class NcdfEncoder implements AutoCloseable {
                 int numColumns = m.getColumnCount();
 
                 // organize dimensions by name
-                Map<String, IDimension> dimensionsMap = new HashMap<String, IDimension>();
-                for (IDimension dimension : definition.getDimensions()) {
+                Map<String, IDimension> dimensionsMap = new HashMap<>();
+                for (IDimension dimension : dimensions) {
                     dimensionsMap.put(dimension.getName(), dimension);
                 }
 
                 // organize variables by name
-                Map<String, IVariable> variablesMap = new HashMap<String, IVariable>();
-                for (IVariable variable : definition.getVariables()) {
+                Map<String, IVariable> variablesMap = new HashMap<>();
+                for (IVariable variable : variables) {
                     variablesMap.put(variable.getName(), variable);
                 }
 
@@ -319,7 +316,7 @@ public class NcdfEncoder implements AutoCloseable {
 
                 for (int i = 1; i <= numColumns; ++i) {
 
-                    processing[i] = new ArrayList<IAddValue>();
+                    processing[i] = new ArrayList<>();
 
                     IDimension dimension = dimensionsMap.get(m.getColumnName(i));
                     if (dimension != null) {
@@ -332,16 +329,39 @@ public class NcdfEncoder implements AutoCloseable {
                     }
                 }
 
-                // process result set rows
+                // copy result set rows in fetchsize batches
+
+                int batchIndex = 0;
+
                 while (rs.next()) {
                     for (int i = 1; i <= numColumns; ++i) {
                         for (IAddValue p : processing[i]) {
                             p.addValueToBuffer(rs.getObject(i));
                         }
                     }
+
+                    batchIndex++;
+
+                    if (batchIndex == fetchSize) {
+                        flushBuffers(variables, writer);
+                        batchIndex = 0;
+                    }
+                }
+
+                // flush buffers if required
+                if (batchIndex > 0) {
+                    flushBuffers(variables, writer);
                 }
             }
        }
+    }
+
+    private void flushBuffers(List<IVariable> variables, NetcdfFileWriter writer) throws Exception {
+        // flush variable buffers to file
+        for (IVariable variable : variables) {
+            variable.flushBuffer(writer);
+        }
+
     }
 
     public void close() {

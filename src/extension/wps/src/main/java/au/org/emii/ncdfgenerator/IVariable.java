@@ -1,11 +1,11 @@
 package au.org.emii.ncdfgenerator;
 
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 
 public interface IVariable extends IAddValue {
-    void define(NetcdfFileWriteable writer) throws NcdfGeneratorException;
+    void define(NetcdfFileWriter writer) throws NcdfGeneratorException;
 
-    void finish(NetcdfFileWriteable writer) throws Exception;  // TODO should be NcdfGeneratorException
+    void flushBuffer(NetcdfFileWriter writer) throws Exception;  // TODO should be NcdfGeneratorException
 
     void addValueToBuffer(Object value);
 

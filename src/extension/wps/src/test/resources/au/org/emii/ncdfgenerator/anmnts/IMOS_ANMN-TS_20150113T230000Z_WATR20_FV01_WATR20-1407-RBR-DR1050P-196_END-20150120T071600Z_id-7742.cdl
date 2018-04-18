@@ -1,6 +1,6 @@
 netcdf IMOS_ANMN-TS_20150113T230000Z_WATR20_FV01_WATR20-1407-RBR-DR1050P-196_END-20150120T071600Z_id-7742.nc {
   dimensions:
-    TIME = 4569;
+    TIME = UNLIMITED;   // (4569 currently)
   variables:
     double TIME(TIME=4569);
       :standard_name = "time";

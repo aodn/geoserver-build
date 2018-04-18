@@ -1,6 +1,6 @@
 netcdf IMOS_ANMN-TS_20150113T230000Z_WATR20_FV01_WATR20-1407-Nortek-ADCP-190kHz-194_END-20150121T021500Z_id-7736.nc {
   dimensions:
-    TIME = 686;
+    TIME = UNLIMITED;   // (686 currently)
   variables:
     double TIME(TIME=686);
       :standard_name = "time";

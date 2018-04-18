@@ -1,6 +1,6 @@
 netcdf IMOS_ANMN-TS_20150113T230000Z_WATR20_FV01_WATR20-1407-Seabird-SBE39-600m-temp-only-150_END-20150122T030000Z_id-7738.nc {
   dimensions:
-    TIME = 1177;
+    TIME = UNLIMITED;   // (1177 currently)
   variables:
     double TIME(TIME=1177);
       :standard_name = "time";

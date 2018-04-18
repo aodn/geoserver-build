@@ -2,7 +2,7 @@ package au.org.emii.ncdfgenerator;
 
 import ucar.ma2.Array;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +18,8 @@ class Variable implements IVariable {
     private List<Object> convertedAttributes; // output ordered (change name Values  )
     private Map<String, Object> convertedAttributesMap; // to support encoder lookup...
     private List<Object> buffer;
+    private ucar.nc2.Variable variable;
+    private int[] origin;
 
     public Variable(
         String variableName,
@@ -39,6 +41,7 @@ class Variable implements IVariable {
         convertedAttributes = new ArrayList<Object>();
         convertedAttributesMap = new HashMap<String, Object>();
         buffer = new ArrayList<Object>();
+        origin = new int[dimensions.size()]; // buffer position within variable
     }
 
     public void addValueToBuffer(Object value) {
@@ -46,7 +49,7 @@ class Variable implements IVariable {
         buffer.add(value);
     }
 
-    public final void define(NetcdfFileWriteable writer) throws NcdfGeneratorException {
+    public final void define(NetcdfFileWriter writer) throws NcdfGeneratorException {
         // write dims and attributes
 
         // make sure children are defined already
@@ -55,7 +58,7 @@ class Variable implements IVariable {
             d.add(dimension.getDimension());
         }
 
-        writer.addVariable(variableName, encodeValue.targetType(), d);
+        variable = writer.addVariable(null, variableName, encodeValue.targetType(), d);
 
         // there's a bit of double handling here. We use the list to preserve output ordering
         // but use a map for the encoder type to permit easy name lookup
@@ -73,26 +76,27 @@ class Variable implements IVariable {
             Object value = convertedAttributes.get(i);
 
             if (value instanceof Number) {
-                writer.addVariableAttribute(variableName, name, (Number)value);
+                writer.addVariableAttribute(variable, new ucar.nc2.Attribute(name, (Number)value));
             }
             else if (value instanceof String) {
-                writer.addVariableAttribute(variableName, name, (String)value);
+                writer.addVariableAttribute(variable, new ucar.nc2.Attribute(name, (String)value));
             }
             else if (value instanceof Array) {
-                writer.addVariableAttribute(variableName, name, (Array)value);
+                writer.addVariableAttribute(variable, new ucar.nc2.Attribute(name, (Array)value));
             }
             else {
                 throw new NcdfGeneratorException("Unrecognized attribute type '" + value.getClass().getName() + "'");
             }
         }
+
+        encodeValue.prepare(convertedAttributesMap);
     }
 
-    public void writeValues(List<IDimension> dims, int dimIndex, int acc, Array array)
+    public void encodeValues(int[] shape, int index, int acc, Array array)
         throws NcdfGeneratorException {
-        if (dimIndex < dims.size()) {
-            Dimension dim = dims.get(dimIndex).getDimension();
-            for (int i = 0; i < dim.getLength(); i++) {
-                writeValues(dims, dimIndex + 1, acc + i, array);
+        if (index < shape.length) {
+            for (int i = 0; i < shape[index]; i++) {
+                encodeValues(shape, index + 1, acc + i, array);
             }
         }
         else {
@@ -100,37 +104,36 @@ class Variable implements IVariable {
         }
     }
 
-    private static int[] toIntArray(List<Integer> list) {
-        // List.toArray() only supports java Boxed Integers...
-        int[] ret = new int[list.size()];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = list.get(i);
+    public void flushBuffer(NetcdfFileWriter writer) throws Exception { // TODO use narrow exception
+        int[] shape = new int[dimensions.size()];
+
+        int recordSize = 1;
+
+        for (int i=dimensions.size()-1; i >= 0; i--) {
+            IDimension dimension = dimensions.get(i);
+
+            if (dimension.isUnlimited()) {
+                shape[i] = buffer.size() / recordSize;
+            } else {
+                shape[i] = dimension.getLength();
+                recordSize *= shape[i];
+            }
         }
-        return ret;
-    }
 
-    public void finish(NetcdfFileWriteable writer) throws Exception { // TODO use narrow exception
-        ArrayList<Integer> shape = new ArrayList<Integer>();
-        for (IDimension dimension : dimensions) {
-            shape.add(dimension.getLength());
-        }
-
-        Array array = Array.factory(encodeValue.targetType(), toIntArray(shape));
-
-        encodeValue.prepare(convertedAttributesMap);
+        Array array = Array.factory(encodeValue.targetType(), shape);
 
         if (buffer.isEmpty()) {
             throw new NcdfGeneratorException("No values found for variable '" + variableName + "'");
         }
 
-        writeValues(dimensions, 0, 0, array);
+        encodeValues(shape, 0, 0, array);
 
-        // int [] origin = new int[1];
-        // writer.write(variableName, origin, A);
-        writer.write(variableName, array);
+        writer.write(variable, origin, array);
 
-        convertedAttributes.clear();
-        convertedAttributesMap.clear();
+        if (origin.length > 0) {
+            origin[0] += buffer.size() / recordSize;
+        }
+
         buffer.clear();
     }
 
