@@ -1,0 +1,508 @@
+netcdf IMOS_SOOP-SST_20130626T100000Z_VNSZ_FV01_undefined_END-20130627T060000Z_id-9426.nc {
+  dimensions:
+    TIME = UNLIMITED;   // (21 currently)
+  variables:
+    double TIME(TIME=21);
+      :standard_name = "time";
+      :long_name = "time";
+      :units = "days since 1950-01-01 00:00:00 UTC";
+      :calendar = "gregorian";
+      :axis = "T";
+      :valid_min = 0.0; // double
+      :valid_max = 90000.0; // double
+
+    double LATITUDE(TIME=21);
+      :standard_name = "latitude";
+      :long_name = "latitude";
+      :units = "degrees north";
+      :axis = "Y";
+      :reference_datum = "geographical coordinates, WGS84 projection";
+      :_FillValue = 999999.0; // double
+      :valid_min = -90.0; // double
+      :valid_max = 90.0; // double
+      :ancillary_variables = "LATITUDE_quality_control";
+
+    char LATITUDE_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "latitude status_flag";
+      :long_name = "quality flag for latitude";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    double LONGITUDE(TIME=21);
+      :standard_name = "longitude";
+      :long_name = "longitude";
+      :units = "degrees east";
+      :axis = "X";
+      :reference_datum = "geographical coordinates, WGS84 projection";
+      :_FillValue = 999999.0; // double
+      :valid_min = -180.0; // double
+      :valid_max = 180.0; // double
+      :ancillary_variables = "LONGITUDE_quality_control";
+
+    char LONGITUDE_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "longitude status_flag";
+      :long_name = "quality flag for longitude";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float AIRT(TIME=21);
+      :standard_name = "air_temperature";
+      :long_name = "air_temperature";
+      :units = "degrees_Celsius";
+      :_FillValue = -9999.0f; // float
+      :valid_min = -50.0f; // float
+      :valid_max = 50.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "AIRT_quality_control";
+
+    char AIRT_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "air_temperature status_flag";
+      :long_name = "quality flag for air_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float ATMP(TIME=21);
+      :standard_name = "air_pressure";
+      :long_name = "air_pressure";
+      :units = "millibar";
+      :_FillValue = -9999.0f; // float
+      :valid_min = 900.0f; // float
+      :valid_max = 1100.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "ATMP_quality_control";
+
+    char ATMP_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "air_pressure status_flag";
+      :long_name = "quality flag for air_pressure";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float CNDC(TIME=21);
+      :standard_name = "sea_water_electrical_conductivity";
+      :long_name = "sea_water_electrical_conductivity";
+      :units = "S m-1";
+      :valid_min = 0.0f; // float
+      :valid_max = 50000.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "CNDC_quality_control";
+
+    char CNDC_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_electrical_conductivity status_flag";
+      :long_name = "quality flag for sea_water_electrical_conductivity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float CNDC_2(TIME=21);
+      :standard_name = "sea_water_electrical_conductivity";
+      :long_name = "sea_water_electrical_conductivity";
+      :units = "S m-1";
+      :valid_min = 0.0f; // float
+      :valid_max = 50000.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "CNDC_2_quality_control";
+
+    char CNDC_2_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_electrical_conductivity status_flag";
+      :long_name = "quality flag for sea_water_electrical_conductivity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float CNDC_3(TIME=21);
+      :standard_name = "sea_water_electrical_conductivity";
+      :long_name = "sea_water_electrical_conductivity";
+      :units = "S m-1";
+      :valid_min = 0.0f; // float
+      :valid_max = 50000.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "CNDC_3_quality_control";
+
+    char CNDC_3_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_electrical_conductivity status_flag";
+      :long_name = "quality flag for sea_water_electrical_conductivity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float DEWT(TIME=21);
+      :standard_name = "dew_point_temperature";
+      :long_name = "dew_point_temperature";
+      :units = "degrees_Celsius";
+      :_FillValue = -9999.0f; // float
+      :valid_min = -50.0f; // float
+      :valid_max = 50.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "DEWT_quality_control";
+
+    char DEWT_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "dew_point_temperature status_flag";
+      :long_name = "quality flag for dew_point_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PL_CRS(TIME=21);
+      :standard_name = "platform_course";
+      :long_name = "platform_course";
+      :units = "degrees (clockwise towards true north)";
+      :_FillValue = -9999.0f; // float
+      :valid_min = 0.0f; // float
+      :valid_max = 360.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PL_CRS_quality_control";
+
+    char PL_CRS_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "platform_course status_flag";
+      :long_name = "quality flag for platform_course";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PL_SPD(TIME=21);
+      :standard_name = "platform_speed_wrt_ground";
+      :long_name = "platform_speed_wrt_ground";
+      :units = "m s-1";
+      :_FillValue = -9999.0f; // float
+      :valid_min = 0.0f; // float
+      :valid_max = 20.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PL_SPD_quality_control";
+
+    char PL_SPD_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "platform_speed_wrt_ground status_flag";
+      :long_name = "quality flag for platform_speed_wrt_ground";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PL_WDIR(TIME=21);
+      :long_name = "wind direction relative to moving platform";
+      :units = "degrees (clockwise towards true north)";
+      :_FillValue = -9999.0f; // float
+      :valid_min = 0.0f; // float
+      :valid_max = 360.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PL_WDIR_quality_control";
+
+    char PL_WDIR_quality_control(TIME=21);
+      :_FillValue = "";
+      :long_name = "quality flag for wind direction (relative to moving platform) in the atmosphere";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PL_WSPD(TIME=21);
+      :long_name = "wind speed relative to moving platform";
+      :units = "m s-1";
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PL_WSPD_quality_control";
+
+    char PL_WSPD_quality_control(TIME=21);
+      :_FillValue = "";
+      :long_name = "quality flag for wind direction (relative to moving platform)";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PSAL(TIME=21);
+      :standard_name = "sea_water_salinity";
+      :long_name = "sea_water_salinity";
+      :units = "1e-3";
+      :valid_min = 2.0f; // float
+      :valid_max = 41.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PSAL_quality_control";
+
+    char PSAL_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_salinity status_flag";
+      :long_name = "quality flag for sea_water_salinity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PSAL_2(TIME=21);
+      :standard_name = "sea_water_salinity";
+      :long_name = "sea_water_salinity";
+      :units = "1e-3";
+      :valid_min = 2.0f; // float
+      :valid_max = 41.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PSAL_2_quality_control";
+
+    char PSAL_2_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_salinity status_flag";
+      :long_name = "quality flag for sea_water_salinity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float PSAL_3(TIME=21);
+      :standard_name = "sea_water_salinity";
+      :long_name = "sea_water_salinity";
+      :units = "1e-3";
+      :valid_min = 2.0f; // float
+      :valid_max = 41.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "PSAL_3_quality_control";
+
+    char PSAL_3_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_salinity status_flag";
+      :long_name = "quality flag for sea_water_salinity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float RELH(TIME=21);
+      :standard_name = "relative_humidity";
+      :long_name = "relative_humidity";
+      :units = "percent";
+      :valid_min = 0.0f; // float
+      :valid_max = 100.0f; // float
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "RELH_quality_control";
+
+    char RELH_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "relative_humidity status_flag";
+      :long_name = "quality flag for relative_humidity";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    char TEMP_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_temperature status_flag";
+      :long_name = "quality flag for sea_water_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float TEMP_2(TIME=21);
+      :standard_name = "sea_water_temperature";
+      :long_name = "sea_water_temperature";
+      :units = "degrees_Celsius";
+      :valid_min = -2.5f; // float
+      :valid_max = 40.0f; // float
+      :_FillValue = 999999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "TEMP_quality_control";
+
+    char TEMP_2_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_temperature status_flag";
+      :long_name = "quality flag for sea_water_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float TEMP_3(TIME=21);
+      :standard_name = "sea_water_temperature";
+      :long_name = "sea_water_temperature";
+      :units = "degrees_Celsius";
+      :valid_min = -2.5f; // float
+      :valid_max = 40.0f; // float
+      :_FillValue = 999999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "TEMP_quality_control";
+
+    char TEMP_3_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "sea_water_temperature status_flag";
+      :long_name = "quality flag for sea_water_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float WDIR(TIME=21);
+      :standard_name = "wind_from_direction";
+      :long_name = "wind_from_direction";
+      :units = "degrees (clockwise from true north)";
+      :_FillValue = -9999.0f; // float
+      :valid_min = 0.0f; // float
+      :valid_max = 360.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "WDIR_quality_control";
+
+    char WDIR_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "wind_from_direction status_flag";
+      :long_name = "quality flag for wind_from_direction";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float WETT(TIME=21);
+      :standard_name = "wet_bulb_temperature";
+      :long_name = "wet_bulb_temperature";
+      :units = "degrees Celsius";
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "WETT_quality_control";
+
+    char WETT_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "wet_bulb_temperature status_flag";
+      :long_name = "quality flag for wet_bulb_temperature";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+    float WSPD(TIME=21);
+      :standard_name = "wind_speed";
+      :long_name = "wind_speed";
+      :units = "m s-1";
+      :_FillValue = -9999.0f; // float
+      :coordinates = "TIME LATITUDE LONGITUDE";
+      :ancillary_variables = "WSPD_quality_control";
+
+    char WSPD_quality_control(TIME=21);
+      :_FillValue = "";
+      :standard_name = "wind_speed status_flag";
+      :long_name = "quality flag for wind_speed";
+      :quality_control_set = 3.0; // double
+      :quality_control_conventions = "BOM (SST and Air-Sea flux) quality control procedure";
+      :flag_values = "B, C, D, E, F, G, H, J, K, L, M, Q, S, T, U, V, X, Z";
+      :flag_meaning = "Value_out_of_bounds Time_not_sequential Failed_T_Tw_Td_test Failed_true_wind_recomputation_test Platform_velocity_unrealistic Value_exceeds_threshold Discontinuity Erroneous_value Suspect_value_(visual) Value_located_over_land Instrument_malfunction Pre-flagged_as_suspect Spike_in_data_(visual) Time_duplicate Suspect_value_(statistical) Step_in_data_(statistical) Spike_in_data_(statistical) Value_passed_all_tests";
+
+  // global attributes:
+  :title = "Sea surface temperature and meteorological data";
+  :file_version = "Level 1 - Quality Controlled Data";
+  :file_version_quality_control = "Data in this file has been through the BOM quality control procedure (Reference Table F). Every data point in this file has an associated quality flag.";
+  :abstract = "";
+  :project = "Integrated Marine Observing System (IMOS)";
+  :Conventions = "CF-1.6,IMOS-1.3";
+  :institution = "Australian Bureau of Meteorology";
+  :standard_name_vocabulary = "CF-1.6";
+  :references = "http://www.imos.org.au";
+  :featureType = "trajectory";
+  :naming_authority = "IMOS";
+  :geospatial_lat_min = -41.2f; // float
+  :geospatial_lat_max = -37.8f; // float
+  :geospatial_lon_min = 144.7f; // float
+  :geospatial_lon_max = 146.4f; // float
+  :geospatial_vertical_min = 0; // int
+  :geospatial_vertical_max = 0; // int
+  :time_coverage_start = "2013-06-26T10:00:00Z";
+  :time_coverage_end = "2013-06-27T06:00:00Z";
+  :data_centre = "eMarine Information Infrastructure (eMII)";
+  :data_centre_email = "info@aodn.org.au";
+  :institution_references = "http://www.imos.org.au/emii.html";
+  :citation = "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-url], accessed [date-of-access]\"";
+  :acknowledgement = "Any users of IMOS data are required to clearly acknowledge the source of the material in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - an initiative of the Australian Government being conducted as part of the National Collaborative Research Infrastructure Strategy and and the Super Science Initiative.\"";
+  :distribution_statement = "Data may be re-used, provided that related metadata explaining the data has been reviewed by the user, and the data is appropriately acknowledged. Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.";
+  :project_acknowledgement = "The collection of this data was funded by IMOS";
+ data:
+TIME =
+  {23186.583333333332, 23186.625, 23186.666666666668, 23186.708333333332, 23186.75, 23186.791666666668, 23186.833333333332, 23186.875, 23186.916666666668, 23186.958333333332, 23187.0, 23187.041666666668, 23187.083333333332, 23187.125, 23187.166666666668, 23187.208333333332, 23187.25, 23187.291666666668, 23187.333333333332, 23187.375, 23187.416666666668}
+LATITUDE =
+  {-37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -37.79999923706055, -38.0, -38.29999923706055, -38.400001525878906, -38.79999923706055, -39.099998474121094, -39.5, -39.79999923706055, -40.20000076293945, -40.5, -40.900001525878906, -41.20000076293945}
+LATITUDE_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+LONGITUDE =
+  {144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.89999389648438, 144.6999969482422, 144.89999389648438, 145.10000610351562, 145.3000030517578, 145.60000610351562, 145.8000030517578, 146.0, 146.1999969482422, 146.39999389648438}
+LONGITUDE_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+AIRT =
+  {8.3, 10.7, 13.3, 12.0, 12.9, 12.6, 12.2, 12.8, 12.6, 13.3, 12.0, 11.3, 12.5, 12.5, 13.2, 12.8, 12.8, 13.3, 13.0, 13.1, 9.8}
+AIRT_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+ATMP =
+  {1024.0, 1024.1, 1023.5, 1022.7, 1021.7, 1021.2, 1021.0, 1021.3, 1021.3, 1021.8, 1022.3, 1022.0, 1021.7, 1021.4, 1021.0, 1021.2, 1020.6, 1020.5, 1020.6, 1020.2, 1021.9}
+ATMP_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+CNDC =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+CNDC_quality_control =  ""
+CNDC_2 =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+CNDC_2_quality_control =  ""
+CNDC_3 =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+CNDC_3_quality_control =  ""
+DEWT =
+  {4.5, 5.0, 5.9, 7.1, 8.2, 7.9, 8.4, 8.4, 9.1, 7.3, 8.3, 6.7, 7.6, 9.9, 10.4, 10.7, 10.6, 11.0, 11.6, 11.5, 8.1}
+DEWT_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+PL_CRS =
+  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 180.0, 180.0, 135.0, 135.0, 180.0, 135.0, 135.0, 135.0, 135.0, 135.0, 0.0}
+PL_CRS_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+PL_SPD =
+  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.26, 9.26, 11.832223, 11.832223, 11.832223, 11.832223, 11.832223, 11.832223, 11.832223, 11.832223, 0.0}
+PL_SPD_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+PL_WDIR =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+PL_WDIR_quality_control =  ""
+PL_WSPD =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+PL_WSPD_quality_control =  ""
+PSAL =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+PSAL_quality_control =  ""
+PSAL_2 =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+PSAL_2_quality_control =  ""
+PSAL_3 =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+PSAL_3_quality_control =  ""
+RELH =
+  {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0}
+RELH_quality_control =  ""
+TEMP_quality_control =  "QQQQQQQQQQZZZZZZZZZZQ"
+TEMP_2 =
+  {999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0}
+TEMP_2_quality_control =  ""
+TEMP_3 =
+  {999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0, 999999.0}
+TEMP_3_quality_control =  ""
+WDIR =
+  {30.0, 360.0, 20.0, 180.0, 190.0, 180.0, 180.0, 170.0, 160.0, 90.0, 120.0, 150.0, 120.0, 70.0, 40.0, 350.0, 40.0, 90.0, 80.0, 100.0, 170.0}
+WDIR_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+WETT =
+  {6.4, 7.9, 9.5, 9.4, 10.4, 10.1, 10.2, 10.5, 10.6, 10.1, 10.0, 8.9, 9.9, 11.1, 11.6, 11.6, 11.5, 12.0, 12.2, 12.1, 8.9}
+WETT_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+WSPD =
+  {2.057778, 2.057778, 1.5433334, 2.057778, 3.6011114, 4.63, 5.1444445, 5.1444445, 3.6011114, 2.057778, 3.0866668, 4.63, 3.6011114, 4.115556, 3.6011114, 4.115556, 2.057778, 1.5433334, 2.057778, 8.745556, 3.0866668}
+WSPD_quality_control =  "ZZZZZZZZZZZZZZZZZZZZZ"
+}
