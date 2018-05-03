@@ -4,6 +4,7 @@ import au.org.emii.aggregator.dataset.AbstractNetcdfDataset;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
 import au.org.emii.aggregator.variable.NetcdfVariable;
+import au.org.emii.aggregator.variable.Bounds;
 import au.org.emii.aggregator.datatype.NumericTypes;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
@@ -158,9 +159,15 @@ public class TemplateDataset extends AbstractNetcdfDataset {
             result.put("TIME_END", timeRange.getEnd().toString());
         }
 
-        if (verticalRange != null) {
-            result.put("Z_MIN", Integer.toString(verticalRange.first()));
-            result.put("Z_MAX", Integer.toString(verticalRange.last()));
+        if (dataset.hasVerticalAxis()) {
+            if (verticalRange != null) {
+                result.put("Z_MIN", Integer.toString(verticalRange.first()));
+                result.put("Z_MAX", Integer.toString(verticalRange.last()));
+            } else {
+                Bounds verticalBounds = dataset.getVerticalAxis().getBounds();
+                result.put("Z_MIN", Integer.toString((int)verticalBounds.getMin()));
+                result.put("Z_MAX", Integer.toString((int)verticalBounds.getMax()));
+            }
         }
 
         CalendarDate aggregationTime = CalendarDate.of(new Date()).truncate(Field.Minute); // ignore seconds/milliseconds
