@@ -46,7 +46,7 @@ public class SubsetParameters {
         Map<String, ParameterRange> subsets = new HashMap<>();
         String latLonErrorMsg = String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
         String timeErrorMsg = String.format("Invalid time format for subset: %s Valid time format example: DEPTH,0.0,100.0", subset);
-        String verticalSubsetErrorMsg = String.format("Invalid vertical subset format for subset: %s Valid vertical format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z", subset);
+        String verticalSubsetErrorMsg = String.format("Invalid vertical subset format for subset: %s Valid vertical format example: DEPTH,43.567,100.0", subset);
         String subsetErrorMsg = String.format("Invalid format for subset: %s Valid format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
 
         // Parse
