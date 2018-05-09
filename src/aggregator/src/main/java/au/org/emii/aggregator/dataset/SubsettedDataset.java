@@ -59,6 +59,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
             }
 
             try {
+                // todo check this :/
                 Range indexedSubset = new Range(startIndex, endIndex);
                 subsettedDimensions.put(verticalAxis.getDimensions().get(0).getShortName(), indexedSubset);
             } catch (InvalidRangeException e) {
