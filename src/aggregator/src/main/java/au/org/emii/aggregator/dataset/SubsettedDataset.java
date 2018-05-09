@@ -4,25 +4,23 @@ import au.org.emii.aggregator.coordsystem.LatLonCoords;
 import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.coordsystem.XYRanges;
 import au.org.emii.aggregator.exception.AggregationException;
-import au.org.emii.aggregator.variable.AbstractVariable.*;
+import au.org.emii.aggregator.variable.AbstractVariable.NumericValue;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.SubsettedVariable;
-import ucar.ma2.Array;
+import au.org.emii.util.ParameterRange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * Subsetted dataset
@@ -33,7 +31,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
     private final List<NetcdfVariable> variables;
     private static final Logger logger = LoggerFactory.getLogger(SubsettedDataset.class);
 
-    public SubsettedDataset(NetcdfDatasetIF dataset, CalendarDateRange timeRange, Range verticalSubset,
+    public SubsettedDataset(NetcdfDatasetIF dataset, CalendarDateRange timeRange, ParameterRange verticalSubset,
                             LatLonRect bbox) throws AggregationException {
         // just copy global attributes
 
@@ -55,8 +53,8 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
             NetcdfVariable verticalAxis = dataset.getVerticalAxis();
             int startIndex = 0, endIndex = 0, i = 0;
             for (NumericValue value: verticalAxis.getNumericValues()) {
-                if (value.getValue().intValue() == verticalSubset.first()) { startIndex = i; }
-                if (value.getValue().intValue() == verticalSubset.last()) { endIndex = i; }
+                if (value.getValue().toString().equals(verticalSubset.start)) { startIndex = i; }
+                if (value.getValue().toString().equals(verticalSubset.end)) { endIndex = i; }
                 i++;
             }
 

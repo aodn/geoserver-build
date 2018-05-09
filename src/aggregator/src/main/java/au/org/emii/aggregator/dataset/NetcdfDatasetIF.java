@@ -4,7 +4,7 @@ import au.org.emii.aggregator.coordsystem.LatLonCoords;
 import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.NetcdfVariable;
-import ucar.ma2.Range;
+import au.org.emii.util.ParameterRange;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.time.CalendarDateRange;
@@ -36,7 +36,7 @@ public interface NetcdfDatasetIF {
 
     LatLonCoords getLatLonCoords();
 
-    NetcdfDatasetIF subset(CalendarDateRange timeRange, Range verticalSubset,
+    NetcdfDatasetIF subset(CalendarDateRange timeRange, ParameterRange verticalSubset,
                            LatLonRect bbox) throws AggregationException;
 
     boolean hasRecordVariables();

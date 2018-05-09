@@ -1,8 +1,7 @@
 package au.org.emii.wps.gogoduck.parameter;
 
+import au.org.emii.util.ParameterRange;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
-import ucar.ma2.InvalidRangeException;
-import ucar.ma2.Range;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonPointImpl;
@@ -18,9 +17,9 @@ public class SubsetParameters {
     public static final String DEPTH = "DEPTH";
     private final LatLonRect bbox;
     private final CalendarDateRange timeRange;
-    private final Range verticalRange;
+    private final ParameterRange verticalRange;
 
-    public SubsetParameters(LatLonRect bbox, CalendarDateRange timeRange, Range verticalRange) {
+    public SubsetParameters(LatLonRect bbox, CalendarDateRange timeRange, ParameterRange verticalRange) {
         this.bbox = bbox;
         this.timeRange = timeRange;
         this.verticalRange = verticalRange;
@@ -38,13 +37,12 @@ public class SubsetParameters {
         return timeRange;
     }
 
-    public Range getVerticalRange() { return verticalRange; }
+    public ParameterRange getVerticalRange() { return verticalRange; }
 
     public static SubsetParameters parse(String subset) {
 
         Double latMin, latMax, lonMin, lonMax;
-        Double verticalMin, verticalMax;
-        Range depthRange = null;
+        ParameterRange depthRange = null;
         Map<String, ParameterRange> subsets = new HashMap<>();
         String latLonErrorMsg = String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
         String timeErrorMsg = String.format("Invalid time format for subset: %s Valid time format example: DEPTH,0.0,100.0", subset);
@@ -104,26 +102,14 @@ public class SubsetParameters {
 
         try {
             if (verticalRange != null) {
-                verticalMax = Double.parseDouble(verticalRange.end);
-                verticalMin = Double.parseDouble(verticalRange.start);
-                depthRange = new Range(verticalMin.intValue(), verticalMax.intValue());
+                Double.parseDouble(verticalRange.end);
+                Double.parseDouble(verticalRange.start);
+                depthRange = verticalRange;
             }
         } catch (NumberFormatException e) {
-            throw new GoGoDuckException(String.format("%s error: '%s'", verticalSubsetErrorMsg, e));
-        } catch (InvalidRangeException e) {
             throw new GoGoDuckException(String.format("%s error: '%s'", verticalSubsetErrorMsg, e));
         }
 
         return new SubsetParameters(bbox, calendarDateRange, depthRange);
-    }
-
-    private static class ParameterRange {
-        String start;
-        String end;
-
-        ParameterRange(String start, String end) {
-            this.start = start;
-            this.end = end;
-        }
     }
 }
