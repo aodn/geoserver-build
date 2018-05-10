@@ -7,7 +7,7 @@ import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.AbstractVariable.NumericValue;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.SubsettedVariable;
-import au.org.emii.util.ParameterRange;
+import au.org.emii.util.DoubleRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.InvalidRangeException;
@@ -31,7 +31,7 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
     private final List<NetcdfVariable> variables;
     private static final Logger logger = LoggerFactory.getLogger(SubsettedDataset.class);
 
-    public SubsettedDataset(NetcdfDatasetIF dataset, CalendarDateRange timeRange, ParameterRange verticalSubset,
+    public SubsettedDataset(NetcdfDatasetIF dataset, CalendarDateRange timeRange, DoubleRange verticalSubset,
                             LatLonRect bbox) throws AggregationException {
         // just copy global attributes
 
@@ -53,13 +53,12 @@ public class SubsettedDataset extends AbstractNetcdfDataset {
             NetcdfVariable verticalAxis = dataset.getVerticalAxis();
             int startIndex = 0, endIndex = 0, i = 0;
             for (NumericValue value: verticalAxis.getNumericValues()) {
-                if (value.getValue().toString().equals(verticalSubset.start)) { startIndex = i; }
-                if (value.getValue().toString().equals(verticalSubset.end)) { endIndex = i; }
+                if (value.getValue().doubleValue() == verticalSubset.start) { startIndex = i; }
+                if (value.getValue().doubleValue() == verticalSubset.end) { endIndex = i; }
                 i++;
             }
 
             try {
-                // todo check this :/
                 Range indexedSubset = new Range(startIndex, endIndex);
                 subsettedDimensions.put(verticalAxis.getDimensions().get(0).getShortName(), indexedSubset);
             } catch (InvalidRangeException e) {

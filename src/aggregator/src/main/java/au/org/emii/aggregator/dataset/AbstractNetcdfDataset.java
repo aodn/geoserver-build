@@ -5,7 +5,7 @@ import au.org.emii.aggregator.coordsystem.TimeAxis;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.variable.Bounds;
 import au.org.emii.aggregator.variable.NetcdfVariable;
-import au.org.emii.util.ParameterRange;
+import au.org.emii.util.DoubleRange;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonPointImpl;
@@ -71,7 +71,7 @@ public abstract class AbstractNetcdfDataset implements NetcdfDatasetIF {
     }
 
     @Override
-    public SubsettedDataset subset(CalendarDateRange timeRange, ParameterRange verticalSubset,
+    public SubsettedDataset subset(CalendarDateRange timeRange, DoubleRange verticalSubset,
                                          LatLonRect bbox) throws AggregationException {
         return new SubsettedDataset(this, timeRange, verticalSubset, bbox);
     }

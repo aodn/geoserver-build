@@ -12,7 +12,7 @@ import au.org.emii.aggregator.template.TemplateDataset;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.UnpackerOverrides;
 import au.org.emii.aggregator.variable.UnpackerOverrides.Builder;
-import au.org.emii.util.ParameterRange;
+import au.org.emii.util.DoubleRange;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -61,7 +61,7 @@ public class NetcdfAggregator implements AutoCloseable {
     private final Path outputPath;
     private final AggregationOverrides aggregationOverrides;
     private final LatLonRect bbox;
-    private final ParameterRange verticalSubset;
+    private final DoubleRange verticalSubset;
     private final CalendarDateRange dateRange;
     private final long maxChunkSize;
 
@@ -73,7 +73,7 @@ public class NetcdfAggregator implements AutoCloseable {
     private int slicesWritten = 0;
 
     public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides, Long maxChunkSize,
-                            LatLonRect bbox, ParameterRange verticalSubset, CalendarDateRange dateRange
+                            LatLonRect bbox, DoubleRange verticalSubset, CalendarDateRange dateRange
     ) {
         assertOutputPathValid(outputPath);
 
@@ -345,11 +345,11 @@ public class NetcdfAggregator implements AutoCloseable {
             bbox = new LatLonRect(lowerLeft, upperRight);
         }
 
-        ParameterRange zSubset = null;
+        DoubleRange zSubset = null;
 
         if (zSubsetArg != null) {
             String[] zSubsetIndexes = zSubsetArg.split(",");
-            zSubset = new ParameterRange(zSubsetIndexes[0], zSubsetIndexes[1]);
+            zSubset = new DoubleRange(zSubsetIndexes[0], zSubsetIndexes[1]);
         }
 
         CalendarDateRange timeRange = null;

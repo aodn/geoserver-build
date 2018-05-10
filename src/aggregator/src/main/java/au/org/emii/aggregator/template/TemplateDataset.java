@@ -1,6 +1,6 @@
 package au.org.emii.aggregator.template;
 
-import au.org.emii.util.ParameterRange;
+import au.org.emii.util.DoubleRange;
 import au.org.emii.aggregator.dataset.AbstractNetcdfDataset;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
@@ -36,7 +36,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     private final List<NetcdfVariable> variables;
 
     public TemplateDataset(NetcdfDatasetIF dataset, AggregationOverrides aggregationOverrides,
-                           CalendarDateRange timeRange, ParameterRange verticalSubset, LatLonRect bbox) {
+                           CalendarDateRange timeRange, DoubleRange verticalSubset, LatLonRect bbox) {
 
         this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributeOverrides(), timeRange, verticalSubset);
 
@@ -93,7 +93,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     }
 
     private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, GlobalAttributeOverrides attributeOverrides,
-                                                CalendarDateRange timeRange, ParameterRange verticalSubset) {
+                                                CalendarDateRange timeRange, DoubleRange verticalSubset) {
         // Copy existing attributes
 
         Map<String, Attribute> result = new LinkedHashMap<>();
@@ -144,7 +144,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return new ArrayList<>(result.values());
     }
 
-    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange, ParameterRange verticalRange) {
+    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange, DoubleRange verticalRange) {
         Map<String, String> result = new LinkedHashMap<>();
 
         LatLonRect newBbox = dataset.getBbox();
@@ -161,12 +161,12 @@ public class TemplateDataset extends AbstractNetcdfDataset {
 
         if (dataset.hasVerticalAxis()) {
             if (verticalRange != null) {
-                result.put("Z_MIN", verticalRange.start);
-                result.put("Z_MAX", verticalRange.end);
+                result.put("Z_MIN", verticalRange.start.toString());
+                result.put("Z_MAX", verticalRange.end.toString());
             } else {
                 Bounds verticalBounds = dataset.getVerticalAxis().getBounds();
-                result.put("Z_MIN", Integer.toString((int)verticalBounds.getMin()));
-                result.put("Z_MAX", Integer.toString((int)verticalBounds.getMax()));
+                result.put("Z_MIN", Double.toString(verticalBounds.getMin()));
+                result.put("Z_MAX", Double.toString(verticalBounds.getMax()));
             }
         }
 
