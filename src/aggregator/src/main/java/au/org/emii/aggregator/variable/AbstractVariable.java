@@ -99,7 +99,11 @@ public abstract class AbstractVariable implements NetcdfVariable {
         return new Iterable<NumericValue>() {
             @Override
             public Iterator<NumericValue> iterator() {
-                return new NumericValueIterator(AbstractVariable.this);
+                if (AbstractVariable.this.getRank() > 0) {
+                    return new NumericArrayIterator(AbstractVariable.this);
+                } else {
+                    return new NumericValueIterator(AbstractVariable.this);
+                }
             }
         };
     }
@@ -132,7 +136,7 @@ public abstract class AbstractVariable implements NetcdfVariable {
     }
 
 
-    private class NumericValueIterator implements Iterator<NumericValue> {
+    private class NumericArrayIterator implements Iterator<NumericValue> {
 
         private final NetcdfVariable variable;
         private final IndexChunkIterator variableIndex;
@@ -141,7 +145,7 @@ public abstract class AbstractVariable implements NetcdfVariable {
         private Index chunkIndex;
         private IndexChunk currentChunk;
 
-        NumericValueIterator(NetcdfVariable variable) {
+        NumericArrayIterator(NetcdfVariable variable) {
             this.variable = variable;
             long maxChunkElems = variable.getMaxChunkSize() / variable.getDataType().getSize();
             variableIndex = new IndexChunkIterator(variable.getShape(), maxChunkElems);
@@ -198,6 +202,40 @@ public abstract class AbstractVariable implements NetcdfVariable {
 
     }
 
+    private class NumericValueIterator implements Iterator<NumericValue> {
+        private Number value;
+        private int index = -1;
+
+        public NumericValueIterator(NetcdfVariable netcdfVariable) {
+            try {
+                Array result = netcdfVariable.read();
+                value = (Number) result.getObject(0);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index == -1;
+        }
+
+        @Override
+        public NumericValue next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            return new NumericValue(new int[] {index++}, value);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Read only iterator");
+        }
+
+    }
+
     public class NumericValue {
         private int[] index;
         private Number value;
@@ -215,4 +253,5 @@ public abstract class AbstractVariable implements NetcdfVariable {
             return value;
         }
     }
+
 }
