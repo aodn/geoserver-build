@@ -23,6 +23,7 @@ import ucar.unidata.geoloc.LatLonRect;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * NetcdfAggregator tests for different types of collections
@@ -135,6 +136,21 @@ public class NetcdfAggregatorTest {
         }
 
         assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/point-subset-outside.nc"), outputFile);
+    }
+
+    @Test
+    public void testNonArrayDepthVariable() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-20.0, 113.0), new LatLonPointImmutable(-20.0, 113.0));
+        AggregationOverrides overrides = AggregationOverridesReader.load(
+            resourcePath("au/org/emii/aggregator/non-array-depth.xml"));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            outputFile, overrides, null, bbox, null, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/non-array-depth-variable.nc"));
+        }
+
+        assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/non-array-depth-expected.cdl"), outputFile);
     }
 
     @Test
