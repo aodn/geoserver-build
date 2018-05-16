@@ -2,6 +2,7 @@ package au.org.emii.aggregator.variable;
 
 import au.org.emii.aggregator.index.IndexChunkIterator;
 import au.org.emii.aggregator.index.IndexChunk;
+import au.org.emii.util.NumberRange;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -19,7 +20,7 @@ import java.util.NoSuchElementException;
 public abstract class AbstractVariable implements NetcdfVariable {
     final long maxChunkSize;
 
-    private Bounds bounds;
+    private NumberRange bounds;
 
     protected AbstractVariable() {
         this.maxChunkSize = DEFAULT_MAX_CHUNK_SIZE;
@@ -108,9 +109,8 @@ public abstract class AbstractVariable implements NetcdfVariable {
         };
     }
 
-
     @Override
-    public Bounds getBounds() {
+    public NumberRange getBounds() {
         if (bounds == null) {
             bounds = calculateBounds();
         }
@@ -123,18 +123,16 @@ public abstract class AbstractVariable implements NetcdfVariable {
         return maxChunkSize;
     }
 
-    private Bounds calculateBounds() {
-        double min = Double.MAX_VALUE;
-        double max = Double.MAX_VALUE * -1;
+    private NumberRange calculateBounds() {
+        Number min = null;
+        Number max = null;
 
         for (NumericValue value: getNumericValues()) {
-            if (value.getValue().doubleValue() < min) min = value.getValue().doubleValue();
-            if (value.getValue().doubleValue() > max) max = value.getValue().doubleValue();
+            if (min == null || value.getValue().doubleValue() < min.doubleValue()) min = value.getValue();
+            if (max == null || value.getValue().doubleValue() > max.doubleValue()) max = value.getValue();
         }
-
-        return new Bounds(min, max);
+        return new NumberRange(min, max);
     }
-
 
     private class NumericArrayIterator implements Iterator<NumericValue> {
 

@@ -1,6 +1,6 @@
 package au.org.emii.wps.gogoduck.parameter;
 
-import au.org.emii.util.DoubleRange;
+import au.org.emii.util.NumberRange;
 import au.org.emii.wps.gogoduck.exception.GoGoDuckException;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
@@ -17,9 +17,9 @@ public class SubsetParameters {
     public static final String DEPTH = "DEPTH";
     private final LatLonRect bbox;
     private final CalendarDateRange timeRange;
-    private final DoubleRange verticalRange;
+    private final NumberRange verticalRange;
 
-    public SubsetParameters(LatLonRect bbox, CalendarDateRange timeRange, DoubleRange verticalRange) {
+    public SubsetParameters(LatLonRect bbox, CalendarDateRange timeRange, NumberRange verticalRange) {
         this.bbox = bbox;
         this.timeRange = timeRange;
         this.verticalRange = verticalRange;
@@ -37,13 +37,13 @@ public class SubsetParameters {
         return timeRange;
     }
 
-    public DoubleRange getVerticalRange() { return verticalRange; }
+    public NumberRange getVerticalRange() { return verticalRange; }
 
     public static SubsetParameters parse(String subset) {
 
         Double latMin, latMax, lonMin, lonMax;
         Double verticalMin, verticalMax;
-        DoubleRange depthRange = null;
+        NumberRange depthRange = null;
         Map<String, ParameterRange> subsets = new HashMap<>();
         String latLonErrorMsg = String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);
         String timeErrorMsg = String.format("Invalid time format for subset: %s Valid time format example: TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;DEPTH,0.0,100.0", subset);
@@ -102,7 +102,7 @@ public class SubsetParameters {
         ParameterRange verticalRange = subsets.get(DEPTH);
         try {
             if (verticalRange != null) {
-                depthRange = new DoubleRange(verticalRange.start, verticalRange.end);
+                depthRange = new NumberRange(verticalRange.start, verticalRange.end);
             }
         } catch (NumberFormatException e) {
             throw new GoGoDuckException(String.format("%s error: '%s'", verticalSubsetErrorMsg, e));

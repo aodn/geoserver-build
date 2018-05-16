@@ -1,9 +1,5 @@
 package au.org.emii.aggregator;
 
-import static au.org.emii.test.util.Assert.assertNetcdfFileEqualsCdl;
-import static au.org.emii.test.util.Resource.resourcePath;
-import static au.org.emii.test.util.Assert.assertNetcdfFilesEqual;
-
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
 import au.org.emii.aggregator.overrides.xstream.AggregationOverridesReader;
@@ -23,7 +19,10 @@ import ucar.unidata.geoloc.LatLonRect;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import static au.org.emii.test.util.Assert.assertNetcdfFileEqualsCdl;
+import static au.org.emii.test.util.Assert.assertNetcdfFilesEqual;
+import static au.org.emii.test.util.Resource.resourcePath;
 
 /**
  * NetcdfAggregator tests for different types of collections
@@ -144,7 +143,7 @@ public class NetcdfAggregatorTest {
         AggregationOverrides overrides = AggregationOverridesReader.load(
             resourcePath("au/org/emii/aggregator/non-array-depth.xml"));
 
-        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+            try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
             outputFile, overrides, null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/non-array-depth-variable.nc"));
