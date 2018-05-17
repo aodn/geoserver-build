@@ -42,7 +42,6 @@ public class SubsetParameters {
     public static SubsetParameters parse(String subset) {
 
         Double latMin, latMax, lonMin, lonMax;
-        Double verticalMin, verticalMax;
         NumberRange depthRange = null;
         Map<String, ParameterRange> subsets = new HashMap<>();
         String latLonErrorMsg = String.format("Invalid latitude/longitude format for subset: %s Valid latitude/longitude format example: LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219", subset);

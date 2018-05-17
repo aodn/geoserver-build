@@ -81,7 +81,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-30.68, 97.82), new LatLonPointImmutable(-30.64, 97.86));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-2.nc"));
@@ -90,7 +90,8 @@ public class NetcdfAggregatorTest {
         if (libraryVersion.startsWith("4.1.3")) {
             // sses_standard_deviation attribute ordering slightly different with this version - result is still OK.
             assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/unpack-expected-4.1.3.nc"), outputFile);
-        } else {
+        }
+        else {
             assertNetcdfFilesEqual(resourcePath("au/org/emii/aggregator/unpack-expected.nc"), outputFile);
         }
     }
@@ -100,7 +101,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-20.0, 113.9), new LatLonPointImmutable(-18.0, 114.9));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-2.nc"));
@@ -114,7 +115,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-32.8, 114.0), new LatLonPointImmutable(-32.8, 114.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-2.nc"));
@@ -128,7 +129,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-20.0, 113.0), new LatLonPointImmutable(-20.0, 113.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/acorn-2.nc"));
@@ -141,10 +142,10 @@ public class NetcdfAggregatorTest {
     public void testNonArrayDepthVariable() throws IOException, AggregationException {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-20.0, 113.0), new LatLonPointImmutable(-20.0, 113.0));
         AggregationOverrides overrides = AggregationOverridesReader.load(
-            resourcePath("au/org/emii/aggregator/non-array-depth.xml"));
+                resourcePath("au/org/emii/aggregator/non-array-depth.xml"));
 
-            try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, overrides, null, bbox, null, null
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+                outputFile, overrides, null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/non-array-depth-variable.nc"));
         }
@@ -155,10 +156,10 @@ public class NetcdfAggregatorTest {
     @Test
     public void testTemporalSubset() throws IOException, AggregationException {
         CalendarDateRange dateRange = CalendarDateRange.of(
-            CalendarDate.parseISOformat("gregorian", "2009-05-07"), CalendarDate.parseISOformat("gregorian", "2009-05-22"));
+                CalendarDate.parseISOformat("gregorian", "2009-05-07"), CalendarDate.parseISOformat("gregorian", "2009-05-22"));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, null, null, dateRange
+                outputFile, new AggregationOverrides(), null, null, null, dateRange
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/cars.nc"));
         }
@@ -171,7 +172,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-31.0, 113.0), new LatLonPointImmutable(-30.0, 114.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-2.nc"));
@@ -185,7 +186,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-31.0, 113.0), new LatLonPointImmutable(-31.0, 113.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-2.nc"));
@@ -199,7 +200,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-10.0, 114.0), new LatLonPointImmutable(-10.0, 114.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-2.nc"));
@@ -213,7 +214,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-10.0, 114.0), new LatLonPointImmutable(-12.0, 114.0));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/projection-2.nc"));
@@ -226,12 +227,12 @@ public class NetcdfAggregatorTest {
     public void testAggregationOverrides() throws IOException, AggregationException {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-30.68, 97.82), new LatLonPointImmutable(-30.64, 97.86));
         CalendarDateRange timeRange = CalendarDateRange.of(CalendarDate.parseISOformat("gregorian", "2017-02-01T03:19:60"),
-            CalendarDate.parseISOformat("gregorian", "2017-02-02T03:19:60"));
+                CalendarDate.parseISOformat("gregorian", "2017-02-02T03:19:60"));
         AggregationOverrides overrides = AggregationOverridesReader.load(
-            resourcePath("au/org/emii/aggregator/template.xml"));
+                resourcePath("au/org/emii/aggregator/template.xml"));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, overrides, null, bbox, null, timeRange
+                outputFile, overrides, null, bbox, null, timeRange
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-2.nc"));
@@ -245,7 +246,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-41.5, 83.7), new LatLonPointImmutable(-41.1, 84.1));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/gsla0.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/gsla1.nc"));
@@ -257,7 +258,7 @@ public class NetcdfAggregatorTest {
     @Test
     public void testSrsOcJohnson() throws IOException, AggregationException {
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, null, null, null
+                outputFile, new AggregationOverrides(), null, null, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-oc-1.nc"));
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/srs-oc-2.nc"));
@@ -271,7 +272,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-90.0, 179.5), new LatLonPointImmutable(90, -179.5));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/cars-monthly.nc"));
         }
@@ -284,7 +285,7 @@ public class NetcdfAggregatorTest {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-90.0, -125.862299280124), new LatLonPointImmutable(90, -125.862292710516));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-            outputFile, new AggregationOverrides(), null, bbox, null, null
+                outputFile, new AggregationOverrides(), null, bbox, null, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/bathymetry.nc"));
         }
