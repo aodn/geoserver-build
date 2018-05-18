@@ -1,17 +1,18 @@
 package au.org.emii.aggregator;
 
-import au.org.emii.aggregator.index.IndexChunkIterator;
 import au.org.emii.aggregator.dataset.NetcdfDatasetAdapter;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.index.IndexChunk;
+import au.org.emii.aggregator.index.IndexChunkIterator;
+import au.org.emii.aggregator.overrides.AggregationOverrides;
+import au.org.emii.aggregator.overrides.VariableOverrides;
 import au.org.emii.aggregator.overrides.xstream.AggregationOverridesReader;
 import au.org.emii.aggregator.template.TemplateDataset;
 import au.org.emii.aggregator.variable.NetcdfVariable;
 import au.org.emii.aggregator.variable.UnpackerOverrides;
 import au.org.emii.aggregator.variable.UnpackerOverrides.Builder;
-import au.org.emii.aggregator.overrides.AggregationOverrides;
-import au.org.emii.aggregator.overrides.VariableOverrides;
+import au.org.emii.util.NumberRange;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
-import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
@@ -61,7 +61,7 @@ public class NetcdfAggregator implements AutoCloseable {
     private final Path outputPath;
     private final AggregationOverrides aggregationOverrides;
     private final LatLonRect bbox;
-    private final Range verticalSubset;
+    private final NumberRange verticalSubset;
     private final CalendarDateRange dateRange;
     private final long maxChunkSize;
 
@@ -73,7 +73,7 @@ public class NetcdfAggregator implements AutoCloseable {
     private int slicesWritten = 0;
 
     public NetcdfAggregator(Path outputPath, AggregationOverrides aggregationOverrides, Long maxChunkSize,
-                            LatLonRect bbox, Range verticalSubset, CalendarDateRange dateRange
+                            LatLonRect bbox, NumberRange verticalSubset, CalendarDateRange dateRange
     ) {
         assertOutputPathValid(outputPath);
 
@@ -345,13 +345,11 @@ public class NetcdfAggregator implements AutoCloseable {
             bbox = new LatLonRect(lowerLeft, upperRight);
         }
 
-        Range zSubset = null;
+        NumberRange zSubset = null;
 
         if (zSubsetArg != null) {
             String[] zSubsetIndexes = zSubsetArg.split(",");
-            int startIndex = Integer.parseInt(zSubsetIndexes[0]);
-            int endIndex = Integer.parseInt(zSubsetIndexes[1]);
-            zSubset = new Range(startIndex, endIndex);
+            zSubset = new NumberRange(zSubsetIndexes[0], zSubsetIndexes[1]);
         }
 
         CalendarDateRange timeRange = null;

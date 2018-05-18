@@ -1,6 +1,7 @@
 package au.org.emii.aggregator.variable;
 
 import au.org.emii.aggregator.variable.AbstractVariable.NumericValue;
+import au.org.emii.util.NumberRange;
 import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -43,10 +44,10 @@ public class AbstractVariableTest {
 
         NetcdfVariable testVariable = new TestVariable("test", new String[] {"lat"}, data, 16L);
 
-        Bounds bounds = testVariable.getBounds();
+        NumberRange bounds = testVariable.getBounds();
 
-        assertEquals(-1.0, bounds.getMin(), Double.MIN_VALUE);
-        assertEquals(5.0, bounds.getMax(), Double.MIN_VALUE);
+        assertEquals(-1.0, bounds.getMin().doubleValue(), Double.MIN_VALUE);
+        assertEquals(5.0, bounds.getMax().doubleValue(), Double.MIN_VALUE);
     }
 
     @Test
@@ -57,10 +58,10 @@ public class AbstractVariableTest {
 
         NetcdfVariable testVariable = new TestVariable("test", new String[] {"i", "j"}, data, 16L);
 
-        Bounds bounds = testVariable.getBounds();
+        NumberRange bounds = testVariable.getBounds();
 
-        assertEquals(-1.0, bounds.getMin(), Double.MIN_VALUE);
-        assertEquals(5.0, bounds.getMax(), Double.MIN_VALUE);
+        assertEquals(-1.0, bounds.getMin().doubleValue(), Double.MIN_VALUE);
+        assertEquals(5.0, bounds.getMax().doubleValue(), Double.MIN_VALUE);
     }
 
 }

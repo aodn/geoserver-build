@@ -2,15 +2,14 @@ package au.org.emii.aggregator.template;
 
 import au.org.emii.aggregator.dataset.AbstractNetcdfDataset;
 import au.org.emii.aggregator.dataset.NetcdfDatasetIF;
+import au.org.emii.aggregator.datatype.NumericTypes;
+import au.org.emii.aggregator.overrides.AggregationOverrides;
+import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
 import au.org.emii.aggregator.overrides.GlobalAttributeOverrides;
 import au.org.emii.aggregator.variable.NetcdfVariable;
-import au.org.emii.aggregator.variable.Bounds;
-import au.org.emii.aggregator.datatype.NumericTypes;
-import au.org.emii.aggregator.overrides.GlobalAttributeOverride;
-import au.org.emii.aggregator.overrides.AggregationOverrides;
+import au.org.emii.util.NumberRange;
 import org.apache.commons.lang.text.StrSubstitutor;
 import ucar.ma2.DataType;
-import ucar.ma2.Range;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.time.CalendarDate;
@@ -36,7 +35,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     private final List<NetcdfVariable> variables;
 
     public TemplateDataset(NetcdfDatasetIF dataset, AggregationOverrides aggregationOverrides,
-                           CalendarDateRange timeRange, Range verticalSubset, LatLonRect bbox) {
+                           CalendarDateRange timeRange, NumberRange verticalSubset, LatLonRect bbox) {
 
         this.globalAttributes = getGlobalAttributes(dataset, aggregationOverrides.getAttributeOverrides(), timeRange, verticalSubset);
 
@@ -93,7 +92,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
     }
 
     private List<Attribute> getGlobalAttributes(NetcdfDatasetIF dataset, GlobalAttributeOverrides attributeOverrides,
-                                                CalendarDateRange timeRange, Range verticalSubset) {
+                                                CalendarDateRange timeRange, NumberRange verticalSubset) {
         // Copy existing attributes
 
         Map<String, Attribute> result = new LinkedHashMap<>();
@@ -144,7 +143,7 @@ public class TemplateDataset extends AbstractNetcdfDataset {
         return new ArrayList<>(result.values());
     }
 
-    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange, Range verticalRange) {
+    private Map<String, String> getSubstitutionValues(NetcdfDatasetIF dataset, CalendarDateRange timeRange, NumberRange verticalRange) {
         Map<String, String> result = new LinkedHashMap<>();
 
         LatLonRect newBbox = dataset.getBbox();
@@ -161,12 +160,12 @@ public class TemplateDataset extends AbstractNetcdfDataset {
 
         if (dataset.hasVerticalAxis()) {
             if (verticalRange != null) {
-                result.put("Z_MIN", Integer.toString(verticalRange.first()));
-                result.put("Z_MAX", Integer.toString(verticalRange.last()));
+                result.put("Z_MIN", verticalRange.getMin().toString());
+                result.put("Z_MAX", verticalRange.getMax().toString());
             } else {
-                Bounds verticalBounds = dataset.getVerticalAxis().getBounds();
-                result.put("Z_MIN", Integer.toString((int)verticalBounds.getMin()));
-                result.put("Z_MAX", Integer.toString((int)verticalBounds.getMax()));
+                NumberRange verticalBounds = dataset.getVerticalAxis().getBounds();
+                result.put("Z_MIN", verticalBounds.getMin().toString());
+                result.put("Z_MAX", verticalBounds.getMax().toString());
             }
         }
 

@@ -1,6 +1,7 @@
 package au.org.emii.aggregator.variable;
 
 import au.org.emii.aggregator.variable.AbstractVariable.NumericValue;
+import au.org.emii.util.NumberRange;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -39,7 +40,7 @@ public interface NetcdfVariable {
 
     Iterable<NumericValue> getNumericValues();
 
-    Bounds getBounds();
+    NumberRange getBounds();
 
     long getMaxChunkSize();
 }

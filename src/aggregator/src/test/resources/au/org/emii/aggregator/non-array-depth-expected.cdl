@@ -97,8 +97,8 @@ netcdf {
   :geospatial_lat_min = -24.989999771118164; // double
   :geospatial_lon_max = 109.66999816894531; // double
   :geospatial_lon_min = 109.61000061035156; // double
-  :geospatial_vertical_max = "0";
-  :geospatial_vertical_min = "0";
+  :geospatial_vertical_max = "0.2";
+  :geospatial_vertical_min = "0.2";
   :institution = "AODN";
   :institution_references = "http://www.imos.org.au/aodn.html";
   :keywords = "SSTAARS, Climatology, sea surface temperature, seasonal cycle, boundary currents, tidal mixing, warming trends, satellite observations, TEMP, TEMP_std_err, TEMP_mean, TEMP_mean_std_err, TEMP_trend, TEMP_trend_std_err";
