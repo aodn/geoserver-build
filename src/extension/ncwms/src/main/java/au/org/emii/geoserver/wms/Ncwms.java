@@ -99,48 +99,54 @@ public class Ncwms {
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
+        if(wmsUrlStr != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, String[]> wmsParameters = new HashMap<String, String[]>(request.getParameterMap());
 
-            // Some collections such as SRS are indexed with a timestamp which doesn't match
-            // the timestamp thredds calculates but only have one timestamp per file meaning its
-            // not actually required
-            // For the moment just don't include the time parameter for these collections
-            if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
-                wmsParameters.remove("TIME");
-            }
-
-            wmsParameters.put(layerParameter, new String[] { layerDescriptor.getNetCDFVariableName() });
-
-            // Needed for GetFeatureInfo
-            if (wmsParameters.containsKey("QUERY_LAYERS")) {
-                wmsParameters.put("QUERY_LAYERS", new String[]{layerDescriptor.getNetCDFVariableName() });
-            }
-
-            String queryString = encodeMapForRequest(wmsParameters);
-
-            URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
-
-            HttpURLConnection connection = (HttpURLConnection) wmsUrl.openConnection();
-            if (connection.getResponseCode() != 200 ) {
-                String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
-                response.sendError(connection.getResponseCode(), ret);
-                LOGGER.log(Level.SEVERE, ret);
-            }
-            else {
-                response.setStatus(connection.getResponseCode());
-                response.setContentType(connection.getContentType());
-                response.setContentLength(connection.getContentLength());
-                try (InputStream is = connection.getInputStream()) {
-                    IOUtils.copy(is, response.getOutputStream());
+                // Some collections such as SRS are indexed with a timestamp which doesn't match
+                // the timestamp thredds calculates but only have one timestamp per file meaning its
+                // not actually required
+                // For the moment just don't include the time parameter for these collections
+                if (isCollectionWithTimeMismatch(layerDescriptor.geoserverName())) {
+                    wmsParameters.remove("TIME");
                 }
+
+                wmsParameters.put(layerParameter, new String[]{layerDescriptor.getNetCDFVariableName()});
+
+                // Needed for GetFeatureInfo
+                if (wmsParameters.containsKey("QUERY_LAYERS")) {
+                    wmsParameters.put("QUERY_LAYERS", new String[]{layerDescriptor.getNetCDFVariableName()});
+                }
+
+                String queryString = encodeMapForRequest(wmsParameters);
+
+                URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
+
+                HttpURLConnection connection = (HttpURLConnection) wmsUrl.openConnection();
+                if (connection.getResponseCode() != 200) {
+                    String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
+                    response.sendError(connection.getResponseCode(), ret);
+                    LOGGER.log(Level.SEVERE, ret);
+                } else {
+                    response.setStatus(connection.getResponseCode());
+                    response.setContentType(connection.getContentType());
+                    response.setContentLength(connection.getContentLength());
+                    try (InputStream is = connection.getInputStream()) {
+                        IOUtils.copy(is, response.getOutputStream());
+                    }
+                }
+            } catch (Exception e) {
+                String ret = String.format("Problem while proxying URL '%s' - %s", wmsUrlStr, e.getMessage());
+                response.sendError(500, e.getMessage());
+                LOGGER.log(Level.SEVERE, ret);
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            String ret = String.format("Problem while proxying URL '%s' - %s", wmsUrlStr, e.getMessage());
-            response.sendError(500, e.getMessage());
+        } else {
+            //  Couldn't get WMS url
+            String ret = String.format("Unable to determine destination WMS URL.");
+            response.sendError(500, ret);
             LOGGER.log(Level.SEVERE, ret);
-            e.printStackTrace();
         }
     }
 
@@ -178,6 +184,11 @@ public class Ncwms {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, String.format("Error retreiving getWmsUrl: '%s'", e.getStackTrace()));
             e.printStackTrace();
+            return null;
+        }
+
+        if(wmsUrl == null) {
+            LOGGER.log(Level.SEVERE, "Unable to determine WMS URL for layer: " + layerDescriptor.layer);
             return null;
         }
 

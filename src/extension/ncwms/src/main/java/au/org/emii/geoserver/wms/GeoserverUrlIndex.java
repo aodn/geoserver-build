@@ -56,11 +56,17 @@ public class GeoserverUrlIndex implements UriIndex {
 
         SimpleFeatureIterator iterator = getFeatures(layerDescriptor.geoserverName(), query);
 
+        LOGGER.log(Level.INFO, "Geoserver [" + layerDescriptor.geoserverName() + "], Feature type name [" + query.getTypeName() + "]");
         String url = null;
 
         try {
-             SimpleFeature feature = iterator.next();
-             url = (String) feature.getAttribute(layerDescriptor.getUrlFieldName());
+             SimpleFeature feature = null;
+             if(iterator != null && iterator.hasNext()) {
+                 feature = iterator.next();
+                 url = (String) feature.getAttribute(layerDescriptor.getUrlFieldName());
+             } else {
+                 LOGGER.log(Level.SEVERE, "No URL field found. Layer [" + layerDescriptor.layer + "], URL field name [" + layerDescriptor.getUrlFieldName() + "]");
+             }
         } finally {
             iterator.close();
         }
