@@ -113,7 +113,8 @@ public class NetcdfAggregator implements AutoCloseable {
 
             logger.info("Cumulative output file size. Size {} bytes", Files.size(outputPath));
 
-        } catch (IOException e) {
+        } catch (AggregationException | IOException e) {
+            logger.error("Error adding " + datasetLocation + " to output file.", e);
             throw new AggregationException(e);
         }
     }
