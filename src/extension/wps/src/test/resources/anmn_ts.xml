@@ -47,6 +47,7 @@
     <attribute name="deployment_code" sql="select deployment_code from $instance"/>
     <attribute name="featureType" value="'timeSeries'"/>
     <attribute name="naming_authority" value="'IMOS'"/>
+    <attribute name="missing_attribute" sql="select 'not possible' from $instance where false"/>
     <attribute name="instrument_serial_number" sql="select instrument_serial_number from $instance"/>
     <attribute name="history" sql="select history from $instance"/>
     <attribute name="geospatial_lat_min">
