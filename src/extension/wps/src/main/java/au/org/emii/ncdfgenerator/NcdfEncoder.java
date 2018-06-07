@@ -271,8 +271,11 @@ public class NcdfEncoder implements AutoCloseable {
 
             // TODO more checks around this
             // maybe support converion to ncdf array attribute types
-            rs.next();
-            return rs.getObject(1);
+            if (rs.next()) {
+                return rs.getObject(1);
+            } else {
+                return null;
+            }
         }
         finally {
             if (stmt != null) {
