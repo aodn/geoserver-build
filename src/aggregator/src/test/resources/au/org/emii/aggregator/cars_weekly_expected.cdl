@@ -215,10 +215,10 @@ netcdf {
       :units = "1e-3";
 
     float PSAL_std_dev(DEPTH=2, LATITUDE=1, LONGITUDE=1);
+      :coordinates = "LATITUDE LONGITUDE DEPTH";
       :_FillValue = 1.17549435E-38f; // float
       :long_name = "intra_and_inter-seasonal_weighted_standard_deviation_of_sea_water_salinity";
       :units = "1e-3";
-      :coordinates = "LATITUDE LONGITUDE DEPTH";
 
     short PSAL_sumofwgts(DEPTH=2, LATITUDE=1, LONGITUDE=1);
       :coordinates = "LATITUDE LONGITUDE DEPTH";
@@ -303,10 +303,10 @@ netcdf {
       :units = "Celsius";
 
     float TEMP_std_dev(DEPTH=2, LATITUDE=1, LONGITUDE=1);
+      :coordinates = "LATITUDE LONGITUDE DEPTH";
       :_FillValue = 1.17549435E-38f; // float
       :long_name = "intra_and_inter-seasonal_weighted_standard_deviation_of_sea_water_temperature";
       :units = "Celsius";
-      :coordinates = "LATITUDE LONGITUDE DEPTH";
 
     short TEMP_sumofwgts(DEPTH=2, LATITUDE=1, LONGITUDE=1);
       :coordinates = "LATITUDE LONGITUDE DEPTH";
@@ -329,8 +329,8 @@ netcdf {
   :geospatial_lat_min = -50.0; // double
   :geospatial_lon_max = 161.0; // double
   :geospatial_lon_min = 104.0; // double
-  :geospatial_vertical_max = 100;
-  :geospatial_vertical_min = 50;
+  :geospatial_vertical_max = 100S; // short
+  :geospatial_vertical_min = 50S; // short
   :institution = "AODN";
   :institution_references = "http://www.imos.org.au/aodn.html";
   :keywords = "CARS extraction, Climatology, TEMP, TEMP_anomaly, PSAL, PSAL_anomaly, DOX2, DOX2_anomaly, DENS, DENS_anomaly, NTR2, NTR2_anomaly, SLC2, SLC2_anomaly, PHOS, PHOS_anomaly";

@@ -284,16 +284,12 @@ public class NetcdfAggregatorTest {
     @Test
     public void testCarsDepth() throws IOException, AggregationException {
         LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-44.5, 114), new LatLonPointImmutable(-44.5, 114));
-
-        CalendarDateRange timeRange = CalendarDateRange.of(CalendarDate.parseISOformat("gregorian", "2009-01-01T00:00:00"),
-                CalendarDate.parseISOformat("gregorian", "2009-12-26T00:00:00"));
         NumberRange verticalSubset = new NumberRange(50,100);
-
         AggregationOverrides overrides = AggregationOverridesReader.load(
                 resourcePath("au/org/emii/aggregator/CARStemplate.xml"));
 
         try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
-                outputFile, overrides, null, bbox, verticalSubset, timeRange
+                outputFile, overrides, null, bbox, verticalSubset, null
         )) {
             netcdfAggregator.add(resourcePath("au/org/emii/aggregator/CARSWeeklySubset.nc"));
         }
