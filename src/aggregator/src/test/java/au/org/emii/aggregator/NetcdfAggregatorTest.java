@@ -3,6 +3,7 @@ package au.org.emii.aggregator;
 import au.org.emii.aggregator.exception.AggregationException;
 import au.org.emii.aggregator.overrides.AggregationOverrides;
 import au.org.emii.aggregator.overrides.xstream.AggregationOverridesReader;
+import au.org.emii.util.NumberRange;
 import com.sun.jna.Native;
 import org.junit.After;
 import org.junit.Before;
@@ -278,6 +279,22 @@ public class NetcdfAggregatorTest {
         }
 
         assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/cars-monthly-expected.cdl"), outputFile);
+    }
+
+    @Test
+    public void testCarsDepth() throws IOException, AggregationException {
+        LatLonRect bbox = new LatLonRect(new LatLonPointImmutable(-44.5, 114), new LatLonPointImmutable(-44.5, 114));
+        NumberRange verticalSubset = new NumberRange(50,100);
+        AggregationOverrides overrides = AggregationOverridesReader.load(
+                resourcePath("au/org/emii/aggregator/CARStemplate.xml"));
+
+        try (NetcdfAggregator netcdfAggregator = new NetcdfAggregator(
+                outputFile, overrides, null, bbox, verticalSubset, null
+        )) {
+            netcdfAggregator.add(resourcePath("au/org/emii/aggregator/CARSWeeklySubset.nc"));
+        }
+
+        assertNetcdfFileEqualsCdl(resourcePath("au/org/emii/aggregator/cars_weekly_expected.cdl"), outputFile);
     }
 
     @Test

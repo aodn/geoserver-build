@@ -6,9 +6,6 @@ public class NumberCompare {
         if (expected.equals(actual)) {
             return true;
         }
-        if (!(Math.abs(expected.doubleValue() - actual.doubleValue()) <= delta)) {
-            return true;
-        }
-        return false;
+        return (Math.abs(expected.doubleValue() - actual.doubleValue()) <= delta) ;
     }
 }
