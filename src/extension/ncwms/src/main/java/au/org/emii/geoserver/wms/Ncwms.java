@@ -124,6 +124,16 @@ public class Ncwms {
                 URL wmsUrl = new URL(wmsUrlStr + "?" + queryString);
 
                 HttpURLConnection connection = (HttpURLConnection) wmsUrl.openConnection();
+
+                // identify requests for log tracking
+                if (request.getHeader ("User-Agent").contains("AODN-Portal")) {
+                    String userAgent = String.format("%s %s", "Geoserver-Ncwms ", request.getHeader ("User-Agent"));
+                    connection.addRequestProperty("User-Agent", userAgent);
+                }
+                else {
+                    connection.addRequestProperty("User-Agent","Geoserver-Ncwms");
+                }
+
                 if (connection.getResponseCode() != 200) {
                     String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
                     response.sendError(connection.getResponseCode(), ret);
