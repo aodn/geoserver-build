@@ -24,7 +24,7 @@ public class Resource {
     }
 
     public static NetcdfDatasetAdapter openNetcdfDataset(String resource) throws IOException {
-        Path testFile = Resource.resourcePath(resource);
+        String testFile = resourcePath(resource).toString();
         return NetcdfDatasetAdapter.open(testFile, new HashMap<String, UnpackerOverrides>());
     }
 

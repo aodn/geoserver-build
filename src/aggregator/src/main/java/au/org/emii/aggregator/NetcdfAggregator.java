@@ -91,6 +91,10 @@ public class NetcdfAggregator implements AutoCloseable {
     }
 
     public void add(Path datasetLocation) throws AggregationException {
+        add(datasetLocation.toString());
+    }
+
+    public void add(String datasetLocation) throws AggregationException {
         try (NetcdfDatasetAdapter dataset = NetcdfDatasetAdapter.open(datasetLocation, unpackerOverrides, maxChunkSize)) {
             NetcdfDatasetIF subsettedDataset = dataset.subset(dateRange, verticalSubset, bbox);
 
@@ -107,7 +111,7 @@ public class NetcdfAggregator implements AutoCloseable {
                 outputFileCreated = true;
             }
 
-            logger.info("Adding {} to output file. Size {} bytes", datasetLocation, Files.size(datasetLocation));
+            logger.info("Adding {} to output file. Size {} bytes", datasetLocation, dataset.getSize());
 
             appendTimeSlices(subsettedDataset);
 
@@ -382,7 +386,7 @@ public class NetcdfAggregator implements AutoCloseable {
         ) {
             for (String file:inputFiles) {
                 if (file.trim().length() == 0) continue;
-                netcdfAggregator.add(Paths.get(file));
+                netcdfAggregator.add(file);
             }
         }
     }
