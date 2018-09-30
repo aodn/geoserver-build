@@ -40,10 +40,10 @@
         </constructor-arg>
     </bean>
 
-    <bean id="paletteKvpParser" class="org.geoserver.wms.kvp.PaletteKvpParser">
-        <property name="service" value="WMS"/>
-        <!-- Avoid the palleteKvpParser denying palettes that are not defined
-             in geoserver but may be defined on thredds (ncwms) -->
+    <bean id="ncwmsPaletteKvpParser" class="au.org.emii.geoserver.wms.SimpleKvpParser">
+        <constructor-arg value="palette"/>
+        <property name="service" value="NCWMS"/>
+        <!-- Don't want to use the default PaletteKvpParser -->
     </bean>
 
     <!-- http url mapping -->
