@@ -13,7 +13,6 @@
     <modules>
         <module>src/extension</module>
         <module>src/main</module>
-        <module>src/aggregator</module>
     </modules>
 
     <description>AODN/IMOS Geoserver v${project.version} with XSLT and CSV/metadata plugin.</description>
