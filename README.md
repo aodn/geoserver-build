@@ -7,32 +7,11 @@ Configures a GeoServer war file with the following;
 * CSV with metadata header plugin
 * Layer filter extension
 
-Check out the [extensions' readme](https://github.com/aodn/geoserver-build/blob/master/src/extension/wps/README.md) for more information.
-
-### Prerequisites
-
-To perform aggregation of gridded netcdf files/run unit tests, this project requires the installation of the netcdf c library
-version 4.3.1 or above (see [NetCDF-4 C Library Loading](https://www.unidata.ucar.edu/software/thredds/current/netcdf-java/reference/netcdf4Clibrary.html)).
-
 ### To build
 
 ```
 mvn clean install -U 
 ```
-### To setup to run
-
-Create an empty postgres schema that geoserver can connect to as follows: 
-
-| Parameter | Value |
-| ---- | ---- |
-| host | localhost |
-| port | 5432 |
-| database | geoserver |
-| schema | geoserver |
-| user | geoserver |
-| password | geoserver |
-
-the schema will be populated with default test data using liquibase
 
 Copy the sample context.xml file to configure the default/additional jndi resources
 
