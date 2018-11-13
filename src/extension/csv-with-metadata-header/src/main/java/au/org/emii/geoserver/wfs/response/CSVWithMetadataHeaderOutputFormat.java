@@ -175,8 +175,11 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                w.write(rs.getString(1));
-                w.newLine();
+                String value = rs.getString(1);
+                if (value != null) {
+                    w.write(value);
+                    w.newLine();
+                }
             }
 
             w.newLine();
