@@ -71,9 +71,20 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <extensions>
+            <extension>
+                <groupId>org.springframework.build</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>5.0.0.RELEASE</version>
+            </extension>
+        </extensions>
     </build>
 
      <repositories>
+        <repository>
+            <id>aodn</id>
+            <url>http://content.aodn.org.au/repo/maven/</url>
+        </repository>
         <repository>
             <id>opengeo</id>
             <url>http://repo.boundlessgeo.com/main</url>
