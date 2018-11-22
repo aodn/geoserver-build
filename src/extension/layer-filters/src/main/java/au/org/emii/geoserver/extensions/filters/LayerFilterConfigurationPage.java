@@ -13,10 +13,9 @@ import au.org.emii.geoserver.extensions.filters.layer.data.FilterConfiguration;
 import au.org.emii.geoserver.extensions.filters.layer.data.FilterMerge;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.FilterConfigurationFile;
 import au.org.emii.geoserver.extensions.filters.layer.data.io.LayerPropertiesReader;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.geoserver.web.data.store.DataAccessEditPage;
 import org.geotools.util.logging.Logging;
@@ -28,7 +27,6 @@ import javax.servlet.ServletContext;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
@@ -47,9 +45,9 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
     public LayerFilterConfigurationPage(PageParameters parameters) {
         this(
-            parameters.getString(DataAccessEditPage.WS_NAME),
-            parameters.getString(DataAccessEditPage.STORE_NAME),
-            parameters.getString(NAME)
+            parameters.get(DataAccessEditPage.WS_NAME).toString(),
+            parameters.get(DataAccessEditPage.STORE_NAME).toString(),
+            parameters.get(NAME).toString()
         );
     }
 
@@ -60,7 +58,6 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
         try {
             add(getLayerFilterForm());
-            add(CSSPackageResource.getHeaderContribution(LayerFilterConfigurationPage.class, "layer_filters.css"));
         }
         catch (NamingException e) {
             throw new FilterConfigurationException("Error getting DataSource from JNDI reference", e);

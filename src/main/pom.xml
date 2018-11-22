@@ -95,6 +95,12 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.11.v20150529</version>
                 <configuration>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>org.eclipse.jetty.annotations.maxWait</name>
+                            <value>120</value>
+                        </systemProperty>
+                    </systemProperties>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <scanTargetPatterns>
                       <scanTargetPattern>
