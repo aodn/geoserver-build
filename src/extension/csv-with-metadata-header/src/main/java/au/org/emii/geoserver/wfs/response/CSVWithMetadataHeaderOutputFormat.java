@@ -16,8 +16,10 @@ import org.geoserver.wfs.WFSGetFeatureOutputFormat;
 import org.geoserver.wfs.request.FeatureCollectionResponse;
 import org.geoserver.wfs.request.GetFeatureRequest;
 import org.geoserver.wfs.request.Query;
+import org.geotools.data.DataAccess;
 import org.geotools.data.Transaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.store.DecoratingDataStore;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.DateUtil;
@@ -194,13 +196,21 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     }
 
     private JDBCDataStore getDataStoreForFeatureCollection(
-        FeatureCollectionResponse featureCollection) throws IOException {
-
+            FeatureCollectionResponse featureCollection) throws IOException {
+        JDBCDataStore ds;
         SimpleFeatureCollection fc = (SimpleFeatureCollection) featureCollection.getFeature().get(0);
         String typeName = fc.getSchema().getName().toString();
         FeatureTypeInfo fi = catalog.getFeatureTypeByName(typeName);
         DataStoreInfo dsi = fi.getStore();
-        return (JDBCDataStore)dsi.getDataStore(null);
+        DataAccess da = dsi.getDataStore(null);
+
+        if (da instanceof DecoratingDataStore) {
+            ds = ((DecoratingDataStore) da).unwrap(JDBCDataStore.class);
+        } else {
+            ds = (JDBCDataStore) da;
+        }
+
+        return ds;
     }
 
     private String getMetadataFeatureName(
