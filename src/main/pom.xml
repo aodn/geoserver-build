@@ -60,8 +60,6 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -99,14 +97,8 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.2.11.v20150529</version>
+                <version>9.2.13.v20150730</version>
                 <configuration>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>org.eclipse.jetty.annotations.maxWait</name>
-                            <value>120</value>
-                        </systemProperty>
-                    </systemProperties>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <scanTargetPatterns>
                       <scanTargetPattern>
