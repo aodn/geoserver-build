@@ -40,9 +40,6 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
     private String workspaceName;
     private String dataDirectory;
 
-    @Autowired
-    private ServletContext context;
-
     public LayerFilterConfigurationPage(PageParameters parameters) {
         this(
             parameters.get(DataAccessEditPage.WS_NAME).toString(),
@@ -110,6 +107,7 @@ public class LayerFilterConfigurationPage extends GeoServerSecuredPage {
 
     private String getDataDirectory() {
         if (dataDirectory == null) {
+            ServletContext context = getGeoServerApplication().getServletContext();
             dataDirectory = new DataDirectory(context).getLayerDataDirectoryPath(
                 LayerInfoProperties.getLayer(getCatalog(), workspaceName, layerName)
             );
