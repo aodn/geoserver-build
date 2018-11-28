@@ -9,7 +9,9 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
+import org.geotools.data.DataAccess;
 import org.geotools.data.Query;
+import org.geotools.data.store.DecoratingDataStore;
 import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.VirtualTable;
@@ -33,7 +35,7 @@ public class PossibleValuesReader {
     public Set read(DataStoreInfo dataStoreInfo, LayerInfo layerInfo, String propertyName)
         throws IOException, NoSuchMethodException, SQLException, IllegalAccessException, InvocationTargetException
     {
-        JDBCDataStore store = (JDBCDataStore)dataStoreInfo.getDataStore(null);
+        JDBCDataStore store = getJdbcDataStore(dataStoreInfo);
         FeatureTypeInfo info = (FeatureTypeInfo)layerInfo.getResource();
 
         FeatureType schema = null;
@@ -73,5 +75,19 @@ public class PossibleValuesReader {
         values.remove(null);
         // ordered by comparator for type
         return new TreeSet(values);
+    }
+
+    private JDBCDataStore getJdbcDataStore(DataStoreInfo dataStoreInfo) throws IOException {
+        JDBCDataStore result;
+
+        DataAccess dataAccess = dataStoreInfo.getDataStore(null);
+
+        if (dataAccess instanceof DecoratingDataStore) {
+            result = ((DecoratingDataStore) dataAccess).unwrap(JDBCDataStore.class);
+        } else {
+            result = (JDBCDataStore) dataAccess;
+        }
+
+        return result;
     }
 }

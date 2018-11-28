@@ -8,12 +8,10 @@
 package au.org.emii.geoserver.extensions.filters;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.web.ComponentAuthorizer;
 import org.geoserver.web.GeoServerSecuredPage;
-import org.geoserver.web.data.SelectionRemovalLink;
 import org.geoserver.web.wicket.GeoServerDataProvider;
 import org.geoserver.web.wicket.GeoServerDialog;
 import org.geoserver.web.wicket.GeoServerTablePanel;
@@ -32,7 +30,7 @@ public class LayerPage extends GeoServerSecuredPage {
             protected Component getComponentForProperty(
                 String id,
                 IModel itemModel,
-                GeoServerDataProvider.Property<LayerInfo> property)
+                GeoServerDataProvider.Property property)
             {
                 return LayerPageLink.create(property.getName(), id, new LayerInfoModels(itemModel)).getLink();
             }

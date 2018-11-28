@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
+    <Call name="setAttribute">
+        <Arg>org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern</Arg>
+        <Arg>^$</Arg>
+    </Call>
     <New id="defaultDs" class="org.eclipse.jetty.plus.jndi.Resource">
         <Arg></Arg>
         <Arg>jdbc/default</Arg>
