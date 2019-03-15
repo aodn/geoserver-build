@@ -37,24 +37,14 @@ public class FilterConfigurationFile extends FilterConfigurationIO {
     public void write(List<Filter> filters) throws TemplateException, IOException {
         FilterConfigurationWriter configurationWriter = new FilterConfigurationWriter(filters);
 
-        Writer writer = null;
-        try {
-            writer = new FileWriter(getFilePath());
+        try (Writer writer = new FileWriter(getFilePath())) {
             configurationWriter.write(writer);
-        }
-        finally {
-            IOUtils.closeQuietly(writer);
         }
     }
 
     private List<Filter> readFilters(File file) throws ParserConfigurationException, SAXException, IOException {
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
+        try (FileInputStream fileInputStream = new FileInputStream(file)){
             return getReader().read(fileInputStream).getFilters();
-        }
-        finally {
-            IOUtils.closeQuietly(fileInputStream);
         }
     }
 
