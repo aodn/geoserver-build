@@ -16,7 +16,7 @@ import org.geoserver.catalog.LayerInfo;
 import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.platform.Operation;
-import org.geotools.xml.EMFUtils;
+import org.geotools.xsd.EMFUtils;
 
 import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
