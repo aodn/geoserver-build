@@ -1,6 +1,7 @@
 package au.org.emii.geoserver.wms;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.geotools.util.logging.Logging;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -192,7 +193,7 @@ public class Ncwms {
         try {
             wmsUrl = getWmsUrl(layerDescriptor, null);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Error retreiving getWmsUrl: '%s'", e.getStackTrace()));
+            LOGGER.log(Level.SEVERE, String.format("Error retrieving getWmsUrl: '%s'", ExceptionUtils.getStackTrace(e)));
             e.printStackTrace();
             return null;
         }
