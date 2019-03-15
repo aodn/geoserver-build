@@ -43,7 +43,7 @@ public class PossibleValuesReader {
         if(info.getMetadata() != null && info.getMetadata().containsKey(FeatureTypeInfo.JDBC_VIRTUAL_TABLE)) {
             VirtualTable vt = (VirtualTable) info.getMetadata().get(FeatureTypeInfo.JDBC_VIRTUAL_TABLE);
             if(!store.getVirtualTables().containsValue(vt)) {
-                store.addVirtualTable(vt);
+                store.createVirtualTable(vt);
             }
             schema = store.getSchema(vt.getName());
         }
