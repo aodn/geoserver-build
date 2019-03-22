@@ -53,12 +53,10 @@ public class FilterConfigurationReaderTest {
 
     @Test
     public void readTest() throws ParserConfigurationException, SAXException, IOException {
-        InputStream stream = null;
 
         FilterConfigurationReader reader = new FilterConfigurationReader("");
 
-        try {
-            stream = new ByteArrayInputStream(XML.getBytes(StandardCharsets.UTF_8));
+        try (InputStream stream = new ByteArrayInputStream(XML.getBytes(StandardCharsets.UTF_8))){
             FilterConfiguration filterConfiguration = reader.read(stream);
 
             assertEquals(4, filterConfiguration.getFilters().size());
@@ -68,9 +66,6 @@ public class FilterConfigurationReaderTest {
             assertEquals("This", filterConfiguration.getFilters().get(2).getLabel());
             assertEquals("deployment_name", filterConfiguration.getFilters().get(3).getName());
             assertEquals(Boolean.TRUE, filterConfiguration.getFilters().get(3).getExcludedFromDownload());
-        }
-        finally {
-            IOUtils.closeQuietly(stream);
         }
     }
 }
