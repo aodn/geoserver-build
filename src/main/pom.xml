@@ -66,6 +66,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-control-flow</artifactId>
+            <version>${geoserver.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

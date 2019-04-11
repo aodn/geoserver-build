@@ -50,11 +50,6 @@
                 <version>${geoserver.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.geoserver.extension</groupId>
-                <artifactId>gs-control-flow</artifactId>
-                <version>${geoserver.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>dom4j</groupId>
                 <artifactId>dom4j</artifactId>
                 <version>1.6.1</version>
