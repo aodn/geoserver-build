@@ -1,14 +1,23 @@
 pipeline {
-    agent none
+    agent { label 'master' }
 
     stages {
         stage('clean') {
-            agent { label 'master' }
             steps {
                 sh 'git clean -fdx'
             }
         }
-
+        stage('set_version') {
+            steps {
+                sh 'bumpversion patch'
+            }
+        }
+        stage('release') {
+            when { branch 'master' }
+            steps {
+                sh 'bumpversion --tag --commit --allow-dirty release'
+            }
+        }
         stage('container') {
             agent {
                 dockerfile {
