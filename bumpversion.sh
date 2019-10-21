@@ -22,10 +22,10 @@ _set_maven_version() {
 _update_git() {
   local version=$1; shift
   git add pom.xml '*/pom.xml'
-  git commit -m "Jenkins version bump (${version})"
-  git tag -a -f -m "Jenkins: create tag ${version}" ${version}
+  git commit -m "Bump version to ${version}"
+  git tag -a -f -m "Bump version to ${version}" ${version}
   git push origin tag ${version}
-  git push origin "HEAD:${RELEASE_BRANCH}"
+  git push origin HEAD:${RELEASE_BRANCH}
 }
 
 _bumpversion() {
