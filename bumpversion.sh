@@ -21,6 +21,7 @@ _set_maven_version() {
 
 _update_git() {
   local version=$1; shift
+  git fetch --prune --prune-tags
   git add pom.xml '*/pom.xml'
   git commit -m "Bump version to ${version}"
   git tag -a -f -m "Bump version to ${version}" ${version}
