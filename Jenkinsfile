@@ -42,7 +42,9 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'src/main/target/*.war', fingerprint: true, onlyIfSuccessful: true
+                    dir('src/main/target/') {
+                        archiveArtifacts artifacts: '*.war', fingerprint: true, onlyIfSuccessful: true
+                    }
                 }
             }
         }
