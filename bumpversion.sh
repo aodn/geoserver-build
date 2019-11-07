@@ -24,8 +24,7 @@ _update_git() {
   git add pom.xml '*/pom.xml'
   git commit -m "Bump version to ${version}"
   git tag -a -f -m "Bump version to ${version}" ${version}
-  git push origin tag ${version}
-  git push origin HEAD:${RELEASE_BRANCH}
+  git push --atomic origin "HEAD:${RELEASE_BRANCH}" tag "${version}"
 }
 
 _bumpversion() {
