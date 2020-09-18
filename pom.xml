@@ -93,6 +93,11 @@
             <id>osgeo-geoserver</id>
             <url>https://repo.osgeo.org/repository/Geoserver-releases/</url>
         </repository>
+        <repository>
+            <id>geosolutions</id>
+            <name>geosolutions repository</name>
+            <url>https://maven.geo-solutions.it/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>

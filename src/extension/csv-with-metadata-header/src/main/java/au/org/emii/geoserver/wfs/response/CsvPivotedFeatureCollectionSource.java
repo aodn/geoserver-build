@@ -27,6 +27,7 @@ import static org.geotools.gce.imagemosaic.Utils.FF;
 public class CsvPivotedFeatureCollectionSource implements CsvSource {
 
     private static final int MAX_PIVOT_COLUMNS = 10000;
+    private static final String DEFAULT_MISSING_VALUE = "0";
     private final SimpleFeatureCollection featureCollection;
     private final SimpleFeatureIterator featureIterator;
     private final String pivotName;
@@ -36,6 +37,7 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
     private final List<String> pivotColumnNames;
 
     private SimpleFeature nextFeature;
+    private String missingValue;
 
     public CsvPivotedFeatureCollectionSource(Operation getFeatureOperation, SimpleFeatureCollection featureCollection) {
         this.featureCollection = featureCollection;
@@ -69,6 +71,9 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
             throw new IllegalArgumentException("pivot_value must be an attribute of this feature");
         }
 
+        String missingValue = (String)formatOptions.get("MISSING_VALUE");
+        this.missingValue = missingValue != null ? missingValue : DEFAULT_MISSING_VALUE; 
+        
         // Determine sort attributes
 
         List<Query> queries = request.getQueries();
@@ -186,7 +191,9 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
         // Add pivoted column values to column values
 
         for (String columnName: pivotColumnNames) {
-            result.add(pivotedColumnValues.get(columnName));
+            Object pivotedValue = pivotedColumnValues.get(columnName);
+            Object columnValue = pivotedValue != null ? pivotedValue : missingValue;
+            result.add(columnValue);
         }
 
         return result;
