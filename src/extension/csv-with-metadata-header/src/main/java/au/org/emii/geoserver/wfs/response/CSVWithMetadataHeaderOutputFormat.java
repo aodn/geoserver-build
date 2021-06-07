@@ -26,7 +26,9 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -37,7 +39,6 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -49,6 +50,9 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     static Logger LOGGER = org.geotools.util.logging.Logging.getLogger("au.org.emii.geoserver.wfs.response");
 
     private Catalog catalog;
+
+    @Autowired
+    private ServletContext context;
 
     public CSVWithMetadataHeaderOutputFormat(GeoServer gs, Catalog catalog) {
         super(gs, "csv-with-metadata-header");
@@ -228,13 +232,13 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
 
     private CsvSource getCsvSource(Operation getFeatureOperation, FeatureCollectionResponse featureCollectionResponse) {
         SimpleFeatureCollection simpleFeatureCollection = (SimpleFeatureCollection)featureCollectionResponse.getFeature().get(0);
-        GetFeatureRequest request = GetFeatureRequest.adapt(getFeatureOperation.getParameters()[0]);
-        Map<String, ?> formatOptions = request.getFormatOptions();
 
-        boolean hasPivotFields = simpleFeatureCollection.getSchema().getAttributeDescriptors().stream().anyMatch(attributeDescriptor -> attributeDescriptor.getUserData().get("org.geotools.jdbc.nativeTypeName").toString().equals(JSON_FIELD_TYPE));
+        boolean hasPivotFields = simpleFeatureCollection.getSchema().getAttributeDescriptors().stream().anyMatch(
+                attributeDescriptor -> attributeDescriptor.getUserData().size() > 0 && attributeDescriptor.getUserData().get("org.geotools.jdbc.nativeTypeName")
+                        .toString().equals(JSON_FIELD_TYPE));
 
         if (hasPivotFields) {
-            return new CsvPivotedFeatureCollectionSource(getFeatureOperation, simpleFeatureCollection);
+            return new CsvPivotedFeatureCollectionSource(getFeatureOperation, simpleFeatureCollection, catalog, context);
         } else {
             return new CsvFeatureCollectionSource(simpleFeatureCollection);
         }

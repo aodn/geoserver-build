@@ -45,6 +45,14 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
       </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+      </dependency>
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
