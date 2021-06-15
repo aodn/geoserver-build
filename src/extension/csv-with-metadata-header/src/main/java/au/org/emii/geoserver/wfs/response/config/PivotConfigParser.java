@@ -5,8 +5,9 @@
  *
  */
 
-package au.org.emii.geoserver.wfs.response;
+package au.org.emii.geoserver.wfs.response.config;
 
+import au.org.emii.geoserver.extensions.filters.layer.data.io.NodeWrapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

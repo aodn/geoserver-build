@@ -5,7 +5,7 @@
  *
  */
 
-package au.org.emii.geoserver.wfs.response;
+package au.org.emii.geoserver.wfs.response.config;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;

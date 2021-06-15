@@ -1,12 +1,17 @@
 package au.org.emii.geoserver.wfs.response;
 
+import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
+import au.org.emii.geoserver.wfs.response.config.PivotConfig;
+import au.org.emii.geoserver.wfs.response.config.PivotConfigFile;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.platform.Operation;
 import org.geoserver.wfs.TypeInfoCollectionWrapper;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.Transaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.visitor.UniqueVisitor;
+import org.geotools.jdbc.JDBCDataStore;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,6 +22,10 @@ import org.postgresql.util.PGobject;
 
 import javax.servlet.ServletContext;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,7 +49,7 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
     private final Catalog catalog;
     private final ServletContext context;
 
-    public CsvPivotedFeatureCollectionSource(Operation getFeatureOperation, SimpleFeatureCollection featureCollection, Catalog catalog, ServletContext context) {
+    public CsvPivotedFeatureCollectionSource(Operation getFeatureOperation, SimpleFeatureCollection featureCollection, Catalog catalog, ServletContext context, JDBCDataStore dataStore) {
         this.featureIterator = featureCollection.features();
         this.catalog = catalog;
         this.context = context;
@@ -76,40 +85,38 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
             nextFeature = featureIterator.next();
         }
 
-        // Loop through each source column of JSON objects and build up a list of distinct attribute names
-        // alphabetically to then be rendered into columns
+        // Loop through all attributes of the JSONB columns to build the pivot fields columns names
 
-        JSONParser parser = new JSONParser();
+        Connection cx = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String sourceTable = String.format(
+                "%s.%s", dataStore.getDatabaseSchema(), featureCollection.getSchema().getName().getLocalPart());
         Set<String> foundColumnNames = new HashSet<>();
-        for (String sourceColumnName : pivotSourceColumnNames) {
-            try {
-                FeatureSource featureSource = ((TypeInfoCollectionWrapper.Simple) featureCollection)
-                        .getFeatureTypeInfo().getFeatureSource(null, null);
-                SimpleFeatureCollection features = (SimpleFeatureCollection) featureSource.getFeatures();
 
-                UniqueVisitor visitor = new UniqueVisitor(FF.property(sourceColumnName)) {
-                    @Override
-                    public boolean hasLimits() {
-                        // force usage of visitor limits, also for size extraction "query"
-                        return true;
-                    }
-                };
+        try {
 
-                visitor.setMaxFeatures(MAX_PIVOT_COLUMNS);
-                features.accepts(visitor, null);
-                if (visitor.getResult() != null && visitor.getResult().toList() != null) {
-                    for (Object result : visitor.getResult().toList()) {
-                        try {
-                            JSONObject json = (JSONObject) parser.parse(((PGobject) result).getValue());
-                            foundColumnNames.addAll(json.keySet());
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
+            for (String sourceColumnName : pivotSourceColumnNames) {
+                cx = dataStore.getConnection(Transaction.AUTO_COMMIT);
+                stmt = cx.prepareStatement(
+                        String.format("SELECT DISTINCT jsonb_object_keys(%s) FROM %s", sourceColumnName, sourceTable));
+                rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    String value = rs.getString(1);
+                    if (value != null) {
+                        foundColumnNames.add(value);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        }
+        catch (SQLException | IOException e) {
+            LOGGER.warning(e.getMessage());
+        }
+        finally {
+            dataStore.closeSafe(rs);
+            dataStore.closeSafe(stmt);
+            dataStore.closeSafe(cx);
         }
 
         this.pivotColumnNames = foundColumnNames.stream().sorted().collect(Collectors.toList());

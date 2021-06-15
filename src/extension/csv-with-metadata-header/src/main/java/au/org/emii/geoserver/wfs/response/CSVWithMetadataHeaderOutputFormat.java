@@ -230,7 +230,7 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         return outputFileName + ".csv";
     }
 
-    private CsvSource getCsvSource(Operation getFeatureOperation, FeatureCollectionResponse featureCollectionResponse) {
+    private CsvSource getCsvSource(Operation getFeatureOperation, FeatureCollectionResponse featureCollectionResponse) throws IOException {
         SimpleFeatureCollection simpleFeatureCollection = (SimpleFeatureCollection)featureCollectionResponse.getFeature().get(0);
 
         boolean hasPivotFields = simpleFeatureCollection.getSchema().getAttributeDescriptors().stream().anyMatch(
@@ -238,7 +238,8 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                         .toString().equals(JSON_FIELD_TYPE));
 
         if (hasPivotFields) {
-            return new CsvPivotedFeatureCollectionSource(getFeatureOperation, simpleFeatureCollection, catalog, context);
+            JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollectionResponse);
+            return new CsvPivotedFeatureCollectionSource(getFeatureOperation, simpleFeatureCollection, catalog, context, dataStore);
         } else {
             return new CsvFeatureCollectionSource(simpleFeatureCollection);
         }

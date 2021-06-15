@@ -1,4 +1,4 @@
-package au.org.emii.geoserver.wfs.response;
+package au.org.emii.geoserver.wfs.response.config;
 
 import java.util.ArrayList;
 import java.util.List;
