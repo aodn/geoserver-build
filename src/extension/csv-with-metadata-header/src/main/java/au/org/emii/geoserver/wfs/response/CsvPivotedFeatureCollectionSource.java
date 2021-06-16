@@ -4,6 +4,7 @@ import au.org.emii.geoserver.extensions.filters.layer.data.DataDirectory;
 import au.org.emii.geoserver.wfs.response.config.PivotConfig;
 import au.org.emii.geoserver.wfs.response.config.PivotConfigFile;
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.platform.Operation;
 import org.geoserver.wfs.TypeInfoCollectionWrapper;
 import org.geotools.data.FeatureSource;
@@ -79,20 +80,16 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
             }
         }
 
-        // Read the first row to get JSON attr for column names
-
-        if (featureIterator.hasNext()) {
-            nextFeature = featureIterator.next();
-        }
-
         // Loop through all attributes of the JSONB columns to build the pivot fields columns names
 
         Connection cx = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String sourceTable = String.format(
-                "%s.%s", dataStore.getDatabaseSchema(), featureCollection.getSchema().getName().getLocalPart());
         Set<String> foundColumnNames = new HashSet<>();
+
+        String typeName = featureCollection.getSchema().getName().toString();
+        FeatureTypeInfo fi = catalog.getFeatureTypeByName(typeName);
+        String sourceTable = String.format("%s.%s", dataStore.getDatabaseSchema(), fi.getNativeName());
 
         try {
 
@@ -125,6 +122,12 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
 
         if (pivotConfig.getOrderDirection() != null && pivotConfig.getOrderDirection().equalsIgnoreCase("desc")) {
             this.pivotColumnNames.sort(Collections.reverseOrder());
+        }
+
+        // Initialise the first row of data
+
+        if (featureIterator.hasNext()) {
+            nextFeature = featureIterator.next();
         }
 
     }
