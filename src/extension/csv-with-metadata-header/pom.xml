@@ -7,6 +7,18 @@
     <artifactId>csv-with-metadata-header</artifactId>
     <packaging>jar</packaging>
     <name>CSV With Metadata Header (jar)</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <parent>
         <groupId>org.geoserver</groupId>
@@ -23,6 +35,30 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+        </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+      </dependency>
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-core</artifactId>
+        </dependency>
+      <dependency>
+        <groupId>au.org.emii</groupId>
+        <artifactId>layer-filters</artifactId>
+        <version>1.0.24</version>
+        <scope>compile</scope>
+      </dependency>
     </dependencies>
 
 </project>

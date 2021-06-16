@@ -20,32 +20,24 @@ import org.geotools.data.DataAccess;
 import org.geotools.data.Transaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.store.DecoratingDataStore;
-import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.DateUtil;
 import org.geotools.jdbc.JDBCDataStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Time;
+import java.sql.*;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -53,10 +45,14 @@ import java.util.regex.Pattern;
 public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat {
 
     static final Pattern CSV_ESCAPES = Pattern.compile("[\"\n,\r]");
+    static final String JSON_FIELD_TYPE = "jsonb";
 
     static Logger LOGGER = org.geotools.util.logging.Logging.getLogger("au.org.emii.geoserver.wfs.response");
 
     private Catalog catalog;
+
+    @Autowired
+    private ServletContext context;
 
     public CSVWithMetadataHeaderOutputFormat(GeoServer gs, Catalog catalog) {
         super(gs, "csv-with-metadata-header");
@@ -75,24 +71,21 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
     protected void write(FeatureCollectionResponse featureCollection,
                          OutputStream output,
                          Operation getFeature) throws IOException, ServiceException {
+
         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
         writeMetadata(featureCollection, getMetadataFeatureName(featureCollection), w);
-        writeData(featureCollection, output, getFeature);
+        CsvSource csvSource = getCsvSource(getFeature, featureCollection);
+        writeData(csvSource, output);
     }
 
-
-    public void writeData(FeatureCollectionResponse featureCollection, OutputStream output, Operation getFeature) throws IOException, ServiceException {
+    public void writeData(CsvSource csvSource, OutputStream output) throws IOException, ServiceException {
         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output, this.gs.getGlobal().getSettings().getCharset()));
-        FeatureCollection<?, ?> fc = (FeatureCollection)featureCollection.getFeature().get(0);
-        Object att;
 
-        SimpleFeatureType ft = (SimpleFeatureType)((FeatureCollection)fc).getSchema();
-        w.write("FID,");
+        List<String> columnNames = csvSource.getColumnNames();
 
-        for(int i = 0; i < ft.getAttributeCount(); ++i) {
-            AttributeDescriptor ad = ft.getDescriptor(i);
-            w.write(this.prepCSVField(ad.getLocalName()));
-            if (i < ft.getAttributeCount() - 1) {
+        for (int i = 0; i < columnNames.size(); i++) {
+            w.write(this.prepCSVField(columnNames.get(i)));
+            if (i < columnNames.size() - 1) {
                 w.write(",");
             }
         }
@@ -101,34 +94,34 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         NumberFormat coordFormatter = NumberFormat.getInstance(Locale.US);
         coordFormatter.setMaximumFractionDigits(this.getInfo().getGeoServer().getSettings().getNumDecimals());
         coordFormatter.setGroupingUsed(false);
-        FeatureIterator i = ((FeatureCollection)fc).features();
 
         try {
-            while (i.hasNext()) {
-                Feature f = i.next();
-                w.write(this.prepCSVField(f.getIdentifier().getID()));
-                w.write(",");
+            while (csvSource.hasNext()) {
+                List<Object> f = csvSource.next();
 
-                for(int j = 0; j < ((SimpleFeature)f).getAttributeCount(); ++j) {
-                    att = ((SimpleFeature)f).getAttribute(j);
-                    if (att != null) {
-                        String value = formatToString(att, coordFormatter);
-                        w.write(this.prepCSVField(value));
+                for(int j = 0; j < f.size(); ++j) {
+                    Object value = f.get(j);
+                    if (value != null) {
+                        String stringValue = formatToString(value, coordFormatter);
+                        w.write(this.prepCSVField(stringValue));
                     }
 
-                    if (j < ((SimpleFeature)f).getAttributeCount() - 1) {
+                    if (j < f.size() -1) {
                         w.write(",");
                     }
                 }
                 w.write("\r\n");
             }
         } finally {
-            i.close();
+            csvSource.close();
         }
         w.flush();
     }
 
     private String prepCSVField(String field) {
+        if (field == null) {
+            return "";
+        }
         String mod = field.replaceAll("\"", "\"\"");
         if (CSV_ESCAPES.matcher(mod).find()) {
             mod = "\"" + mod + "\"";
@@ -235,5 +228,20 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
         GetFeatureRequest request = GetFeatureRequest.adapt(operation.getParameters()[0]);
         String outputFileName = ((QName)((Query)request.getQueries().get(0)).getTypeNames().get(0)).getLocalPart();
         return outputFileName + ".csv";
+    }
+
+    private CsvSource getCsvSource(Operation getFeatureOperation, FeatureCollectionResponse featureCollectionResponse) throws IOException {
+        SimpleFeatureCollection simpleFeatureCollection = (SimpleFeatureCollection)featureCollectionResponse.getFeature().get(0);
+
+        boolean hasPivotFields = simpleFeatureCollection.getSchema().getAttributeDescriptors().stream().anyMatch(
+                attributeDescriptor -> attributeDescriptor.getUserData().size() > 0 && attributeDescriptor.getUserData().get("org.geotools.jdbc.nativeTypeName")
+                        .toString().equals(JSON_FIELD_TYPE));
+
+        if (hasPivotFields) {
+            JDBCDataStore dataStore = getDataStoreForFeatureCollection(featureCollectionResponse);
+            return new CsvPivotedFeatureCollectionSource(getFeatureOperation, simpleFeatureCollection, catalog, context, dataStore);
+        } else {
+            return new CsvFeatureCollectionSource(simpleFeatureCollection);
+        }
     }
 }
