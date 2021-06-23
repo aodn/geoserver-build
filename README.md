@@ -14,8 +14,8 @@ Configures a GeoServer war file with the following extensions installed
 Builds the following AODN extensions and includes them:
 
 * CSV with metadata header WFS output format
-* Layer filter configuration plugin
-* NCWMS abomination
+* [Layer filter configuration plugin](src/extension/layer-filters/README.md)
+* [NCWMS abomination](src/extension/ncwms/README.md)
 
 Makes the following customisations to the geoserver war
 
