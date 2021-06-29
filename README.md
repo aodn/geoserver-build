@@ -1,11 +1,29 @@
 Geoserver Build
 ===============
 
-Configures a GeoServer war file with the following;
+Configures a GeoServer war file with the following extensions installed
 
-* The XSLT extension installed
-* CSV with metadata header plugin
-* Layer filter extension
+* The [XSLT WFS Output Format](https://docs.geoserver.org/stable/en/user/extensions/xslt/index.html)
+  extension installed
+* The [GeoWebCache s3 blob store](https://docs.geoserver.org/stable/en/user/extensions/gwc-s3/index.html)
+  extension installed
+* The [Control Flow Module](https://docs.geoserver.org/stable/en/user/extensions/controlflow/index.html) 
+  extension installed
+* [SqlServer support](https://docs.geoserver.org/stable/en/user/data/database/sqlserver.html) used by IMAS installed
+
+Builds the following AODN extensions and includes them:
+
+* CSV with metadata header WFS output format
+* [Layer filter configuration plugin](src/extension/layer-filters/README.md)
+* [NCWMS abomination](src/extension/ncwms/README.md)
+
+Makes the following customisations to the geoserver war
+
+* Return 500 errors instead of 200 for API errors so squid doesn't cache API errors
+* Enable CORS for GET requests so IMAS can use it for GetFeatureInfo requests
+
+Might be good to use transformation sets as per geonetwork-build to enable CORS instead of a full replacement of web.xml
+ so that we get other updates made when upgrading.
 
 ### To build
 
@@ -32,7 +50,7 @@ prior to running this command or add this command to you startup scripts
 
 Then to run jetty on port 9090 you can use:
 ```
-mvn jetty:run -Djetty.port=9090 -Duser.timezone=UTC
+mvn jetty:run-war -Pjetty -Djetty.port=9090 -Duser.timezone=UTC
 ```
 
 GeoServer will then be available at:
