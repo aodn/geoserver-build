@@ -6,12 +6,9 @@ import au.org.emii.geoserver.wfs.response.config.PivotConfigFile;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.platform.Operation;
-import org.geoserver.wfs.TypeInfoCollectionWrapper;
-import org.geotools.data.FeatureSource;
 import org.geotools.data.Transaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.jdbc.JDBCDataStore;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,7 +16,7 @@ import org.json.simple.parser.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
-import org.postgresql.util.PGobject;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ServletContext;
 import java.io.IOException;
@@ -32,12 +29,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static au.org.emii.geoserver.wfs.response.CSVWithMetadataHeaderOutputFormat.JSON_FIELD_TYPE;
-import static org.geotools.gce.imagemosaic.Utils.FF;
 
 
 public class CsvPivotedFeatureCollectionSource implements CsvSource {
 
-    private static final int MAX_PIVOT_COLUMNS = 10000;
     private final SimpleFeatureIterator featureIterator;
     private final ArrayList<String> nonPivotColumnNames;
     private final List<String> pivotColumnNames;
@@ -165,13 +160,15 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
         JSONParser parser = new JSONParser();
         for (String sourceColumnName : pivotSourceColumnNames) {
             String column_json_string = (String) nextFeature.getAttribute(sourceColumnName);
-            try {
-                JSONObject json = (JSONObject) parser.parse(column_json_string);
-                for (String key : this.pivotColumnNames.stream().sorted().collect(Collectors.toList())){
-                    result.add(json.getOrDefault(key, this.pivotConfig.getDefaultValue()));
+            if(StringUtils.isNotBlank(column_json_string)) {
+                try {
+                    JSONObject json = (JSONObject) parser.parse(column_json_string);
+                    for (String key : this.pivotColumnNames.stream().sorted().collect(Collectors.toList())) {
+                        result.add(json.getOrDefault(key, this.pivotConfig.getDefaultValue()));
+                    }
+                } catch (ParseException pe) {
+                    LOGGER.warning(pe.getMessage());
                 }
-            } catch(ParseException pe) {
-                LOGGER.warning(pe.getMessage());
             }
         }
 
