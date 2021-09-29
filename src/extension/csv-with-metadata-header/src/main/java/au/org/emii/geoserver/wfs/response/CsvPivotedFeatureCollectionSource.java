@@ -160,14 +160,23 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
         JSONParser parser = new JSONParser();
         for (String sourceColumnName : pivotSourceColumnNames) {
             String column_json_string = (String) nextFeature.getAttribute(sourceColumnName);
+
             if(StringUtils.isNotBlank(column_json_string)) {
                 try {
                     JSONObject json = (JSONObject) parser.parse(column_json_string);
                     for (String key : this.pivotColumnNames.stream().sorted().collect(Collectors.toList())) {
-                        result.add(json.getOrDefault(key, this.pivotConfig.getDefaultValue()));
+                        if(json.containsKey(key)) {
+                            result.add(json.get(key));
+                        } else {
+                            result.add(this.pivotConfig.getDefaultValue());
+                        }
                     }
                 } catch (ParseException pe) {
                     LOGGER.warning(pe.getMessage());
+                }
+            } else {
+                for (String key : this.pivotColumnNames.stream().sorted().collect(Collectors.toList())) {
+                    result.add("");
                 }
             }
         }
