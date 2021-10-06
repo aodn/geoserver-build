@@ -176,7 +176,7 @@ public class CsvPivotedFeatureCollectionSource implements CsvSource {
                 }
             } else {
                 for (String key : this.pivotColumnNames.stream().sorted().collect(Collectors.toList())) {
-                    result.add("");
+                    result.add(this.pivotConfig.getDefaultValue());
                 }
             }
         }
