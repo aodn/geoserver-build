@@ -28,9 +28,6 @@
   <onlineResource>http://geoserver.sourceforge.net/html/index.php</onlineResource>
   <schemaBaseURL>http://schemas.opengis.net</schemaBaseURL>
   <verbose>false</verbose>
-  <metadata>
-    <entry key="SHAPE-ZIP_DEFAULT_PRJ_IS_ESRI">false</entry>
-  </metadata>
   <gml>
     <entry>
       <version>V_10</version>
@@ -54,8 +51,8 @@
       </gml>
     </entry>
   </gml>
-  <serviceLevel>BASIC</serviceLevel>
-  <maxFeatures>2000000000</maxFeatures>
+  <serviceLevel>COMPLETE</serviceLevel>
+  <maxFeatures>1000000</maxFeatures>
   <featureBounding>false</featureBounding>
   <canonicalSchemaLocation>false</canonicalSchemaLocation>
   <encodeFeatureMember>false</encodeFeatureMember>
