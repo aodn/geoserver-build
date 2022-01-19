@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.*;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -139,7 +140,9 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
                 value = DateUtil.serializeSqlDate((java.sql.Date)att);
             } else if (att instanceof Time) {
                 value = DateUtil.serializeSqlTime((Time)att);
-            }else {
+            } else if (att instanceof Timestamp){
+                value = localDateTimeString((Timestamp) att);
+            } else {
                 value = utcDateString((Date)att);
             }
         } else {
@@ -153,6 +156,13 @@ public class CSVWithMetadataHeaderOutputFormat extends WFSGetFeatureOutputFormat
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTimeNoMillis();
         return fmt.print(dt);
+    }
+
+    private String localDateTimeString(Timestamp date) {
+        LocalDateTime local = date.toLocalDateTime();
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        String formatted = fmt.format(local);
+        return formatted;
     }
 
     private void writeMetadata(FeatureCollectionResponse featureCollection,
