@@ -1,7 +1,9 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 ARG BUILDER_UID=9999
+ARG DEBIAN_FRONTEND=noninteractive
 
+ENV TZ="Australia"
 ENV GRAILS_VERSION 2.4.4
 ENV HOME /home/builder
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
