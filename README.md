@@ -1,5 +1,4 @@
-Geoserver Build
-===============
+# Geoserver Build
 
 Configures a GeoServer war file with the following extensions installed
 
@@ -25,7 +24,10 @@ Makes the following customisations to the geoserver war
 Might be good to use transformation sets as per geonetwork-build to enable CORS instead of a full replacement of web.xml
  so that we get other updates made when upgrading.
 
-### To build
+## Licensing
+This project is licensed under the terms of the GNU GPLv3 license.
+
+## To build
 
 ```
 mvn clean install -U 
@@ -38,7 +40,7 @@ cd src/main/src/jetty
 cp context-sample.xml context.xml
 ```
 
-### Running using Jetty
+## Running using Jetty
 
 Maven project is in src/main
 ```
