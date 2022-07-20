@@ -40,6 +40,15 @@ cd src/main/src/jetty
 cp context-sample.xml context.xml
 ```
 
+## Provision Geoserver
+A [job in jenkins](https://build.aodn.org.au/job/geoserver-build_build/) create the artifact, but the real provision
+is done via cloudformation where it combines the [configuration](https://github.com/aodn/geoserver-config) 
+of geoserver, for example [workspaces](https://github.com/aodn/geoserver-config/tree/master/workspaces/imos)
+so you can search the layer in geoserver. In short the layers are predefined by this configuration, however
+the data about this layer comes from the PostGis database that set in the cloudformation.
+
+This issue contains extra [information](https://github.com/aodn/backlog/issues/4098)
+
 ## Running using Jetty
 
 Maven project is in src/main
