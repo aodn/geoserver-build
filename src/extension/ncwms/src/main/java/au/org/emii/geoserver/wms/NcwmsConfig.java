@@ -3,6 +3,7 @@ package au.org.emii.geoserver.wms;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultElement;
 import org.dom4j.xpath.DefaultXPath;
@@ -56,10 +57,11 @@ public class NcwmsConfig {
             DefaultXPath xpath = new DefaultXPath(xpathString);
 
             @SuppressWarnings("unchecked")
-            List<DefaultElement> list = xpath.selectNodes(doc);
+            List<org.dom4j.Node> list = xpath.selectNodes(doc);
 
-            for (final DefaultElement element : list) {
-                returnValue.put(element.attribute("key").getText(), element.getText());
+            for (final org.dom4j.Node node : list) {
+                Element element = (Element) node;
+                returnValue.put(element.attributeValue("@key"), element.getText());
             }
         }
         catch (DocumentException e) {
@@ -79,9 +81,9 @@ public class NcwmsConfig {
             DefaultXPath xpath = new DefaultXPath(xpathString);
 
             @SuppressWarnings("unchecked")
-            List<DefaultElement> list = xpath.selectNodes(doc);
+            List<org.dom4j.Node> list = xpath.selectNodes(doc);
 
-            for (final DefaultElement element : list) {
+            for (final org.dom4j.Node element : list) {
                 returnValue.add(element.getText());
             }
         } catch (DocumentException e) {
