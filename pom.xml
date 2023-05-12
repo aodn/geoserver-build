@@ -24,16 +24,6 @@
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
-    <settings>
-        <servers>
-            <server>
-                <id>codeartifact</id>
-                <username>aws</username>
-                <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
-            </server>
-        </servers>
-    </settings>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
