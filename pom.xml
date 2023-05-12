@@ -81,11 +81,11 @@
     </build>
 
      <repositories>
-         <repository>
-             <id>codeartifact</id>
-             <name>codeartifact</name>
-             <url>https://cmrose-maven-615645230945.d.codeartifact.ap-southeast-2.amazonaws.com/maven/cmrose-maven/</url>
-         </repository>
+<!--         <repository>-->
+<!--             <id>codeartifact</id>-->
+<!--             <name>codeartifact</name>-->
+<!--             <url>https://cmrose-maven-615645230945.d.codeartifact.ap-southeast-2.amazonaws.com/maven/cmrose-maven/</url>-->
+<!--         </repository>-->
          <repository>
              <id>mvnrepository</id>
              <url>https://mvnrepository.com/artifact/</url>

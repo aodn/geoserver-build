@@ -24,9 +24,14 @@ pipeline {
                         }
                     }
                 }
-                stage('set_codeartifact_token') {
+//                 stage('set_codeartifact_token') {
+//                     steps {
+//                         sh 'export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cmrose-maven --domain-owner 615645230945 --region ap-southeast-2 --query authorizationToken --output text`'
+//                     }
+//                 }
+                stage('install_local_dependencies') {
                     steps {
-                        sh 'export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cmrose-maven --domain-owner 615645230945 --region ap-southeast-2 --query authorizationToken --output text`'
+                        sh 'mvn install:install-file -Dfile=gs-gwc-s3.jar -DgroupId=org.geoserver.community -DartifactId=gs-gwc-s3 -Dversion=2.23.0 -Dpackaging=jar'
                     }
                 }
                 stage('build') {
