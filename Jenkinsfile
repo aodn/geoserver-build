@@ -31,7 +31,7 @@ pipeline {
                 }
                 stage('build') {
                     steps {
-                        sh 'mvn -B -DskipTests clean compile'
+                        sh 'mvn -B -DskipTests clean compile -s settings.xml'
                     }
                 }
                 stage('test') {
