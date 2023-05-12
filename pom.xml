@@ -24,6 +24,16 @@
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
     </properties>
 
+    <settings>
+        <servers>
+            <server>
+                <id>codeartifact</id>
+                <username>aws</username>
+                <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+            </server>
+        </servers>
+    </settings>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -81,6 +91,11 @@
     </build>
 
      <repositories>
+         <repository>
+             <id>codeartifact</id>
+             <name>codeartifact</name>
+             <url>https://cmrose-maven-615645230945.d.codeartifact.ap-southeast-2.amazonaws.com/maven/cmrose-maven/</url>
+         </repository>
          <repository>
              <id>mvnrepository</id>
              <url>https://mvnrepository.com/artifact/</url>

@@ -24,6 +24,11 @@ pipeline {
                         }
                     }
                 }
+                stage('set_codeartifact_token') {
+                    steps {
+                        sh 'export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cmrose-maven --domain-owner 615645230945 --region ap-southeast-2 --query authorizationToken --output text`'
+                    }
+                }
                 stage('build') {
                     steps {
                         sh 'mvn -B -DskipTests clean compile'
