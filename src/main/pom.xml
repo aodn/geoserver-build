@@ -48,6 +48,14 @@
             <artifactId>gs-web-wfs</artifactId>
             <scope>compile</scope>
         </dependency>
+<!--  TODO: The required version is not in the maven repository
+Currently install this way: https://docs.geoserver.org/2.23.x/en/user/extensions/gwc-s3/install.html
+      -->
+<!--        <dependency>-->
+<!--            <groupId>org.geoserver.community</groupId>-->
+<!--            <artifactId>gs-gwc-s3</artifactId>-->
+<!--            <version>${geoserver.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>net.sourceforge.jtds</groupId>
             <artifactId>jtds</artifactId>
