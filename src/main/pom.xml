@@ -66,8 +66,10 @@ Currently include by unzipping jar files from https://geoserver.org/release/2.23
             <artifactId>gt-jdbc-sqlserver</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.geoserver.extension</groupId>
@@ -118,22 +120,22 @@ Currently include by unzipping jar files from https://geoserver.org/release/2.23
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.29.v20200521</version>
+                <version>10.0.15</version>
                 <configuration>
-                    <scanIntervalSeconds>2</scanIntervalSeconds>
+                    <scan>2</scan>
                     <scanTargetPatterns>
-                      <scanTargetPattern>
-                        <directory>src/jetty</directory>
-                        <excludes>
-                          <exclude>geoserver_data</exclude>
-                        </excludes>
-                      </scanTargetPattern>
+                        <scanTargetPattern>
+                            <directory>src/jetty</directory>
+                            <excludes>
+                                <exclude>geoserver_data</exclude>
+                            </excludes>
+                        </scanTargetPattern>
                     </scanTargetPatterns>
                     <webApp>
                         <overrideDescriptor>src/jetty/override-web.xml</overrideDescriptor>
                         <extraClasspath>src/jetty/database</extraClasspath>
-                     </webApp>
-                     <war>${build.directory}/geoserver-${project.version}-imos.war</war>
+                        <war>${build.directory}/geoserver-${project.version}-imos.war</war>
+                    </webApp>
                     <contextXml>src/jetty/context.xml</contextXml>
                 </configuration>
                 <dependencies>
@@ -160,7 +162,7 @@ Currently include by unzipping jar files from https://geoserver.org/release/2.23
                     <dependency>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-servlets</artifactId>
-                        <version>9.4.29.v20200521</version>
+                        <version>10.0.15</version>
                     </dependency>
                 </dependencies>
             </plugin>
