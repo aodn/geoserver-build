@@ -42,8 +42,8 @@
       <id>CacheBucket</id>
       <enabled>true</enabled>
       <bucket></bucket>                     <!-- Insert your cache bucket name -->
-      <awsAccessKey></awsAccessKey>     <!-- Insert your access key -->
-      <awsSecretKey></awsSecretKey>     <!-- Insert your secret key -->
+<!--      <awsAccessKey>Insert your access key</awsAccessKey> -->
+<!--      <awsSecretKey>Insert your secret key</awsSecretKey>     -->
       <access>PUBLIC</access>
       <maxConnections>50</maxConnections>
       <useHTTPS>true</useHTTPS>
