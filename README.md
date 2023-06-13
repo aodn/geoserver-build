@@ -58,3 +58,22 @@ GeoServer will then be available at:
 ```
 http://localhost:9090
 ```
+
+### Running using Tomcat and IntelliJ
+
+Set the maven profile to `tomcat`
+Create a context file and update to use the required database (an existing populated database or create one with restored data)
+Create and populate a data directory or a symlink to a checkout of `geoserver-config`
+Install Tomcat 8.5
+Install Amazon Corretto version 11
+Update the run configuration JRE and Application Server to your Corretto and Tomcat
+
+GeoServer will then be available at:
+
+```
+http://localhost:8080
+```
+
+Default admin user is `username=admin`, `password=geoserver`
+
+
