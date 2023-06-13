@@ -67,6 +67,12 @@ Create and populate a data directory or a symlink to a checkout of `geoserver-co
 Install Tomcat 8.5
 Install Amazon Corretto version 11
 Update the run configuration JRE and Application Server to your Corretto and Tomcat
+For console logging, create src/main/webapp/WEB-INF/classes/logging.properties:
+
+```yaml
+org.apache.catalina.core.ContainerBase.[Catalina].level=INFO
+org.apache.catalina.core.ContainerBase.[Catalina].handlers=java.util.logging.ConsoleHandler
+```
 
 GeoServer will then be available at:
 
