@@ -37,9 +37,6 @@
     <Valve className="org.apache.catalina.valves.CometConnectionManagerValve" />
     -->
 
-    <!--        driverClassName="org.postgis.DriverWrapper"-->
-<!--    factory="org.apache.commons.dbcp.BasicDataSourceFactory"-->
-
     <Resource name="jdbc/harvest_read" auth="Container"
         type="javax.sql.DataSource"
         driverClassName="org.postgresql.Driver"
