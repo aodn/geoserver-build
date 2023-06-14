@@ -163,6 +163,8 @@ org.apache.catalina.core.ContainerBase.[Catalina].level=INFO
 org.apache.catalina.core.ContainerBase.[Catalina].handlers=java.util.logging.ConsoleHandler
 ```
 
+Run the `Tomcat` run configuration.
+
 GeoServer will then be available at:
 
 ```
