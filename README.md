@@ -141,19 +141,22 @@ http://localhost:9090
 
 ## Running using Tomcat and IntelliJ
 
-Set the maven profile to `tomcat`
-
-Create a context file and update to use the required database (an existing populated database or create one with restored data)
-
-Create and populate a data directory or a symlink to a checkout of `geoserver-config`
-
 Install Tomcat 8.5
 
-Install Amazon Corretto version 11
+Install Java version 11
 
-Update the run configuration JRE and Application Server to your Corretto and Tomcat
+Set the maven profile to `tomcat`.
 
-For console logging, create src/main/webapp/WEB-INF/classes/logging.properties:
+![img.png](img.png)
+
+Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
+a template and update to use the required database datastore.
+
+Create and populate a `src/main/webapp/data` directory with custom content.
+
+Update the supplied `Tomcat` run configuration JRE and Application Server to your Corretto and Tomcat.
+
+For complete console logging, create `src/main/webapp/WEB-INF/classes/logging.properties`:
 
 ```yaml
 org.apache.catalina.core.ContainerBase.[Catalina].level=INFO
