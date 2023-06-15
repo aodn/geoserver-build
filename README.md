@@ -147,7 +147,8 @@ Install Java version 11
 
 Set the maven profile to `tomcat`.
 
-![img.png](img.png)
+[maven tomcat profile](https://github.com/aodn/geoserver-build/assets/40220935/68d0c69f-1ca9-44db-b59e-edf6b47121a3)
+
 
 Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
 a template and update to use the required database datastore.
