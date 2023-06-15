@@ -63,7 +63,6 @@ Status: 200 OK
       imos:NON_EXISTENT_LAYER: no such layer on this server
 </ServiceException>
 </ServiceExceptionReport>
-
 ```
 
 With the customisation we get:
@@ -83,7 +82,6 @@ Status: 500 Internal Server Error
 <hr class="line" /><h3>Apache Tomcat/8.5.73</h3>
 </body>
 </html>
-
 ```
 
 ### Enable CORS for GET requests so IMAS can use it for GetFeatureInfo requests
@@ -147,8 +145,7 @@ Install Java version 11
 
 Set the maven profile to `tomcat`.
 
-[maven tomcat profile](https://github.com/aodn/geoserver-build/assets/40220935/68d0c69f-1ca9-44db-b59e-edf6b47121a3)
-
+![maven tomcat profile](https://github.com/aodn/geoserver-build/assets/40220935/68d0c69f-1ca9-44db-b59e-edf6b47121a3)
 
 Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
 a template and update to use the required database datastore.
