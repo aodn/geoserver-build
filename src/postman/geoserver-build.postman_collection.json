@@ -1104,18 +1104,6 @@
 	"variable": [
 		{
 			"key": "host",
-			"value": "geoserver-cmrose2.dev.aodn.org.au",
-			"type": "string",
-			"disabled": true
-		},
-		{
-			"key": "host",
-			"value": "geoserver-portal.aodn.org.au",
-			"type": "string",
-			"disabled": true
-		},
-		{
-			"key": "host",
 			"value": "localhost:8080",
 			"type": "string"
 		},
@@ -1123,12 +1111,6 @@
 			"key": "site",
 			"value": "/geoserver",
 			"type": "string"
-		},
-		{
-			"key": "site",
-			"value": "",
-			"type": "string",
-			"disabled": true
 		}
 	]
 }
