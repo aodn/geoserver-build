@@ -82,6 +82,7 @@ public class RestrictedColumnCsvOutputFormat extends WFSGetFeatureOutputFormat {
 
             RestrictedColumnCsvOutputFormatLines lines = new RestrictedColumnCsvOutputFormatLines(excludedFilters, getCoordFormatter());
             lines.write(featureCollection, writer);
+            writer.flush();
         }
         catch (ParserConfigurationException pce) {
             throw new RuntimeException(pce);
