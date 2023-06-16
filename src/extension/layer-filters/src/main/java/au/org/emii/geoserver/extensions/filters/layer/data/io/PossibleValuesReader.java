@@ -51,7 +51,7 @@ public class PossibleValuesReader {
             schema = store.getSchema(info.getNativeName());
         }
 
-        Query query = new Query(null, null, new String[] { });
+        Query query = new Query();
         UniqueVisitor visitor = new UniqueVisitor(propertyName);
 
         Method storeGetAggregateValueMethod = store.getClass().getDeclaredMethod(
