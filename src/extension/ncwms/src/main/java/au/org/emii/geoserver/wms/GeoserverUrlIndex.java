@@ -174,45 +174,6 @@ public class GeoserverUrlIndex implements UriIndex {
         }
     }
 
-    private SimpleFeatureIterator getFeatures2(String typeName, Query query) throws IOException {
-
-        // Feature information
-        FeatureTypeInfo info = catalog.getFeatureTypeByName(typeName);
-
-        // The query needs a coordinate system - see geotools.ContentFeatureCollection line 57 or 60
-        DefaultGeographicCRS crs = (DefaultGeographicCRS) catalog.getResourcePool().getCRS(info.getSRS());
-//        query.setCoordinateSystem(crs);
-//        query.setCoordinateSystemReproject(crs);
-
-        // The metadata needs other_SRS=null (GeoServerFeatureSource.metadata.get("OTHER_SRS")) - see geoserver.GeoServerFeatureSource line 331
-        MetadataMap metadata = info.getMetadata();
-        metadata.put("OTHER_SRS", null);
-
-//        SimpleFeatureSource featureSource = (SimpleFeatureSource) catalog.getFeatureTypeByName(typeName).getFeatureSource(null, null);
-//        SimpleFeatureCollection collection = featureSource.getFeatures(query);
-//        return collection.features();
-
-        // Get the geoserver collection source
-        SimpleFeatureSource source = (SimpleFeatureSource) info.getFeatureSource(null, null);    // !!! getFeatureSource creates a new FeatureSource without the required metadata
-        GeoServerFeatureSource.Settings settings = new GeoServerFeatureSource.Settings(source.getSchema(), null, crs, 0, null, metadata);
-        SimpleFeatureSource test = (SimpleFeatureSource) catalog.getResourcePool().getFeatureSource(info, null);
-        GeoServerFeatureSource gs_source = GeoServerFeatureSource.create(source, settings);
-
-        // Get the features
-        SimpleFeatureCollection feature_collection = gs_source.getFeatures(query);
-        SimpleFeatureIterator featureIterator = feature_collection.features();  // !!! featureIterator.hasNext() is false
-
-        return featureIterator;
-    }
-
-    private SimpleFeatureIterator getFeatures1(String typeName, Query query) throws IOException {
-
-        FeatureTypeInfo info = catalog.getFeatureTypeByName(typeName);
-        SimpleFeatureSource featureSource = (SimpleFeatureSource) catalog.getResourcePool().getFeatureSource(info, null);
-        SimpleFeatureCollection collection = featureSource.getFeatures(query);
-        return collection.features();
-    }
-
     private SimpleFeatureIterator getFeatures(String typeName, Query query) throws IOException {
         SimpleFeatureSource featureSource = (SimpleFeatureSource) catalog.getFeatureTypeByName(typeName).getFeatureSource(null, null);
         SimpleFeatureCollection collection = featureSource.getFeatures(query);

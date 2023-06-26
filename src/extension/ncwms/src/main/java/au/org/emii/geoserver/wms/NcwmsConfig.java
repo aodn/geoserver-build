@@ -61,7 +61,7 @@ public class NcwmsConfig {
 
             for (final org.dom4j.Node node : list) {
                 Element element = (Element) node;
-                returnValue.put(element.attributeValue("@key"), element.getText());
+                returnValue.put(element.attributeValue("key"), element.getText());
             }
         }
         catch (DocumentException e) {

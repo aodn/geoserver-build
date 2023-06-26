@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,9 @@ public class Ncwms {
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
+        Integer[] response_codes = {200, 301};  // Send error if the response is not one of these
+        List<Integer> response_ok = Arrays.asList(response_codes);
+
         if(wmsUrlStr != null) {
             try {
                 @SuppressWarnings("unchecked")
@@ -134,8 +138,7 @@ public class Ncwms {
                 else {
                     connection.addRequestProperty("User-Agent","Geoserver-Ncwms");
                 }
-
-                if (connection.getResponseCode() != 200) {
+                if (!response_ok.contains(connection.getResponseCode())) {
                     String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
                     response.sendError(connection.getResponseCode(), ret);
                     LOGGER.log(Level.SEVERE, ret);
@@ -225,7 +228,7 @@ public class Ncwms {
     private String mangleUrl(String url) {
         for (final String search : urlSubstitutions.keySet()) {
             final String replace = urlSubstitutions.get(search);
-            url = url.replaceAll(search, replace);   // TODO: NullPointerException when url is null
+            url = url.replaceAll(search, replace);
         }
         return url;
     }
