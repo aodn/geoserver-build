@@ -101,7 +101,7 @@ public class Ncwms {
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
-        Integer[] response_codes = {200, 301};  // Send error if the response is not one of these
+        Integer[] response_codes = {200, 301};  // Send error if the response is not one of thesetreat
         List<Integer> response_ok = Arrays.asList(response_codes);
 
         if(wmsUrlStr != null) {
