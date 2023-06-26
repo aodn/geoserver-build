@@ -225,7 +225,7 @@ public class Ncwms {
     private String mangleUrl(String url) {
         for (final String search : urlSubstitutions.keySet()) {
             final String replace = urlSubstitutions.get(search);
-            url = url.replaceAll(search, replace);
+            url = url.replaceAll(search, replace);   // TODO: NullPointerException when url is null
         }
         return url;
     }

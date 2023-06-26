@@ -1,6 +1,9 @@
 package au.org.emii.geoserver.wms;
 
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.FeatureTypeInfo;
+import org.geoserver.catalog.MetadataMap;
+import org.geoserver.catalog.ResourcePool;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -8,6 +11,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.logging.Logging;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -18,8 +22,10 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
+import org.vfny.geoserver.global.GeoServerFeatureSource;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,7 +67,7 @@ public class GeoserverUrlIndex implements UriIndex {
 
         try {
              SimpleFeature feature = null;
-             if(iterator != null && iterator.hasNext()) {
+             if(iterator != null && iterator.hasNext()) {  // iterator.hasNext() == false
                  feature = iterator.next();
                  url = (String) feature.getAttribute(layerDescriptor.getUrlFieldName());
              } else {
@@ -166,6 +172,45 @@ public class GeoserverUrlIndex implements UriIndex {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private SimpleFeatureIterator getFeatures2(String typeName, Query query) throws IOException {
+
+        // Feature information
+        FeatureTypeInfo info = catalog.getFeatureTypeByName(typeName);
+
+        // The query needs a coordinate system - see geotools.ContentFeatureCollection line 57 or 60
+        DefaultGeographicCRS crs = (DefaultGeographicCRS) catalog.getResourcePool().getCRS(info.getSRS());
+//        query.setCoordinateSystem(crs);
+//        query.setCoordinateSystemReproject(crs);
+
+        // The metadata needs other_SRS=null (GeoServerFeatureSource.metadata.get("OTHER_SRS")) - see geoserver.GeoServerFeatureSource line 331
+        MetadataMap metadata = info.getMetadata();
+        metadata.put("OTHER_SRS", null);
+
+//        SimpleFeatureSource featureSource = (SimpleFeatureSource) catalog.getFeatureTypeByName(typeName).getFeatureSource(null, null);
+//        SimpleFeatureCollection collection = featureSource.getFeatures(query);
+//        return collection.features();
+
+        // Get the geoserver collection source
+        SimpleFeatureSource source = (SimpleFeatureSource) info.getFeatureSource(null, null);    // !!! getFeatureSource creates a new FeatureSource without the required metadata
+        GeoServerFeatureSource.Settings settings = new GeoServerFeatureSource.Settings(source.getSchema(), null, crs, 0, null, metadata);
+        SimpleFeatureSource test = (SimpleFeatureSource) catalog.getResourcePool().getFeatureSource(info, null);
+        GeoServerFeatureSource gs_source = GeoServerFeatureSource.create(source, settings);
+
+        // Get the features
+        SimpleFeatureCollection feature_collection = gs_source.getFeatures(query);
+        SimpleFeatureIterator featureIterator = feature_collection.features();  // !!! featureIterator.hasNext() is false
+
+        return featureIterator;
+    }
+
+    private SimpleFeatureIterator getFeatures1(String typeName, Query query) throws IOException {
+
+        FeatureTypeInfo info = catalog.getFeatureTypeByName(typeName);
+        SimpleFeatureSource featureSource = (SimpleFeatureSource) catalog.getResourcePool().getFeatureSource(info, null);
+        SimpleFeatureCollection collection = featureSource.getFeatures(query);
+        return collection.features();
     }
 
     private SimpleFeatureIterator getFeatures(String typeName, Query query) throws IOException {
