@@ -113,3 +113,16 @@ And last, a real example of an online resource:
     </gmd:CI_OnlineResource>
 </gmd:onLine>
 ```
+
+## Geoserver configuration
+
+Include an `ncwms.xml` file in the Geoserver data directory. This contains the location of the wfs service and the url
+to substitute for the Thredds server. NCWMS will not follow redirects between `http:\\` and `https:\\` so make sure you
+use the correct protocol for your Thredds server.
+
+```xml
+<ncwms>
+  <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+  <urlSubstitution key="^">https://thredds.aodn.org.au/thredds/wms/</urlSubstitution>
+</ncwms>
+```

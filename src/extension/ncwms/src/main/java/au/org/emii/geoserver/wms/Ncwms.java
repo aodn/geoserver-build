@@ -101,9 +101,6 @@ public class Ncwms {
 
         String wmsUrlStr = getWmsUrl(layerDescriptor, time);
 
-        Integer[] response_codes = {200, 301};  // Send error if the response is not one of thesetreat
-        List<Integer> response_ok = Arrays.asList(response_codes);
-
         if(wmsUrlStr != null) {
             try {
                 @SuppressWarnings("unchecked")
@@ -138,7 +135,7 @@ public class Ncwms {
                 else {
                     connection.addRequestProperty("User-Agent","Geoserver-Ncwms");
                 }
-                if (!response_ok.contains(connection.getResponseCode())) {
+                if (connection.getResponseCode() != 200) {
                     String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
                     response.sendError(connection.getResponseCode(), ret);
                     LOGGER.log(Level.SEVERE, ret);
