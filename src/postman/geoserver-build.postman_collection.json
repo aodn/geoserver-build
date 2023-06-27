@@ -872,10 +872,10 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"// pm.test(\"Body has valid data\", function () {",
-									"//     var jsonData = xml2Json(responseBody);",
-									"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
-									"// });"
+									"pm.test(\"Body has valid data\", function () {",
+									"    var jsonData = xml2Json(responseBody);",
+									"    pm.expect(jsonData.WMS_DescribeLayerResponse.LayerDescription.Query.$.typeName).to.eql(\"imos:argo_profile_map\");",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -926,10 +926,11 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"// pm.test(\"Body has valid data\", function () {",
-									"//     var jsonData = xml2Json(responseBody);",
-									"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
-									"// });"
+									"pm.test(\"Body has valid data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.featureTypes.length).to.be.greaterThan(0);",
+									"    pm.expect(jsonData.featureTypes[0].properties.length).to.be.greaterThan(0);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -984,11 +985,7 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"",
-									"// pm.test(\"Body has valid data\", function () {",
-									"//     var jsonData = xml2Json(responseBody);",
-									"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
-									"// });"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1079,11 +1076,7 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"",
-									"// pm.test(\"Body has valid data\", function () {",
-									"//     var jsonData = xml2Json(responseBody);",
-									"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
-									"// });"
+									""
 								],
 								"type": "text/javascript"
 							}
