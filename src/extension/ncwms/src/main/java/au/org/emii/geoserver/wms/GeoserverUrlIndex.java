@@ -67,7 +67,7 @@ public class GeoserverUrlIndex implements UriIndex {
 
         try {
              SimpleFeature feature = null;
-             if(iterator != null && iterator.hasNext()) {  // iterator.hasNext() == false
+             if(iterator != null && iterator.hasNext()) {
                  feature = iterator.next();
                  url = (String) feature.getAttribute(layerDescriptor.getUrlFieldName());
              } else {
