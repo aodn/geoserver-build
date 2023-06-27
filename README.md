@@ -123,7 +123,8 @@ Set the maven profile to `tomcat`.
 Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
 a template and update to use the required database datastore.
 
-Create and populate a `src/main/webapp/data` directory with custom content.
+Create and populate a `src/main/webapp/data` directory with custom content. For all the Postman tests to pass you will need to
+update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`
 
 Update the supplied `Tomcat` run configuration JRE and Application Server to your Corretto and Tomcat.
 
@@ -143,3 +144,10 @@ http://localhost:8080
 ```
 
 Default admin user is `username=admin`, `password=geoserver`
+
+## Using the Postman tests
+
+For all the Postman tests to pass you will need to
+update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`
+
+Import the Postman tests from `src/postman/geoserver-build.postman_collection.json` into Postman and run.
