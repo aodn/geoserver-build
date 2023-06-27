@@ -150,7 +150,11 @@ public class GeoserverUrlIndex implements UriIndex {
     private Filter cqlFilterForTimestamp(String timestamp, String timeFieldName) {
         LOGGER.log(Level.INFO, String.format("Returning cql for timestamp '%s'", timestamp));
         try {
-            return CQL.toFilter(String.format("%s = '%s'", timeFieldName, timestamp));
+
+            DateTime time = new DateTime(timestamp);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");  // Format required by geotools 29.x
+
+            return CQL.toFilter(String.format("%s = '%s'", timeFieldName, formatter.print(time.withZone(DateTimeZone.UTC))));
         } catch (CQLException e) {
             throw new RuntimeException(e);
         }
@@ -161,7 +165,7 @@ public class GeoserverUrlIndex implements UriIndex {
         DateTime timeEnd = timeStart.plusDays(1); // Just the next day
         LOGGER.log(Level.INFO, String.format("Returning times of day '%s'", day));
 
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");  // Format required by geotools 29.x
 
         try {
             return CQL.toFilter(String.format(
