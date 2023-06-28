@@ -49,14 +49,11 @@
             <artifactId>gs-web-wfs</artifactId>
             <scope>compile</scope>
         </dependency>
-<!--  TODO: The required gs-gwc-s3 version is not in the maven repository
-Currently include by unzipping jar files from https://geoserver.org/release/2.23.0/ into src/main/webapp/WEB-INF/lib
-      -->
-<!--        <dependency>-->
-<!--            <groupId>org.geoserver.community</groupId>-->
-<!--            <artifactId>gs-gwc-s3</artifactId>-->
-<!--            <version>${geoserver.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-gwc-s3</artifactId>
+            <version>${geoserver.version}</version>
+        </dependency>
         <dependency>
             <groupId>net.sourceforge.jtds</groupId>
             <artifactId>jtds</artifactId>
