@@ -1,5 +1,4 @@
-Geoserver Build
-===============
+# Geoserver Build
 
 ## Configures a GeoServer war file with the following extensions installed
 
@@ -22,6 +21,7 @@ Geoserver Build
 ### Return 500 errors instead of 200 for API errors so squid doesn't cache API errors
 
 The geoserver `dispatcher` bean is overriden with `src/main/java/org/geoserver/ows/DispatcherWithHttpStatus.java` class which handles all OWS service exceptions by sending an HTTP 500 response. Otherwise Geoserver will modify the response to potentially send other HTTP response codes. These can end up as 200 codes depending on the service.
+
 
 Squid will cache 200 responses which may actually contain error reporting content. These will be erroneously returned as the response when there is a cache hit.
 
@@ -76,6 +76,10 @@ Response headers will include:
 ]
 ```
 
+## Licensing
+This project is licensed under the terms of the GNU GPLv3 license.
+
+
 ## To build
 
 ```
@@ -88,6 +92,15 @@ Copy the sample context.xml file to configure the default/additional jndi resour
 cd src/main/src/jetty
 cp context-sample.xml context.xml
 ```
+
+## Provision Geoserver
+A [job in jenkins](https://build.aodn.org.au/job/geoserver-build_build/) create the artifact, but the real provision
+is done via cloudformation where it combines the [configuration](https://github.com/aodn/geoserver-config) 
+of geoserver, for example [workspaces](https://github.com/aodn/geoserver-config/tree/master/workspaces/imos)
+so you can search the layer in geoserver. In short the layers are predefined by this configuration, however
+the data about this layer comes from the PostGis database that set in the cloudformation.
+
+This issue contains extra [information](https://github.com/aodn/backlog/issues/4098)
 
 ## Running using Jetty
 
