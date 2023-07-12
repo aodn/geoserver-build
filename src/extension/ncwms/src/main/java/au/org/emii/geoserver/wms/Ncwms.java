@@ -134,7 +134,6 @@ public class Ncwms {
                 else {
                     connection.addRequestProperty("User-Agent","Geoserver-Ncwms");
                 }
-
                 if (connection.getResponseCode() != 200) {
                     String ret = String.format("ERROR proxying URL '%s' - %s", wmsUrl, connection.getResponseMessage());
                     response.sendError(connection.getResponseCode(), ret);
@@ -223,9 +222,11 @@ public class Ncwms {
     }
 
     private String mangleUrl(String url) {
-        for (final String search : urlSubstitutions.keySet()) {
-            final String replace = urlSubstitutions.get(search);
-            url = url.replaceAll(search, replace);
+        if (url != null) {
+            for (final String search : urlSubstitutions.keySet()) {
+                final String replace = urlSubstitutions.get(search);
+                url = url.replaceAll(search, replace);
+            }
         }
         return url;
     }

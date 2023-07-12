@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app>
+<web-app
+        xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+        metadata-complete="false"
+        version="3.1">
+
     <display-name>GeoServer</display-name>
   
       <context-param>
@@ -106,31 +112,6 @@
          <param-value>text/.*,.*xml.*,application/json,application/x-javascript</param-value>
      </init-param>
    </filter>
-
-   <filter>
-     <filter-name>Request Logging Filter</filter-name>
-     <filter-class>org.geoserver.filters.LoggingFilter</filter-class>
-     <init-param>
-         <!-- The 'enabled' parameter is a boolean value, "true" (case-insensitive) for true or
-              any other value for false.  If enabled, then the logging will be performed;
-              otherwise the logging filter will have no effect.  If not specified, this 
-              parameter defaults to false.
-              -->
-         <param-name>enabled</param-name>
-         <param-value>true</param-value>
-     </init-param>
-     <init-param>
-     <!-- The 'log-request-bodies' parameter is a boolean value, "true" (case-insensitive) for
-          true or any other value for false.  If enabled, then the logging will include the body
-          of POST and PUT requests.  If not specified, this parameter defaults to false.
-          Note that this may noticeably degrade responsiveness of your geoserver since it will
-          not begin to process requests until the entire request body has been received by the 
-          server.
-          -->
-     <param-name>log-request-bodies</param-name>
-     <param-value>true</param-value>
-     </init-param>
-   </filter>
    
    <filter>
      <filter-name>Advanced Dispatch Filter</filter-name>
@@ -212,11 +193,6 @@
 
     <filter-mapping>
       <filter-name>xFrameOptionsFilter</filter-name>
-      <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    
-    <filter-mapping>
-      <filter-name>Request Logging Filter</filter-name>
       <url-pattern>/*</url-pattern>
     </filter-mapping>
    

@@ -1,40 +1,23 @@
-FROM ubuntu:20.04
+FROM amazoncorretto:11-al2-jdk
 
 ARG BUILDER_UID=9999
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ="Australia"
-ENV GRAILS_VERSION 2.4.4
 ENV HOME /home/builder
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 ENV JAVA_TOOL_OPTIONS -Duser.home=/home/builder
-ENV GRAILS_HOME /usr/lib/jvm/grails
-ENV PATH $GRAILS_HOME/bin:$PATH
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN yum install --quiet --assumeyes \
     git \
     libxml2-utils \
     maven \
-    openjdk-8-jdk \
-    python3-dev \
+    python3 \
+    python3-pip \
     unzip \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+    wget
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-
-RUN wget -q https://bootstrap.pypa.io/pip/3.5/get-pip.py \
-    && python get-pip.py pip==18.1 setuptools==49.6.0 wheel==0.35.1 \
-    && rm -rf get-pip.py
-
-RUN pip install \
+RUN pip3 install \
     bump2version==1.0.1
-
-WORKDIR /usr/lib/jvm
-RUN wget https://github.com/grails/grails-core/releases/download/v$GRAILS_VERSION/grails-$GRAILS_VERSION.zip && \
-    unzip grails-$GRAILS_VERSION.zip && \
-    rm -rf grails-$GRAILS_VERSION.zip && \
-    ln -s grails-$GRAILS_VERSION grails
 
 RUN useradd --create-home --no-log-init --shell /bin/bash --uid $BUILDER_UID builder
 USER builder

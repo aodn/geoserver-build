@@ -1,0 +1,1385 @@
+{
+	"info": {
+		"_postman_id": "48ff3fc7-d58a-433f-b722-dbccec75d250",
+		"name": "geoserver-build",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19634741"
+	},
+	"item": [
+		{
+			"name": "Test geoserver-build",
+			"item": [
+				{
+					"name": "csv-with-metadata-header",
+					"item": [
+						{
+							"name": "GetFeature",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const parse = require('csv-parse/lib/sync'),",
+											"    parsedBody = parse(responseBody, {relax_column_count: true});",
+											"const sample_data = [",
+											"        \"JBmeteorological_data.fid-3064fac0_188bc7492c4_-7805\",",
+											"        \"684\",",
+											"        \"35\",",
+											"        \"49a62950-be36-11dc-9c72-00188b4c0af8\",",
+											"        \"629051e0-2b7b-11dd-a343-00188b4c0af8\",",
+											"        \"\",",
+											"        \"Wind statistics at Governor Head Meteorological Station, Jervis Bay in November 1988\",",
+											"        \"Peter Holloway\",",
+											"        \"Governor Head\",",
+											"        \"1988-11-01T00:00:00Z\",",
+											"        \"1988-11-30T00:00:00Z\",",
+											"        \"POINT (-35.133 150.762)\"",
+											"    ]",
+											"    ",
+											"pm.test(\"Correct CSV response\", function () {",
+											"    // Check that we have at least 2 two (header + row)",
+											"    pm.expect(parsedBody).to.have.length.above(1);",
+											"",
+											"    // Getting the index of metadata_uuid",
+											"    const head = parsedBody.shift();",
+											"    const metadata_uuid = head.indexOf('metadata_uuid');",
+											"",
+											"    // Iterate through the rows",
+											"    parsedBody.forEach((row) => {",
+											"        // Each row has correct number of columns",
+											"        pm.expect(row.length).to.equal(head.length);",
+											"        // If metadata_uuid matches the required value perform the test",
+											"        // if(row[metadata_uuid] === sample_data[3]) {",
+											"        //     sample_data.forEach((value, index) => {",
+											"        //         // Each value in the example row is correct",
+											"        //         if (index !== 0) {",
+											"        //             pm.expect(row[index]).to.equal(value);",
+											"        //         }",
+											"        //     });",
+											"        // }",
+											"    })",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ows?typeName=aodn:JBmeteorological_data&SERVICE=WFS&outputFormat=csv-with-metadata-header&REQUEST=GetFeature&VERSION=2.0.0&sortBy=pkid",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ows"
+									],
+									"query": [
+										{
+											"key": "typeName",
+											"value": "aodn:JBmeteorological_data"
+										},
+										{
+											"key": "SERVICE",
+											"value": "WFS"
+										},
+										{
+											"key": "outputFormat",
+											"value": "csv-with-metadata-header"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetFeature"
+										},
+										{
+											"key": "VERSION",
+											"value": "2.0.0"
+										},
+										{
+											"key": "sortBy",
+											"value": "pkid"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "layer-filters extension",
+					"item": [
+						{
+							"name": "enabledFilters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Body has valid data\", function () {",
+											"    var jsonData = xml2Json(responseBody);",
+											"    pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ows?request=enabledFilters&service=layerFilters&version=1.0.0&workspace=imos&layer=argo_primary_profile_core_low_res_good_qc_data",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ows"
+									],
+									"query": [
+										{
+											"key": "request",
+											"value": "enabledFilters"
+										},
+										{
+											"key": "service",
+											"value": "layerFilters"
+										},
+										{
+											"key": "version",
+											"value": "1.0.0"
+										},
+										{
+											"key": "workspace",
+											"value": "imos"
+										},
+										{
+											"key": "layer",
+											"value": "argo_primary_profile_core_low_res_good_qc_data"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uniqueValues",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Body has valid data\", function () {",
+											"    var jsonData = xml2Json(responseBody);",
+											"    pm.expect(jsonData.uniqueValues.value[0]).to.eql(\"1900042\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ows?request=uniqueValues&service=layerFilters&version=1.0.0&layer=imos:argo_profile_map&propertyName=platform_number",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ows"
+									],
+									"query": [
+										{
+											"key": "request",
+											"value": "uniqueValues"
+										},
+										{
+											"key": "service",
+											"value": "layerFilters"
+										},
+										{
+											"key": "version",
+											"value": "1.0.0"
+										},
+										{
+											"key": "layer",
+											"value": "imos:argo_profile_map"
+										},
+										{
+											"key": "propertyName",
+											"value": "platform_number"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "WFS",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// For these tests configure the layer to exclude the \"data_centre_name\" from the response",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const parse = require('csv-parse/lib/sync'),",
+											"    parsedBody = parse(responseBody, {relax_column_count: true});",
+											"",
+											"pm.test(\"Correct CSV response\", function () {",
+											"    // Check that we have at least 2 two (header + row)",
+											"    pm.expect(parsedBody).to.have.length.above(1);",
+											"",
+											"    // Getting column headings ",
+											"    const head = parsedBody.shift();",
+											"",
+											"    // Column is excluded",
+											"    // For this test to pass configure imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data data_centre_name",
+											"    // to Exclude From Download",
+											"    pm.expect(head).to.not.contain(\"data_centre_name\");",
+											"",
+											"    // Iterate through the rows",
+											"    parsedBody.forEach((row) => {",
+											"        // Each row has correct number of columns",
+											"        pm.expect(row.length).to.equal(head.length);",
+											"    })",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ows?typeName=imos:argo_primary_profile_core_low_res_good_qc_data&SERVICE=WFS&outputFormat=csv-restricted-column&REQUEST=GetFeature&VERSION=1.0.0&CQL_FILTER=platform_number%20LIKE%20%271900042%27",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ows"
+									],
+									"query": [
+										{
+											"key": "typeName",
+											"value": "imos:argo_primary_profile_core_low_res_good_qc_data"
+										},
+										{
+											"key": "SERVICE",
+											"value": "WFS"
+										},
+										{
+											"key": "outputFormat",
+											"value": "csv-restricted-column"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetFeature"
+										},
+										{
+											"key": "VERSION",
+											"value": "1.0.0"
+										},
+										{
+											"key": "CQL_FILTER",
+											"value": "platform_number%20LIKE%20%271900042%27"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "NCWMS",
+					"item": [
+						{
+							"name": "GetMetadata",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has correct number of timesteps\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.timesteps.length).to.eql(16);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ncwms?layerName=acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity&SERVICE=ncwms&REQUEST=GetMetadata&item=timesteps&day=2017-04-17&version=1.0.0",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ncwms"
+									],
+									"query": [
+										{
+											"key": "layerName",
+											"value": "acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity"
+										},
+										{
+											"key": "SERVICE",
+											"value": "ncwms"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetMetadata"
+										},
+										{
+											"key": "item",
+											"value": "timesteps"
+										},
+										{
+											"key": "day",
+											"value": "2017-04-17"
+										},
+										{
+											"key": "version",
+											"value": "1.0.0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetFeatureInfo",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Body has valid data\", function () {",
+											"    var jsonData = xml2Json(responseBody);",
+											"    pm.expect(jsonData.FeatureInfoResponse.FeatureInfo.value).to.eql(\"0.095328525\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ncwms?LAYERS=acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity&TRANSPARENT=TRUE&VERSION=1.3.0&FORMAT=text%2Fxml&EXCEPTIONS=application%2Fvnd.ogc.se_xml&TILED=true&SERVICE=ncwms&REQUEST=GetFeatureInfo&STYLES=&QUERYABLE=true&CRS=EPSG%3A4326&NUMCOLORBANDS=253&TIME=2017-04-17T15%3A30%3A00.000Z&BBOX=-61.436523%2C83.671875%2C8.436523%2C186.328125&INFO_FORMAT=text%2Fxml&QUERY_LAYERS=acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity&FEATURE_COUNT=1&SRS=EPSG%3A4326&WIDTH=1168&HEIGHT=795&X=777&Y=365&I=777&J=365&BUFFER=10",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ncwms"
+									],
+									"query": [
+										{
+											"key": "LAYERS",
+											"value": "acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity"
+										},
+										{
+											"key": "TRANSPARENT",
+											"value": "TRUE"
+										},
+										{
+											"key": "VERSION",
+											"value": "1.3.0"
+										},
+										{
+											"key": "FORMAT",
+											"value": "text%2Fxml"
+										},
+										{
+											"key": "EXCEPTIONS",
+											"value": "application%2Fvnd.ogc.se_xml"
+										},
+										{
+											"key": "TILED",
+											"value": "true"
+										},
+										{
+											"key": "SERVICE",
+											"value": "ncwms"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetFeatureInfo"
+										},
+										{
+											"key": "STYLES",
+											"value": ""
+										},
+										{
+											"key": "QUERYABLE",
+											"value": "true"
+										},
+										{
+											"key": "CRS",
+											"value": "EPSG%3A4326"
+										},
+										{
+											"key": "NUMCOLORBANDS",
+											"value": "253"
+										},
+										{
+											"key": "TIME",
+											"value": "2017-04-17T15%3A30%3A00.000Z"
+										},
+										{
+											"key": "BBOX",
+											"value": "-61.436523%2C83.671875%2C8.436523%2C186.328125"
+										},
+										{
+											"key": "INFO_FORMAT",
+											"value": "text%2Fxml"
+										},
+										{
+											"key": "QUERY_LAYERS",
+											"value": "acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity"
+										},
+										{
+											"key": "FEATURE_COUNT",
+											"value": "1"
+										},
+										{
+											"key": "SRS",
+											"value": "EPSG%3A4326"
+										},
+										{
+											"key": "WIDTH",
+											"value": "1168"
+										},
+										{
+											"key": "HEIGHT",
+											"value": "795"
+										},
+										{
+											"key": "X",
+											"value": "777"
+										},
+										{
+											"key": "Y",
+											"value": "365"
+										},
+										{
+											"key": "I",
+											"value": "777"
+										},
+										{
+											"key": "J",
+											"value": "365"
+										},
+										{
+											"key": "BUFFER",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetLegendGraphic",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// pm.test(\"Body has valid data\", function () {",
+											"//     var jsonData = xml2Json(responseBody);",
+											"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
+											"// });"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ncwms?PALETTE=rainbow&STYLE=vector/rainbow&LEGEND_OPTIONS=forceLabels:on&NUMCOLORBANDS=253&SERVICE=ncwms&REQUEST=GetLegendGraphic&LAYER=acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity&FORMAT=image/png&VERSION=1.3.0",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ncwms"
+									],
+									"query": [
+										{
+											"key": "PALETTE",
+											"value": "rainbow"
+										},
+										{
+											"key": "STYLE",
+											"value": "vector/rainbow"
+										},
+										{
+											"key": "LEGEND_OPTIONS",
+											"value": "forceLabels:on"
+										},
+										{
+											"key": "NUMCOLORBANDS",
+											"value": "253"
+										},
+										{
+											"key": "SERVICE",
+											"value": "ncwms"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetLegendGraphic"
+										},
+										{
+											"key": "LAYER",
+											"value": "acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity"
+										},
+										{
+											"key": "FORMAT",
+											"value": "image/png"
+										},
+										{
+											"key": "VERSION",
+											"value": "1.3.0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetMap",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// pm.test(\"Body has valid data\", function () {",
+											"//     var jsonData = xml2Json(responseBody);",
+											"//     pm.expect(jsonData.filters.filter[0].name).to.eql(\"data_centre_name\");",
+											"// });"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/ncwms?LAYERS=acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity&TRANSPARENT=TRUE&VERSION=1.1.1&FORMAT=image%2Fpng&EXCEPTIONS=application%2Fvnd.ogc.se_xml&TILED=true&SERVICE=ncwms&REQUEST=GetMap&STYLES=&QUERYABLE=true&SRS=EPSG%3A4326&BBOX=150.64,-25.31,153.37,-21.89&WIDTH=256&HEIGHT=256",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"ncwms"
+									],
+									"query": [
+										{
+											"key": "LAYERS",
+											"value": "acorn_hourly_avg_cbg_nonqc_timeseries_url%2Fsea_water_velocity"
+										},
+										{
+											"key": "TRANSPARENT",
+											"value": "TRUE"
+										},
+										{
+											"key": "VERSION",
+											"value": "1.1.1"
+										},
+										{
+											"key": "FORMAT",
+											"value": "image%2Fpng"
+										},
+										{
+											"key": "EXCEPTIONS",
+											"value": "application%2Fvnd.ogc.se_xml"
+										},
+										{
+											"key": "TILED",
+											"value": "true"
+										},
+										{
+											"key": "SERVICE",
+											"value": "ncwms"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetMap"
+										},
+										{
+											"key": "STYLES",
+											"value": ""
+										},
+										{
+											"key": "QUERYABLE",
+											"value": "true"
+										},
+										{
+											"key": "SRS",
+											"value": "EPSG%3A4326"
+										},
+										{
+											"key": "BBOX",
+											"value": "150.64,-25.31,153.37,-21.89"
+										},
+										{
+											"key": "WIDTH",
+											"value": "256"
+										},
+										{
+											"key": "HEIGHT",
+											"value": "256"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CORS",
+					"item": [
+						{
+							"name": "GetFeatureInfo",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Access-Control-Allow-Origin is equal to '*'\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(\"*\");",
+											"});",
+											"",
+											"pm.test(\"Access-Control-Allow-Headers is equal to '*'\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.eql(\"*\");",
+											"});",
+											"",
+											"pm.test(\"Access-Control-Allow-Methods is equal to 'GET'\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Methods\")).to.eql(\"GET\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fpng&TRANSPARENT=true&QUERY_LAYERS=imos:anmn_velocity_timeseries_map&STYLES&LAYERS=imos:anmn_velocity_timeseries_map&exceptions=application/vnd.ogc.se_inimage&INFO_FORMAT=text/html&FEATURE_COUNT=50&X=50&Y=50&SRS=EPSG%3A4326&WIDTH=101&HEIGHT=101&BBOX=126.1669921875%2C-16.787109375%2C135.0439453125%2C-7.91015625",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"wms"
+									],
+									"query": [
+										{
+											"key": "SERVICE",
+											"value": "WMS"
+										},
+										{
+											"key": "VERSION",
+											"value": "1.1.1"
+										},
+										{
+											"key": "REQUEST",
+											"value": "GetFeatureInfo"
+										},
+										{
+											"key": "FORMAT",
+											"value": "image%2Fpng"
+										},
+										{
+											"key": "TRANSPARENT",
+											"value": "true"
+										},
+										{
+											"key": "QUERY_LAYERS",
+											"value": "imos:anmn_velocity_timeseries_map"
+										},
+										{
+											"key": "STYLES",
+											"value": null
+										},
+										{
+											"key": "LAYERS",
+											"value": "imos:anmn_velocity_timeseries_map"
+										},
+										{
+											"key": "exceptions",
+											"value": "application/vnd.ogc.se_inimage"
+										},
+										{
+											"key": "INFO_FORMAT",
+											"value": "text/html"
+										},
+										{
+											"key": "FEATURE_COUNT",
+											"value": "50"
+										},
+										{
+											"key": "X",
+											"value": "50"
+										},
+										{
+											"key": "Y",
+											"value": "50"
+										},
+										{
+											"key": "SRS",
+											"value": "EPSG%3A4326"
+										},
+										{
+											"key": "WIDTH",
+											"value": "101"
+										},
+										{
+											"key": "HEIGHT",
+											"value": "101"
+										},
+										{
+											"key": "BBOX",
+											"value": "126.1669921875%2C-16.787109375%2C135.0439453125%2C-7.91015625"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Return 500 errors instead of 200",
+					"item": [
+						{
+							"name": "WMS DescribeLayer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 500\", function () {",
+											"    pm.response.to.have.status(500);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/wms?request=DescribeLayer&service=WMS&version=1.1.1&layers=imos:NON_EXISTENT_LAYER",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"wms"
+									],
+									"query": [
+										{
+											"key": "request",
+											"value": "DescribeLayer"
+										},
+										{
+											"key": "service",
+											"value": "WMS"
+										},
+										{
+											"key": "version",
+											"value": "1.1.1"
+										},
+										{
+											"key": "layers",
+											"value": "imos:NON_EXISTENT_LAYER"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "New Folder",
+					"item": []
+				},
+				{
+					"name": "XSLT WFS",
+					"item": [
+						{
+							"name": "transforms",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Body has valid data\", function () {",
+											"    var jsonData = xml2Json(responseBody);",
+											"    pm.expect(jsonData.transforms.transform.name).to.eql(\"marvl\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/rest/services/wfs/transforms",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"rest",
+										"services",
+										"wfs",
+										"transforms"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "WFS marvl xml",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Body has valid data\", function () {",
+											"    var jsonData = xml2Json(responseBody);",
+											"    jsonData[\"wfs:FeatureCollection\"][\"gml:featureMember\"].forEach( fm => {",
+											"        pm.expect(fm[\"imos:gsla_fv02_dm_timeseries_url\"][\"imos:file_url\"]).to.include(\"https://imos-data.s3-ap-southeast-2.amazonaws.com\");",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}{{site}}/imos/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=imos%3Agsla_fv02_dm_timeseries_url&maxFeatures=50&outputFormat=marvl%20xml",
+									"protocol": "http",
+									"host": [
+										"{{host}}{{site}}"
+									],
+									"path": [
+										"imos",
+										"ows"
+									],
+									"query": [
+										{
+											"key": "service",
+											"value": "WFS"
+										},
+										{
+											"key": "version",
+											"value": "1.0.0"
+										},
+										{
+											"key": "request",
+											"value": "GetFeature"
+										},
+										{
+											"key": "typeName",
+											"value": "imos%3Agsla_fv02_dm_timeseries_url"
+										},
+										{
+											"key": "maxFeatures",
+											"value": "50"
+										},
+										{
+											"key": "outputFormat",
+											"value": "marvl%20xml"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GWC S3 Blob Store",
+					"item": [
+						{
+							"name": "layers",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "layer",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "download image",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://geoserver223-static-cache.s3.ap-southeast-2.amazonaws.com/LayerGroupInfoImpl--62a9b58b%3A144dcb81441%3A-8000/EPSG%3A4326/png/default/2/0/0.png.png",
+									"protocol": "https",
+									"host": [
+										"geoserver223-static-cache",
+										"s3",
+										"ap-southeast-2",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"LayerGroupInfoImpl--62a9b58b%3A144dcb81441%3A-8000",
+										"EPSG%3A4326",
+										"png",
+										"default",
+										"2",
+										"0",
+										"0.png.png"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "[https://docs.geoserver.org/stable/en/user/geowebcache/rest/index.html](https://docs.geoserver.org/stable/en/user/geowebcache/rest/index.html)",
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{
+								"key": "username",
+								"value": "admin",
+								"type": "string"
+							},
+							{
+								"key": "password",
+								"value": "tHxnebfMthFjEYMyC262HA8XuxNxgCEu",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DescribeLayer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Body has valid data\", function () {",
+									"    var jsonData = xml2Json(responseBody);",
+									"    pm.expect(jsonData.WMS_DescribeLayerResponse.LayerDescription.Query.$.typeName).to.eql(\"imos:argo_profile_map\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}{{site}}/wms?request=DescribeLayer&service=WMS&version=1.1.1&layers=imos:argo_profile_map",
+							"protocol": "http",
+							"host": [
+								"{{host}}{{site}}"
+							],
+							"path": [
+								"wms"
+							],
+							"query": [
+								{
+									"key": "request",
+									"value": "DescribeLayer"
+								},
+								{
+									"key": "service",
+									"value": "WMS"
+								},
+								{
+									"key": "version",
+									"value": "1.1.1"
+								},
+								{
+									"key": "layers",
+									"value": "imos:argo_profile_map"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DescribeFeatureType",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Body has valid data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.featureTypes.length).to.be.greaterThan(0);",
+									"    pm.expect(jsonData.featureTypes[0].properties.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}{{site}}/wfs?version=1.0.0&request=describeFeatureType&outputFormat=application/json&service=WFS&typeName=aodn:JBmeteorological_data",
+							"protocol": "http",
+							"host": [
+								"{{host}}{{site}}"
+							],
+							"path": [
+								"wfs"
+							],
+							"query": [
+								{
+									"key": "version",
+									"value": "1.0.0"
+								},
+								{
+									"key": "request",
+									"value": "describeFeatureType"
+								},
+								{
+									"key": "outputFormat",
+									"value": "application/json"
+								},
+								{
+									"key": "service",
+									"value": "WFS"
+								},
+								{
+									"key": "typeName",
+									"value": "aodn:JBmeteorological_data"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMap",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}{{site}}/wms?LAYERS=imos%3Aargo_profile_map&TRANSPARENT=TRUE&VERSION=1.1.1&FORMAT=image%2Fpng&EXCEPTIONS=application%2Fvnd.ogc.se_xml&TILED=true&SERVICE=WMS&REQUEST=GetMap&STYLES=&QUERYABLE=true&SRS=EPSG%3A4326&BBOX=-90,45,-45,90&WIDTH=256&HEIGHT=256",
+							"protocol": "http",
+							"host": [
+								"{{host}}{{site}}"
+							],
+							"path": [
+								"wms"
+							],
+							"query": [
+								{
+									"key": "LAYERS",
+									"value": "imos%3Aargo_profile_map"
+								},
+								{
+									"key": "TRANSPARENT",
+									"value": "TRUE"
+								},
+								{
+									"key": "VERSION",
+									"value": "1.1.1"
+								},
+								{
+									"key": "FORMAT",
+									"value": "image%2Fpng"
+								},
+								{
+									"key": "EXCEPTIONS",
+									"value": "application%2Fvnd.ogc.se_xml"
+								},
+								{
+									"key": "TILED",
+									"value": "true"
+								},
+								{
+									"key": "SERVICE",
+									"value": "WMS"
+								},
+								{
+									"key": "REQUEST",
+									"value": "GetMap"
+								},
+								{
+									"key": "STYLES",
+									"value": ""
+								},
+								{
+									"key": "QUERYABLE",
+									"value": "true"
+								},
+								{
+									"key": "SRS",
+									"value": "EPSG%3A4326"
+								},
+								{
+									"key": "BBOX",
+									"value": "-90,45,-45,90"
+								},
+								{
+									"key": "WIDTH",
+									"value": "256"
+								},
+								{
+									"key": "HEIGHT",
+									"value": "256"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetLegendGraphic",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}{{site}}/wms?LEGEND_OPTIONS=forceLabels:on&SERVICE=WMS&REQUEST=GetLegendGraphic&LAYER=imos%3Aargo_profile_map&FORMAT=image/png&VERSION=1.1.1",
+							"protocol": "http",
+							"host": [
+								"{{host}}{{site}}"
+							],
+							"path": [
+								"wms"
+							],
+							"query": [
+								{
+									"key": "LEGEND_OPTIONS",
+									"value": "forceLabels:on"
+								},
+								{
+									"key": "SERVICE",
+									"value": "WMS"
+								},
+								{
+									"key": "REQUEST",
+									"value": "GetLegendGraphic"
+								},
+								{
+									"key": "LAYER",
+									"value": "imos%3Aargo_profile_map"
+								},
+								{
+									"key": "FORMAT",
+									"value": "image/png"
+								},
+								{
+									"key": "VERSION",
+									"value": "1.1.1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "c6134c1d86b1d20ba3c221f06b9f9b11",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "admin",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "localhost:8080",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "site",
+			"value": "/geoserver",
+			"type": "string"
+		},
+		{
+			"key": "host",
+			"value": "geoserver-geoserver223.dev.aodn.org.au",
+			"type": "string"
+		}
+	]
+}

@@ -113,3 +113,42 @@ And last, a real example of an online resource:
     </gmd:CI_OnlineResource>
 </gmd:onLine>
 ```
+
+## A helpful note for developers
+
+The [JDBCFeatureReader](https://github.com/geotools/geotools/blob/main/modules/library/jdbc/src/main/java/org/geotools/jdbc/JDBCFeatureReader.java) class in GeoTools
+sends the query to the datastore to retrieve the Thredds netcdf URL. The result is stored in `this.rs.getString(1)`. The
+query used is in `runner.arg$2`.
+
+```java
+void runQuery(QueryRunner runner, Statement st) throws SQLException {
+    this.callback.beforeQuery(st);
+    try {
+        this.rs = runner.run();
+        this.callback.afterQuery(st);
+    } catch (Exception var6) {
+        this.callback.queryError(var6);
+
+        try {
+            this.close();
+        } catch (IOException var5) {
+            LOGGER.log(Level.FINE, "Failed to close the reader, moving on", var5);
+        }
+
+        throw new SQLException(var6);
+    }
+}
+```
+
+## Geoserver configuration
+
+Include an `ncwms.xml` file in the Geoserver data directory. This contains the location of the wfs service and the url
+to substitute for the Thredds server. NCWMS will not follow redirects between `http:\\` and `https:\\` so make sure you
+use the correct protocol for your Thredds server.
+
+```xml
+<ncwms>
+  <wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+  <urlSubstitution key="^">https://thredds.aodn.org.au/thredds/wms/</urlSubstitution>
+</ncwms>
+```
