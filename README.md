@@ -136,8 +136,63 @@ Set the maven profile to `tomcat`.
 Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
 a template and update to use the required database datastore.
 
-Create and populate a `src/main/webapp/data` directory with custom content. For all the Postman tests to pass you will need to
-update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`
+Create and populate a `src/main/webapp/data` directory with custom content. Your data dir can be a symlink pointing to a
+checkout of `https://github.com/aodn/geoserver-config`.
+
+For all the Postman tests to pass you will need to update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`.
+
+```xml
+src/main/webapp/data/ncwms.xml
+
+<ncwms>
+<wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+<urlSubstitution key="^">https://thredds.aodn.org.au/thredds/wms/</urlSubstitution>
+</ncwms>
+```
+
+```xml
+src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml
+
+<?xml version="1.0"?>
+<filters>
+    <filter>
+        <name>data_centre_name</name>
+        <type>string</type>
+        <label>Data centre name</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>true</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>platform_number</name>
+        <type>string</type>
+        <label>Platform Number</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>juld</name>
+        <type>datetime</type>
+        <label>Time</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>position</name>
+        <type>geometrypropertytype</type>
+        <label>Bounding Box</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>profile_processing_type</name>
+        <type>string</type>
+        <label>Realtime/Delayed</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+</filters>
+
+```
 
 Update the supplied `Tomcat` run configuration JRE and Application Server to your Corretto and Tomcat.
 

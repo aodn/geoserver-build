@@ -68,7 +68,6 @@
         <param-value>
             classpath*:/applicationContext.xml
             classpath*:/applicationSecurityContext.xml
-            classpath*:/applicationContextOverrides.xml
         </param-value>
     </context-param>
     
