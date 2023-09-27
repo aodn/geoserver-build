@@ -18,45 +18,6 @@
 
 ## Makes the following customisations to the geoserver war
 
-### Return 500 errors instead of 200 for API errors so squid doesn't cache API errors
-
-The geoserver `dispatcher` bean is overriden with `src/main/java/org/geoserver/ows/DispatcherWithHttpStatus.java` class which handles all OWS service exceptions by sending an HTTP 500 response. Otherwise Geoserver will modify the response to potentially send other HTTP response codes. These can end up as 200 codes depending on the service.
-
-
-Squid will cache 200 responses which may actually contain error reporting content. These will be erroneously returned as the response when there is a cache hit.
-
-Without the customisation `http://localhost:8080/geoserver/wms?request=DescribeLayer&service=WMS&version=1.1.1&layers=imos:NON_EXISTENT_LAYER` would return:
-
-```
-Status: 200 OK
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE ServiceExceptionReport SYSTEM "http://localhost:8080/geoserver/schemas/wms/1.1.1/WMS_exception_1_1_1.dtd">
-<ServiceExceptionReport version="1.1.1" >
-    <ServiceException code="LayerNotDefined" locator="MapLayerInfoKvpParser">
-      imos:NON_EXISTENT_LAYER: no such layer on this server
-</ServiceException>
-</ServiceExceptionReport>
-```
-
-With the customisation we get:
-
-```
-Status: 500 Internal Server Error
-<!doctype html>
-<html lang="en">
-<head>
-<title>HTTP Status 500 – Internal Server Error</title>
-<style type="text/css">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style>
-</head>
-<body>
-<h1>HTTP Status 500 – Internal Server Error</h1><hr class="line" />
-<p><b>Type</b> Status Report</p>
-<p><b>Description</b> The server encountered an unexpected condition that prevented it from fulfilling the request.</p>
-<hr class="line" /><h3>Apache Tomcat/8.5.73</h3>
-</body>
-</html>
-```
-
 ### Enable CORS for GET requests so IMAS can use it for GetFeatureInfo requests
 
 For Tomcat CORS is enabled in `src/main/webapp/WEB-INF/web.xml`.  The `cors.filter.class` is specified in `src/main/pom.xml`.
@@ -136,8 +97,63 @@ Set the maven profile to `tomcat`.
 Create a `src/main/webapp/META-INF/context.xml` file using the supplied `src/main/webapp/META-INF/context-sample.xml` as 
 a template and update to use the required database datastore.
 
-Create and populate a `src/main/webapp/data` directory with custom content. For all the Postman tests to pass you will need to
-update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`
+Create and populate a `src/main/webapp/data` directory with custom content. Your data dir can be a symlink pointing to a
+checkout of `https://github.com/aodn/geoserver-config`.
+
+For all the Postman tests to pass you will need to update `src/main/webapp/data/ncwms.xml` and `src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml`.
+
+```xml
+src/main/webapp/data/ncwms.xml
+
+<ncwms>
+<wfsServer>http://localhost:8080/geoserver/ows</wfsServer>
+<urlSubstitution key="^">https://thredds.aodn.org.au/thredds/wms/</urlSubstitution>
+</ncwms>
+```
+
+```xml
+src/main/webapp/data/workspaces/imos/JNDI_argo/argo_primary_profile_core_low_res_good_qc_data/filters.xml
+
+<?xml version="1.0"?>
+<filters>
+    <filter>
+        <name>data_centre_name</name>
+        <type>string</type>
+        <label>Data centre name</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>true</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>platform_number</name>
+        <type>string</type>
+        <label>Platform Number</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>juld</name>
+        <type>datetime</type>
+        <label>Time</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>position</name>
+        <type>geometrypropertytype</type>
+        <label>Bounding Box</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+    <filter>
+        <name>profile_processing_type</name>
+        <type>string</type>
+        <label>Realtime/Delayed</label>
+        <visualised>true</visualised>
+        <excludedFromDownload>false</excludedFromDownload>
+    </filter>
+</filters>
+
+```
 
 Update the supplied `Tomcat` run configuration JRE and Application Server to your Corretto and Tomcat.
 
