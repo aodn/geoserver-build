@@ -8,7 +8,7 @@
 package au.org.emii.geoserver.wfs.response;
 
 import org.geotools.feature.type.DateUtil;
-import org.opengis.feature.type.PropertyDescriptor;
+import org.geotools.api.feature.type.PropertyDescriptor;
 
 import java.io.IOException;
 import java.io.Writer;

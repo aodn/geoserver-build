@@ -10,7 +10,7 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 import org.geoserver.wfs.xml.GML2Profile;
 import org.geoserver.wfs.xml.TypeMappingProfile;
 import org.geoserver.wfs.xml.XSProfile;
-import org.opengis.feature.type.AttributeType;
+import org.geotools.api.feature.type.AttributeType;
 
 /**
  * Hides some ugly type mapping code in to this one class.
