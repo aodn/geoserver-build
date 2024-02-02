@@ -124,7 +124,7 @@
                         <overrideDescriptor>src/jetty/override-web.xml</overrideDescriptor>
                         <extraClasspath>src/jetty/database</extraClasspath>
                      </webApp>
-                     <war>${build.directory}/geoserver-${project.version}-imos.war</war>
+                     <war>${project.build.directory}/geoserver-${project.version}-imos.war</war>
                     <contextXml>src/jetty/context.xml</contextXml>
                 </configuration>
                 <dependencies>
