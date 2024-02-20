@@ -9,8 +9,8 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import au.org.emii.geoserver.extensions.filters.layer.data.Filter;
 import org.geoserver.catalog.*;
-import org.opengis.feature.type.FeatureType;
-import org.opengis.feature.type.PropertyDescriptor;
+import org.geotools.api.feature.type.FeatureType;
+import org.geotools.api.feature.type.PropertyDescriptor;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -9,14 +9,14 @@ package au.org.emii.geoserver.extensions.filters.layer.data.io;
 
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.LayerInfo;
-import org.geotools.data.DataAccess;
-import org.geotools.data.Query;
+import org.geotools.api.data.DataAccess;
+import org.geotools.api.data.Query;
 import org.geotools.data.store.DecoratingDataStore;
 import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.VirtualTable;
 
-import org.opengis.feature.type.FeatureType;
+import org.geotools.api.feature.type.FeatureType;
 
 import org.geoserver.catalog.*;
 
@@ -56,9 +56,9 @@ public class PossibleValuesReader {
 
         Method storeGetAggregateValueMethod = store.getClass().getDeclaredMethod(
             "getAggregateValue",
-            org.opengis.feature.FeatureVisitor.class,
-            org.opengis.feature.simple.SimpleFeatureType.class,
-            org.geotools.data.Query.class,
+            org.geotools.api.feature.FeatureVisitor.class,
+            org.geotools.api.feature.simple.SimpleFeatureType.class,
+            org.geotools.api.data.Query.class,
             java.sql.Connection.class
         );
         storeGetAggregateValueMethod.setAccessible(true);

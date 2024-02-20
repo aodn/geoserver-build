@@ -10,9 +10,9 @@ package au.org.emii.geoserver.wfs.response;
 import org.eclipse.xsd.XSDElementDeclaration;
 import org.eclipse.xsd.impl.XSDElementDeclarationImpl;
 import org.geotools.feature.FeatureCollection;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.PropertyDescriptor;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.feature.type.PropertyDescriptor;
 
 import java.io.IOException;
 import java.io.Writer;
