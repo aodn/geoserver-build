@@ -12,7 +12,7 @@
     <parent>
         <groupId>au.org.emii</groupId>
         <artifactId>geoserver</artifactId>
-        <version>0.0.0</version>
+        <version>1.0.41</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -20,17 +20,17 @@
         <dependency>
             <groupId>au.org.emii</groupId>
             <artifactId>layer-filters</artifactId>
-            <version>0.0.0</version>
+            <version>1.0.41</version>
         </dependency>
         <dependency>
             <groupId>au.org.emii.geoserver.wfs</groupId>
             <artifactId>csv-with-metadata-header</artifactId>
-            <version>0.0.0</version>
+            <version>1.0.41</version>
         </dependency>
         <dependency>
             <groupId>au.org.emii.geoserver.wms</groupId>
             <artifactId>ncwms</artifactId>
-            <version>0.0.0</version>
+            <version>1.0.41</version>
         </dependency>
         <dependency>
             <groupId>org.geoserver.web</groupId>
