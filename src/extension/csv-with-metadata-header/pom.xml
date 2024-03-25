@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.geoserver</groupId>
         <artifactId>extension</artifactId>
-        <version>0.0.0</version>
+        <version>1.0.43</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <dependencies>
@@ -57,7 +57,7 @@
       <dependency>
         <groupId>au.org.emii</groupId>
         <artifactId>layer-filters</artifactId>
-        <version>0.0.0</version>
+        <version>1.0.43</version>
         <scope>compile</scope>
       </dependency>
     </dependencies>
