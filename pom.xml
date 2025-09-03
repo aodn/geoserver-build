@@ -44,7 +44,7 @@
             <dependency>
                 <groupId>org.geoserver</groupId>
                 <artifactId>gs-xslt</artifactId>
-                <version>${geoserver.version}</version>
+                <version>2.26.3</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.web</groupId>
