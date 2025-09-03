@@ -19,7 +19,7 @@
     <url>http://imos.org.au</url>
 
     <properties>
-        <geoserver.version>2.24.4</geoserver.version>
+        <geoserver.version>2.27.2</geoserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.resources.sourceEncoding>${project.build.sourceEncoding}</project.resources.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
