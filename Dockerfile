@@ -4,7 +4,7 @@ ARG BUILDER_UID=9999
 ARG DEBIAN_FRONTEND=noninteractive
 ARG MAVEN_VERSION=3.9.6
 ARG USER_HOME_DIR="/root"
-ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
+ARG BASE_URL=https://repo1.maven.org/maven2/org/apache/maven/apache-maven
 
 ENV TZ="Australia"
 ENV HOME /home/builder
@@ -25,7 +25,7 @@ RUN pip3 install \
     bump2version==1.0.1
 
 RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
- && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+ && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
  && tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 \
  && rm -f /tmp/apache-maven.tar.gz \
  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
