@@ -86,7 +86,7 @@ http://localhost:9090
 
 ## Running using Tomcat and IntelliJ
 
-Install Tomcat 8.5
+Install Tomcat >= 8.5
 
 Install Java version 11
 
