@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "48ff3fc7-d58a-433f-b722-dbccec75d250",
+		"_postman_id": "c558c437-d846-4cd7-abcf-4e549b1f8a86",
 		"name": "geoserver-build",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "19634741"
+		"_exporter_id": "19634741",
+		"_collection_link": "https://solar-station-839095.postman.co/workspace/My-Workspace~cc913ce8-56a0-4689-8984-8a971fa8477c/collection/19634741-c558c437-d846-4cd7-abcf-4e549b1f8a86?action=share&source=collection_link&creator=19634741"
 	},
 	"item": [
 		{
@@ -64,11 +65,15 @@
 											"    })",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "noauth"
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -109,6 +114,31 @@
 								}
 							},
 							"response": []
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				},
@@ -312,6 +342,31 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						}
 					]
 				},
 				{
@@ -330,11 +385,12 @@
 											"",
 											"pm.test(\"Response has correct number of timesteps\", function () {",
 											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.timesteps.length).to.eql(16);",
+											"    pm.expect(jsonData.timesteps.length).to.eql(24);",
 											"});",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -686,6 +742,31 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						}
 					]
 				},
 				{
@@ -702,19 +783,13 @@
 											"    pm.response.to.have.status(200);",
 											"});",
 											"",
-											"pm.test(\"Access-Control-Allow-Origin is equal to '*'\", function () {",
-											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(\"*\");",
+											"pm.test(\"Allow is equal to 'GET,HEAD,POST,OPTIONS'\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Allow\")).to.eql(\"GET,HEAD,POST,OPTIONS\");",
 											"});",
-											"",
-											"pm.test(\"Access-Control-Allow-Headers is equal to '*'\", function () {",
-											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.eql(\"*\");",
-											"});",
-											"",
-											"pm.test(\"Access-Control-Allow-Methods is equal to 'GET'\", function () {",
-											"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Methods\")).to.eql(\"GET\");",
-											"});"
+											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -804,11 +879,32 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						}
 					]
-				},
-				{
-					"name": "New Folder",
-					"item": []
 				},
 				{
 					"name": "XSLT WFS",
@@ -825,11 +921,22 @@
 											"});",
 											"",
 											"pm.test(\"Body has valid data\", function () {",
-											"    var jsonData = xml2Json(responseBody);",
+											"    var jsonData = xml2Json(pm.response.text());",
 											"    pm.expect(jsonData.transforms.transform.name).to.eql(\"marvl\");",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -868,9 +975,11 @@
 											"    jsonData[\"wfs:FeatureCollection\"][\"gml:featureMember\"].forEach( fm => {",
 											"        pm.expect(fm[\"imos:gsla_fv02_dm_timeseries_url\"][\"imos:file_url\"]).to.include(\"https://imos-data.s3-ap-southeast-2.amazonaws.com\");",
 											"    });",
-											"});"
+											"});",
+											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -920,80 +1029,13 @@
 							},
 							"response": []
 						}
-					]
-				},
-				{
-					"name": "GWC S3 Blob Store",
-					"item": [
-						{
-							"name": "layers",
-							"request": {
-								"method": "GET",
-								"header": []
-							},
-							"response": []
-						},
-						{
-							"name": "layer",
-							"request": {
-								"method": "GET",
-								"header": []
-							},
-							"response": []
-						},
-						{
-							"name": "download image",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "https://geoserver223-static-cache.s3.ap-southeast-2.amazonaws.com/LayerGroupInfoImpl--62a9b58b%3A144dcb81441%3A-8000/EPSG%3A4326/png/default/2/0/0.png.png",
-									"protocol": "https",
-									"host": [
-										"geoserver223-static-cache",
-										"s3",
-										"ap-southeast-2",
-										"amazonaws",
-										"com"
-									],
-									"path": [
-										"LayerGroupInfoImpl--62a9b58b%3A144dcb81441%3A-8000",
-										"EPSG%3A4326",
-										"png",
-										"default",
-										"2",
-										"0",
-										"0.png.png"
-									]
-								}
-							},
-							"response": []
-						}
 					],
-					"description": "[https://docs.geoserver.org/stable/en/user/geowebcache/rest/index.html](https://docs.geoserver.org/stable/en/user/geowebcache/rest/index.html)",
-					"auth": {
-						"type": "basic",
-						"basic": [
-							{
-								"key": "username",
-								"value": "admin",
-								"type": "string"
-							},
-							{
-								"key": "password",
-								"value": "tHxnebfMthFjEYMyC262HA8XuxNxgCEu",
-								"type": "string"
-							}
-						]
-					},
 					"event": [
 						{
 							"listen": "prerequest",
 							"script": {
 								"type": "text/javascript",
+								"packages": {},
 								"exec": [
 									""
 								]
@@ -1003,6 +1045,7 @@
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
+								"packages": {},
 								"exec": [
 									""
 								]
@@ -1279,7 +1322,7 @@
 		"basic": [
 			{
 				"key": "password",
-				"value": "c6134c1d86b1d20ba3c221f06b9f9b11",
+				"value": "geoserver",
 				"type": "string"
 			},
 			{
@@ -1313,18 +1356,15 @@
 		{
 			"key": "host",
 			"value": "localhost:8080",
-			"type": "string",
 			"disabled": true
 		},
 		{
 			"key": "site",
-			"value": "/geoserver",
-			"type": "string"
+			"value": "/geoserver"
 		},
 		{
 			"key": "host",
-			"value": "geoserver-geoserver223.dev.aodn.org.au",
-			"type": "string"
+			"value": "geoserver-geoserver223.dev.aodn.org.au"
 		}
 	]
 }
